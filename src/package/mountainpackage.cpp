@@ -547,6 +547,8 @@ public:
 ZhibaCard::ZhibaCard() {
     mute = true;
     m_skillName = "zhiba_pindian";
+    will_throw = false;
+    handling_method = MethodPindian;
 }
 
 bool ZhibaCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -575,7 +577,11 @@ void ZhibaCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &tar
     else
         room->broadcastSkillInvoke("zhiba", 1);
 
-    source->pindian(sunce, "zhiba_pindian", NULL);
+    const Card *card1 = NULL;
+    if (getSubcards().length() != 0)
+        card1 = this;
+
+    source->pindian(sunce, "zhiba_pindian", card1);
     QList<ServerPlayer *> sunces;
     QList<ServerPlayer *> players = room->getOtherPlayers(source);
     foreach (ServerPlayer *p, players) {
@@ -586,9 +592,9 @@ void ZhibaCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &tar
         room->setPlayerFlag(source, "ForbidZhiba");
 }
 
-class ZhibaPindian: public ZeroCardViewAsSkill {
+class ZhibaPindian: public ViewAsSkill {
 public:
-    ZhibaPindian(): ZeroCardViewAsSkill("zhiba_pindian") {
+    ZhibaPindian(): ViewAsSkill("zhiba_pindian") {
         attached_lord_skill = true;
     }
 
@@ -596,8 +602,14 @@ public:
         return player->getKingdom() == "wu" && !player->isKongcheng() && !player->hasFlag("ForbidZhiba");
     }
 
-    virtual const Card *viewAs() const{
-        return new ZhibaCard;
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        return selected.isEmpty() && !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        ZhibaCard *card = new ZhibaCard;
+        card->addSubcards(cards);
+        return card;
     }
 };
 

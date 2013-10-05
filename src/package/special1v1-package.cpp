@@ -74,6 +74,8 @@ public:
 };
 
 XiechanCard::XiechanCard() {
+    will_throw = false;
+    handling_method = MethodPindian;
 }
 
 bool XiechanCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -84,7 +86,10 @@ void XiechanCard::use(Room *room, ServerPlayer *xuchu, QList<ServerPlayer *> &ta
     room->removePlayerMark(xuchu, "@twine");
     room->doLightbox("$XiechanAnimate");
 
-    bool success = xuchu->pindian(targets.first(), "xiechan", NULL);
+    const Card *card1 = NULL;
+    if (getSubcards().length() != 0)
+        card1 = this;
+    bool success = xuchu->pindian(targets.first(), "xiechan", card1);
     Duel *duel = new Duel(Card::NoSuit, 0);
     duel->setSkillName("_xiechan");
     ServerPlayer *from = NULL, *to = NULL;
@@ -99,9 +104,9 @@ void XiechanCard::use(Room *room, ServerPlayer *xuchu, QList<ServerPlayer *> &ta
         room->useCard(CardUseStruct(duel, from, to));
 }
 
-class Xiechan: public ZeroCardViewAsSkill {
+class Xiechan: public ViewAsSkill {
 public:
-    Xiechan(): ZeroCardViewAsSkill("xiechan") {
+    Xiechan(): ViewAsSkill("xiechan") {
         frequency = Limited;
     }
 
@@ -109,8 +114,14 @@ public:
         return player->getMark("@twine") > 0;
     }
 
-    virtual const Card *viewAs() const{
-        return new XiechanCard;
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        return selected.isEmpty() && !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        XiechanCard *card = new XiechanCard;
+        card->addSubcards(cards);
+        return card;
     }
 
     virtual int getEffectIndex(const ServerPlayer *, const Card *card) const{

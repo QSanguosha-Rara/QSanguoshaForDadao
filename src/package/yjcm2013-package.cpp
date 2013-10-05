@@ -269,6 +269,8 @@ void ExtraCollateralCard::onUse(Room *, const CardUseStruct &card_use) const{
 }
 
 QiaoshuiCard::QiaoshuiCard() {
+    will_throw = false;
+    handling_method = MethodPindian;
 }
 
 bool QiaoshuiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -276,16 +278,19 @@ bool QiaoshuiCard::targetFilter(const QList<const Player *> &targets, const Play
 }
 
 void QiaoshuiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
-    bool success = source->pindian(targets.first(), "qiaoshui", NULL);
+    const Card *card1 = NULL;
+    if (getSubcards().length() != 0)
+        card1 = this;
+    bool success = source->pindian(targets.first(), "qiaoshui", card1);
     if (success)
         source->setFlags("QiaoshuiSuccess");
     else
         room->setPlayerCardLimitation(source, "use", "TrickCard", true);
 }
 
-class QiaoshuiViewAsSkill: public ZeroCardViewAsSkill {
+class QiaoshuiViewAsSkill: public ViewAsSkill {
 public:
-    QiaoshuiViewAsSkill(): ZeroCardViewAsSkill("qiaoshui") {
+    QiaoshuiViewAsSkill(): ViewAsSkill("qiaoshui") {
     }
 
     virtual bool isEnabledAtPlay(const Player *) const{
@@ -296,12 +301,20 @@ public:
         return pattern.startsWith("@@qiaoshui");
     }
 
-    virtual const Card *viewAs() const{
-        QString pattern = Sanguosha->currentRoomState()->getCurrentCardUsePattern();
-        if (pattern.endsWith("!"))
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        if (Sanguosha->getCurrentCardUsePattern().endsWith("!"))
+            return false;
+        return selected.isEmpty() && !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        if (Sanguosha->getCurrentCardUsePattern().endsWith("!"))
             return new ExtraCollateralCard;
-        else
-            return new QiaoshuiCard;
+        else {
+            QiaoshuiCard *card = new QiaoshuiCard;
+            card->addSubcards(cards);
+            return card;
+        }
     }
 };
 

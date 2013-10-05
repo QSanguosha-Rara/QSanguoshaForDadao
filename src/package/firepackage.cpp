@@ -7,6 +7,8 @@
 #include "maneuvering.h"
 
 QuhuCard::QuhuCard() {
+    will_throw = false;
+    handling_method = MethodPindian;
 }
 
 bool QuhuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -16,7 +18,10 @@ bool QuhuCard::targetFilter(const QList<const Player *> &targets, const Player *
 void QuhuCard::use(Room *room, ServerPlayer *xunyu, QList<ServerPlayer *> &targets) const{
     ServerPlayer *tiger = targets.first();
 
-    bool success = xunyu->pindian(tiger, "quhu", NULL);
+    const Card *card1 = NULL;
+    if (getSubcards().length() != 0)
+        card1 = this;
+    bool success = xunyu->pindian(tiger, "quhu", card1);
     if (success) {
         QList<ServerPlayer *> players = room->getOtherPlayers(tiger), wolves;
         foreach (ServerPlayer *player, players) {
@@ -42,6 +47,26 @@ void QuhuCard::use(Room *room, ServerPlayer *xunyu, QList<ServerPlayer *> &targe
     }
 }
 
+class Quhu: public ViewAsSkill {
+public:
+    Quhu(): ViewAsSkill("quhu") {
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("QuhuCard") && !player->isKongcheng();
+    }
+
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        return selected.isEmpty() && !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        QuhuCard *card = new QuhuCard;
+        card->addSubcards(cards);
+        return card;
+    }
+};
+
 class Jieming: public MasochismSkill {
 public:
     Jieming(): MasochismSkill("jieming") {
@@ -62,20 +87,6 @@ public:
             if (!xunyu->isAlive())
                 break;
         }
-    }
-};
-
-class Quhu: public ZeroCardViewAsSkill {
-public:
-    Quhu(): ZeroCardViewAsSkill("quhu") {
-    }
-
-    virtual bool isEnabledAtPlay(const Player *player) const{
-        return !player->hasUsed("QuhuCard") && !player->isKongcheng();
-    }
-
-    virtual const Card *viewAs() const{
-        return new QuhuCard;
     }
 };
 
@@ -422,6 +433,8 @@ public:
 };
 
 TianyiCard::TianyiCard() {
+    will_throw = false;
+    handling_method = MethodPindian;
 }
 
 bool TianyiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -429,24 +442,33 @@ bool TianyiCard::targetFilter(const QList<const Player *> &targets, const Player
 }
 
 void TianyiCard::use(Room *room, ServerPlayer *taishici, QList<ServerPlayer *> &targets) const{
-    bool success = taishici->pindian(targets.first(), "tianyi", NULL);
+    const Card *card1 = NULL;
+    if (getSubcards().length() != 0)
+        card1 = this;
+    bool success = taishici->pindian(targets.first(), "tianyi", card1);
     if (success)
         room->setPlayerFlag(taishici, "TianyiSuccess");
     else
         room->setPlayerCardLimitation(taishici, "use", "Slash", true);
 }
 
-class TianyiViewAsSkill: public ZeroCardViewAsSkill {
+class TianyiViewAsSkill: public ViewAsSkill {
 public:
-    TianyiViewAsSkill(): ZeroCardViewAsSkill("tianyi") {
+    TianyiViewAsSkill(): ViewAsSkill("tianyi") {
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
         return !player->hasUsed("TianyiCard") && !player->isKongcheng();
     }
 
-    virtual const Card *viewAs() const{
-        return new TianyiCard;
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        return selected.isEmpty() && !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        TianyiCard *card = new TianyiCard;
+        card->addSubcards(cards);
+        return card;
     }
 };
 

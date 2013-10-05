@@ -493,6 +493,8 @@ public:
 };
 
 DaheCard::DaheCard() {
+    will_throw = false;
+    handling_method = MethodPindian;
 }
 
 bool DaheCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -500,20 +502,29 @@ bool DaheCard::targetFilter(const QList<const Player *> &targets, const Player *
 }
 
 void DaheCard::use(Room *room, ServerPlayer *zhangfei, QList<ServerPlayer *> &targets) const{
-    zhangfei->pindian(targets.first(), "dahe", NULL);
+    const Card *card1 = NULL;
+    if (getSubcards().length() != 0)
+        card1 = this;
+    zhangfei->pindian(targets.first(), "dahe", card1);
 }
 
-class DaheViewAsSkill: public ZeroCardViewAsSkill {
+class DaheViewAsSkill: public ViewAsSkill {
 public:
-    DaheViewAsSkill(): ZeroCardViewAsSkill("dahe") {
+    DaheViewAsSkill(): ViewAsSkill("dahe") {
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
         return !player->hasUsed("DaheCard") && !player->isKongcheng();
     }
 
-    virtual const Card *viewAs() const{
-        return new DaheCard;
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        return selected.isEmpty() && !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        DaheCard *card = new DaheCard;
+        card->addSubcards(cards);
+        return card;
     }
 };
 
@@ -603,6 +614,8 @@ public:
 };
 
 TanhuCard::TanhuCard() {
+    will_throw = false;
+    handling_method = MethodPindian;
 }
 
 bool TanhuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -610,7 +623,10 @@ bool TanhuCard::targetFilter(const QList<const Player *> &targets, const Player 
 }
 
 void TanhuCard::use(Room *room, ServerPlayer *lvmeng, QList<ServerPlayer *> &targets) const{
-    bool success = lvmeng->pindian(targets.first(), "tanhu", NULL);
+    const Card *card1 = NULL;
+    if (getSubcards().length() != 0)
+        card1 = this;
+    bool success = lvmeng->pindian(targets.first(), "tanhu", card1);
     if (success) {
         room->broadcastSkillInvoke("tanhu", 2);
         lvmeng->tag["TanhuInvoke"] = QVariant::fromValue(targets.first());
@@ -621,17 +637,23 @@ void TanhuCard::use(Room *room, ServerPlayer *lvmeng, QList<ServerPlayer *> &tar
     }
 }
 
-class TanhuViewAsSkill: public ZeroCardViewAsSkill {
+class TanhuViewAsSkill: public ViewAsSkill {
 public:
-    TanhuViewAsSkill(): ZeroCardViewAsSkill("tanhu") {
+    TanhuViewAsSkill(): ViewAsSkill("tanhu") {
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
         return !player->hasUsed("TanhuCard") && !player->isKongcheng();
     }
 
-    virtual const Card *viewAs() const{
-        return new TanhuCard;
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        return selected.isEmpty() && !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        TanhuCard *card = new TanhuCard;
+        card->addSubcards(cards);
+        return card;
     }
 };
 

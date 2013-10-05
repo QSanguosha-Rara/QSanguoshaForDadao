@@ -245,6 +245,8 @@ public:
 };
 
 JuejiCard::JuejiCard(){
+    will_throw = false;
+    handling_method = MethodPindian;
 }
 
 
@@ -255,23 +257,33 @@ bool JuejiCard::targetFilter(const QList<const Player *> &targets, const Player 
 void JuejiCard::onEffect(const CardEffectStruct &effect) const{
     ServerPlayer *to = effect.to;
     QVariant data = QVariant::fromValue(to);
-    while (effect.from->pindian(effect.to, "jueji", this)){
-        if (!(effect.from->isKongcheng() || effect.to->isKongcheng()) || !effect.from->askForSkillInvoke("jueji", data))
+    const Card *card1 = NULL;
+    if (getSubcards().length() != 0)
+        card1 = this;
+    while (effect.from->pindian(effect.to, "jueji", card1)){
+        card1 = NULL;
+        if (!(effect.from->isKongcheng() || effect.to->isKongcheng() || !effect.from->askForSkillInvoke(objectName())))
             break;
     }
 }
 
-class JuejiViewAsSkill: public ZeroCardViewAsSkill{
+class JuejiViewAsSkill: public ViewAsSkill{
 public:
-    JuejiViewAsSkill():ZeroCardViewAsSkill("jueji"){
+    JuejiViewAsSkill():ViewAsSkill("jueji"){
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
         return !player->hasUsed("JuejiCard");
     }
 
-    virtual const Card *viewAs() const{
-        return new JuejiCard;
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        return selected.isEmpty() && !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        JuejiCard *card = new JuejiCard;
+        card->addSubcards(cards);
+        return card;
     }
 };
 

@@ -487,6 +487,8 @@ public:
 };
 
 XianzhenCard::XianzhenCard() {
+    will_throw = false;
+    handling_method = MethodPindian;
 }
 
 bool XianzhenCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -494,8 +496,12 @@ bool XianzhenCard::targetFilter(const QList<const Player *> &targets, const Play
 }
 
 void XianzhenCard::onEffect(const CardEffectStruct &effect) const{
-    Room *room = effect.from->getRoom();
-    if (effect.from->pindian(effect.to, "xianzhen", NULL)) {
+    const Card *card1 = NULL;
+    if (getSubcards().length() != 0)
+        card1 = this;
+
+    if (effect.from->pindian(effect.to, "xianzhen", card1)) {
+        Room *room = effect.from->getRoom();
         PlayerStar target = effect.to;
         effect.from->tag["XianzhenTarget"] = QVariant::fromValue(target);
         room->setPlayerFlag(effect.from, "XianzhenSuccess");
@@ -507,21 +513,27 @@ void XianzhenCard::onEffect(const CardEffectStruct &effect) const{
         room->setFixedDistance(effect.from, effect.to, 1);
         room->addPlayerMark(effect.to, "Armor_Nullified");
     } else {
-        room->setPlayerCardLimitation(effect.from, "use", "Slash", true);
+        effect.from->getRoom()->setPlayerCardLimitation(effect.from, "use", "Slash", true);
     }
 }
 
-class XianzhenViewAsSkill: public ZeroCardViewAsSkill {
+class XianzhenViewAsSkill: public ViewAsSkill {
 public:
-    XianzhenViewAsSkill(): ZeroCardViewAsSkill("xianzhen") {
+    XianzhenViewAsSkill(): ViewAsSkill("xianzhen") {
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
        return !player->hasUsed("XianzhenCard") && !player->isKongcheng();
     }
 
-    virtual const Card *viewAs() const{
-        return new XianzhenCard;
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        return selected.isEmpty() && !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        XianzhenCard *card = new XianzhenCard;
+        card->addSubcards(cards);
+        return card;
     }
 };
 
