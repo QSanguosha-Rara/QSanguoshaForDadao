@@ -756,3 +756,110 @@ duanhun_skill.getTurnUseCard = function(self, inclusive)
 	assert(slash)
 	return slash
 end
+
+
+
+local gudan_skill = {}
+gudan_skill.name = "gudan"
+table.insert(sgs.ai_skills, gudan_skill)
+gudan_skill.getTurnUseCard = function(self)
+	local cards = self.player:getHandcards()
+	local allcard = {}
+	cards = sgs.QList2Table(cards)
+	local i	
+	local qicetrick = "slash|fire_slash|thunder_slash|peach|analeptic"
+	local qicetricks = qicetrick:split("|")
+	for i=1, #qicetricks do
+		local forbiden = qicetricks[i]
+		forbid = sgs.Sanguosha:cloneCard(forbiden)
+		if self.player:isLocked(forbid) then return end
+	end
+	if self.player:isKongcheng() then return end
+
+	for _,card in ipairs(cards)  do
+		table.insert(allcard, card:getId()) 
+	end
+
+	if self.player:getHandcardNum() <= 3 and self:getCardsNum("Analeptic")==0 and self:slashIsAvailable() and sgs.Analeptic_IsAvailable(self.player) and self:hasLoseHandcardEffective() then
+		local parsed_card = sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "analeptic")
+			return parsed_card
+	end	
+	if self.player:getHandcardNum() <= 3 and self:getCardsNum("Jink") == 0 and self:getCardsNum("Peach") == 0 and self:slashIsAvailable() and self:getCardsNum("Slash") == 0 then
+		local slashcard = sgs.Sanguosha:cloneCard("slash")
+		local slashcard2 = sgs.Sanguosha:cloneCard("fire_slash")
+		local slashcard3 = sgs.Sanguosha:cloneCard("thunder_slash")
+		local dummyuse = { isDummy = true }
+		self:useBasicCard(slashcard, dummyuse)
+		if dummyuse.card then return sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "slash") end
+		local dummyuse2 = { isDummy = true }
+		self:useBasicCard(slashcard2, dummyuse2)
+		if dummyuse2.card then return sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "fire_slash") end
+		local dummyuse3 = { isDummy = true }
+		self:useBasicCard(slashcard3, dummyuse3)
+		if dummyuse3.card then return sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "thunder_slash") end
+	end
+	
+
+	if self:hasLoseHandcardEffective() and self:getCardsNum("Peach") == 0 and (not self:needToLoseHp() or self:isWeak()) and self.player:isWounded() then
+		local cardx = sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "peach")
+		local peachcard = sgs.Sanguosha:cloneCard("peach", cardx:getSuit(), cardx:getNumber())
+		local dummy_use = { isDummy = true }
+		self:useBasicCard(peachcard, dummy_use)
+		if dummy_use.card then return cardx end
+	end
+	if self.player:getHandcardNum() < 3 and self:getCardsNum("Peach") == 0 and self:isWeak() and self.player:isWounded() then
+		local cardx = sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "peach")
+		local peachcard = sgs.Sanguosha:cloneCard("peach", cardx:getSuit(), cardx:getNumber())
+		local dummy_use = { isDummy = true }
+		self:useBasicCard(peachcard, dummy_use)
+		if dummy_use.card then return cardx end
+	end
+	if self:getCardsNum("Peach") == 0 and self.player:getHp() < 2 and not self:needToLoseHp() and self.player:isWounded() then
+		local cardx = sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "peach")
+		local peachcard = sgs.Sanguosha:cloneCard("peach", cardx:getSuit(), cardx:getNumber())
+		local dummy_use = { isDummy = true }
+		self:useBasicCard(peachcard, dummy_use)
+		if dummy_use.card then return cardx end
+	end
+	
+
+	if self.player:hasSkill("kongcheng") and self:getCardsNum("Peach") == 0 and self.player:isWounded() then
+		local cardx = sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "peach")
+		local peachcard = sgs.Sanguosha:cloneCard("peach", cardx:getSuit(), cardx:getNumber())
+		local dummy_use = { isDummy = true }
+		self:useBasicCard(peachcard, dummy_use)
+		if dummy_use.card then return cardx end
+	end
+	if self.player:hasSkill("kongcheng") and self:getCardsNum("Peach") == 0 and sgs.Analeptic_IsAvailable(self.player) then
+		local cardx = sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "analeptic")
+		local peachcard = sgs.Sanguosha:cloneCard("analeptic", cardx:getSuit(), cardx:getNumber())
+		local dummy_use = { isDummy = true }
+		self:useBasicCard(peachcard, dummy_use)
+		if dummy_use.card then return cardx end
+	end
+	if self:getCardsNum("Jink") == 0 and self:getCardsNum("Peach") == 0 and self:getCardsNum("Slash") == 0 and self:getCardsNum("Analeptic") == 0 then
+		local slashcard = sgs.Sanguosha:cloneCard("slash")
+		local slashcard2 = sgs.Sanguosha:cloneCard("fire_slash")
+		local slashcard3 = sgs.Sanguosha:cloneCard("thunder_slash")
+		local dummyuse = { isDummy = true }
+		self:useBasicCard(slashcard, dummyuse)
+		if dummyuse.card then return sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "slash") end
+		local dummyuse2 = { isDummy = true }
+		self:useBasicCard(slashcard2, dummyuse2)
+		if dummyuse2.card then return sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "fire_slash") end
+		local dummyuse3 = { isDummy = true }
+		self:useBasicCard(slashcard3, dummyuse3)
+		if dummyuse3.card then return sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "thunder_slash") end
+	end
+	return nil
+end
+
+sgs.ai_skill_use_func.GudanCard=function(card,use,self)
+	local userstring=card:toString()
+	userstring=(userstring:split(":"))[3]
+	local guhuocard=sgs.Sanguosha:cloneCard(userstring, card:getSuit(), card:getNumber())
+	 self:useBasicCard(guhuocard, use) 
+	if not use.card then return end
+	use.card=card
+end
+sgs.ai_use_priority.GudanCard = sgs.ai_use_priority.QiceCard + 0.1
