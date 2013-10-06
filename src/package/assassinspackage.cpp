@@ -281,6 +281,7 @@ public:
     }
 };
 
+/*
 MixinCard::MixinCard(){
     will_throw = false;
     mute = true;
@@ -342,6 +343,71 @@ public:
         MixinCard *card = new MixinCard;
         card->addSubcard(originalCard);
         return card;
+    }
+};
+*/
+
+class Mixin: public PhaseChangeSkill{
+public:
+    Mixin(): PhaseChangeSkill("mixin"){
+
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() != Player::Draw || target->askForSkillInvoke(objectName()))
+            return false;
+
+        Room *room = target->getRoom();
+        QList<int> cards = room->getNCards(3, false);
+        CardsMoveStruct move(cards, NULL, Player::PlaceTable,
+                CardMoveReason(CardMoveReason::S_REASON_TURNOVER, target->objectName()));
+        room->moveCardsAtomic(move, true);
+        room->getThread()->delay();
+        room->getThread()->delay();
+
+        room->fillAG(cards, target);
+        int card_to_give = room->askForAG(target, cards, false, objectName());
+        room->clearAG(target);
+
+        cards.removeOne(card_to_give);
+        DummyCard dummyobtain(cards);
+        room->obtainCard(target, &dummyobtain, true);
+
+        ServerPlayer *player_to_give = room->askForPlayerChosen(target, room->getOtherPlayers(target), objectName() + "-give", "@mixin-give");
+
+        room->broadcastSkillInvoke(objectName(), 1);
+
+        room->obtainCard(player_to_give, card_to_give, true);
+
+        QList<ServerPlayer *> can_slashes;
+        foreach(ServerPlayer *p, room->getOtherPlayers(player_to_give)){
+            if (player_to_give->canSlash(p, false))
+                can_slashes << p;
+        }
+
+        if (can_slashes.isEmpty())
+            return true;
+
+        ServerPlayer *player_to_slash = room->askForPlayerChosen(target, can_slashes, objectName() + "-slash", "@mixin-slash");
+
+        LogMessage log;
+        log.type = "#CollateralSlash";
+        log.from = target;
+        log.to << player_to_slash;
+        room->sendLog(log);
+        
+        if (room->askForUseSlashTo(player_to_give, player_to_slash, "#mixin", false)){
+            room->broadcastSkillInvoke("mixin", 2);
+        }
+        else {
+            room->broadcastSkillInvoke("mixin", 3);
+            QList<int> card_ids = player_to_give->handCards();
+            room->fillAG(card_ids, player_to_slash);
+            int cdid = room->askForAG(player_to_slash, card_ids, false, objectName());
+            room->obtainCard(player_to_slash, cdid, false);
+            room->clearAG(player_to_slash);
+        }
+        return true;
     }
 };
 
@@ -681,6 +747,9 @@ public:
 };
 
 AssassinsPackage::AssassinsPackage(): Package("assassins") {
+
+    //todo: these three generals are to move to tigerfly package
+    
     General *fuhuanghou = new General(this, "as_fuhuanghou", "qun", 3, false);
     fuhuanghou->addSkill(new Mixin);
     fuhuanghou->addSkill(new Cangni);
@@ -698,12 +767,15 @@ AssassinsPackage::AssassinsPackage(): Package("assassins") {
     related_skills.insertMulti("chizhong", "#chizhong");
 
     //SPconvert from SP fuwan to as_mushun
+    //consider moving as_mushun to test package
 
     General *mushun = new General(this, "as_mushun", "qun", 4, true, true);
     mushun->addSkill(new Moukui);
 
     //hide these two generals because the skills and the cards are same with the ones in SP package
     //and I don't want to move the codes to sp-package.h/.cpp
+
+    //consider move these skills to sp-package.h/.cpp
 
     General *hanxiandi = new General(this, "as_liuxie", "qun", 3, true, true, true);
     hanxiandi->addSkill(new Tianming);
@@ -715,9 +787,11 @@ AssassinsPackage::AssassinsPackage(): Package("assassins") {
     lingju->addSkill(new Jieyuan);
     lingju->addSkill(new Fenxin);
 
+    //to delete
+
 
     addMetaObject<MizhaoCard>();
-    addMetaObject<MixinCard>();
+    /*addMetaObject<MixinCard>();*/
     addMetaObject<DuyiCard>();
     addMetaObject<FengyinCard>();
 }
