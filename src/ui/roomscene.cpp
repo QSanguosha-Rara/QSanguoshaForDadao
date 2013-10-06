@@ -3195,7 +3195,7 @@ void RoomScene::killPlayer(const QString &who) {
         container->stopHuaShen();
     }
 
-    if (Config.EnableEffects && Config.EnableLastWord && !Self->hasFlag("marshalling"))
+    if (Config.EnableEffects && Config.EnableLastWord && !Self->hasFlag("marshalling") && !player->hasSkill("huaming"))
         general->lastWord();
     m_roomMutex.unlock();
 }
