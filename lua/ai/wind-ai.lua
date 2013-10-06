@@ -408,7 +408,7 @@ huangtianv_skill.getTurnUseCard = function(self)
 end
 
 sgs.ai_skill_use_func.HuangtianCard = function(card, use, self)
-	if self:needBear() or self:getCardsNum("Jink", "h") <= 1 then
+	if self:needBear() or self:getCardsNum("Jink", nil, "h") <= 1 then
 		return "."
 	end
 	local targets = {}
@@ -653,8 +653,8 @@ guhuo_skill.getTurnUseCard = function(self)
 	local fakeCards = {}
 
 	for _, card in sgs.qlist(self.player:getHandcards()) do
-		if (card:isKindOf("Slash") and self:getCardsNum("Slash", "h") >= 2 and not self:hasCrossbowEffect())
-			or (card:isKindOf("Jink") and self:getCardsNum("Jink", "h") >= 3)
+		if (card:isKindOf("Slash") and self:getCardsNum("Slash", nil, "h") >= 2 and not self:hasCrossbowEffect())
+			or (card:isKindOf("Jink") and self:getCardsNum("Jink", nil, "h") >= 3)
 			or (card:isKindOf("EquipCard") and self:getSameEquip(card))
 			or card:isKindOf("Disaster") then
 			table.insert(fakeCards, card)
