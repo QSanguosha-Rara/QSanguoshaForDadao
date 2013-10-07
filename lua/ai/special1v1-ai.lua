@@ -61,6 +61,10 @@ sgs.ai_skill_choice.drowning = function(self, choices, data)
 		or self:needToLoseHp(self.player, effect.from)
 		or self:getDamagedEffects(self.player, effect.from) then return "damage" end
 	if self:isWeak() and not self:needDeath() then return "throw" end
+	if effect.from:getMark("@xiongjie") > 1 and effect.from:hasSkill("xiongjie") and not self:getDamagedEffects(self.player, effect.from) then return "throw" end
+	if effect.from:getMark("@xiongjie") > 1 and effect.from:hasSkill("xiongjie") and self:getDamagedEffects(self.player, effect.from) then 
+		if self:getCardsNum("Peach") < effect.from:getMark("@xiongjie") then return "throw" else return "damage" end
+	end
 	
 	local value = 0
 	for _, equip in sgs.qlist(self.player:getEquips()) do
