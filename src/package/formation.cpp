@@ -27,7 +27,16 @@ public:
             if (!player->isAlive()) break;
             if (dengai->getPile("field").isEmpty()) continue;
             if (!room->askForSkillInvoke(dengai, objectName(), data)) continue;
-            room->obtainCard(player, room->askForAG(dengai, dengai->getPile("field"), false, objectName()));
+            int id = room->askForAG(dengai, dengai->getPile("field"), false, objectName());
+            if (player == dengai) {
+                LogMessage log;
+                log.type = "$MoveCard";
+                log.from = player;
+                log.to << player;
+                log.card_str = QString::number(id);
+                room->sendLog(log);
+            }
+            room->obtainCard(player, id);
         }
         return false;
     }
@@ -400,7 +409,6 @@ public:
             if (!hetaihou->isAlive() || !hetaihou->canDiscard(hetaihou, "h") || hetaihou->getPhase() == Player::Play)
                 continue;
             if (room->askForCard(hetaihou, ".", "@zhendu-discard", QVariant(), objectName())) {
-                room->setPlayerFlag(player, "zhendu_used");
                 Analeptic *analeptic = new Analeptic(Card::NoSuit, 0);
                 analeptic->setSkillName("_zhendu");
                 room->useCard(CardUseStruct(analeptic, player, QList<ServerPlayer *>(), true));
