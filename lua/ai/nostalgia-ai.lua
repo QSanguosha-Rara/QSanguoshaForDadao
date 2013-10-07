@@ -714,8 +714,8 @@ nosguhuo_skill.getTurnUseCard = function(self)
 	local fakeCards = {}
 
 	for _, card in sgs.qlist(self.player:getHandcards()) do
-		if (card:isKindOf("Slash") and self:getCardsNum("Slash", "h") >= 2 and not self:hasCrossbowEffect())
-			or (card:isKindOf("Jink") and self:getCardsNum("Jink", "h") >= 3)
+		if (card:isKindOf("Slash") and self:getCardsNum("Slash", nil, "h") >= 2 and not self:hasCrossbowEffect())
+			or (card:isKindOf("Jink") and self:getCardsNum("Jink", nil, "h") >= 3)
 			or (card:isKindOf("EquipCard") and self:getSameEquip(card))
 			or card:isKindOf("Disaster") then
 			table.insert(fakeCards, card)
