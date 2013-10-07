@@ -85,6 +85,31 @@ public:
     virtual void use(Room *, ServerPlayer *source, QList<ServerPlayer *> &) const;
 };
 
+class ChanyuCard: public SkillCard{
+    Q_OBJECT
+        
+public:
+    Q_INVOKABLE ChanyuCard();
+    virtual const Card *validateInResponse(ServerPlayer *user) const;
+};
+
+class SuoshiCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE SuoshiCard();
+    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
+};
+
+class ZongjiuCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE ZongjiuCard();
+    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
+};
+
 class TigerFlyPackage: public Package {
     Q_OBJECT
 
