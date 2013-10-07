@@ -39,6 +39,7 @@ local function chooseKingdomForPlayer(self, to_modify) --选择合适的势力�
 		else
 			-- find a kingdom that is different from the lord
 			local kingdoms = allcountry()
+			table.removeOne(kingdoms, "god")
 			for _, kingdom in ipairs(kingdoms) do
 				if lord and lord:getKingdom() ~= kingdom then
 					return kingdom
