@@ -2370,8 +2370,8 @@ void ZongjiuCard::onUse(Room *room, const CardUseStruct &card_use) const{
     else {
         Analeptic *ana = new Analeptic(Card::NoSuit, 0);
         ana->setSkillName("_zongjiu");
-        room->useCard(CardUseStruct(ana, card_use.from, NULL), true);
-        room->useCard(CardUseStruct(ana, responded, NULL), true);
+        room->useCard(CardUseStruct(ana, card_use.from, QList<ServerPlayer *>()), true);
+        room->useCard(CardUseStruct(ana, responded, QList<ServerPlayer *>()), true);
     }
 }
 
