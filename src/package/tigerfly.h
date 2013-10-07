@@ -77,6 +77,14 @@ public:
     virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
 };
 
+class XingsuanCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE XingsuanCard();
+    virtual void use(Room *, ServerPlayer *source, QList<ServerPlayer *> &) const;
+};
+
 class TigerFlyPackage: public Package {
     Q_OBJECT
 

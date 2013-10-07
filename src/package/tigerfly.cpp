@@ -1875,6 +1875,123 @@ public:
     }
 };
 
+class Huaiju: public PhaseChangeSkill{
+public:
+    Huaiju(): PhaseChangeSkill("huaiju"){
+
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() != Player::Finish)
+            return false;
+
+        Room *room = target->getRoom();
+        QList<ServerPlayer *> players;
+        foreach(ServerPlayer *p, room->getOtherPlayers(target)){
+            if (p->getHandcardNum() > target->getHandcardNum())
+                players << p;
+        }
+
+        if (players.isEmpty())
+            return false;
+
+        ServerPlayer *victim = room->askForPlayerChosen(target, players, objectName() + "-rob", "@huaiju-rob", true, true);
+        if (victim != NULL){
+            room->broadcastSkillInvoke(objectName());
+
+            int id = room->askForCardChosen(target, victim, "h", objectName());
+            const Card *c = Sanguosha->getCard(id);
+
+            CardMoveReason reason(CardMoveReason::S_REASON_ROB, target->objectName());
+            room->obtainCard(target, c, reason, false);
+
+            room->showCard(target, id);
+
+            if (c->isRed()){
+                target->addToPile("ju", c, true);
+                if (target->getPile("ju").length() == 3){
+                    ServerPlayer *to_give = room->askForPlayerChosen(target, room->getOtherPlayers(target), objectName() + "-give", "@huaiju-give");
+                    CardsMoveStruct move(target->getPile("ju"), to_give, Player::PlaceHand, 
+                        CardMoveReason(CardMoveReason::S_REASON_GOTCARD, target->objectName(), objectName(), QString()));
+
+                    room->moveCards(move, true);
+                }
+            }
+        }
+        return false;
+    }
+};
+
+XingsuanCard::XingsuanCard(){
+    target_fixed = true;
+    will_throw = false;
+    handling_method = Card::MethodNone;
+}
+
+void XingsuanCard::use(Room *, ServerPlayer *source, QList<ServerPlayer *> &) const{
+    source->addToPile("tu", this, true);
+}
+
+class XingsuanVS: public ViewAsSkill{
+public:
+    XingsuanVS(): ViewAsSkill("xingsuan"){
+        response_pattern = "@@xingsuan";
+    }
+
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        return Sanguosha->matchExpPattern("Slash,EquipCard", Self, to_select); //I use this function the first time, bugs exist probably
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        if (cards.isEmpty())
+            return NULL;
+
+        XingsuanCard *card = new XingsuanCard;
+        card->addSubcards(cards);
+        return card;
+    }
+};
+
+class Xingsuan: public TriggerSkill{
+public:
+    Xingsuan(): TriggerSkill("xingsuan"){
+        view_as_skill = new XingsuanVS;
+        events << EventPhaseStart << FinishJudge;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == EventPhaseStart && TriggerSkill::triggerable(player) && player->getPhase() == Player::Discard){
+            room->askForUseCard(player, "@@xingsuan", "@xingsuan-put", -1, Card::MethodNone);
+        }
+        else if (triggerEvent == FinishJudge){
+            QList<ServerPlayer *> lujis = room->findPlayersBySkillName(objectName());
+            JudgeStruct *judge = data.value<JudgeStruct *>();
+            foreach(ServerPlayer *luji, lujis){
+                QList<int> tu = luji->getPile("tu");
+                QList<int> tuwithsamesuit;
+                foreach(int id, tu)
+                    if (Sanguosha->getCard(id)->getSuit() == judge->card->getSuit())
+                        tuwithsamesuit << id;
+
+                if (tuwithsamesuit.isEmpty())
+                    continue;
+
+                if (judge->who == luji)
+                    room->askForDiscard(luji, objectName(), tuwithsamesuit.length(), tuwithsamesuit.length(), false, true, "@xingsuan-discard");
+                else
+                    room->drawCards(luji, tuwithsamesuit.length(), objectName());
+
+            }
+        }
+
+        return false;
+    }
+};
+
 
 TigerFlyPackage::TigerFlyPackage(): Package("tigerfly") {
     General *caorui = new General(this, "caorui$", "wei", 3);
@@ -1944,6 +2061,10 @@ TigerFlyPackage::TigerFlyPackage(): Package("tigerfly") {
     General *mizhu = new General(this, "mizhu", "shu", 3);
     mizhu->addSkill(new Jingshang);
     mizhu->addSkill(new Zijun);
+    
+    General *luji = new General(this, "luji", "wu", 3);
+    luji->addSkill(new Huaiju);
+    luji->addSkill(new Xingsuan);
 
     addMetaObject<PozhenCard>();
     addMetaObject<TushouGiveCard>();
@@ -1952,6 +2073,7 @@ TigerFlyPackage::TigerFlyPackage(): Package("tigerfly") {
     addMetaObject<JisiCard>();
     addMetaObject<ShangjianCard>();
     addMetaObject<JingshangCard>();
+    addMetaObject<XingsuanCard>();
 
     skills << new Zhuanquan;
 };
