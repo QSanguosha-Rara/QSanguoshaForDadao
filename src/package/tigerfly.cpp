@@ -2245,6 +2245,8 @@ public:
                         break;
                     }
                 }
+                if (use.card == NULL)
+                    return false;
                 if (use.card->hasFlag("suoshi_success")){
                     room->setCardFlag(use.card, "-suoshi_success");
                     if (suoshivictim){
