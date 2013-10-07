@@ -2050,7 +2050,7 @@ public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == TargetConfirmed){
             CardUseStruct use = data.value<CardUseStruct>();
-            if (use.to.contains(player) && player->askForSkillInvoke(objectName(), data)){
+            if (use.card && use.card->isKindOf("Slash") && use.to.contains(player) && player->askForSkillInvoke(objectName(), data)){
                 room->setCardFlag(use.card, "yongjie");
                 room->setPlayerFlag(player, "yongjie");
                 room->loseMaxHp(player, 1);
