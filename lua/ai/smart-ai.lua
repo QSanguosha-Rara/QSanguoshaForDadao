@@ -5230,6 +5230,7 @@ function SmartAI:useTrickCard(card, use)
 		end
 
 		local mode = global_room:getMode()
+		local lord = global_room:getLord()
 		if mode:find("p") and mode >= "04p" then
 			if self.player:isLord() and sgs.turncount < 2 and card:isKindOf("ArcheryAttack") and self:getOverflow() < 1 then return end
 			if self.role == "loyalist" and sgs.turncount < 2 and card:isKindOf("ArcheryAttack") then return end
