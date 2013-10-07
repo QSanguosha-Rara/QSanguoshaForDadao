@@ -5234,6 +5234,10 @@ function SmartAI:useTrickCard(card, use)
 			if self.player:isLord() and sgs.turncount < 2 and card:isKindOf("ArcheryAttack") and self:getOverflow() < 1 then return end
 			if self.role == "loyalist" and sgs.turncount < 2 and card:isKindOf("ArcheryAttack") then return end
 			if self.role == "rebel" and sgs.turncount < 2 and card:isKindOf("SavageAssault") then return end
+			if self.role == "loyalist" and self.player:getMark("@xiongjie") > 1 and card:isKindOf("NeoDrowning") and self.player:hasSkill("xiongjie") then 
+				if lord:getCards("e"):length() == 0 or lord:isWeak() then 
+				return end
+			end	
 		end
 
 		local good = self:getAoeValue(card)
