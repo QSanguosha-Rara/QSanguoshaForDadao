@@ -2220,7 +2220,7 @@ public:
             }
             case ConfirmDamage:{
                 DamageStruct damage = data.value<DamageStruct>();
-                if (damage.card->hasFlag("suoshi_invoked")){
+                if (damage.card != NULL && damage.card->hasFlag("suoshi_invoked")){
                     foreach(ServerPlayer *p, room->getAlivePlayers())
                         if (p->getMark("suoshivictim")){
                             damage.from = p;
@@ -2232,7 +2232,7 @@ public:
             }
             case DamageDone:{
                 DamageStruct damage = data.value<DamageStruct>();
-                if (damage.card->hasFlag("suoshi_invoked"))
+                if (damage.card != NULL && damage.card->hasFlag("suoshi_invoked"))
                     room->setCardFlag(damage.card, "suoshi_success");
             }
             case CardFinished:{
