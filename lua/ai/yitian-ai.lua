@@ -5,6 +5,7 @@
 		2. 永久获得一项未上场或已死亡角色的主公技。(获得后即使你不是主公仍然有效) 
 ]]--
 sgs.ai_skill_invoke.weiwudi_guixin = true
+function allcountry() return sgs.Sanguosha:getKingdoms() end
 
 local function findPlayerForModifyKingdom(self, players) --从目标列表中选择一名用于修改势力
 	if players and not players:isEmpty() then
@@ -37,7 +38,8 @@ local function chooseKingdomForPlayer(self, to_modify) --选择合适的势力�
 			return lord and lord:getKingdom()
 		else
 			-- find a kingdom that is different from the lord
-			local kingdoms = {"qun","wei", "shu", "wu"}
+			local kingdoms = allcountry()
+			table.removeOne(kingdoms, "god")
 			for _, kingdom in ipairs(kingdoms) do
 				if lord and lord:getKingdom() ~= kingdom then
 					return kingdom
@@ -54,7 +56,9 @@ local function chooseKingdomForPlayer(self, to_modify) --选择合适的势力�
 end
 
 sgs.ai_skill_choice.weiwudi_guixin = function(self, choices)
-	if choices == "wei+shu+wu+qun" then --选择势力
+	local kings = allcountry()
+	table.removeOne(kings, "god")
+	if choices == table.concat(kings, "+") then --选择势力
 		local to_modify = self.room:getTag("Guixin2Modify"):toPlayer()
 		return chooseKingdomForPlayer(self, to_modify)
 	end
