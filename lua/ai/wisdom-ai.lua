@@ -743,7 +743,6 @@ sgs.ai_skill_use_func.ShouyeCard = function(card, use, self)
 	if first then
 		if use.to then
 			use.to:append(first)
-			self:speak("好好学习，天天向上！")
 		end
 	end
 	if second then
