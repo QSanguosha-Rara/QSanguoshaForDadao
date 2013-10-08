@@ -528,69 +528,7 @@ public:
         return false;
     }
 };
-
-
-ShangyiCard::ShangyiCard(){
-}
-
-void ShangyiCard::onEffect(const CardEffectStruct &effect) const{
-    Room *room = effect.to->getRoom();
-    if (effect.from->isKongcheng() || effect.to->isKongcheng())
-        return ;
-
-    room->showAllCards(effect.from, effect.to);
-
-    QList<int> ids;
-    foreach (int card_id, effect.to->handCards()){
-        if (Sanguosha->getCard(card_id)->isBlack())
-            ids << card_id;
-    }
-
-    int to_throw = room->doGongxin(effect.from, effect.to, ids, "shangyi");
-    effect.from->tag.remove("shangyi");
-
-    if (to_throw != -1)
-        room->throwCard(to_throw, effect.to, effect.from);
-    else
-        effect.from->drawCards(1);
-}
-
-class Shangyi: public ZeroCardViewAsSkill{
-public:
-    Shangyi(): ZeroCardViewAsSkill("shangyi"){
-
-    }
-
-    virtual bool isEnabledAtPlay(const Player *player) const{
-        return !player->hasUsed("ShangyiCard");
-    }
-
-    virtual const Card *viewAs() const{
-        return new ShangyiCard;
-    }
-};
-
-class Niaoxiang: public TriggerSkill{
-public:
-    Niaoxiang(): TriggerSkill("niaoxiang"){
-        events << TargetConfirmed;
-    }
-
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        CardUseStruct use = data.value<CardUseStruct>();
-        if (use.card != NULL && use.card->isKindOf("Slash") && use.from != NULL){
-            QVariantList jink_list = use.from->tag["Jink_" + use.card->toString()].toList();
-            foreach(ServerPlayer *p, use.to){
-                if (player->isAdjacentTo(p) && player->askForSkillInvoke(objectName(), QVariant::fromValue(p))){
-                    if (jink_list[use.to.indexOf(p)].toInt() == 1)
-                        jink_list[use.to.indexOf(p)] = 2;
-                }
-            }
-            use.from->tag["Jink_" + use.card->toString()] = jink_list;
-        }
-        return false;
-    }
-};
+ 
 
 FormationPackage::FormationPackage()
     : Package("formation")
@@ -613,9 +551,6 @@ FormationPackage::FormationPackage()
     jiangwanfeiyi->addSkill(new Shoucheng);
 
     //ToDo: Jiang Qin(I don't understand the skill)
-    General *jiangqin = new General(this, "jiangqin", "wu", 4);
-    jiangqin->addSkill(new Shangyi);
-    jiangqin->addSkill(new Niaoxiang);
 
     General *heg_xusheng = new General(this, "heg_xusheng", "wu"); // WU 020
     heg_xusheng->addSkill(new Yicheng);
@@ -629,7 +564,6 @@ FormationPackage::FormationPackage()
 
     addMetaObject<HuyuanCard>();
     addMetaObject<HeyiCard>();
-    addMetaObject<ShangyiCard>();
 }
 
 ADD_PACKAGE(Formation)

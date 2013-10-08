@@ -27,15 +27,6 @@ public:
     virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
 }; 
 
-class ShangyiCard: public SkillCard{
-    Q_OBJECT
-
-public:
-    Q_INVOKABLE ShangyiCard();
-
-    virtual void onEffect(const CardEffectStruct &effect) const;
-};
-
 class FormationPackage: public Package {
     Q_OBJECT
 
