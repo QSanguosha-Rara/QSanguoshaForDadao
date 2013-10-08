@@ -562,7 +562,7 @@ public:
                     room->attachSkillToPlayer(p, "xiansi_slash");
             }
         } else if (triggerEvent == EventLoseSkill && data.toString() == "xiansi") {
-            player->clearOnePrivatePile("counter");
+            //player->clearOnePrivatePile("counter");
             foreach (ServerPlayer *p, room->getOtherPlayers(player)) {
                 if (p->hasSkill("xiansi_slash"))
                     room->detachSkillFromPlayer(p, "xiansi_slash", true);
