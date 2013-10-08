@@ -1605,9 +1605,10 @@ public:
 
                 JudgeStruct judge;
                 judge.reason = objectName();
+                judge.who = player;
                 judge.good = true;
                 judge.pattern = ".";
-                //judge.play_animation = false;
+                judge.play_animation = false;
                 room->judge(judge);
 
                 bool red = (judge.pattern == "red");
