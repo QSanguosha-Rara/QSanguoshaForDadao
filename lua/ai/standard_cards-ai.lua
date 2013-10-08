@@ -842,7 +842,6 @@ sgs.ai_card_intention.Slash = function(self, card, from, tos)
 				value = 0
 			end
 		end
-		speakTrigger(card, from, to)
 		if to:hasSkill("yiji") then
 			-- value = value*(2-to:getHp())/1.1
 			value = math.max(value*(2-to:getHp())/1.1, 0)
