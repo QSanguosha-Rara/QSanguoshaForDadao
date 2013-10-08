@@ -859,9 +859,12 @@ public:
                         foreach(const Card *cd, cards)
                             cardids.append(cd->getId());
                         if (room->askForChoice(from, objectName(), "kangdaogain+kangdaocancel") == "kangdaogain"){
-                            room->fillAG(cardids);
+							int aidelay = Config.AIDelay;
+							Config.AIDelay = 0;
+                            room->fillAG(cardids, from);
                             int cid = room->askForAG(from, cardids, true, objectName() + "Chosen");
-                            room->clearAG();
+                            room->clearAG(from);
+							Config.AIDelay = aidelay;
                             if (cid != -1){
                                 room->broadcastSkillInvoke(objectName(), 2);
                                 CardMoveReason reason(CardMoveReason::S_REASON_PUT, player->objectName());
