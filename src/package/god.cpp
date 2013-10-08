@@ -829,7 +829,7 @@ public:
 class QixingClear: public TriggerSkill {
 public:
     QixingClear(): TriggerSkill("#qixing-clear") {
-        events << EventPhaseStart << Death << EventLoseSkill;
+        events << EventPhaseStart << Death/* << EventLoseSkill*/;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -856,8 +856,6 @@ public:
                 player->loseAllMarks("@fog");
             }
             player->tag.remove("Qixing_user");
-        } else if (triggerEvent == EventLoseSkill && data.toString() == "qixing") {
-            player->clearOnePrivatePile("stars");
         }
 
         return false;
