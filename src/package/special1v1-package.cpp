@@ -211,7 +211,7 @@ public:
         if (!opponent->isAlive())
             return false;
         Slash *slash = new Slash(Card::NoSuit, 0);
-        slash->setSkillName("_huwei");
+        slash->setSkillName("_xiaoxi"); //this typo......
         if (player->isLocked(slash) || !player->canSlash(opponent, slash, false)) {
             delete slash;
             return false;
@@ -891,6 +891,99 @@ public:
     }
 };
 
+class Cuorui: public TriggerSkill{
+public:
+    Cuorui(): TriggerSkill("cuorui"){
+        events << Debut << EventPhaseChanging;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == Debut)
+            player->gainMark("@cuorui", 1);
+        else if (triggerEvent == EventPhaseChanging){
+            if (data.value<PhaseChangeStruct>().to == Player::Judge && player->getMark("@cuorui") > 0){
+                player->loseAllMarks("@cuorui");
+                player->skip(Player::Judge);
+            }
+        }
+        return false;
+    }
+};
+
+class Liewei: public TriggerSkill{
+public:
+    Liewei(): TriggerSkill("liewei"){
+        events << Death;
+        frequency = Frequent;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        DeathStruct death = data.value<DeathStruct>();
+        if (death.who != player && death.damage && death.damage->from == player && player->askForSkillInvoke(objectName()))
+            player->drawCards(3, objectName());
+
+        return false;
+    }
+};
+/*
+class NiluanVS: public OneCardViewAsSkill{
+public:
+    NiluanVS(): OneCardViewAsSkill("niluan"){
+        response_pattern = "@@niluan";
+        filter_pattern = ".|black";
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        Slash *slash = new Slash(originalCard->getSuit(), originalCard->getNumber());
+        slash->addSubcard(originalCard);
+        slash->setSkillName("_niluan");
+        return slash;
+    }
+};
+*/
+
+class Niluan: public TriggerSkill{
+public:
+    Niluan(): TriggerSkill("niluan"){
+        events << EventPhaseStart << CardUsed;
+        //view_as_skill = new NiluanVS;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive() && !target->hasSkill(objectName());
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == CardUsed){
+            CardUseStruct use = data.value<CardUseStruct>();
+            foreach(ServerPlayer *p, use.to){
+                if (p->hasSkill(objectName()))
+                    room->setPlayerMark(p, "niluan", 1);
+            }
+        }
+        else if (player->getPhase() == Player::Finish){
+            QList<ServerPlayer *> hansuis = room->findPlayersBySkillName(objectName());
+            foreach(ServerPlayer *hansui, hansuis){
+                if (hansui->getMark("niluan") > 0 || player->getHp() > hansui->getHp() && hansui->canSlash(player, false)){
+                    room->setPlayerMark(hansui, "niluan", 0);
+                    const Card *theblack = room->askForCard(hansui, "..black", "@niluan", QVariant::fromValue(player), Card::MethodNone);
+                    if (theblack != NULL){
+                        Slash *slash = new Slash(theblack->getSuit(), theblack->getNumber());
+                        slash->setSkillName("_niluan");
+                        slash->addSubcard(theblack);
+                        if (!room->isProhibited(hansui, player, slash))
+                            room->useCard(CardUseStruct(slash, hansui, player));
+                        else
+                            delete slash;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+};
+
 Drowning::Drowning(Suit suit, int number)
     : SingleTargetTrick(suit, number)
 {
@@ -981,6 +1074,14 @@ Special1v1Package::Special1v1Package()
     General *hejin = new General(this, "hejin", "qun", 4); // QUN 025
     hejin->addSkill(new Mouzhu);
     hejin->addSkill(new Yanhuo);
+
+    General *niujin = new General(this, "niujin", "wei", 4); //D.WEI 025
+    niujin->addSkill(new Cuorui);
+    niujin->addSkill(new Liewei);
+
+    General *hansui = new General(this, "hansui", "qun", 4); //D.QUN 027
+    hansui->addSkill(new Niluan);
+    hansui->addSkill("xiaoxi");
 
     addMetaObject<XiechanCard>();
     addMetaObject<CangjiCard>();

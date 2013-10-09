@@ -453,7 +453,6 @@ StandardPackage::StandardPackage()
     patterns[".C"] = new ExpPattern(".|club|.|hand");
     patterns[".H"] = new ExpPattern(".|heart|.|hand");
     patterns[".D"] = new ExpPattern(".|diamond|.|hand");
-
     patterns[".black"] = new ExpPattern(".|black|.|hand");
     patterns[".red"] = new ExpPattern(".|red|.|hand");
 
@@ -462,6 +461,8 @@ StandardPackage::StandardPackage()
     patterns["..C"] = new ExpPattern(".|club");
     patterns["..H"] = new ExpPattern(".|heart");
     patterns["..D"] = new ExpPattern(".|diamond");
+    patterns["..black"] = new ExpPattern(".|black");
+    patterns["..red"] = new ExpPattern(".|red");
 
     patterns[".Basic"] = new ExpPattern("BasicCard");
     patterns[".Trick"] = new ExpPattern("TrickCard");

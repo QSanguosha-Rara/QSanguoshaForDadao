@@ -638,6 +638,10 @@ void GameRule::changeGeneral1v1(ServerPlayer *player) const{
 
     room->setTag("FirstRound", true); //For Manjuan
     int draw_num = classical ? 4 : player->getMaxHp();
+
+    if (player->hasSkill("cuorui"))
+        draw_num = player->tag["1v1Arrange"].toStringList().length() + 2;
+
     try {
         player->drawCards(draw_num);
         room->setTag("FirstRound", false);
