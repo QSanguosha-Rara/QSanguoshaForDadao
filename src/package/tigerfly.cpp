@@ -859,12 +859,12 @@ public:
                         foreach(const Card *cd, cards)
                             cardids.append(cd->getId());
                         if (room->askForChoice(from, objectName(), "kangdaogain+kangdaocancel") == "kangdaogain"){
-							int aidelay = Config.AIDelay;
-							Config.AIDelay = 0;
+                            int aidelay = Config.AIDelay;
+                            Config.AIDelay = 0;
                             room->fillAG(cardids, from);
                             int cid = room->askForAG(from, cardids, true, objectName() + "Chosen");
                             room->clearAG(from);
-							Config.AIDelay = aidelay;
+                            Config.AIDelay = aidelay;
                             if (cid != -1){
                                 room->broadcastSkillInvoke(objectName(), 2);
                                 CardMoveReason reason(CardMoveReason::S_REASON_PUT, player->objectName());
@@ -1764,7 +1764,7 @@ void JingshangCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> 
     source->tag["jingshang_card"] = QVariant::fromValue(showcard);
     source->tag["jingshang_using"] = true;
 
-    targets.first()->pindian(targets.last(), objectName());
+    targets.first()->pindian(targets.last(), "jingshang");
 
     source->tag["jingshang_using"] = false;
     source->tag.remove("jingshang_card");
@@ -1784,6 +1784,10 @@ public:
         JingshangCard *card = new JingshangCard;
         card->addSubcards(cards);
         return card;
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("JingshangCard");
     }
 };
 
