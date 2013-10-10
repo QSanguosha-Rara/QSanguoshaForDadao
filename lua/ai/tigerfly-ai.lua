@@ -863,3 +863,35 @@ sgs.ai_skill_use_func.GudanCard=function(card,use,self)
 	use.card=card
 end
 sgs.ai_use_priority.GudanCard = sgs.ai_use_priority.QiceCard + 0.1
+
+--勇节 by Fsu0413（没写过几次AI的渣）
+sgs.ai_skill_invoke.yongjie = function(self, data)
+	local use = data:toCardUse()
+	
+	if self.player:getRole() == "rebel" then
+		if use.from and use.from.isLord() then
+			if self.player:getMaxHp() == 1 then return true end
+		end 
+	end
+	
+	if not self:slashIsEffective(use.card or sgs.Sanguosha:cloneCard("Slash", sgs.Card_NoSuit, 0), self.player, false, use.from) then return false end
+	
+	local jinknum = 0
+	local expectedjink = self:getExpectedJinkNum(use)
+	for _, c in sgs.qlist(self.player:getCards("he")) do
+		if isCard("Jink", c, self.player) then
+			jinknum = jinknum + 1
+		end
+	end
+	
+	if jinknum < expectjink then
+		if self.player:hasSkills("leiji|nosleiji") and self.player:hasSkills(sgs.wizard_harm_skill) then
+			if jinknum > 0 then return false end
+			if self:hasEightDiagramEffect(self.player) then return false end
+		end
+	end
+
+	return (jinknum < expectedjink) && (self.player:getHp() < self.player:getMaxHp())
+end
+
+
