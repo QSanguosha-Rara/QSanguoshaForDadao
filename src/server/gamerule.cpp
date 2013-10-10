@@ -1044,7 +1044,7 @@ void BasaraMode::generalShowed(ServerPlayer *player, QString general_name) const
     if (names.isEmpty()) return;
 
     if (player->getGeneralName() == "anjiang") {
-        room->changeHero(player, general_name, false, false, false, false);
+        room->changeHero(player, general_name, false, true, false, false);
         room->setPlayerProperty(player, "kingdom", player->getGeneral()->getKingdom());
 
         if (player->getGeneral()->getKingdom() == "god") {
@@ -1061,7 +1061,7 @@ void BasaraMode::generalShowed(ServerPlayer *player, QString general_name) const
         if (Config.EnableHegemony)
             room->setPlayerProperty(player, "role", getMappedRole(player->getKingdom()));
     } else {
-        room->changeHero(player, general_name, false, false, true, false);
+        room->changeHero(player, general_name, false, true, true, false);
     }
 
     Q_ASSERT(room->getThread() != NULL);
