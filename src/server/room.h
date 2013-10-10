@@ -27,6 +27,8 @@ public:
     friend class RoomThread3v3;
     friend class RoomThreadXMode;
     friend class RoomThread1v1;
+    friend class Fun2v2;
+    friend class Fun2v2Rule;
 
     typedef void (Room::*Callback)(ServerPlayer *, const QString &);
     typedef bool (Room::*CallBack)(ServerPlayer *, const QSanProtocol::QSanGeneralPacket *);

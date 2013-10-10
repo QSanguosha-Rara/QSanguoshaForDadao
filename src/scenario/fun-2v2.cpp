@@ -1,5 +1,10 @@
 #include "fun-2v2.h"
 #include "engine.h"
+#include "jsonutils.h"
+#include "settings.h"
+
+using namespace QSanProtocol;
+using namespace QSanProtocol::Utils;
 
 class Fun2v2Rule: public ScenarioRule{
 public:
@@ -15,6 +20,36 @@ public:
                 if (p->getRole() == "rebel" && p->getNext()->getRole() == "rebel")
                     room->setCurrent(p->getNext());
 */
+            QList<ServerPlayer *> to_assign = room->getPlayers();
+
+            room->assignGeneralsForPlayers(to_assign);
+            foreach (ServerPlayer *player, to_assign)
+                room->_setupChooseGeneralRequestArgs(player);
+            room->doBroadcastRequest(to_assign, S_COMMAND_CHOOSE_GENERAL);
+            foreach (ServerPlayer *player, to_assign) {
+                if (player->getGeneral() != NULL) continue;
+                Json::Value generalName = player->getClientReply();
+                if (!player->m_isClientResponseReady || !generalName.isString()
+                    || !room->_setPlayerGeneral(player, toQString(generalName), true))
+                    room->_setPlayerGeneral(player, room->_chooseDefaultGeneral(player), true);
+            }
+
+            if (Config.Enable2ndGeneral) {
+                QList<ServerPlayer *> to_assign = room->getPlayers();
+                room->assignGeneralsForPlayers(to_assign);
+                foreach (ServerPlayer *player, to_assign)
+                    room->_setupChooseGeneralRequestArgs(player);
+
+                room->doBroadcastRequest(to_assign, S_COMMAND_CHOOSE_GENERAL);
+                foreach (ServerPlayer *player, to_assign) {
+                    if (player->getGeneral2() != NULL) continue;
+                    Json::Value generalName = player->getClientReply();
+                    if (!player->m_isClientResponseReady || !generalName.isString()
+                        || !room->_setPlayerGeneral(player, toQString(generalName), false))
+                        room->_setPlayerGeneral(player, room->_chooseDefaultGeneral(player), false);
+                }
+            }
+
 
             room->setTag("SkipNormalDeathProcess", true);
 
@@ -61,8 +96,7 @@ Fun2v2::Fun2v2(): Scenario("fun2v2"){
 }
 
 void Fun2v2::assign(QStringList &generals, QStringList &roles) const{
-    Q_UNUSED(generals);
-
+    generals << "sujiang" << "sujiangf" << "sujiangf" << "sujiang";
     roles << "rebel" << "loyalist" << "loyalist" << "rebel";
 }
 
@@ -79,7 +113,8 @@ void Fun2v2::onTagSet(Room *room, const QString &key) const{
 }
 
 bool Fun2v2::generalSelection() const{
-    return true;
+    //return true;
+    return false;
 }
 
 AI::Relation Fun2v2::relationTo(const ServerPlayer *a, const ServerPlayer *b) const{
