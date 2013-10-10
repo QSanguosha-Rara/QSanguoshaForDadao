@@ -891,7 +891,7 @@ sgs.ai_skill_invoke.yongjie = function(self, data)
 		end
 	end
 
-	return (jinknum < expectedjink) && (self.player:getHp() < self.player:getMaxHp())
+	return (jinknum < expectedjink) and (self.player:getHp() < self.player:getMaxHp())
 end
 
 
