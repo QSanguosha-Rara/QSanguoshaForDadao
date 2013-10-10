@@ -902,10 +902,36 @@ public:
         if (triggerEvent == Debut)
             player->gainMark("@cuorui", 1);
         else if (triggerEvent == EventPhaseChanging){
+            if (Config.GameMode != "02_1v1")
+                return false;
             if (data.value<PhaseChangeStruct>().to == Player::Judge && player->getMark("@cuorui") > 0){
                 player->loseAllMarks("@cuorui");
                 player->skip(Player::Judge);
             }
+        }
+        return false;
+    }
+};
+
+class CuoruiForNormalMode: public TriggerSkill{
+public:
+    CuoruiForNormalMode(): TriggerSkill("#cuorui"){
+        events << EventPhaseStart << GameStart;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (Config.GameMode == "02_1v1")
+            return false;
+
+        if (triggerEvent == GameStart)
+            player->gainMark("@cuorui");
+        else if(triggerEvent == EventPhaseStart && player->getMark("@cuorui") > 0 && player->getPhase() == Player::RoundStart){
+            if (!player->askForSkillInvoke("cuorui"))
+                return false;
+
+            player->loseMark("@cuorui");
+            player->drawCards(2 + player->getLostHp());
+            player->skip(Player::Judge);
         }
         return false;
     }
@@ -1077,7 +1103,9 @@ Special1v1Package::Special1v1Package()
 
     General *niujin = new General(this, "niujin", "wei", 4); //D.WEI 025
     niujin->addSkill(new Cuorui);
+    niujin->addSkill(new CuoruiForNormalMode);
     niujin->addSkill(new Liewei);
+    related_skills.insertMulti("cuorui", "#cuorui");
 
     General *hansui = new General(this, "hansui", "qun", 4); //D.QUN 027
     hansui->addSkill(new Niluan);
