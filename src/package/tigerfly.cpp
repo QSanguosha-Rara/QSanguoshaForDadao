@@ -1850,6 +1850,10 @@ public:
     }
 
     virtual bool onPhaseChange(ServerPlayer *target) const{
+        Player::Phase phase = target->getPhase();
+        if (phase != Player::RoundStart && phase != Player::Finish)
+            return false;
+
         Room *room = target->getRoom();
         QList<ServerPlayer *> mizhus = room->findPlayersBySkillName(objectName());
 
