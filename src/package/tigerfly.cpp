@@ -2282,7 +2282,7 @@ public:
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
-        if (damage.to != player && damage.to->getHp() <= player->getHp()){
+        if (damage.to != player && damage.to->getHp() <= player->getHp() && damage.to->isAlive()){
             QString choice = "draw";
             if (player->canDiscard(damage.to, "he"))
                 choice = room->askForChoice(damage.to, objectName(), "draw+discard", data);
@@ -2304,6 +2304,11 @@ class Baozheng: public PhaseChangeSkill{
 public:
     Baozheng(): PhaseChangeSkill("baozheng"){
         frequency = Limited;
+        limit_mark = "@baozheng";
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return PhaseChangeSkill::triggerable(target) && target->getMark("@baozheng") > 0;
     }
 
     virtual bool onPhaseChange(ServerPlayer *target) const{
