@@ -1861,7 +1861,9 @@ public:
             QList<int> zi = mizhu->getPile("zi");
             if (zi.length() > 0){
                 QList<int> to_give;
+                int aidelay = Config.AIDelay;
                 while (room->askForChoice(mizhu, objectName(), "dismiss+give" + QString(to_give.isEmpty()? "": "continue"), QVariant::fromValue(target)).startsWith("give")){
+                    Config.AIDelay = 0;
                     room->fillAG(mizhu->getPile("zi"), mizhu, to_give);
                     int card_id = room->askForAG(mizhu, zi, false, objectName());
                     room->clearAG(mizhu);
@@ -1870,6 +1872,10 @@ public:
                     if (zi.isEmpty())
                         break;
                 }
+                Config.AIDelay = aidelay;
+
+                if (to_give.isEmpty())
+                    return false;
 
                 CardsMoveStruct move(to_give, target, Player::PlaceHand, 
                     CardMoveReason(CardMoveReason::S_REASON_GOTCARD, mizhu->objectName(), objectName(), QString()));
