@@ -934,7 +934,8 @@ public:
             CardUseStruct use = data.value<CardUseStruct>();
             if (use.card->isKindOf("AmazingGrace")){
                 ServerPlayer *p = room->findPlayerBySkillName(objectName());
-                p->setFlags((triggerEvent == CardUsed) ? "agusing": "-agusing");
+                if (p != NULL || p->isDead())
+                    p->setFlags((triggerEvent == CardUsed) ? "agusing": "-agusing");
             }
         }
         if (TriggerSkill::triggerable(player) && !player->hasFlag("agusing")){
@@ -1586,7 +1587,7 @@ public:
     }
 
     virtual bool onPhaseChange(ServerPlayer *target) const{
-        if (target->getPhase() == Player::Discard)
+        if (target->getPhase() == Player::Discard && target->getHandcardNum() > target->getHp())
             target->getRoom()->askForUseCard(target, "@@shangjian", "@shangjian-give", -1, Card::MethodNone, false);
         return false;
     }
@@ -2136,7 +2137,8 @@ public:
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardEffectStruct effect = data.value<CardEffectStruct>();
-        if (effect.card->isNDTrick() && (effect.from != player)){
+        if (effect.card->isNDTrick() && effect.from != NULL && (effect.from != player)){
+            room->setTag("chanyudrawer", QVariant::fromValue(effect.from));
             room->setPlayerFlag(player, "chanyu_caninvoke");
         }
 
@@ -2156,6 +2158,7 @@ public:
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
         room->setPlayerFlag(player, "-chanyu_caninvoke");
+        room->removeTag("chanyudrawer");
         return false;
     }
 };
