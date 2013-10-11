@@ -964,3 +964,12 @@ sgs.ai_skill_invoke.annei = function(self, data)
 	return false
 end
 
+
+sgs.ai_skill_askforag.annei = function(self, card_ids)
+	local cards = {}
+	for _, card_id in ipairs(card_ids) do
+		table.insert(cards, sgs.Sanguosha:getCard(card_id))
+	end
+	self:sortByCardNeed(cards)
+	return cards[1]:getEffectiveId()
+end
