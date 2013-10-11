@@ -414,3 +414,15 @@ end
 sgs.ai_card_intention.TribladeSkillCard = 30
 
 
+sgs.ai_skill_invoke.DragonPhoenix = function(self, data)
+	local use = data:toCardUse()
+	if use then
+		for _,to in sgs.qlist(use.to) do 
+			if self:isFriend(to) and self:doNotDiscard(to) then return true end
+			if self:isEnemy(to) and not self:doNotDiscard(to) then return true end
+		end
+		return false
+	end
+	return false
+end
+
