@@ -911,3 +911,65 @@ sgs.ai_skill_discard.fuji = function(self)
 end
 
 
+sgs.ai_skill_use["@@shangjian"]=function(self, prompt)
+	local cards = sgs.QList2Table(self.player:getHandcards())
+	local maxs = self.player:getMaxCards()
+	local cha = self.player:getHandcards():length() - maxs
+	local friends = self:getFriendsNoself()
+	self:sortByKeepValue(cards)
+	local alls = {}
+	local allcard = {}
+	local tar
+	for _,card in ipairs(cards) do
+		table.insert(alls, card)
+		if #alls >= cha then break end
+	end
+	if #alls == 0 or #friends == 0 then return "." end
+	for _,card in ipairs(alls)  do
+		table.insert(allcard, card:getId()) 
+	end
+	self:sort(self.friends_noself, "defense")
+	for _, friend in ipairs(self.friends_noself) do
+		if (not (self:needKongcheng(friend) or friend:hasSkill("manjuan"))) and friend:isAlive() then tar = friend break end
+	end
+	local target = tar or self.friends_noself[1]
+	if target then return "@ShangjianCard="..table.concat(allcard, "+").."->"..target:objectName() end
+	return "."
+end
+
+sgs.ai_skill_invoke.manwu = function(self)
+	return self:willSkipPlayPhase() 
+end
+
+sgs.ai_skill_playerchosen.manwu = function(self, targets)
+	targets = sgs.QList2Table(targets)
+	self:sort(targets, "defense")
+	for _, en in ipairs(targets) do
+		if not self:doNotDiscard(en,"ej") and self:isEnemy(en) then return en end
+		if self:doNotDiscard(en,"ej") and self:isFriend(en) then return en end
+	end
+	for _, en2 in ipairs(targets) do
+		if self:isEnemy(en2) then return en2 end
+	end
+	return nil
+end
+sgs.ai_playerchosen_intention.manwu = 30
+
+sgs.ai_skill_invoke.annei = function(self, data)
+    local damage = data:toDamage()
+	local from = damage.from
+	local target = damage.to
+	if self:isFriend(target) and (self:isWeak(target) or target:getHp() < 3) and not self:needToLoseHp(target, from) then return true end
+	if self:isFriend(target) and self:isFriend(from) and not self:needToLoseHp(target, from) then return true end
+	return false
+end
+
+
+sgs.ai_skill_askforag.annei = function(self, card_ids)
+	local cards = {}
+	for _, card_id in ipairs(card_ids) do
+		table.insert(cards, sgs.Sanguosha:getCard(card_id))
+	end
+	self:sortByCardNeed(cards)
+	return cards[1]:getEffectiveId()
+end
