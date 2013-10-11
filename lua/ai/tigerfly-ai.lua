@@ -869,7 +869,7 @@ sgs.ai_skill_invoke.yongjie = function(self, data)
 	local use = data:toCardUse()
 	
 	if self.player:getRole() == "rebel" then
-		if use.from and use.from.isLord() then
+		if use.from and use.from:isLord() then
 			if self.player:getMaxHp() == 1 then return true end
 		end 
 	end
