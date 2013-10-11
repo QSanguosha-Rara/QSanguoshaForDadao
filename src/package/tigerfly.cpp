@@ -2097,6 +2097,8 @@ const Card *ChanyuCard::validateInResponse(ServerPlayer *user) const{
     room->setPlayerMark(user, "chanyuused", 1);
     ServerPlayer *drawer = room->getTag("chanyudrawer").value<ServerPlayer *>();
     drawer->drawCards(1);
+    room->setPlayerFlag(user, "-chanyu_caninvoke");
+    room->removeTag("chanyudrawer");
     Nullification *nul = new Nullification(Card::NoSuit, 0);
     nul->setSkillName("_chanyu");
     return nul;
