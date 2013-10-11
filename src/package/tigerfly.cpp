@@ -2104,7 +2104,14 @@ const Card *ChanyuCard::validateInResponse(ServerPlayer *user) const{
 class ChanyuVS: public ZeroCardViewAsSkill{
 public:
     ChanyuVS():ZeroCardViewAsSkill("chanyu"){
-        response_pattern = "nullification";
+    }
+
+    virtual bool isEnabledAtPlay(const Player *target) const{
+        return false;
+    }
+
+    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
+        return player->hasFlag("chanyu_caninvoke") && player->getMark("chanyuused") == 0 && pattern == "nullification";
     }
     
     virtual bool isEnabledAtNullification(const ServerPlayer *player) const{
