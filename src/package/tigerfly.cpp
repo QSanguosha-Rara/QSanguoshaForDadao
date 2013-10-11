@@ -934,7 +934,7 @@ public:
             CardUseStruct use = data.value<CardUseStruct>();
             if (use.card->isKindOf("AmazingGrace")){
                 ServerPlayer *p = room->findPlayerBySkillName(objectName());
-                if (p != NULL || p->isDead())
+                if (p != NULL && p->isAlive())
                     p->setFlags((triggerEvent == CardUsed) ? "agusing": "-agusing");
             }
         }
