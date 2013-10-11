@@ -884,14 +884,30 @@ sgs.ai_skill_invoke.yongjie = function(self, data)
 		end
 	end
 	
-	if jinknum < expectjink then
+	if jinknum < expectedjink then --typo
 		if self.player:hasSkills("leiji|nosleiji") and self.player:hasSkills(sgs.wizard_harm_skill) then
 			if jinknum > 0 then return false end
 			if self:hasEightDiagramEffect(self.player) then return false end
 		end
+		if use.from and (not self:isFriend(use.from)) and self:getAllPeachNum(self.player) < 1 and self.player:getMaxHp() == 1 then
+			return true
+		end
+		return self.player:getLostHp() > 0
 	end
 
-	return (jinknum < expectedjink) and (self.player:getHp() < self.player:getMaxHp())
+	return false
+end
+
+sgs.ai_skill_discard.fuji = function(self)
+	local victim = self.player:getTag("fujiplayer"):toPlayer()
+	if self:isEnemy(victim) and self:slashIsEffective(sgs.Sanguosha:cloneCard("Slash", sgs.Card_NoSuit, 0), victim) then
+		local to_discard = self:askForDiscard("dummyreason", 1, 1, false, true)
+		if to_discard ~= {} then
+			self.room:getThread():delay()
+		end
+		return to_discard
+	end
+	return {}
 end
 
 
