@@ -39,7 +39,7 @@ sgs.ai_skill_askforag.ziliang = function(self, card_ids)
 	return self.ziliang_id
 end
 
-sgs.ai_choicemade_filter.skillInvoke.ziliang = function(self, player, promptlist)
+sgs.ai_choicemade_filter.skillInvoke.ziliang = function(player, promptlist, self)
 	local damage = self.room:getTag("CurrentDamageStruct"):toDamage()
 	if damage.to and promptlist[#promptlist] == "yes" then
 		local intention = -40
