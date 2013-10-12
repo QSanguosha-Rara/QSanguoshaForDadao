@@ -1127,7 +1127,7 @@ sgs.ai_need_damaged.toudu = function(self, attacker, player)
 		local slash = sgs.Sanguosha:cloneCard("Slash", sgs.Card_NoSuit, 0)
 		for _, target in ipairs(self.enemies) do
 			if self:isEnemy(target) and self:slashIsEffective(slash, target) and not self:getDamagedEffects(target, self.player, true)
-				and getCardsNum("Jink", target) < 1 and (target:getHp() == 1 or self:hasHeavySlashDamage(player, nil, tareget) and target:getHp() == 2) then
+				and getCardsNum("Jink", target) < 1 and (target:getHp() == 1 or self:hasHeavySlashDamage(player, nil, target) and target:getHp() == 2) then
 				return true
 			end
 		end
