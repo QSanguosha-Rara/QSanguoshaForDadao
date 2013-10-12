@@ -1514,7 +1514,7 @@ SixSwords::SixSwords(Card::Suit suit, int number): Weapon(suit, number, 2){
 }
 
 SixSwordsSkillCard::SixSwordsSkillCard(): SkillCard(){
-
+    setObjectName("SixSwords");
 }
 
 bool SixSwordsSkillCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -1573,7 +1573,7 @@ Triblade::Triblade(Card::Suit suit, int number): Weapon(suit, number, 3){
 }
 
 TribladeSkillCard::TribladeSkillCard(): SkillCard(){
-
+    setObjectName("Triblade");
 }
 
 bool TribladeSkillCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
