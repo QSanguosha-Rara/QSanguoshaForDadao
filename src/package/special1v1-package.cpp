@@ -891,27 +891,49 @@ public:
     }
 };
 
-class Cuorui: public TriggerSkill{
+class Cuorui: public TriggerSkill {
 public:
-    Cuorui(): TriggerSkill("cuorui"){
-        events << Debut << EventPhaseChanging;
+    Cuorui(): TriggerSkill("cuorui") {
+        events << DrawInitialCards << EventPhaseChanging;
         frequency = Compulsory;
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        if (triggerEvent == Debut)
-            player->gainMark("@cuorui", 1);
-        else if (triggerEvent == EventPhaseChanging){
-            if (Config.GameMode != "02_1v1")
-                return false;
-            if (data.value<PhaseChangeStruct>().to == Player::Judge && player->getMark("@cuorui") > 0){
-                player->loseAllMarks("@cuorui");
+        if (Config.GameMode != "02_1v1")
+            return false;
+
+        if (triggerEvent == DrawInitialCards) {
+            int n = player->tag["1v1Arrange"].toStringList().length();
+            if (Config.value("1v1/Rule", "Classical").toString() != "OL")
+                n += 3;
+
+            LogMessage log;
+            log.type = "#TriggerSkill";
+            log.from = player;
+            log.arg = "cuorui";
+            room->sendLog(log);
+            room->broadcastSkillInvoke("cuorui");
+            room->notifySkillInvoked(player, "cuorui");
+
+            data = data.toInt() + n;
+        } else if (triggerEvent == EventPhaseChanging) {
+            PhaseChangeStruct change = data.value<PhaseChangeStruct>();
+            if (change.to == Player::Judge && player->getMark("CuoruiSkipJudge") == 0) {
+                LogMessage log;
+                log.type = "#TriggerSkill";
+                log.from = player;
+                log.arg = "cuorui";
+                room->sendLog(log);
+                room->broadcastSkillInvoke("cuorui");
+                room->notifySkillInvoked(player, "cuorui");
+
                 player->skip(Player::Judge);
+                player->addMark("CuoruiSkipJudge");
             }
         }
         return false;
     }
-};
+}; 
 
 class CuoruiForNormalMode: public TriggerSkill{
 public:
@@ -952,59 +974,94 @@ public:
         return false;
     }
 };
-/*
-class NiluanVS: public OneCardViewAsSkill{
+
+class NiluanViewAsSkill: public OneCardViewAsSkill {
 public:
-    NiluanVS(): OneCardViewAsSkill("niluan"){
-        response_pattern = "@@niluan";
+    NiluanViewAsSkill(): OneCardViewAsSkill("niluan") {
         filter_pattern = ".|black";
+        response_pattern = "@@niluan";
     }
 
     virtual const Card *viewAs(const Card *originalCard) const{
-        Slash *slash = new Slash(originalCard->getSuit(), originalCard->getNumber());
+        Slash *slash = new Slash(Card::SuitToBeDecided, -1);
         slash->addSubcard(originalCard);
-        slash->setSkillName("_niluan");
+        slash->setSkillName("niluan");
         return slash;
     }
 };
-*/
-
-class Niluan: public TriggerSkill{
+    
+class Niluan: public TriggerSkill {
 public:
-    Niluan(): TriggerSkill("niluan"){
-        events << EventPhaseStart << CardUsed;
-        //view_as_skill = new NiluanVS;
+    Niluan(): TriggerSkill("niluan") {
+        events << EventPhaseStart;
+        view_as_skill = new NiluanViewAsSkill;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL && target->isAlive() && !target->hasSkill(objectName());
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
+        if (player->getPhase() == Player::Finish) {
+            ServerPlayer *hansui = room->findPlayerBySkillName(objectName());
+            if (hansui && hansui != player && hansui->canSlash(player, false)
+                && (player->getHp() > hansui->getHp() || hansui->hasFlag("NiluanSlashTarget"))) {
+                    if (hansui->isKongcheng()) {
+                        bool has_black = false;
+                        for (int i = 0; i < 4; i++) {
+                            const EquipCard *equip = hansui->getEquip(i);
+                            if (equip && equip->isBlack()) {
+                                has_black = true;
+                                break;
+                            }
+                        }
+                        if (!has_black) return false;
+                    }
+
+                    room->setPlayerFlag(hansui, "slashTargetFix");
+                    room->setPlayerFlag(hansui, "slashNoDistanceLimit");
+                    room->setPlayerFlag(hansui, "slashTargetFixToOne");
+                    room->setPlayerFlag(player, "SlashAssignee");
+
+                    const Card *slash = room->askForUseCard(hansui, "@@niluan", "@niluan-slash:" + player->objectName());
+                    if (slash == NULL) {
+                        room->setPlayerFlag(hansui, "-slashTargetFix");
+                        room->setPlayerFlag(hansui, "-slashNoDistanceLimit");
+                        room->setPlayerFlag(hansui, "-slashTargetFixToOne");
+                        room->setPlayerFlag(player, "-SlashAssignee");
+                    }
+            }
+        }
+        return false;
+    }
+};
+            
+class NiluanRecord: public TriggerSkill {
+public:
+    NiluanRecord(): TriggerSkill("#niluan-record") {
+        events << TargetConfirmed << EventPhaseStart;
+    }
+
+    virtual int getPriority() const{
+        return 4;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        if (triggerEvent == CardUsed){
+        if (triggerEvent == TargetConfirmed) {
             CardUseStruct use = data.value<CardUseStruct>();
-            foreach(ServerPlayer *p, use.to){
-                if (p->hasSkill(objectName()))
-                    room->setPlayerMark(p, "niluan", 1);
-            }
-        }
-        else if (player->getPhase() == Player::Finish){
-            QList<ServerPlayer *> hansuis = room->findPlayersBySkillName(objectName());
-            foreach(ServerPlayer *hansui, hansuis){
-                if (hansui->getMark("niluan") > 0 || player->getHp() > hansui->getHp() && hansui->canSlash(player, false)){
-                    room->setPlayerMark(hansui, "niluan", 0);
-                    const Card *theblack = room->askForCard(hansui, "..black", "@niluan", QVariant::fromValue(player), Card::MethodNone);
-                    if (theblack != NULL){
-                        Slash *slash = new Slash(theblack->getSuit(), theblack->getNumber());
-                        slash->setSkillName("_niluan");
-                        slash->addSubcard(theblack);
-                        if (!room->isProhibited(hansui, player, slash))
-                            room->useCard(CardUseStruct(slash, hansui, player));
-                        else
-                            delete slash;
-                    }
+            if (use.from && use.from == player && use.card->isKindOf("Slash")) {
+                foreach (ServerPlayer *to, use.to) {
+                    if (!to->hasFlag("NiluanSlashTarget"))
+                        to->setFlags("NiluanSlashTarget");
                 }
             }
+        } else if (player->getPhase() == Player::RoundStart) {
+            foreach (ServerPlayer *p, room->getAlivePlayers())
+                p->setFlags("-NiluanSlashTarget");
         }
         return false;
     }
@@ -1101,16 +1158,6 @@ Special1v1Package::Special1v1Package()
     hejin->addSkill(new Mouzhu);
     hejin->addSkill(new Yanhuo);
 
-    General *niujin = new General(this, "niujin", "wei", 4); //D.WEI 025
-    niujin->addSkill(new Cuorui);
-    niujin->addSkill(new CuoruiForNormalMode);
-    niujin->addSkill(new Liewei);
-    related_skills.insertMulti("cuorui", "#cuorui");
-
-    General *hansui = new General(this, "hansui", "qun", 4); //D.QUN 027
-    hansui->addSkill(new Niluan);
-    hansui->addSkill("xiaoxi");
-
     addMetaObject<XiechanCard>();
     addMetaObject<CangjiCard>();
     addMetaObject<MouzhuCard>();
@@ -1151,6 +1198,23 @@ Special1v1OLPackage::Special1v1OLPackage()
 }
 
 ADD_PACKAGE(Special1v1OL)
+
+Special1v1ExtPackage::Special1v1ExtPackage() :Package("Special1v1Ext"){
+
+    General *niujin = new General(this, "niujin", "wei", 4); //D.WEI 025
+    niujin->addSkill(new Cuorui);
+    niujin->addSkill(new CuoruiForNormalMode);
+    niujin->addSkill(new Liewei);
+    related_skills.insertMulti("cuorui", "#cuorui");
+
+    General *hansui = new General(this, "hansui", "qun", 4); //D.QUN 027
+    hansui->addSkill(new Niluan);
+    hansui->addSkill(new NiluanRecord);
+    hansui->addSkill("xiaoxi");
+    related_skills.insertMulti("niluan", "#niluan-record");
+}
+
+ADD_PACKAGE(Special1v1Ext)
 
 #include "maneuvering.h"
 New1v1CardPackage::New1v1CardPackage()
