@@ -973,3 +973,128 @@ sgs.ai_skill_askforag.annei = function(self, card_ids)
 	self:sortByCardNeed(cards)
 	return cards[1]:getEffectiveId()
 end
+
+
+function JS_Card(self) --选择一张手牌或装备区的牌
+	local card_id = nil
+	local cards = self.player:getHandcards()
+	cards = sgs.QList2Table(cards)
+	self:sortByCardNeed(cards)
+	local lightning = self:getCard("Lightning")
+	if lightning and not self:willUseLightning(lightning) then card_id = lightning:getEffectiveId() end
+	if not card_id then
+		if self:needToThrowArmor() then card_id = self.player:getArmor():getId()
+		elseif self.player:getHandcardNum() >= self.player:getHp() then			
+			for _, acard in ipairs(cards) do
+				if (acard:isKindOf("EquipCard") or acard:isKindOf("AmazingGrace") or acard:isKindOf("BasicCard"))
+					and self:cardNeed(acard) <= 6 then card_id = acard:getEffectiveId() break 
+				elseif acard:getTypeId() == sgs.Card_TypeTrick then
+					local dummy_use = { isDummy = true }
+					self:useTrickCard(acard, dummy_use)
+					if not dummy_use.card then card_id = acard:getEffectiveId() break end	
+				end
+			end
+		elseif not self.player:getEquips():isEmpty() then
+			local equips=sgs.QList2Table(self.player:getEquips())
+			self:sortByCardNeed(equips)
+			for _, card in ipairs(equips) do
+				if card:getId() ~= self:getValuableCard(self.player) and not card:isKindOf("Armor") then 
+					card_id = card:getEffectiveId() break end 
+			end
+		end
+	end
+	return card_id
+end
+function DoBeweak(self)
+local _cards = self.player:getCards("he"):length()
+local condition = math.random(0, 2) == 1 and _cards <= 4 or _cards < 4
+return self:isWeak() and self.player:getHp() < 2 and condition
+end
+sgs.ai_compare_funcs.value_sha = function(a, b)
+return sgs.getDefenseSlash(a) > sgs.getDefenseSlash(b) end
+
+local jingshang={}
+jingshang.name="jingshang"
+table.insert(sgs.ai_skills,jingshang)
+jingshang.getTurnUseCard=function(self)
+	if DoBeweak(self) or self:needBear() then return nil end
+	local card_id 
+	local cardc
+	local powers = self.player:getPile("zi")
+	if self:getOverflow(target) > 1 then card_id = JS_Card(self)
+	elseif powers:length() > 4 then card_id = nil
+	else
+		card_id = JS_Card(self)
+	end
+	if card_id then
+		cardc = sgs.Card_Parse(("@JingshangCard=%d"):format(card_id))
+	elseif not card_id and powers:length() > 1 then
+		cardc = sgs.Card_Parse(("@JingshangCard=."))
+	end
+	assert(cardc)
+	return cardc
+end
+sgs.ai_skill_use_func.JingshangCard = function(card,use,self)
+self:sort(self.enemies, "defense")
+self:sort(self.friends_noself, math.random(0,1) == 0 and "threat" or "value_sha")
+local dingenemy = nil
+local dingfriend = self.friends_noself[1]
+for index=1,#self.enemies,1 do
+local fr = self.enemies[index]
+if fr and not fr:isKongcheng() and fr:isAlive() then dingenemy = fr break end
+end
+
+for _, enemy3 in ipairs(self.enemies) do
+if dingfriend and not dingfriend:isKongcheng() and not enemy3:isKongcheng() 
+and self:getMaxCard(dingfriend):getNumber() > self:getMaxCard(enemy3):getNumber() then
+use.card = card
+if use.to then use.to:append(enemy3) 
+use.to:append(dingfriend) end
+return end
+end
+
+for _, friend in ipairs(self.friends_noself) do
+if not friend:isKongcheng() and self:needKongcheng(friend, true) and dingenemy and not enemy3:isKongcheng() then
+use.card = card
+if use.to then use.to:append(enemy3) 
+use.to:append(dingfriend) end
+return end
+end
+
+if dingenemy and dingfriend and not dingenemy:isKongcheng() and not dingfriend:isKongcheng() then
+use.card = card
+if use.to then use.to:append(dingenemy)
+use.to:append(dingfriend) end
+return
+end
+
+for _, enemy in ipairs(self.enemies) do
+if dingenemy and not dingenemy:isKongcheng() and not enemy:isKongcheng() and enemy ~= dingenemy then
+use.card = card
+if use.to then use.to:append(dingenemy)
+use.to:append(enemy) end
+return
+end
+end
+end
+
+sgs.ai_use_value.JingshangCard = 6
+sgs.ai_use_priority.JingshangCard = sgs.ai_use_priority.Slash + 0.5
+
+sgs.card_ids_length = 0
+
+sgs.ai_skill_askforag.zijun = sgs.ai_skill_askforag.annei
+
+sgs.ai_skill_choice.zijun = function(self, choices, data)
+	local aim = data:toPlayer()
+	local powers = self.player:getPile("zi")
+	local option = choices:split("+")
+	if powers:length() == 0 then return "dismiss" end
+	if not self:isFriend(aim) and aim:hasSkill("kongcheng") and aim:isKongcheng() and powers:length() > 1 then return option[2] end
+	if self:isFriend(aim) then
+		sgs.card_ids_length = sgs.card_ids_length + 1
+		if sgs.card_ids_length > 2 then sgs.card_ids_length = 0 return "dismiss" end
+		return option[2] 
+	end
+	return "dismiss" 
+end
