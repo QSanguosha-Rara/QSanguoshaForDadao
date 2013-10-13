@@ -904,7 +904,7 @@ public:
 
         if (triggerEvent == DrawInitialCards) {
             int n = player->tag["1v1Arrange"].toStringList().length();
-            if (Config.value("1v1/Rule", "Classical").toString() != "OL")
+            if (Config.value("1v1/Rule", "2013").toString() != "OL")
                 n += 3;
 
             LogMessage log;
@@ -1075,13 +1075,7 @@ Drowning::Drowning(Suit suit, int number)
 
 bool Drowning::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
     int total_num = 1 + Sanguosha->correctCardTarget(TargetModSkill::ExtraTarget, Self, this);
-    if (targets.length() >= total_num)
-        return false;
-
-    if (to_select == Self)
-        return false;
-
-    return true;
+    return targets.length() < total_num && to_select != Self; 
 }
 
 void Drowning::onEffect(const CardEffectStruct &effect) const{
