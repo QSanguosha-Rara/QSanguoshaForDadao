@@ -1126,10 +1126,12 @@ sgs.ai_playerchosen_intention["huaiju-give"] = -50
 
 sgs.ai_skill_use["@@xingsuan"]=function(self, prompt)
 	local clubcards={}
-	local flag = false
+	local justarmor = false
+	local loseequip = false
 	local maxs = self.player:getMaxCards()
 	local cha = self.player:getHandcards():length() - maxs
-	if self:needToThrowArmor() or self:hasSkills(sgs.lose_equip_skill, self.player) then flag = true end
+	if self:needToThrowArmor() then justarmor = true end
+	if self:hasSkills(sgs.lose_equip_skill, self.player) then loseequip = true end
 	local cards = sgs.QList2Table(self.player:getCards("h"))
 	local cards2 = sgs.QList2Table(self.player:getCards("e"))
 	self:sortByUseValue(cards, true)
@@ -1138,13 +1140,18 @@ sgs.ai_skill_use["@@xingsuan"]=function(self, prompt)
 		if card:isKindOf("EquipCard") or card:isKindOf("Slash") then table.insert(clubcards, card:getId()) end
 		if #clubcards >= cha then break end
 	end
-	if flag then
+	if justarmor then
 		for _, card in ipairs(cards2) do
-			if (card:isKindOf("Armor") and self:needToThrowArmor()) or (card:getId()~=self:getValuableCard(self.player) and not card:isKindOf("Armor")) then 
+			if card:isKindOf("Armor") then table.insert(clubcards, card:getId()) break end 
+		end
+	end  
+	if loseequip then
+		for _, card in ipairs(cards2) do
+			if (card:isKindOf("Armor") and self:needToThrowArmor()) or card:getId()~=self:getValuableCard(self.player) then 
 				table.insert(clubcards, card:getId())
 			end 
 		end
-	end  
+	end 
 	local willput = true
 	if not self.player:getPile("tu"):isEmpty() and math.random(0, 4) == 2 then willput = false end
 	if #clubcards > 0 and willput then return "@XingsuanCard="..table.concat(clubcards, "+").."->".."." end
