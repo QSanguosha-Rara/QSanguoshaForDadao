@@ -301,7 +301,7 @@ function sgs.getDefenseSlash(player, self)
 end
 
 sgs.ai_compare_funcs["defenseSlash"] = function(a,b)
-	return sgs.getDefenseSlash(a) < sgs.getDefenseSlash(b)
+	return sgs.getDefenseSlash(a, self) < sgs.getDefenseSlash(b, self)
 end
 
 function SmartAI:slashProhibit(card, enemy, from)
