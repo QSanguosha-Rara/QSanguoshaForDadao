@@ -354,7 +354,7 @@ public:
     }
 
     virtual bool onPhaseChange(ServerPlayer *target) const{
-        if (target->getPhase() != Player::Draw || target->askForSkillInvoke(objectName()))
+        if (target->getPhase() != Player::Draw || !target->askForSkillInvoke(objectName()))
             return false;
 
         Room *room = target->getRoom();
