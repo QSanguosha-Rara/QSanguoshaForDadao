@@ -295,9 +295,6 @@ sgs.ai_skill_use_func.HouyuanCard = function(card, use, self)
 			use.to:append(target)
 		end
 		use.card = sgs.Card_Parse("@HouyuanCard=" .. table.concat(usecards, "+"))
-		if use.to then
-			self:speak("有你这样出远门不带粮食的么？接好了！")
-		end
 	end
 	return 
 end
