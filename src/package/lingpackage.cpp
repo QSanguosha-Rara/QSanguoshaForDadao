@@ -327,7 +327,7 @@ public:
 
             killer->throwAllHandCardsAndEquips();
             room->setPlayerMark(killer, "@HuileiDecrease", 1);
-            room->attachSkillToPlayer(killer, "#neo2013huilei-maxcards");
+            room->acquireSkill(killer, "#neo2013huilei-maxcards", false);
         }
 
         return false;

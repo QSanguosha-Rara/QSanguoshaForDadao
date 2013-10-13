@@ -2015,7 +2015,7 @@ public:
 class Fuji: public TriggerSkill{
 public:
     Fuji(): TriggerSkill("fuji"){
-        events << HpRecover << CardsMoveOneTime;
+        events << HpRecover << CardsMoveOneTime << EventPhaseStart;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -2023,38 +2023,50 @@ public:
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        ServerPlayer *zhangren = room->findPlayerBySkillName(objectName());
-        if (zhangren == NULL || zhangren->isDead() || zhangren->isNude())
+        if (room->getTag("FirstRound").toBool())
             return false;
 
-        if (triggerEvent == HpRecover){
-            if (player == zhangren)
-                return false;
+        if (triggerEvent != EventPhaseStart){
+            foreach(ServerPlayer *p, room->getAlivePlayers())
+                if (p->getHp() <= 0)
+                    return false;
+
+            QList<ServerPlayer *> zhangrens = room->findPlayersBySkillName(objectName());
+            foreach (ServerPlayer *zhangren, zhangrens){
+                if (zhangren == NULL || zhangren->isDead() || zhangren->isNude() || zhangren->getMark("fujiused") > 0)
+                    continue;
+
+                if (triggerEvent == HpRecover){
+                    if (player == zhangren)
+                        continue;
+                }
+                else {
+                    CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+                    if (move.to != player || move.to == zhangren || move.to->getPhase() == Player::Draw || move.from == move.to )
+                        continue;
+                    if (move.to_place != Player::PlaceHand && move.to_place != Player::PlaceEquip)
+                        continue;
+                }
+
+                zhangren->tag["fujiplayer"] = QVariant::fromValue(player);
+                bool invoked = room->askForDiscard(zhangren, objectName(), 1, 1, true, true, "@fuji-discard");
+                zhangren->tag.remove("fujiplayer");
+                if (invoked){
+                    room->broadcastSkillInvoke(objectName());
+                    room->notifySkillInvoked(zhangren, objectName());
+
+                    room->addPlayerMark(zhangren, "fujiused");
+
+                    Slash *slash = new Slash(Card::NoSuit, 0);
+                    slash->setSkillName("_" + objectName());
+                    CardUseStruct use(slash, zhangren, player, false);
+                    room->useCard(use, false);
+                }
+            }
         }
-        else {
-            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-            if (move.to != player || move.to == zhangren || move.to->getPhase() == Player::Draw || move.from == move.to )
-                return false;
-            if (move.to_place != Player::PlaceHand && move.to_place != Player::PlaceEquip)
-                return false;
-
-        }
-
-        foreach(ServerPlayer *p, room->getAlivePlayers())
-            if (p->getHp() <= 0)
-                return false;
-
-        zhangren->tag["fujiplayer"] = QVariant::fromValue(player);
-        bool invoked = room->askForDiscard(zhangren, objectName(), 1, 1, true, true, "@fuji-discard");
-        zhangren->tag.remove("fujiplayer");
-        if (invoked){
-            room->broadcastSkillInvoke(objectName());
-            room->notifySkillInvoked(zhangren, objectName());
-
-            Slash *slash = new Slash(Card::NoSuit, 0);
-            slash->setSkillName("_" + objectName());
-            CardUseStruct use(slash, zhangren, player, false);
-            room->useCard(use, false);
+        else if (player->getPhase() == Player::NotActive){
+            foreach(ServerPlayer *p, room->getAlivePlayers())
+                room->setPlayerMark(p, "fujiused", 0);
         }
         return false;
     }
