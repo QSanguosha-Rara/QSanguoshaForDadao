@@ -1123,3 +1123,31 @@ sgs.ai_skill_playerchosen["huaiju-give"] = function(self, targets)
 	return targets[1]
 end
 sgs.ai_playerchosen_intention["huaiju-give"] = -50
+
+sgs.ai_skill_use["@@xingsuan"]=function(self, prompt)
+	local clubcards={}
+	local flag = false
+	local maxs = self.player:getMaxCards()
+	local cha = self.player:getHandcards():length() - maxs
+	if self:needToThrowArmor() or self:hasSkills(sgs.lose_equip_skill, self.player) then flag = true end
+	local cards = sgs.QList2Table(self.player:getCards("h"))
+	local cards2 = sgs.QList2Table(self.player:getCards("e"))
+	self:sortByUseValue(cards, true)
+	self:sortByCardNeed(cards2)
+	for _,card in ipairs(cards) do
+		if card:isKindOf("EquipCard") or card:isKindOf("Slash") then table.insert(clubcards, card:getId()) end
+		if #clubcards >= cha then break end
+	end
+	if flag then
+		for _, card in ipairs(cards2) do
+			if (card:isKindOf("Armor") and self:needToThrowArmor()) or (card:getId()~=self:getValuableCard(self.player) and not card:isKindOf("Armor")) then 
+				table.insert(clubcards, card:getId())
+			end 
+		end
+	end  
+	local willput = true
+	if not self.player:getPile("tu"):isEmpty() and math.random(0, 4) == 2 then willput = false end
+	if #clubcards > 0 and willput then return "@XingsuanCard="..table.concat(clubcards, "+").."->".."." end
+	return "."
+end
+sgs.ai_chaofeng.luji = 0.5
