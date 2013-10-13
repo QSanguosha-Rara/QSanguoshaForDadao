@@ -1459,6 +1459,9 @@ bool KnownBoth::targetsFeasible(const QList<const Player *> &targets, const Play
     if (Self->isCardLimited(this, Card::MethodUse))
         return targets.length() == 0;
 
+    if (Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE_USE)
+        return targets.length() != 0;
+
     int total_num = 1 + Sanguosha->correctCardTarget(TargetModSkill::ExtraTarget, Self, this);
     if (getSkillName().contains("guhuo") || getSkillName() == "qice")  // Dirty hack here!!!
         return targets.length() > 0 && targets.length() <= total_num;
