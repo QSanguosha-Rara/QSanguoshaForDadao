@@ -1005,11 +1005,16 @@ function JS_Card(self) --选择一张手牌或装备区的牌
 	end
 	return card_id
 end
-function DoBeweak(self)
-local _cards = self.player:getCards("he"):length()
-local condition = math.random(0, 2) == 1 and _cards <= 4 or _cards < 4
-return self:isWeak() and self.player:getHp() < 2 and condition
+
+function DoBeweak(self, flag, pilename, piles)
+flag = flag or "he"
+pilename = pilename or "zi"
+piles = piles or 2
+local _cards = self.player:getCards(flag):length()
+local _powers = self.player:getPile(pilename):length()
+return self:isWeak() and self.player:getHp() < 2 and (_cards < 4 or _powers <= piles)
 end
+
 sgs.ai_compare_funcs.value_sha = function(a, b)
 return sgs.getDefenseSlash(a, self) > sgs.getDefenseSlash(b, self) end
 
