@@ -6,6 +6,7 @@
 #include "engine.h"
 #include "maneuvering.h"
 #include "settings.h"
+#include "hegemony.h"
 
 LuoyiCard::LuoyiCard() {
     target_fixed = true;
@@ -842,6 +843,17 @@ public:
     }
 };
 
+class Neo2013Sijian: public Sijian{
+public:
+    Neo2013Sijian():Sijian(){
+        setObjectName("neo2013sijian");
+    }
+
+    virtual QString getCardChosenFlag() const{
+        return "hej";
+    }
+};
+
 class Neo2013Suishi: public TriggerSkill{
 public:
     Neo2013Suishi(): TriggerSkill("neo2013suishi"){
@@ -1295,6 +1307,58 @@ public:
     }
 };
 
+class Neo2013Chengxiang: public MasochismSkill {
+public:
+    Neo2013Chengxiang(): MasochismSkill("neo2013chengxiang") {
+        frequency = Frequent;
+    }
+
+    virtual void onDamaged(ServerPlayer *target, const DamageStruct &damage) const{
+        Room *room = target->getRoom();
+        if (!target->askForSkillInvoke(objectName(), QVariant::fromValue(damage))) return;
+        room->broadcastSkillInvoke(objectName());
+
+        QList<int> card_ids = room->getNCards(4);
+        room->fillAG(card_ids);
+
+        QList<int> to_get, to_throw;
+        while (true) {
+            int sum = 0;
+            foreach (int id, to_get)
+                sum += Sanguosha->getCard(id)->getNumber();
+            foreach (int id, card_ids) {
+                if (sum + Sanguosha->getCard(id)->getNumber() > 13) {
+                    room->takeAG(NULL, id, false);
+                    card_ids.removeOne(id);
+                    to_throw << id;
+                }
+            }
+            if (card_ids.isEmpty()) break;
+
+            int card_id = room->askForAG(target, card_ids, card_ids.length() < 4, objectName());
+            if (card_id == -1) break;
+            card_ids.removeOne(card_id);
+            to_get << card_id;
+            room->takeAG(target, card_id, false);
+            if (card_ids.isEmpty()) break;
+        }
+        DummyCard *dummy = new DummyCard;
+        if (!to_get.isEmpty()) {
+            dummy->addSubcards(to_get);
+            target->obtainCard(dummy);
+        }
+        dummy->clearSubcards();
+        if (!to_throw.isEmpty() || !card_ids.isEmpty()) {
+            dummy->addSubcards(to_throw + card_ids);
+            CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, target->objectName(), objectName(), QString());
+            room->throwCard(dummy, reason, NULL);
+        }
+        delete dummy;
+
+        room->clearAG();
+    }
+};
+
 
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
@@ -1355,7 +1419,7 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
 
     General *neo2013_tianfeng = new General(this, "neo2013_tianfeng", "qun", 3);
     neo2013_tianfeng->addSkill(new Neo2013Suishi);
-    neo2013_tianfeng->addSkill("sijian");
+    neo2013_tianfeng->addSkill(new Neo2013Sijian);
 
     General *neo2013_gan = new General(this, "neo2013_ganfuren", "shu", 3, false);
     neo2013_gan->addSkill(new Neo2013Shushen);
@@ -1384,6 +1448,10 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_zoushi = new General(this, "neo2013_zoushi", "qun", 3);
     neo2013_zoushi->addSkill(new Neo2013Huoshui);
     neo2013_zoushi->addSkill(new Neo2013Qingcheng);
+
+    General *neo2013_caochong = new General(this, "neo2013_caochong", "wei", 3);
+    neo2013_caochong->addSkill(new Neo2013Chengxiang);
+    neo2013_caochong->addSkill("renxin");
 
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();

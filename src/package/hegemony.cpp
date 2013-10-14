@@ -269,32 +269,34 @@ public:
     }
 };
 
-class Sijian: public TriggerSkill {
-public:
-    Sijian(): TriggerSkill("sijian") {
-        events << CardsMoveOneTime;
-    }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *tianfeng, QVariant &data) const{
-        CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-        if (move.from == tianfeng && move.from_places.contains(Player::PlaceHand) && move.is_last_handcard) {
-            QList<ServerPlayer *> other_players = room->getOtherPlayers(tianfeng);
-            QList<ServerPlayer *> targets;
-            foreach (ServerPlayer *p, other_players) {
-                if (tianfeng->canDiscard(p, "he"))
-                    targets << p;
-            }
-            if (targets.isEmpty()) return false;
-            ServerPlayer *to = room->askForPlayerChosen(tianfeng, targets, objectName(), "sijian-invoke", true, true);
-            if (to) {
-                room->broadcastSkillInvoke(objectName(), to->isLord() ? 2 : 1);
-                int card_id = room->askForCardChosen(tianfeng, to, "he", objectName(), false, Card::MethodDiscard);
-                room->throwCard(card_id, to, tianfeng);
-            }
+Sijian::Sijian(): TriggerSkill("sijian") {
+    events << CardsMoveOneTime;
+}
+
+bool Sijian::trigger(TriggerEvent, Room *room, ServerPlayer *tianfeng, QVariant &data) const{
+    CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+    if (move.from == tianfeng && move.from_places.contains(Player::PlaceHand) && move.is_last_handcard) {
+        QList<ServerPlayer *> other_players = room->getOtherPlayers(tianfeng);
+        QList<ServerPlayer *> targets;
+        foreach (ServerPlayer *p, other_players) {
+            if (tianfeng->canDiscard(p, "he"))
+                targets << p;
         }
-        return false;
+        if (targets.isEmpty()) return false;
+        ServerPlayer *to = room->askForPlayerChosen(tianfeng, targets, objectName(), "sijian-invoke", true, true);
+        if (to) {
+            room->broadcastSkillInvoke(objectName(), to->isLord() ? 2 : 1);
+            int card_id = room->askForCardChosen(tianfeng, to, getCardChosenFlag(), objectName(), false, Card::MethodDiscard);
+            room->throwCard(card_id, to, tianfeng);
+        }
     }
-};
+    return false;
+}
+
+QString Sijian::getCardChosenFlag() const{
+    return "he";
+}
 
 class Suishi: public TriggerSkill {
 public:

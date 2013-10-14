@@ -2,6 +2,7 @@
 #define _HEGEMONY_H
 
 #include "standard.h"
+#include "skill.h"
 
 class HegemonyPackage: public Package {
     Q_OBJECT
@@ -60,6 +61,13 @@ public:
 
     virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
     virtual void onUse(Room *room, const CardUseStruct &card_use) const;
+};
+
+class Sijian: public TriggerSkill{
+public:
+    Sijian();
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const;
+    virtual QString getCardChosenFlag() const;
 };
 
 #endif
