@@ -448,7 +448,7 @@ sgs.ai_skill_cardask["@longyin"] = function(self, data)
 		else
 			local slashc
 			local cards = sgs.QList2Table(self.player:getHandcards())
-			self:sortByUseValue(cards)
+			self:sortByUseValue(cards, true)
 			for _, c in ipairs(cards) do
 				if self:getUseValue(c) < 6 and not self:isValuableCard(c) and not self.player:isJilei(c) then
 					if isCard("Slash", c, self.player) then
