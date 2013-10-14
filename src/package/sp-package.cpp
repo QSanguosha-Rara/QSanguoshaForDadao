@@ -1131,7 +1131,10 @@ public:
                         card_id = ids.first();
                     else
                         card_id = room->askForAG(player, ids, true, objectName());
-                    if (card_id == -1) break;
+                    if (card_id == -1) {
+                        room->clearAG(player); //fix ag
+                        break;
+                    }
                     if (only)
                         player->setMark("YanyuOnlyId", card_id + 1); // For AI
                     const Card *card = Sanguosha->getCard(card_id);
