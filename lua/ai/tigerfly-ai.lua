@@ -1017,7 +1017,7 @@ local jingshang={}
 jingshang.name="jingshang"
 table.insert(sgs.ai_skills,jingshang)
 jingshang.getTurnUseCard=function(self)
-	if DoBeweak(self) or self:needBear() then return nil end
+	if DoBeweak(self) or self:needBear() or self.player:hasUsed("JingshangCard") then return nil end
 	local card_id 
 	local cardc
 	local powers = self.player:getPile("zi")
