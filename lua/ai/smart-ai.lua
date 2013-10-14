@@ -5170,7 +5170,7 @@ function SmartAI:hasTrickEffective(card, to, from)
 	if to:hasSkill("renwang") and to:hasFlag("RenwangEffect") then
 		if self:isFriend(from, to) then return false end
 		local can_discard = false
-		for _, c in from:getCards("he") do
+		for _, c in sgs.qlist(from:getCards("he")) do
 			if c:getEffectiveId() ~= card:getEffectiveId()
 				and not (not from:hasEquip(c) and card:getSkillName() == "qice")
 				and not self:isValuableCard(card, from) then
