@@ -582,6 +582,7 @@ Special3v3Package::Special3v3Package()
     zhugejin->addSkill(new Mingzhe);
     related_skills.insertMulti("hongyuan", "#hongyuan");
 
+    addMetaObject<HongyuanCard>();
     addMetaObject<ZhongyiCard>();
     addMetaObject<JiuzhuCard>();
     addMetaObject<ZhenweiCard>();
