@@ -66,10 +66,9 @@ public:
                     judge.reason = objectName();
                     judge.who = selfplayer;
                     room->judge(judge);
-                    room->getThread()->delay(1000);
                     if (judge.isGood()){
-                        room->broadcastSkillInvoke("kuanhui", 2);
                         ServerPlayer *target = room->askForPlayerChosen(selfplayer, use.to, objectName());
+                        room->broadcastSkillInvoke("kuanhui", 2);
                         room->setPlayerFlag(target, "kuanhuitarget");
                         room->setPlayerMark(target, "kuanhuiCardId", card->getId() + 1);
                         LogMessage log;
@@ -144,7 +143,6 @@ public:
                         room->broadcastSkillInvoke("weidi");
                     else
                         room->broadcastSkillInvoke("hongliang");
-                    room->getThread()->delay(1000);
                     CardMoveReason reason;
                     reason.m_reason = CardMoveReason::S_REASON_GIVE;
                     reason.m_playerId = player->objectName();
@@ -201,6 +199,7 @@ void PozhenCard::onEffect(const CardEffectStruct &effect) const{
     log.from = source;
     log.arg = suittb(suit);
     room->sendLog(log);
+    room->getThread()->delay();
     QString pattern = ".|" + suittb(suit) + "|.|hand|.";
     if (!dest->isKongcheng() &&
             room->askForCard(dest, pattern, "@pozhen:" + source->objectName() + "::" + suittb(suit), QVariant(), "pozhen")){
@@ -283,8 +282,8 @@ public:
                 else
                     choice = "changehero";
                 if (choice == "discard"){
-                    room->broadcastSkillInvoke(objectName(), 1);
                     room->askForDiscard(player, objectName(), 1, 1, false, true);
+                    room->broadcastSkillInvoke(objectName(), 1);
                 }
                 else{
                     room->broadcastSkillInvoke(objectName(), 2);
@@ -326,7 +325,7 @@ public:
                                     judge.reason = objectName();
                                     judge.who = player;
                                     room->judge(judge);
-                                    room->getThread()->delay(1000);
+                                    room->getThread()->delay();
                                     if (judge.isGood()){
                                         room->addPlayerMark(player, "zhuixi_extra");
                                         room->broadcastSkillInvoke(objectName(), 3);
@@ -480,7 +479,7 @@ public:
                             room->obtainCard(player, card, false);
                         }
                         else {
-                            room->askForDiscard(victim, objectName() + "-discard", 2, 2, false, true, "@neoaocaidiscard");
+                            room->askForDiscard(victim, objectName() + "-discard", 2, 2, false, true);
                         }
                     }
                     room->acquireSkill(player, "zhuanquan");
@@ -938,12 +937,11 @@ public:
                     p->setFlags((triggerEvent == CardUsed) ? "agusing": "-agusing");
             }
         }
-        if (TriggerSkill::triggerable(player) && !player->hasFlag("agusing")){
-            if (triggerEvent == CardsMoveOneTime){
-                CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-                if (!(move.from_places.contains(Player::DrawPile) || move.to_place == Player::DrawPile))
-                    return false;
-            }
+        else if (TriggerSkill::triggerable(player) && !player->hasFlag("agusing")){
+
+            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+            if (!(move.from_places.contains(Player::DrawPile) || move.to_place == Player::DrawPile))
+                return false;
 
             QList<int> drawpile = room->getDrawPile();
             QList<int> watchlist;
@@ -1607,6 +1605,8 @@ public:
                 player->skip(Player::Judge);
                 player->skip(Player::Play);
 
+                room->notifySkillInvoked(player, objectName());
+
                 JudgeStruct judge;
                 judge.reason = objectName();
                 judge.who = player;
@@ -1657,6 +1657,8 @@ public:
 
                 if (id == -1)
                     return false;
+
+                room->broadcastSkillInvoke(objectName());
 
                 player->addToPile("ci", id, true);
 
@@ -1882,6 +1884,8 @@ public:
                     CardMoveReason(CardMoveReason::S_REASON_GOTCARD, mizhu->objectName(), objectName(), QString()));
 
                 room->moveCards(move, true);
+                room->notifySkillInvoked(mizhu, objectName());
+                room->broadcastSkillInvoke(objectName());
 
                 if (to_give.length() >= 2){
                     RecoverStruct recover;
@@ -2000,8 +2004,15 @@ public:
                 if (tuwithsamesuit.isEmpty())
                     continue;
 
+                LogMessage l;
+                l.type = (judge->who == luji) ? "#xingsuan-discard": "#xingsuan-draw";
+                l.from = luji;
+                l.arg = QString::number(tuwithsamesuit.length());
+                room->sendLog(l);
+
                 if (judge->who == luji)
-                    room->askForDiscard(luji, objectName(), tuwithsamesuit.length(), tuwithsamesuit.length(), false, true, "@xingsuan-discard");
+                    room->askForDiscard(luji, objectName(), tuwithsamesuit.length(), tuwithsamesuit.length(), false, true, 
+                        "@xingsuan-discard:" + QString::number(tuwithsamesuit.length()));
                 else
                     room->drawCards(luji, tuwithsamesuit.length(), objectName());
 
@@ -2082,6 +2093,7 @@ public:
         if (triggerEvent == TargetConfirmed){
             CardUseStruct use = data.value<CardUseStruct>();
             if (use.card && use.card->isKindOf("Slash") && use.to.contains(player) && player->askForSkillInvoke(objectName(), data)){
+                room->broadcastSkillInvoke(objectName());
                 room->setCardFlag(use.card, "yongjie");
                 room->setPlayerFlag(player, "yongjie");
                 room->loseMaxHp(player, 1);
@@ -2090,6 +2102,13 @@ public:
         else {
             SlashEffectStruct effect = data.value<SlashEffectStruct>();
             if (effect.slash->hasFlag("yongjie") && effect.to->hasFlag("yongjie")){
+                LogMessage log;
+                log.type = "#DanlaoAvoid";
+                log.arg2 = objectName();
+                log.from = effect.to;
+                log.arg = effect.slash->objectName();
+                room->sendLog(log);
+
                 room->setCardFlag(effect.slash, "-yongjie");
                 room->setPlayerFlag(effect.to, "-yongjie");
                 return true;
@@ -2292,6 +2311,10 @@ public:
                 if (use.card->hasFlag("suoshi_success")){
                     room->setCardFlag(use.card, "-suoshi_success");
                     if (suoshivictim){
+                        LogMessage l;
+                        l.type = "#TriggerSkill";
+                        l.from = player;
+                        l.arg = objectName();
                         room->damage(DamageStruct(objectName(), player, suoshivictim));
                     }
                 }
@@ -2314,6 +2337,13 @@ public:
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.to != player && damage.to->getHp() <= player->getHp() && damage.to->isAlive()){
             QString choice = "draw";
+
+            LogMessage l;
+            l.type = "#TriggerSkill";
+            l.from = player;
+            l.arg = objectName();
+            room->sendLog(l);
+
             if (player->canDiscard(damage.to, "he"))
                 choice = room->askForChoice(damage.to, objectName(), "draw+discard", data);
 
@@ -2349,6 +2379,8 @@ public:
             target->setFlags("baozhengused");
 
             Room *room = target->getRoom();
+            room->setPlayerMark(target, "@baozheng", 0);
+            room->broadcastSkillInvoke(objectName());
             QList<ServerPlayer *> players = room->getOtherPlayers(target); 
 
             try {
@@ -2394,8 +2426,11 @@ void ZongjiuCard::onUse(Room *room, const CardUseStruct &card_use) const{
             continue;
         QStringList choicelist;
         choicelist << "cancel" << "damage";
-        if (!p->isNude())
-            choicelist << "rob";
+        foreach(const Card *c, p->getHandcards())
+            if (c->isKindOf("Peach")){
+                choicelist << "rob";
+                break;
+            }
 
         QString choice = room->askForChoice(p, "zongjiu", choicelist.join("+"));
 
@@ -2407,8 +2442,8 @@ void ZongjiuCard::onUse(Room *room, const CardUseStruct &card_use) const{
             break;
         }
         else if (choice == "rob"){
-            int card_id = room->askForCardChosen(card_use.from, p, "he", objectName());
-            room->obtainCard(card_use.from, card_id, false);
+            const Card *peach = room->askForCard(p, "%peach", "@zongjiu-give", QVariant::fromValue(card_use), Card::MethodNone);
+            room->obtainCard(card_use.from, peach);
             responded = p;
             break;
         }
