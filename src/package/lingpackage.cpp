@@ -63,7 +63,6 @@ public:
 };
 
 NeoFanjianCard::NeoFanjianCard() {
-    mute = true;
     will_throw = false;
     handling_method = Card::MethodNone;
 }
@@ -73,10 +72,9 @@ void NeoFanjianCard::onEffect(const CardEffectStruct &effect) const{
     ServerPlayer *target = effect.to;
     Room *room = zhouyu->getRoom();
 
-    room->broadcastSkillInvoke("fanjian");
     const Card *card = Sanguosha->getCard(getSubcards().first());
     int card_id = card->getEffectiveId();
-    Card::Suit suit = room->askForSuit(target, "neofanjian");
+    Card::Suit suit = room->askForSuit(target, objectName() == "NeoFanjianCard" ? "neofanjian" : "neo2013fanjian");
 
     LogMessage log;
     log.type = "#ChooseSuit";
@@ -89,7 +87,11 @@ void NeoFanjianCard::onEffect(const CardEffectStruct &effect) const{
     room->showCard(target, card_id);
 
     if (card->getSuit() != suit)
-        room->damage(DamageStruct("neofanjian", zhouyu, target));
+        DifferentEffect(room, zhouyu, target);
+}
+
+void NeoFanjianCard::DifferentEffect(Room *room, ServerPlayer *from, ServerPlayer *to) const{
+    room->damage(DamageStruct(objectName(), from, to));
 }
 
 class NeoFanjian: public OneCardViewAsSkill {
@@ -408,48 +410,31 @@ public:
     }
 };
 
-Neo2013FanjianCard::Neo2013FanjianCard(): SkillCard(){
+Neo2013FanjianCard::Neo2013FanjianCard(): NeoFanjianCard(){
     will_throw = false;
     handling_method = Card::MethodNone;
+    setObjectName("Neo2013FanjianCard");
 }
 
-void Neo2013FanjianCard::onEffect(const CardEffectStruct &effect) const{
-    ServerPlayer *source = effect.from;
-    ServerPlayer *target = effect.to;
-    Room *room = target->getRoom();
+void Neo2013FanjianCard::DifferentEffect(Room *room, ServerPlayer *from, ServerPlayer *to) const{
+    from->setFlags("Neo2013Fanjian_InTempMoving");
+    int card_id1 = room->askForCardChosen(from, to, "he", "neo2013fanjian");
+    Player::Place place1 = room->getCardPlace(card_id1);
+    to->addToPile("#fanjian", card_id1);
+    int card_id2 = -1;
+    if (!to->isNude()){
+        card_id2 = room->askForCardChosen(from, to, "he", "neo2013fanjian");
+    }
+    room->moveCardTo(Sanguosha->getCard(card_id1), to, place1, CardMoveReason(CardMoveReason::S_REASON_GOTCARD, from->objectName()));
+    from->setFlags("-Neo2013Fanjian_InTempMoving");
+    DummyCard dummy;
+    dummy.addSubcard(card_id1);
+    if (card_id2 != -1)
+        dummy.addSubcard(card_id2);
 
-    const Card *card = Sanguosha->getCard(getSubcards().first());
-    int card_id = card->getEffectiveId();
-    Card::Suit suit = room->askForSuit(target, "neo2013fanjian");
-
-    LogMessage l;
-    l.type = "#ChooseSuit";
-    l.from = target;
-    l.arg = Card::Suit2String(suit);
-    room->sendLog(l);
-
-    room->getThread()->delay();
-    room->showCard(source, card_id);
-
-    if (card->getSuit() != suit)
-        room->loseHp(target);
-
-    if (target->isDead())
-        return;
-
-    QVariant data;
-    data.setValue(source);
-
-    QString choice = "getIt";
-    if (target->canDiscard(source, "h"))
-        choice = room->askForChoice(target, "neo2013fanjian", "getIt+discardOne", data);
-
-    if (choice == "getIt")
-        target->obtainCard(this);
-    else 
-        room->throwCard(room->askForCardChosen(target, source, "h", "neo2013fanjian", false, Card::MethodDiscard), source, target);
-
+    room->obtainCard(from, &dummy);
 }
+
 class Neo2013Fanjian: public OneCardViewAsSkill{
 public:
     Neo2013Fanjian(): OneCardViewAsSkill("neo2013fanjian"){
@@ -1276,6 +1261,40 @@ public:
     }
 };
 
+Neo2013XiechanCard::Neo2013XiechanCard(){
+
+}
+
+void Neo2013XiechanCard::onEffect(const CardEffectStruct &effect) const{
+    Room *room = effect.from->getRoom();
+    room->setPlayerMark(effect.from, "@neo2013xiechan", 0);
+    bool success = effect.from->pindian(effect.to, "neo2013xiechan", NULL);
+    Card *card = NULL;
+    if (success)
+        card = new Slash(Card::NoSuit, 0);
+    else
+        card = new Duel(Card::NoSuit, 0);
+
+    card->setSkillName("_neo2013xiechan");
+    room->useCard(CardUseStruct(card, effect.from, effect.to), false);
+}
+
+class Neo2013Xiechan: public ZeroCardViewAsSkill{
+public:
+    Neo2013Xiechan(): ZeroCardViewAsSkill("neo2013xiechan"){
+        frequency = Limited;
+        limit_mark = "@neo2013xiechan";
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player){
+        return player->getMark("@neo2013xiechan") > 0;
+    }
+    
+    virtual const Card *viewAs() const{
+        return new Neo2013XiechanCard;
+    }
+};
+
 
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
@@ -1297,7 +1316,9 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
 
     General *neo2013_zhouyu = new General(this, "neo2013_zhouyu", "wu", 3);
     neo2013_zhouyu->addSkill(new Neo2013Fanjian);
+    neo2013_zhouyu->addSkill(new FakeMoveSkill("Neo2013Fanjian"));
     neo2013_zhouyu->addSkill("yingzi");
+    related_skills.insertMulti("neo2013fanjian", "#Neo2013Fanjian-fake-move");
 
     General *neo2013_sima = new General(this, "neo2013_simayi", "wei", 3);
     neo2013_sima->addSkill(new Neo2013Fankui);
@@ -1325,7 +1346,7 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
 
     General *neo2013_xuchu = new General(this, "neo2013_xuchu", "wei", 4);
     neo2013_xuchu->addSkill("neoluoyi");
-    neo2013_xuchu->addSkill("xiechan");
+    neo2013_xuchu->addSkill(new Neo2013Xiechan);
 
     General *neo2013_zhaoyun = new General(this, "neo2013_zhaoyun", "shu", 4);
     neo2013_zhaoyun->addSkill("longdan");

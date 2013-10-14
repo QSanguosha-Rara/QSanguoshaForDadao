@@ -41,6 +41,7 @@ class NeoFanjianCard: public SkillCard {
 public:
     Q_INVOKABLE NeoFanjianCard();
     virtual void onEffect(const CardEffectStruct &effect) const;
+    virtual void DifferentEffect(Room *, ServerPlayer *, ServerPlayer *) const;
 };
 
 class Neo2013XinzhanCard: public XinzhanCard{
@@ -50,12 +51,12 @@ public:
     Q_INVOKABLE Neo2013XinzhanCard();
 };
 
-class Neo2013FanjianCard: public SkillCard{
+class Neo2013FanjianCard: public NeoFanjianCard{
     Q_OBJECT
 
 public:
     Q_INVOKABLE Neo2013FanjianCard();
-    virtual void onEffect(const CardEffectStruct &effect) const;
+    virtual void DifferentEffect(Room *, ServerPlayer *, ServerPlayer *) const;
 };
 
 class Neo2013PujiCard: public SkillCard{
@@ -74,6 +75,14 @@ public:
     Q_INVOKABLE Neo2013FengyinCard();
     virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
     virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const;
+};
+
+class Neo2013XiechanCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE Neo2013XiechanCard();
+    virtual void onEffect(const CardEffectStruct &effect) const;
 };
 
 class AwaitExhausted: public TrickCard{
