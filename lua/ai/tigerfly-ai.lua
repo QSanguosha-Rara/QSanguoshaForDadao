@@ -1006,13 +1006,10 @@ function JS_Card(self) --选择一张手牌或装备区的牌
 	return card_id
 end
 
-function DoBeweak(self, flag, pilename, piles)
-flag = flag or "he"
-pilename = pilename or "zi"
-piles = piles or 2
-local _cards = self.player:getCards(flag):length()
-local _powers = self.player:getPile(pilename):length()
-return self:isWeak() and self.player:getHp() < 2 and (_cards < 4 or _powers <= piles)
+function DoBeweak(self)
+if self.player:getCards("h"):length() - self.player:getMaxCards() > 1 then return false end
+local _cards = self.player:getCards("he"):length()
+return self:isWeak() and self.player:getHp() < 2 and _cards < 4 
 end
 
 sgs.ai_compare_funcs.value_sha = function(a, b)
@@ -1022,7 +1019,7 @@ local jingshang={}
 jingshang.name="jingshang"
 table.insert(sgs.ai_skills,jingshang)
 jingshang.getTurnUseCard=function(self)
-	if DoBeweak(self) or self:needBear() or self.player:hasUsed("JingshangCard") then return nil end
+	if DoBeweak(self) or self:needBear() then return nil end
 	local card_id 
 	local cardc
 	local powers = self.player:getPile("zi")
@@ -1032,14 +1029,16 @@ jingshang.getTurnUseCard=function(self)
 		card_id = JS_Card(self)
 	end
 	if card_id then
-		cardc = sgs.Card_Parse(("@JingshangCard=%d"):format(card_id))
+		local cardstr = ("@JingshangCard=%d"):format(card_id)
+		cardc = sgs.Card_Parse(cardstr)
 	elseif not card_id and powers:length() > 1 then
-		cardc = sgs.Card_Parse(("@JingshangCard=."))
+		cardc = sgs.Card_Parse("@JingshangCard=.")
 	end
 	assert(cardc)
 	return cardc
 end
 sgs.ai_skill_use_func.JingshangCard = function(card,use,self)
+if self.player:hasUsed("JingshangCard") then return end
 self:sort(self.enemies, "defense")
 self:sort(self.friends_noself, math.random(0,1) == 0 and "threat" or "value_sha")
 local dingenemy = nil
@@ -1059,10 +1058,10 @@ return end
 end
 
 for _, friend in ipairs(self.friends_noself) do
-if not friend:isKongcheng() and self:needKongcheng(friend, true) and dingenemy and not enemy3:isKongcheng() then
+if not friend:isKongcheng() and self:needKongcheng(friend, true) and dingenemy and not dingenemy:isKongcheng() then
 use.card = card
-if use.to then use.to:append(enemy3) 
-use.to:append(dingfriend) end
+if use.to then use.to:append(dingenemy) 
+use.to:append(friend) end
 return end
 end
 
