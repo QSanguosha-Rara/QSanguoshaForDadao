@@ -898,19 +898,6 @@ sgs.ai_skill_invoke.yongjie = function(self, data)
 	return false
 end
 
-sgs.ai_skill_discard.fuji = function(self)
-	local victim = self.player:getTag("fujiplayer"):toPlayer()
-	if self:isEnemy(victim) and self:slashIsEffective(sgs.Sanguosha:cloneCard("Slash", sgs.Card_NoSuit, 0), victim) then
-		local to_discard = self:askForDiscard("dummyreason", 1, 1, false, true)
-		if to_discard ~= {} then
-			self.room:getThread():delay()
-		end
-		return to_discard
-	end
-	return {}
-end
-
-
 sgs.ai_skill_use["@@shangjian"]=function(self, prompt)
 	local cards = sgs.QList2Table(self.player:getHandcards())
 	local maxs = self.player:getMaxCards()
