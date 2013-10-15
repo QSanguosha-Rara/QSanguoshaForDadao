@@ -1106,13 +1106,13 @@ end
 sgs.ai_skill_playerchosen["huaiju-rob"] = function(self, targets)
 	targets = sgs.QList2Table(targets)
 	self:sort(targets, "defense")
+	local friends = self:getFriendsNoself()
+	if #friends == 0 and self.player:getPile("ju"):length() == 2 then return nil end
 	for _, tar in ipairs(targets) do
-		if tar:isKongcheng() then continue end
-		if self:isFriend(tar) then 
-			if self:doNotDiscard(tar, "h") then return tar end
-		elseif self:isEnemy(tar) then 
-			if not self:doNotDiscard(tar, "h") then return tar end
-		end
+		if self:isFriend(tar) and not tar:isKongcheng() and self:doNotDiscard(tar, "h") then return tar end
+	end
+	for _, tar in ipairs(targets) do
+		if self:isEnemy(tar) and not tar:isKongcheng() and not self:doNotDiscard(tar, "h") then return tar end
 	end
 	return nil
 end
@@ -1123,6 +1123,9 @@ sgs.ai_skill_playerchosen["huaiju-give"] = function(self, targets)
 	self:sort(targets, "defense")
 	for _, tar in ipairs(targets) do
 		if self:isFriend(tar) then return tar end
+	end
+	for _, tar in ipairs(targets) do
+		if self:isEnemy(tar) and self:doNotDiscard(tar, "h") then return tar end
 	end
 	return targets[1]
 end
