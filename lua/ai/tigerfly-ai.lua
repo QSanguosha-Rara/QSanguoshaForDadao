@@ -1188,3 +1188,19 @@ elseif #cards > 2 then to_id = cards[math.random(1,2)]:getEffectiveId() end
 local discard = {to_id}
 return discard 
 end
+
+
+function sgs.ai_cardsview_valuable.chanyu(self, class_name, player)
+	if class_name == "Nullification" then
+		local nullnum = 0 
+		for _,idx in sgs.qlist(player:handCards()) do
+			local card = sgs.Sanguosha:getCard(idx)
+			if card and card:objectName() == "nullification" then nullnum = nullnum + 1 end
+		end
+		if nullnum > 0 then return nil end
+		if player:getHp() > 3 and player:getEquips():isEmpty() then return nil end
+		local null = sgs.Sanguosha:cloneCard("nullification")
+		if player:isLocked(null) then return nil end
+		return "@ChanyuCard=."
+	end
+end
