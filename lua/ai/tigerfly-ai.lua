@@ -1165,3 +1165,26 @@ sgs.ai_skill_use["@@xingsuan"]=function(self, prompt)
 	return "."
 end
 sgs.ai_chaofeng.luji = 0.5
+
+
+sgs.ai_skill_discard.fuji = function(self, discard_num, min_num, optional, include_equip)
+local source = self.room:getTag("fujiplayer"):toPlayer()
+if not source then return {} end
+if self:isFriend(source) and not self:getDamagedEffects(from, self.player) then return {} end
+if self:isFriend(source) and self:isWeak(source) then return {} end
+if self:isEnemy(source) and self:getDamagedEffects(from, self.player) and not self:isWeak(source) then return {} end
+if not self.player:canSlash(source, sgs.Sanguosha:cloneCard("slash"), false) then then return {} end
+if not self:slashIsEffective(sgs.Sanguosha:cloneCard("slash"), source) then then return {} end
+if self:needToThrowArmor() then return {self.player:getArmor():getId()} end
+local to_id
+local flag = "h" 
+if self:hasSkills(sgs.lose_equip_skill, self.player) or self:doNotDiscard(self.player, "e") then local flag = "he" end
+local cards = sgs.QList2Table(self.player:getCards(flag))
+if #cards < discard_num then return {} end
+self:sortByCardNeed(cards)
+if cards[1]:isKindOf("Peach") and self.player:isWounded() then return {} end  
+if #cards > 0 and #cards <= 2 then to_id = cards[1]:getEffectiveId()
+elseif #cards > 2 then to_id = cards[math.random(1,2)]:getEffectiveId() end
+local discard = {to_id}
+return discard 
+end
