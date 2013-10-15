@@ -85,6 +85,16 @@ public:
     virtual void onEffect(const CardEffectStruct &effect) const;
 };
 
+/*
+class Neo2013TongwuCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE Neo2013TongwuCard();
+
+};
+*/
+
 class AwaitExhausted: public TrickCard{
     Q_OBJECT
 

@@ -1359,6 +1359,211 @@ public:
     }
 };
 
+class Neo2013Xiangxue: public PhaseChangeSkill{
+public:
+    Neo2013Xiangxue(): PhaseChangeSkill("neo2013xiangxue"){
+        frequency = Wake;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() != Player::Start)
+            return false;
+
+        Room *room = target->getRoom();
+        bool invoke = true;
+        foreach (ServerPlayer *p, room->getOtherPlayers(target))
+            if (p->getHandcardNum() >= target->getHandcardNum()){
+                invoke = false;
+                break;
+            }
+
+        if (!invoke)
+            return false;
+
+        room->broadcastSkillInvoke(objectName());
+        room->doLightbox("$neo2013xiangxue");
+        
+        if (room->changeMaxHpForAwakenSkill(target)){
+            room->setPlayerMark(target, objectName(), 1);
+            room->drawCards(target, 2);
+            QStringList l;
+            l << "neo2013tongwu" << "neo2013bingyin";
+            room->handleAcquireDetachSkills(target, l);
+        }
+        return false;
+    }
+};
+
+class Neo2013TongwuVS: public ViewAsSkill{
+public:
+    Neo2013TongwuVS(): ViewAsSkill("neo2013tongwu"){
+
+    }
+
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        if (Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY 
+                || (Sanguosha->currentRoomState()->getCurrentCardUsePattern() == "slash" 
+                && Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE_USE))
+            return selected.isEmpty() && to_select->isNDTrick();
+        else if (Sanguosha->currentRoomState()->getCurrentCardUsePattern() == "@@neo2013tongwu")
+            return false;
+
+        return false;
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        if (Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY 
+                || (Sanguosha->currentRoomState()->getCurrentCardUsePattern() == "slash" 
+                && Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE_USE)){
+            if (cards.length() == 0)
+                return NULL;
+            Slash *slash = new Slash(cards[0]->getSuit(), cards[0]->getNumber());
+            slash->setSkillName(objectName());
+            slash->addSubcards(cards);
+            return slash;
+        }
+        else if (Sanguosha->currentRoomState()->getCurrentCardUsePattern() == "@@neo2013tongwu"){
+            const Card *card = Sanguosha->getCard(Self->property("tongwucard").toInt());
+            Card *card_to_use = Sanguosha->cloneCard(card->objectName(), Card::NoSuit, 0);
+            card_to_use->setSkillName(objectName());
+            return card_to_use;
+        }
+
+        return NULL;
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return Slash::IsAvailable(player);
+    }
+
+    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
+        return (pattern == "slash" && Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE_USE)
+            || (pattern == "@@neo2013tongwu");
+    }
+};
+
+class Neo2013Tongwu: public TriggerSkill{
+public:
+    Neo2013Tongwu(): TriggerSkill("neo2013tongwu"){
+        view_as_skill = new Neo2013TongwuVS;
+        events << DamageDone << CardFinished;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+    
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == DamageDone){
+            DamageStruct damage = data.value<DamageStruct>();
+            if (damage.card && damage.card->isKindOf("Slash") && damage.card->getSkillName() == objectName())
+                room->setCardFlag(damage.card, "tongwucaninvoke");
+        }
+        else if (TriggerSkill::triggerable(player)){
+            CardUseStruct use = data.value<CardUseStruct>();
+            if (use.card && use.card->isKindOf("Slash") && use.card->hasFlag("tongwucaninvoke")){
+                room->setCardFlag(use.card, "-tongwucaninvoke");
+                const Card *card_to_use = Sanguosha->getCard(use.card->getSubcards().first());
+                if (card_to_use->isKindOf("Nullification"))
+                    return false;
+                else if (card_to_use->targetFixed()){
+                    if (!player->askForSkillInvoke(objectName(), QVariant::fromValue(card_to_use)))
+                        return false;
+                    room->useCard(CardUseStruct(card_to_use, player, QList<ServerPlayer *>()));
+                }
+                else {
+                    room->setPlayerProperty(player, "tongwucard", card_to_use->getId());
+                    room->askForUseCard(player, "@@neo2013tongwu", "@neo2013tongwu");
+                    room->setPlayerProperty(player, "tongwucard", QVariant());
+                }
+            }
+        }
+        return false;
+    }
+};
+
+class Neo2013Bingyin: public PhaseChangeSkill{
+public:
+    Neo2013Bingyin(): PhaseChangeSkill("neo2013bingyin"){
+        frequency = Wake;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() != Player::Finish)
+            return false;
+
+        Room *room = target->getRoom();
+        bool invoke = true;
+        foreach (ServerPlayer *p, room->getOtherPlayers(target))
+            if (p->getHp() < target->getHp()){
+                invoke = false;
+                break;
+            }
+
+        if (!invoke)
+            return false;
+
+        room->broadcastSkillInvoke(objectName());
+        room->doLightbox("$neo2013bingyin");
+
+        room->setPlayerMark(target, objectName(), 1);
+        QStringList l;
+        l << "neo2013touxi" << "neo2013muhui";
+        room->handleAcquireDetachSkills(target, l);
+
+        return false;
+    }
+
+};
+
+class Neo2013Touxi: public TriggerSkill{ //Player::getAttackRange()
+public:
+    Neo2013Touxi(): TriggerSkill("neo2013touxi"){
+        frequency = Compulsory;
+        events << CardFinished;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        CardUseStruct use = data.value<CardUseStruct>();
+        if (use.from == NULL || use.card == NULL || !use.card->isKindOf("Slash"))
+            return false;
+
+        foreach (ServerPlayer *p, use.to)
+            if (p->hasSkill(objectName()))
+                room->askForUseSlashTo(p, use.from, "@neo2013touxi-slash:" + use.from->objectName(), false);
+
+        return false;
+    }
+};
+
+class Neo2013Muhui: public ProhibitSkill{
+public:
+    Neo2013Muhui(): ProhibitSkill("neo2013muhui"){
+
+    }
+
+    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others /* = QList<const Player *> */) const{
+        return to->hasSkill(objectName()) && (!card->isKindOf("SkillCard") || card->isKindOf("GuhuoCard") || card->isKindOf("QiceCard") || card->isKindOf("GudanCard"));
+    }
+
+};
+
+class Neo2013MuhuiDis: public PhaseChangeSkill{
+public:
+    Neo2013MuhuiDis(): PhaseChangeSkill("#neo2013muhui"){
+
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() == Player::NotActive)
+            target->getRoom()->loseMaxHp(target);
+        return false;
+    }
+};
 
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
@@ -1453,12 +1658,23 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_caochong->addSkill(new Neo2013Chengxiang);
     neo2013_caochong->addSkill("renxin");
 
+    General *neo2013_lvmeng = new General(this, "neo2013_lvmeng", "wu", 5);
+    neo2013_lvmeng->addSkill("keji");
+    neo2013_lvmeng->addSkill(new Neo2013Xiangxue);
+    neo2013_lvmeng->addRelateSkill("neo2013tongwu");
+    neo2013_lvmeng->addRelateSkill("neo2013bingyin");
+    neo2013_lvmeng->addRelateSkill("neo2013touxi");
+    neo2013_lvmeng->addRelateSkill("neo2013muhui");
+    neo2013_lvmeng->addRelateSkill("#neo2013muhui");
+    related_skills.insertMulti("neo2013muhui", "#neo2013muhui");
+
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();
     addMetaObject<Neo2013FengyinCard>();
     addMetaObject<Neo2013YongyiCard>();
 
-    skills << new Neo2013HuileiDecrease << new Neo2013Huwei;
+    skills << new Neo2013HuileiDecrease << new Neo2013Huwei
+        << new Neo2013Tongwu << new Neo2013Bingyin << new Neo2013Touxi << new Neo2013Muhui << new Neo2013MuhuiDis;
 }
 
 ADD_PACKAGE(Ling2013)

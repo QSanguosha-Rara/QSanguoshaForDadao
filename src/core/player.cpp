@@ -156,6 +156,20 @@ void Player::clearFlags() {
 }
 
 int Player::getAttackRange(bool include_weapon) const{
+
+    if (hasSkill("neo2013touxi") && getPhase() == NotActive){
+        const Player *current = NULL;
+        foreach(const Player *p, getAliveSiblings()){
+            if (p->getPhase() != NotActive)
+                current = p;
+                break;
+            }
+        
+        if (current != NULL){
+            return current->getHp();
+        }
+    }
+
     int original_range = 1;
     if (hasSkill("zhengfeng") && !weapon && hp > 1) original_range = hp; // @todo_P: new way to remove coupling or just put it into TargetModSkill
     if (hasFlag("InfinityAttackRange") || getMark("InfinityAttackRange") > 0) original_range = 10000; // Actually infinity
