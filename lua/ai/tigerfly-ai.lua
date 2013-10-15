@@ -1006,13 +1006,10 @@ function JS_Card(self) --选择一张手牌或装备区的牌
 	return card_id
 end
 
-function DoBeweak(self, flag, pilename, piles)
-flag = flag or "he"
-pilename = pilename or "zi"
-piles = piles or 2
-local _cards = self.player:getCards(flag):length()
-local _powers = self.player:getPile(pilename):length()
-return self:isWeak() and self.player:getHp() < 2 and (_cards < 4 or _powers <= piles)
+function DoBeweak(self)
+if self.player:getCards("h"):length() - self.player:getMaxCards() > 1 then return false end
+local _cards = self.player:getCards("he"):length()
+return self:isWeak() and self.player:getHp() < 2 and _cards < 4 
 end
 
 sgs.ai_compare_funcs.value_sha = function(a, b)
@@ -1022,7 +1019,7 @@ local jingshang={}
 jingshang.name="jingshang"
 table.insert(sgs.ai_skills,jingshang)
 jingshang.getTurnUseCard=function(self)
-	if DoBeweak(self) or self:needBear() or self.player:hasUsed("JingshangCard") then return nil end
+	if DoBeweak(self) or self:needBear() then return nil end
 	local card_id 
 	local cardc
 	local powers = self.player:getPile("zi")
@@ -1032,14 +1029,16 @@ jingshang.getTurnUseCard=function(self)
 		card_id = JS_Card(self)
 	end
 	if card_id then
-		cardc = sgs.Card_Parse(("@JingshangCard=%d"):format(card_id))
+		local cardstr = ("@JingshangCard=%d"):format(card_id)
+		cardc = sgs.Card_Parse(cardstr)
 	elseif not card_id and powers:length() > 1 then
-		cardc = sgs.Card_Parse(("@JingshangCard=."))
+		cardc = sgs.Card_Parse("@JingshangCard=.")
 	end
 	assert(cardc)
 	return cardc
 end
 sgs.ai_skill_use_func.JingshangCard = function(card,use,self)
+if self.player:hasUsed("JingshangCard") then return end
 self:sort(self.enemies, "defense")
 self:sort(self.friends_noself, math.random(0,1) == 0 and "threat" or "value_sha")
 local dingenemy = nil
@@ -1059,10 +1058,10 @@ return end
 end
 
 for _, friend in ipairs(self.friends_noself) do
-if not friend:isKongcheng() and self:needKongcheng(friend, true) and dingenemy and not enemy3:isKongcheng() then
+if not friend:isKongcheng() and self:needKongcheng(friend, true) and dingenemy and not dingenemy:isKongcheng() then
 use.card = card
-if use.to then use.to:append(enemy3) 
-use.to:append(dingfriend) end
+if use.to then use.to:append(dingenemy) 
+use.to:append(friend) end
 return end
 end
 
@@ -1107,13 +1106,13 @@ end
 sgs.ai_skill_playerchosen["huaiju-rob"] = function(self, targets)
 	targets = sgs.QList2Table(targets)
 	self:sort(targets, "defense")
+	local friends = self:getFriendsNoself()
+	if #friends == 0 and self.player:getPile("ju"):length() == 2 then return nil end
 	for _, tar in ipairs(targets) do
-		if tar:isKongcheng() then continue end
-		if self:isFriend(tar) then 
-			if self:doNotDiscard(tar, "h") then return tar end
-		elseif self:isEnemy(tar) then 
-			if not self:doNotDiscard(tar, "h") then return tar end
-		end
+		if self:isFriend(tar) and not tar:isKongcheng() and self:doNotDiscard(tar, "h") then return tar end
+	end
+	for _, tar in ipairs(targets) do
+		if self:isEnemy(tar) and not tar:isKongcheng() and not self:doNotDiscard(tar, "h") then return tar end
 	end
 	return nil
 end
@@ -1124,6 +1123,9 @@ sgs.ai_skill_playerchosen["huaiju-give"] = function(self, targets)
 	self:sort(targets, "defense")
 	for _, tar in ipairs(targets) do
 		if self:isFriend(tar) then return tar end
+	end
+	for _, tar in ipairs(targets) do
+		if self:isEnemy(tar) and self:doNotDiscard(tar, "h") then return tar end
 	end
 	return targets[1]
 end
@@ -1163,3 +1165,123 @@ sgs.ai_skill_use["@@xingsuan"]=function(self, prompt)
 	return "."
 end
 sgs.ai_chaofeng.luji = 0.5
+
+
+sgs.ai_skill_discard.fuji = function(self, discard_num, min_num, optional, include_equip)
+local source = self.room:getTag("fujiplayer"):toPlayer()
+if not source then return {} end
+if self:isFriend(source) and not self:getDamagedEffects(source, self.player) then return {} end
+if self:isFriend(source) and self:isWeak(source) then return {} end
+if self:isEnemy(source) and self:getDamagedEffects(source, self.player) and not self:isWeak(source) then return {} end
+if not self.player:canSlash(source, sgs.Sanguosha:cloneCard("slash"), false) then return {} end
+if not self:slashIsEffective(sgs.Sanguosha:cloneCard("slash"), source) then return {} end
+if self:needToThrowArmor() then return {self.player:getArmor():getId()} end
+local to_id
+local flag = "h" 
+if self:hasSkills(sgs.lose_equip_skill, self.player) or self:doNotDiscard(self.player, "e") then local flag = "he" end
+local cards = sgs.QList2Table(self.player:getCards(flag))
+if #cards < discard_num then return {} end
+self:sortByCardNeed(cards)
+if cards[1]:isKindOf("Peach") and self.player:isWounded() then return {} end  
+if #cards > 0 and #cards <= 2 then to_id = cards[1]:getEffectiveId()
+elseif #cards > 2 then to_id = cards[math.random(1,2)]:getEffectiveId() end
+local discard = {to_id}
+return discard 
+end
+
+--[[function sgs.ai_cardsview_valuable.chanyu(self, class_name, player) 使用此技能导致程序退出
+	if class_name == "Nullification" then
+		local nullnum = 0 
+		for _,idx in sgs.qlist(player:handCards()) do
+			local card = sgs.Sanguosha:getCard(idx)
+			if card and card:objectName() == "nullification" then nullnum = nullnum + 1 end
+		end
+		if nullnum > 0 then return nil end
+		if player:getHp() > 3 and player:getEquips():isEmpty() then return nil end
+		local null = sgs.Sanguosha:cloneCard("nullification")
+		if player:isLocked(null) then return nil end
+		return "@ChanyuCard=."
+	end
+end]]
+
+sgs.ai_skill_use["@@suoshi"]=function(self, prompt)
+	if self:isWeak() then return "." end
+	local list = self.player:property("suoshitarget"):toString():split("+")
+	local targets = {}
+	local stargets = {}
+	for _,name in ipairs(list) do table.insert(targets, findPlayerByObjectName(self.room, name)) end
+	local enemy
+	local friend
+	local tox
+	self:sort(targets, "chaofeng")
+	for _,player in ipairs(targets) do 
+		if self:isFriend(player) then friend = player break end
+	end
+	for _,player in ipairs(targets) do 
+		if not self:isFriend(player) then enemy = player break end
+	end
+	for _,p in sgs.qlist(self.room:getOtherPlayers(self.player)) do 
+		if not table.contains(list, p:objectName()) then table.insert(stargets, p) end
+	end	
+	local cards = sgs.QList2Table(self.player:getCards("h"))
+	self:sortByKeepValue(cards)
+	local toy
+	local cardid = cards[2]:getEffectiveId() or cards[1]:getEffectiveId()
+	if friend then 
+		for _,player in ipairs(stargets) do 
+			if self:isFriend(player) and not self:isWeak(player) and self:getDamagedEffects(player, self.player) then
+				return "@SuoshiCard="..cardid.."->"..player:objectName() 
+			end 
+		end
+	end
+	local willsave = false
+	if enemy then 
+		for _, askill in sgs.qlist(enemy:getVisibleSkillList()) do
+			if sgs.ai_slash_prohibit[askill:objectName()] then willsave = true end
+		end	
+		if self.role == "rebel" then 
+			for _,player in ipairs(stargets) do 
+				if not self:isFriend(player) and player:isLord() and not self:getDamagedEffects(player, self.player) and not cards[1]:isKindOf("Peach") then
+					return "@SuoshiCard="..cards[1]:getEffectiveId().."->"..player:objectName() 
+				end
+			end
+			for _,player in ipairs(stargets) do 
+				if not self:isFriend(player) and player:isLord() and self:isWeak(enemy) and not cards[1]:isKindOf("Peach") then
+					return "@SuoshiCard="..cards[1]:getEffectiveId().."->"..player:objectName() 
+				end
+			end
+		elseif self.role == "loyalist" then 
+			for _,player in ipairs(stargets) do 
+				if self:isFriend(player) or player:isLord() and self:isWeak(enemy) and not self:isWeak(player) and self:getDamagedEffects(player, self.player) then
+					return "@SuoshiCard="..cardid.."->"..player:objectName() 
+				end
+			end
+		else
+			for _,player in ipairs(stargets) do 
+				if not player then continue end
+				if willsave and self:isEnemy(player) and not self:getDamagedEffects(player, self.player) and self:cardNeed(cards[1]) < 7 and not cards[1]:isKindOf("Peach")then
+					return "@SuoshiCard="..cards[1]:getEffectiveId().."->"..player:objectName() 
+				end 
+			end
+			for _,player in ipairs(stargets) do 
+				if willsave and not self:isEnemy(player) and self:getDamagedEffects(player, self.player) and self:cardNeed(cards[1]) <= 7 then
+					return "@SuoshiCard="..cardid.."->"..player:objectName() 
+				end 
+			end
+		end	
+		if self:getDamagedEffects(enemy, self.player) then
+			for _,player in ipairs(stargets) do 
+				if self:canAttack(enemy, player) and player:hasSkill("jueqing") and self:isFriend(player) and self:cardNeed(cards[1]) <= 7 then
+					return "@SuoshiCard="..cardid.."->"..player:objectName() 
+				end 
+			end
+			for _,player in ipairs(stargets) do 
+				if self:canAttack(enemy, player) and player:hasSkill("jueqing") and self:isEnemy(player) and self:cardNeed(cards[1]) <= 6 and not cards[1]:isKindOf("Peach") then
+					return "@SuoshiCard="..cards[1]:getEffectiveId().."->"..player:objectName() 
+				end 
+			end
+		end
+		return "."
+	end
+	return "."
+end
