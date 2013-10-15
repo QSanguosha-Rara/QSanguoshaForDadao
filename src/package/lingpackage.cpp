@@ -1365,6 +1365,10 @@ public:
         frequency = Wake;
     }
 
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return PhaseChangeSkill::triggerable(target) && target->getMark(objectName()) == 0;
+    }
+
     virtual bool onPhaseChange(ServerPlayer *target) const{
         if (target->getPhase() != Player::Start)
             return false;
@@ -1486,6 +1490,10 @@ class Neo2013Bingyin: public PhaseChangeSkill{
 public:
     Neo2013Bingyin(): PhaseChangeSkill("neo2013bingyin"){
         frequency = Wake;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return PhaseChangeSkill::triggerable(target) && target->getMark(objectName()) == 0;
     }
 
     virtual bool onPhaseChange(ServerPlayer *target) const{
