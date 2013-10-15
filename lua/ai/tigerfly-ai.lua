@@ -1272,3 +1272,91 @@ sgs.ai_skill_use["@@suoshi"]=function(self, prompt)
 	end
 	return "."
 end
+
+
+sgs.ai_skill_choice.kuxing = function(self, choices, data)
+	local damage = data:toDamage()
+	local from = damage.from
+	if self:isFriend(from) then 
+		if from:getPhase() ~= sgs.Player_NotActive then return "draw" end
+		if from:getPhase() == sgs.Player_NotActive and not self:needKongcheng(from, true) then return "draw" end
+		if not self:doNotDiscard(self.player) then return "draw" end
+		return "discard" 
+	else
+		if from:getPhase() == sgs.Player_NotActive and self:needKongcheng(from, true) then return "draw" end
+		if self:isWeak(from) and not self:isWeak() then return "discard" end
+		if self.player:getHandcardNum() > 4 and self.player:getEquips():isEmpty() then return "discard" end
+		if self.player:getHandcardNum() > 4 and self.player:getEquips():length() > 1 then return "discard" end
+		if self:doNotDiscard(self.player) then return "discard" else return "draw" end
+	end
+	local choice_table = choices:split("+")	
+	return choice_table[math.random(1, #choice_table)] 
+end
+
+sgs.ai_skill_invoke.baozheng = function(self)
+	if self.player:getMark("@baozheng") <= 0 then return end
+	if self:isWeak() and self:getCardsNum("Peach") == 0 then return true end
+	local lord = self.room:getLord()
+	if self.role == "loyalist" and (sgs.isLordInDanger() or (lord and self:isWeak(lord))) then return end
+	if sgs.turncount == 0 then return false end
+	local value = 0
+	for _, player in sgs.qlist(self.room:getOtherPlayers(self.player)) do
+		if self:isFriend(player) then value = value - getFenchengValue(self, player)
+		elseif self:isEnemy(player) then value = value + getFenchengValue(self, player) end
+	end
+	if #self.friends_noself >= #self.enemies and value > 0 then return true end
+	for _,enemy in ipairs(self.enemies) do
+		if enemy:getWeapon() and enemy:getWeapon():isKindOf("Crossbow") and self:getCardsNum("Slash") > 1 then
+			return not self:willSkipPlayPhase() 
+		elseif self.player:getWeapon() and self.player:getWeapon():isKindOf("Crossbow") and self.player:inMyAttackRange(enemy) and self.player:canSlash(enemy) and self:getCardsNum("Slash") > 1 then
+			return not self:willSkipPlayPhase()
+		end
+	end
+	return false
+end	
+
+sgs.ai_skill_choice.baozheng = function(self, choices)
+	local lord = self.room:findPlayerBySkillName("baozheng")
+	if not lord then return "rob" end
+	if self:needToLoseHp(self.player, lord) or self:getDamagedEffects(self.player, lord) then return "damage" end
+	if self:isFriend(lord) then 
+		if self:getOverflow() >= 0 or self:doNotDiscard(self.player) then return "rob" end
+		if not self:damageIsEffective(self.player, sgs.DamageStruct_Normal, lord) then return "damage" end
+		return "rob" 
+	else
+		if not self:damageIsEffective(self.player, sgs.DamageStruct_Normal, lord) then return "damage" end
+		if self:doNotDiscard(self.player) then return "rob" end
+		if self.player:getDefensiveHorse() and not self:isWeak() then return "damage" end
+		if (self:getOverflow() > 1 and self.player:getEquips():length() > 1) then return "rob" end
+		if self.player:getHp() > 3 and not self.player:isKongcheng() then return "damage" end
+		if self:isWeak(lord) and not self:isWeak() and self.player:getHp() >= 3 then return "damage" end
+	end
+	return "rob"
+end
+
+
+sgs.ai_skill_choice.zongjiu = function(self, choices)
+	local lord 
+	if self.room:getLord() and self.room:getLord():hasSkill("zongjiu") then lord = self.room:getLord() end
+	if not lord or self:isEnemy(lord) then return "cancel" end
+	if self:needToLoseHp(self.player, lord) or self:getDamagedEffects(self.player, lord) then return "damage" end
+	if self:getOverflow() > 0 or self:doNotDiscard(self.player) then return "rob" end
+	if not self:damageIsEffective(self.player, sgs.DamageStruct_Normal, lord) then return "damage" end
+	if (self.player:getHandcardNum() > 7 and not self:isWeak()) or self.player:getHandcardNum() > 10 then return "rob" end
+	if self:hasSkills(sgs.lose_equip_skill) and not self.player:getEquips():isEmpty() then return "rob" end
+	return "cancel"
+end
+
+
+function sgs.ai_cardsview.zongjiu(self, class_name, player)
+	if class_name == "Analeptic" and player:hasLordSkill("zongjiu") and not player:hasFlag("Global_ZongjiuFailed") and not player:hasUsed("ZongjiuCard") then
+		if sgs.Sanguosha:getCurrentCardUseReason() == sgs.CardUseStruct_CARD_USE_REASON_PLAY and player:getPhase() == sgs.Player_Play then 
+			return "@ZongjiuCard=.->."
+		end	
+	end
+end
+sgs.ai_skill_use_func.ZongjiuCard = function(card,use,self)
+	use.card = card 
+end
+sgs.dynamic_value.benefit.ZongjiuCard = true
+
