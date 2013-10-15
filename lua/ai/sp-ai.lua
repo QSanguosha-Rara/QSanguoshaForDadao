@@ -1095,13 +1095,6 @@ sgs.ai_card_intention.ZhoufuCard = 0
 sgs.ai_use_value.ZhoufuCard = 2
 sgs.ai_use_priority.ZhoufuCard = 1.0
 
-sgs.ai_skill_use["@@jisu"] = function(self, prompt)
-	local card_str = sgs.ai_skill_use["@@shensu1"](self, "@shensu1")
-	return string.gsub(card_str, "ShensuCard", "JisuCard")
-end
-
-sgs.ai_card_intention.JisuCard = sgs.ai_card_intention.Slash 
-
 sgs.ai_skill_invoke.cv_sunshangxiang = function(self, data)
 	local lord = self.room:getLord()
 	if lord and lord:hasLordSkill("shichou") then

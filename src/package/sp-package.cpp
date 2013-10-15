@@ -6,6 +6,7 @@
 #include "engine.h"
 #include "maneuvering.h"
 #include "wisdompackage.h"
+#include "settings.h"
 
 class SPMoonSpearSkill: public WeaponSkill {
 public:
@@ -1780,13 +1781,16 @@ void XintanCard::onEffect(const CardEffectStruct &effect) const {
     if (burn.length() == 2)
         subs = burn;
     else {
+        int aidelay = Config.AIDelay;
+        Config.AIDelay = 0;
         while (subs.length() < 2) {
             room->fillAG(burn, hanba);
             int id = room->askForAG(hanba, burn, false, objectName());
             subs << id;
             burn.removeOne(id);
             room->clearAG(hanba);
-        };
+        }
+        Config.AIDelay = aidelay;
     };
     CardsMoveStruct move;
     move.from = hanba;
