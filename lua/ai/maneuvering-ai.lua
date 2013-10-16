@@ -399,7 +399,7 @@ function SmartAI:isGoodChainTarget(who, source, nature, damagecount, slash)
 	
 	if slash and F_count == 1 and E_count == 1 and the_enemy and the_enemy:isKongcheng() and the_enemy:getHp() == 1 then
 		for _, c in ipairs(self:getCards("Slash")) do
-			if not c:isKindOf("NatureSlash") and self:slashProhibit(slash, the_enenmy, source) then return end
+			if not c:isKindOf("NatureSlash") and self:slashProhibit(slash, the_enemy, source) then return end
 		end
 	end
 	
