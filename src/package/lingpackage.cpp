@@ -1468,7 +1468,7 @@ public:
             if (use.card && use.card->isKindOf("Slash") && use.card->hasFlag("tongwucaninvoke")){
                 room->setCardFlag(use.card, "-tongwucaninvoke");
                 const Card *card_to_use = Sanguosha->getCard(use.card->getSubcards().first());
-                if (card_to_use->isKindOf("Nullification"))
+                if (!card_to_use->isAvailable(player))
                     return false;
                 else if (card_to_use->targetFixed()){
                     if (!player->askForSkillInvoke(objectName(), QVariant::fromValue(card_to_use)))
