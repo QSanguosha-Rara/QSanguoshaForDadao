@@ -777,7 +777,38 @@ bool Room::doBroadcastNotify(QSanProtocol::CommandType command, const Json::Valu
     return doBroadcastNotify(m_players, command, arg);
 }
 
+bool Room::doNotify(ServerPlayer *player, int command, const JsonArrayForLUA &arg) {
+/*
+    QSanGeneralPacket packet(S_SRC_ROOM | S_TYPE_NOTIFICATION | S_DEST_CLIENT, (QSanProtocol::CommandType)command);
+    Json::Reader reader;
+    Json::Value json_arg;
+    std::string str = arg.toStdString();
+    if (reader.parse(str, json_arg)) {
+        packet.setMessageBody(json_arg);
+        player->invoke(&packet);
+    } else {
+        output("Fail to parse the Json Value " + arg);
+    }
+    return true;
+*/
+    Json::Value realarg = arg;
+    QSanProtocol::CommandType realcommand = (QSanProtocol::CommandType)command;
+    doNotify(player, realcommand, realarg);
+    return true;
+}
+
+bool Room::doBroadcastNotify(const QList<ServerPlayer *> &players, int command, const JsonArrayForLUA &arg) {
+    foreach (ServerPlayer *player, players)
+        doNotify(player, command, arg);
+    return true;
+}
+
+bool Room::doBroadcastNotify(int command, const JsonArrayForLUA &arg) {
+    return doBroadcastNotify(m_players, command, arg);
+}
+
 // the following functions for Lua
+/*
 bool Room::doNotify(ServerPlayer *player, int command, const QString &arg) {
     QSanGeneralPacket packet(S_SRC_ROOM | S_TYPE_NOTIFICATION | S_DEST_CLIENT, (QSanProtocol::CommandType)command);
     Json::Reader reader;
@@ -801,6 +832,7 @@ bool Room::doBroadcastNotify(const QList<ServerPlayer *> &players, int command, 
 bool Room::doBroadcastNotify(int command, const QString &arg) {
     return doBroadcastNotify(m_players, command, arg);
 }
+*/
 
 void Room::broadcastInvoke(const char *method, const QString &arg, ServerPlayer *except) {
     // @@Compatibility

@@ -396,6 +396,35 @@ struct CardResponseStruct {
     bool m_isUse;
 };
 
+struct JsonArrayForLUA{
+    JsonArrayForLUA();
+
+    bool getBoolAt(int n);
+    int getNumberAt(int n);
+    QString getStringAt(int n);
+
+    void setBoolAt(int n, bool v);
+    void setNumberAt(int n, int v);
+    void setStringAt(int n, const QString &v);
+
+    inline operator Json::Value(){
+        return m_realvalue;
+    }
+    inline operator Json::Value() const{
+        return m_realvalue;
+    }
+    
+    inline Json::Value &operator [](int x){
+        return m_realvalue[x];
+    }
+    inline const Json::Value &operator [](int x) const{
+        return m_realvalue[x];
+    }
+
+private:
+    Json::Value m_realvalue;
+};
+
 enum TriggerEvent {
     NonTrigger,
 
@@ -508,5 +537,6 @@ Q_DECLARE_METATYPE(JudgeStar)
 Q_DECLARE_METATYPE(PindianStar)
 Q_DECLARE_METATYPE(PhaseChangeStruct)
 Q_DECLARE_METATYPE(CardResponseStruct)
+Q_DECLARE_METATYPE(JsonArrayForLUA)
 #endif
 

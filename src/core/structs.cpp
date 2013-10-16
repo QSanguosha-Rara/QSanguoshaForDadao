@@ -57,3 +57,30 @@ Json::Value CardMoveReason::toJsonValue() const{
     return result;
 }
 
+JsonArrayForLUA::JsonArrayForLUA(): m_realvalue(Json::Value(Json::arrayValue)){
+
+}
+
+bool JsonArrayForLUA::getBoolAt(int n){
+    return m_realvalue[n].asBool();
+}
+
+int JsonArrayForLUA::getNumberAt(int n){
+    return m_realvalue[n].asInt();
+}
+
+QString JsonArrayForLUA::getStringAt(int n){
+    return m_realvalue[n].asCString();
+}
+
+void JsonArrayForLUA::setBoolAt(int n, bool v){
+    m_realvalue[n] = v;
+}
+
+void JsonArrayForLUA::setNumberAt(int n, int v){
+    m_realvalue[n] = v;
+}
+
+void JsonArrayForLUA::setStringAt(int n, const QString &v){
+    m_realvalue[n] = toJsonString(v);
+}
