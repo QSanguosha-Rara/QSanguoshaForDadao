@@ -2216,6 +2216,9 @@ public:
             if (!player->askForSkillInvoke(objectName(), QVariant::fromValue(damage)))
                 break;
 
+            room->broadcastSkillInvoke(objectName());
+            room->notifySkillInvoked(player, objectName());
+
             QList<int> to_show = room->getNCards(2, false);
 
             CardsMoveStruct move(to_show, NULL, Player::PlaceTable, 
