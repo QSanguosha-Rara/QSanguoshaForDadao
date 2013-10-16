@@ -2151,6 +2151,7 @@ public:
             QString choice = "discard";
             if (!xin->isKongcheng())
                 choice = room->askForChoice(xin, objectName(), "discard+put", _data);
+            room->notifySkillInvoked(xin, objectName());
             if (choice == "discard"){
                 if (room->askForDiscard(xin, objectName() + "-discard", 1, 1, true, true, "@mingjian-discard")){
                     room->broadcastSkillInvoke(objectName(), 1);
