@@ -1036,8 +1036,12 @@ if fr and not fr:isKongcheng() and fr:isAlive() then dingenemy = fr break end
 end
 
 for _, enemy3 in ipairs(self.enemies) do
+local max1 = self:getMaxCard(dingfriend)
+local max2 = self:getMaxCard(enemy3)
+local enemy_max_point = max2 and max2:getNumber() or 13
+if not max1 then return end
 if dingfriend and not dingfriend:isKongcheng() and not enemy3:isKongcheng() 
-and self:getMaxCard(dingfriend):getNumber() > self:getMaxCard(enemy3):getNumber() then
+and self:getMaxCard(dingfriend):getNumber() > enemy_max_point then
 use.card = card
 if use.to then use.to:append(enemy3) 
 use.to:append(dingfriend) end
@@ -1074,7 +1078,14 @@ sgs.ai_use_priority.JingshangCard = sgs.ai_use_priority.Slash + 0.5
 
 sgs.card_ids_length = 0
 
-sgs.ai_skill_askforag.zijun = sgs.ai_skill_askforag.annei
+sgs.ai_skill_askforag.zijun = function(self, card_ids)
+	local cards = {}
+	for _, card_id in ipairs(card_ids) do
+		table.insert(cards, sgs.Sanguosha:getCard(card_id))
+	end
+	self:sortByCardNeed(cards)
+	return cards[1]:getEffectiveId()
+end
 
 sgs.ai_skill_choice.zijun = function(self, choices, data)
 	local aim = data:toPlayer()
