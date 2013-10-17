@@ -1025,103 +1025,6 @@ public:
 
 };
 
-Neo2013FengyinCard::Neo2013FengyinCard(): SkillCard(){
-    will_throw = false;
-    handling_method = Card::MethodNone;
-}
-
-bool Neo2013FengyinCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    return targets.length() == 0 && to_select->hasFlag("Neo2013FengyinTarget");
-}
-
-void Neo2013FengyinCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
-    ServerPlayer *target = targets[0];
-    target->obtainCard(this, true);
-    target->skip(Player::Play);
-    target->skip(Player::Discard);
-    source->drawCards(1);
-}
-
-class Neo2013FengyinVS: public OneCardViewAsSkill{
-public:
-    Neo2013FengyinVS(): OneCardViewAsSkill("neo2013fengyin"){
-        response_pattern = "@@neo2013fengyin";
-        filter_pattern = "Slash,EquipCard";
-    }
-
-    virtual const Card *viewAs(const Card *originalCard) const{
-        Neo2013FengyinCard *card = new Neo2013FengyinCard;
-        card->addSubcard(originalCard);
-        return card;
-    }
-};
-
-
-class Neo2013Fengyin: public TriggerSkill{
-public:
-    Neo2013Fengyin(): TriggerSkill("neo2013fengyin"){
-        events << EventPhaseChanging;
-        view_as_skill = new Neo2013FengyinVS;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL;
-    }
-
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        ServerPlayer *splayer = room->findPlayerBySkillName(objectName());
-        if (splayer == NULL || splayer == player)
-            return false;
-
-        if (player->getHp() >= splayer->getHp())
-            room->askForUseCard(splayer, "@@neo2013fengyin", "@neo2013fengyin", -1, Card::MethodNone);
-
-        return false;
-    }
-};
-
-class Neo2013Chizhong: public MaxCardsSkill{
-public:
-    Neo2013Chizhong(): MaxCardsSkill("neo2013chizhong"){
-
-    }
-
-    virtual int getFixed(const Player *target) const{
-        return target->hasSkill(objectName()) ? target->getMaxHp() : -1;
-    }
-};
-
-class Neo2013ChizhongTr: public TriggerSkill{
-public:
-    Neo2013ChizhongTr(): TriggerSkill("#neo2013chizhong"){
-        events << Death;
-    }
-
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        DeathStruct Death = data.value<DeathStruct>();
-        if (Death.who != player){
-            int maxhp = player->getMaxHp();
-            room->setPlayerProperty(player, "maxhp", maxhp + 1);
-            //room->broadcastProperty(player, "maxhp");
-            RecoverStruct recover;
-            recover.who = player;
-            room->recover(player, recover);
-        }
-        return false;
-    }
-};
-
-class Neo2013Cangni: public ProhibitSkill{
-public:
-    Neo2013Cangni(): ProhibitSkill("neo2013cangni"){
-
-    }
-
-    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others) const{
-        return from != to && card->isKindOf("TrickCard") && to->hasSkill(objectName()) && from->inMyAttackRange(to);
-    }
-};
-
 class Neo2013Duoshi: public OneCardViewAsSkill{
 public:
     Neo2013Duoshi(): OneCardViewAsSkill("neo2013duoshi"){
@@ -2025,16 +1928,6 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_guanping = new General(this, "neo2013_guanping", "shu", 4);
     neo2013_guanping->addSkill(new Neo2013Longyin);
 
-    General *neo2013_fuwan = new General(this, "neo2013_fuwan", "qun", 3);
-    neo2013_fuwan->addSkill(new Neo2013Fengyin);
-    neo2013_fuwan->addSkill(new Neo2013Chizhong);
-    neo2013_fuwan->addSkill(new Neo2013ChizhongTr);
-    related_skills.insertMulti("neo2013chizhong", "#neo2013chizhong");
-
-    General *neo2013_fuhh = new General(this, "neo2013_fuhuanghou", "qun", 3);
-    neo2013_fuhh->addSkill(new Neo2013Cangni);
-    neo2013_fuhh->addSkill("mixin");
-
     General *neo2013_luxun = new General(this, "neo2013_luxun", "wu", 3);
     neo2013_luxun->addSkill(new Neo2013Duoshi);
     neo2013_luxun->addSkill("qianxun");
@@ -2084,7 +1977,6 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
 
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();
-    addMetaObject<Neo2013FengyinCard>();
     addMetaObject<Neo2013YongyiCard>();
     addMetaObject<Neo2013XiongyiCard>();
     addMetaObject<Neo2013ZhoufuCard>();

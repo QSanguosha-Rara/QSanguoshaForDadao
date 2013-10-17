@@ -29,7 +29,6 @@ config = {
 		"YJCM",
 		"YJCM2012",
 		"YJCM2013",
-		"Assassins", 
 		"Special3v3",
 		"Special1v1",
 		"Special1v1OL",
@@ -50,6 +49,7 @@ config = {
 		"NostalWind",
 		"NostalYJCM",
 		"NostalYJCM2012",
+		"NostalOther" ,
 		"Yitian",
 		"Wisdom",
 		"Chaos",
@@ -265,6 +265,6 @@ config = {
 		"zhouyu->heg_zhouyu|sp_heg_zhouyu",
 		"zhugeke->diy_zhugeke",
 		"zhugeliang->heg_zhugeliang|tw_zhugeliang" ,
-		"fuwan->as_mushun" ,
+		"fuwan->neo_mushun" ,
 	}
 }

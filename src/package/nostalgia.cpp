@@ -1264,6 +1264,309 @@ public:
     }
 };
 
+
+NosMixinCard::NosMixinCard(){
+    will_throw = false;
+    mute = true;
+    handling_method = Card::MethodNone;
+}
+
+bool NosMixinCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return targets.isEmpty() && to_select != Self;
+}
+
+void NosMixinCard::onEffect(const CardEffectStruct &effect) const{
+    ServerPlayer *source = effect.from;
+    ServerPlayer *target = effect.to;
+    Room *room = source->getRoom();
+    room->broadcastSkillInvoke("mixin", 1);
+    target->obtainCard(this, false);
+    QList<ServerPlayer *> others;
+    foreach(ServerPlayer *p, room->getOtherPlayers(target))
+        if(target->canSlash(p, NULL, false))
+            others << p;
+
+    if(others.isEmpty())
+        return;
+
+    ServerPlayer *target2 = room->askForPlayerChosen(source, others, "nosmixin");
+    LogMessage log;
+    log.type = "#CollateralSlash";
+    log.from = source;
+    log.to << target2;
+    room->sendLog(log);
+    if(room->askForUseSlashTo(target, target2, "#mixin", false)) {
+        room->broadcastSkillInvoke("mixin", 2);
+    }
+    else {
+        room->broadcastSkillInvoke("mixin", 3);
+        QList<int> card_ids = target->handCards();
+        room->fillAG(card_ids, target2);
+        int cdid = room->askForAG(target2, card_ids, false, "nosmixin");
+        room->obtainCard(target2, cdid, false);
+        room->clearAG(target2);
+    }
+    return;
+}
+
+class NosMixin:public OneCardViewAsSkill{
+public:
+    NosMixin():OneCardViewAsSkill("nosmixin"){
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("NosMixinCard");
+    }
+
+    virtual bool viewFilter(const Card *card) const{
+        return !card->isEquipped();
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        NosMixinCard *card = new NosMixinCard;
+        card->addSubcard(originalCard);
+        return card;
+    }
+};
+
+
+class NosCangni: public TriggerSkill{
+public:
+    NosCangni():TriggerSkill("noscangni"){
+        events << EventPhaseStart << CardsMoveOneTime;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if(triggerEvent == EventPhaseStart && player->getPhase() == Player::Discard && player->askForSkillInvoke(objectName())) {
+            QStringList choices;
+            choices << "draw";
+            if(player->isWounded())
+                choices << "recover";
+
+            QString choice;
+            if(choices.size() == 1)
+                choice = choices.first();
+            else
+                choice = room->askForChoice(player, objectName(), choices.join("+"));
+
+            if(choice == "recover") {
+                RecoverStruct recover;
+                recover.who = player;
+                room->recover(player, recover);
+            }
+            else
+                player->drawCards(2);
+
+            room->broadcastSkillInvoke("noscangni", 1);
+            player->turnOver();
+            return false;
+        }
+        else if(triggerEvent == CardsMoveOneTime && !player->faceUp()) {
+            if(player->getPhase() != Player::NotActive)
+                return false;
+
+            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+            ServerPlayer *target = room->getCurrent();
+            if(target->isDead())
+                return false;
+
+            if(move.from == player && move.to != player) {
+                bool invoke = false;
+                for(int i = 0; i < move.card_ids.size(); i++)
+                    if(move.from_places[i] == Player::PlaceHand || move.from_places[i] == Player::PlaceEquip) {
+                        invoke = true;
+                        break;
+                    }
+
+                    room->setPlayerFlag(player, "cangnilose");    //for AI
+
+                    if(invoke && !target->isNude() && player->askForSkillInvoke(objectName())) {
+                        room->broadcastSkillInvoke("noscangni", 3);
+                        room->askForDiscard(target, objectName(), 1, 1, false, true);
+                    }
+
+                    room->setPlayerFlag(player, "-cangnilose");    //for AI
+
+                    return false;
+            }
+
+            if(move.to == player && move.from != player)
+                if(move.to_place == Player::PlaceHand || move.to_place == Player::PlaceEquip){
+                    room->setPlayerFlag(player, "cangniget");    //for AI
+
+                    if(!target->hasFlag("cangni_used") && player->askForSkillInvoke(objectName())) {
+                        room->setPlayerFlag(target, "cangni_used");
+                        room->broadcastSkillInvoke("noscangni", 2);
+                        target->drawCards(1);
+                    }
+
+                    room->setPlayerFlag(player, "-cangniget");    //for AI
+                }
+        }
+
+        return false;
+    }
+};
+
+NosFengyinCard::NosFengyinCard(){
+    target_fixed = true;
+    will_throw = false;
+    mute = true;
+    handling_method = Card::MethodNone;
+}
+
+void NosFengyinCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const{
+    ServerPlayer *target = room->getCurrent();
+    target->obtainCard(this);
+    room->broadcastSkillInvoke("nosfengyin");
+    room->setPlayerFlag(target, "nosfengyin_target");
+}
+
+class NosFengyinViewAsSkill:public OneCardViewAsSkill{
+public:
+    NosFengyinViewAsSkill():OneCardViewAsSkill("nosfengyin"){
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return false;
+    }
+
+    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
+        return pattern == "@@nosfengyin";
+    }
+
+    virtual bool viewFilter(const Card *card) const{
+        return card->isKindOf("Slash");
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        NosFengyinCard *card = new NosFengyinCard;
+        card->addSubcard(originalCard);
+        return card;
+    }
+};
+
+class NosFengyin:public TriggerSkill{
+public:
+    NosFengyin():TriggerSkill("nosfengyin"){
+        view_as_skill = new NosFengyinViewAsSkill;
+        events << EventPhaseChanging << EventPhaseStart;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        ServerPlayer *splayer = room->findPlayerBySkillName(objectName());
+        if(!splayer || splayer == player)
+            return false;
+
+        if(triggerEvent == EventPhaseChanging && data.value<PhaseChangeStruct>().to == Player::Start)
+            if(player->getHp() >= splayer->getHp())
+                room->askForUseCard(splayer, "@@nosfengyin", "@fengyin", -1, Card::MethodNone);
+
+        if(triggerEvent == EventPhaseStart && player->hasFlag("nosfengyin_target")){
+            player->skip(Player::Play);
+            player->skip(Player::Discard);
+        }
+
+        return false;
+    }
+};
+
+class NosChizhong: public MaxCardsSkill{
+public:
+    NosChizhong():MaxCardsSkill("noschizhong"){
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if(target->hasSkill(objectName()))
+            return target->getLostHp();
+        else
+            return 0;
+    }
+};
+
+class NosChizhongTr: public TriggerSkill{
+public:
+    NosChizhongTr():TriggerSkill("#noschizhong"){
+        events << Death << EventPhaseStart;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        ServerPlayer *splayer = room->findPlayerBySkillName(objectName());
+        if(!splayer)
+            return false;
+
+        if(triggerEvent == EventPhaseStart && splayer == player && player->getPhase() == Player::Discard) {
+            if(player->getHandcardNum() > player->getHp() && player->isWounded()){
+                LogMessage log;
+                log.type = "#Chizhong";
+                log.from = splayer;
+                log.arg = "noschizhong";
+                room->sendLog(log);
+                room->broadcastSkillInvoke("noschizhong", 1);
+            }
+            return false;
+        }
+
+        if(triggerEvent == Death && TriggerSkill::triggerable(player))
+        {
+            DeathStruct death = data.value<DeathStruct>();
+            if (death.who == player)
+                return false;
+
+            room->setPlayerProperty(splayer, "maxhp", splayer->getMaxHp()+1);
+            LogMessage log;
+            log.type = "#TriggerSkill";
+            log.from = splayer;
+            log.arg = "noschizhong";
+            room->sendLog(log);
+            room->broadcastSkillInvoke("noschizhong", 2);
+        }
+        return false;
+    }
+};
+
+
+//nos kongrong
+
+class NosMingshi: public TriggerSkill{
+public:
+    NosMingshi(): TriggerSkill("nosmingshi"){
+        events << DamageInflicted;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        DamageStruct damage = data.value<DamageStruct>();
+        if (damage.from != NULL && !damage.from->isKongcheng()){
+            room->broadcastSkillInvoke("mingshi");
+            if (room->askForChoice(damage.from, objectName(), "show+dismiss", data) == "show")
+                room->showAllCards(damage.from);
+            else {
+                LogMessage log;
+                log.type = "#Mingshi";
+                log.from = player;
+                log.arg = QString::number(damage.damage);
+                log.arg2 = QString::number(--damage.damage);
+                room->sendLog(log);
+
+                if (damage.damage < 1)
+                    return true;
+                data = QVariant::fromValue(damage);
+            }
+        }
+        return false;
+    }
+};
+
+
 NostalStandardPackage::NostalStandardPackage()
     : Package("nostal_standard")
 {
@@ -1354,9 +1657,29 @@ NostalYJCM2012Package::NostalYJCM2012Package()
     addMetaObject<NosJiefanCard>();
 }
 
+NostalOtherPackage::NostalOtherPackage(): Package("nostal_other"){
+
+    General *fuhuanghou = new General(this, "nos_as_fuhuanghou", "qun", 3, false);
+    fuhuanghou->addSkill(new NosMixin);
+    fuhuanghou->addSkill(new NosCangni);
+
+    General *fuwan = new General(this, "nos_as_fuwan", "qun", 3);
+    fuwan->addSkill(new NosFengyin);
+    fuwan->addSkill(new NosChizhong);
+    fuwan->addSkill(new NosChizhongTr);
+    related_skills.insertMulti("noschizhong", "#noschizhong");
+
+    General *nos_kongrong = new General(this, "nos_kongrong", "qun", 3);
+    nos_kongrong->addSkill(new NosMingshi);
+    nos_kongrong->addSkill("lirang");
+
+    addMetaObject<NosFengyinCard>();
+    addMetaObject<NosMixinCard>();
+}
+
 ADD_PACKAGE(Nostalgia)
 ADD_PACKAGE(NostalStandard)
 ADD_PACKAGE(NostalWind)
 ADD_PACKAGE(NostalYJCM)
 ADD_PACKAGE(NostalYJCM2012)
-
+ADD_PACKAGE(NostalOther)
