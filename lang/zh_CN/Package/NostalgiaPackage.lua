@@ -157,5 +157,12 @@ return {
 	["noschizhong"] = "持重",
 	[":noschizhong"] = "<font color=\"blue\"><b>锁定技，</b></font>你的手牌上限等于你的体力上限；其他角色死亡时，你加1点体力上限。",
 	["#Chizhong"] = " %from 受到【%arg】的影响，偷偷藏下了更多的手牌！",
+	
+	["nos_kongrong"] = "亮牌孔融" ,
+	["&nos_kongrong"] = "孔融" ,
+	["nosmingshi"] = "名士" ,
+	[":nosmingshi"] = "<b>锁定技</b>，每当你受到伤害时，若伤害来源有手牌，需展示所有手牌，否则此伤害-1。" ,
+	["nosmingshi:show"] = "展示所有手牌" ,
+	["nosmingshi:dismiss"] = "取消" ,
 
 }
