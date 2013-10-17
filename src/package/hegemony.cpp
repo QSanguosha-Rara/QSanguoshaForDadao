@@ -441,19 +441,23 @@ void XiongyiCard::onUse(Room *room, const CardUseStruct &card_use) const{
     if (!use.to.contains(use.from))
         use.to << use.from;
     room->removePlayerMark(use.from, "@arise");
-    room->broadcastSkillInvoke("xiongyi");
+    room->broadcastSkillInvoke(objectName());
     room->doLightbox("$XiongyiAnimate", 4500);
     SkillCard::onUse(room, use);
 }
 
 void XiongyiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
     foreach (ServerPlayer *p, targets)
-        p->drawCards(3);
+        p->drawCards(getDrawNum());
     if (targets.length() <= room->getAlivePlayers().length() / 2 && source->isWounded()) {
         RecoverStruct recover;
         recover.who = source;
         room->recover(source, recover);
     }
+}
+
+int XiongyiCard::getDrawNum() const{
+    return 3;
 }
 
 class Xiongyi: public ZeroCardViewAsSkill {
