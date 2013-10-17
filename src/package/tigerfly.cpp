@@ -2862,17 +2862,17 @@ TigerFlyPackage::TigerFlyPackage(): Package("tigerfly") {
     fuhuanghou->addSkill(new Mixin);
     fuhuanghou->addSkill(new Cangni);
 
-    General *jiben = new General(this, "jiben", "qun", 3);
-    jiben->addSkill(new Duyi);
-    jiben->addSkill(new Duanzhi);
-    jiben->addSkill(new FakeMoveSkill("duanzhi"));
-    related_skills.insertMulti("duanzhi", "#duanzhi-fake-move");
-
     General *fuwan = new General(this, "neo_fuwan", "qun", 3);
     fuwan->addSkill(new Fengyin);
     fuwan->addSkill(new Chizhong);
     fuwan->addSkill(new ChizhongTr);
     related_skills.insertMulti("chizhong", "#chizhong");
+
+    General *jiben = new General(this, "jiben", "qun", 3);
+    jiben->addSkill(new Duyi);
+    jiben->addSkill(new Duanzhi);
+    jiben->addSkill(new FakeMoveSkill("duanzhi"));
+    related_skills.insertMulti("duanzhi", "#duanzhi-fake-move");
 
     General *mushun = new General(this, "neo_mushun", "qun", 4, true, true);
     mushun->addSkill("moukui");
