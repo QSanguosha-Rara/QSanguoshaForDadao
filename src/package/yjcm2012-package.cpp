@@ -76,7 +76,7 @@ public:
     virtual bool onPhaseChange(ServerPlayer *target) const{
         Room *room = target->getRoom();
         if (target->getPhase() == Player::Finish && target->isWounded() && target->askForSkillInvoke(objectName())) {
-            room->broadcastSkillInvoke(objectName(), 1);
+            room->broadcastSkillInvoke(objectName());
             QStringList draw_num;
             for (int i = 1; i <= target->getLostHp(); draw_num << QString::number(i++)) {}
             int num = room->askForChoice(target, "miji_draw", draw_num.join("+")).toInt();
@@ -112,7 +112,6 @@ public:
                             break;
                     }
                 }
-                room->broadcastSkillInvoke(objectName(), 2);
             }
         }
         return false;
