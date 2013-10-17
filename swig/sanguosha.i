@@ -997,6 +997,18 @@ struct LogMessage {
     QString arg2;
 };
 
+struct JsonArrayForLUA{
+    JsonArrayForLUA();
+
+    bool getBoolAt(int n);
+    int getNumberAt(int n);
+    QString getStringAt(int n);
+
+    void setBoolAt(int n, bool v);
+    void setNumberAt(int n, int v);
+    void setStringAt(int n, const char *v);
+};
+
 class RoomThread: public QThread {
 public:
     explicit RoomThread(Room *room);
@@ -1193,9 +1205,10 @@ public:
     void addPlayerHistory(ServerPlayer *player, const char *key, int times = 1);
 
     void broadcastInvoke(const char *method, const char *arg = ".", ServerPlayer *except = NULL);
-    bool doNotify(ServerPlayer *player, int command, const char *arg);
-    bool doBroadcastNotify(int command, const char *arg);
-    bool doBroadcastNotify(const QList<ServerPlayer *> &players, int command, const char *arg);
+
+    bool doNotify(ServerPlayer *player, int command, const JsonArrayForLUA &arg);
+    bool doBroadcastNotify(int command, const JsonArrayForLUA &arg);
+    bool doBroadcastNotify(const QList<ServerPlayer *> &players, int command, const JsonArrayForLUA &arg);
 
     void updateStateItem();
     bool notifyProperty(ServerPlayer *playerToNotify, const ServerPlayer *propertyOwner, const char *propertyName, const char *value = NULL);
