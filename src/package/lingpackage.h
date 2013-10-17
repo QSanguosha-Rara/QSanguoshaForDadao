@@ -5,6 +5,7 @@
 #include "card.h"
 #include "standard.h"
 #include "yjcm-package.h"
+#include "hegemony.h"
 
 class LingPackage: public Package {
     Q_OBJECT
@@ -94,6 +95,23 @@ public:
 
 };
 */
+
+class Neo2013ZhoufuCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE Neo2013ZhoufuCard();
+
+    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+};
+class Neo2013XiongyiCard: public XiongyiCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE Neo2013XiongyiCard();
+    virtual int getDrawNum() const;
+};
 
 class AwaitExhausted: public TrickCard{
     Q_OBJECT

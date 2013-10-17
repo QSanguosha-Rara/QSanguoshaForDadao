@@ -485,8 +485,8 @@ public:
         }
     }
 };
-/*
 
+/*
 class Neo2013Xiezun: public MaxCardsSkill{
 public:
     Neo2013Xiezun(): MaxCardsSkill("neo2013xiezun"){
@@ -500,6 +500,7 @@ public:
 */ //temporily lay it aside
 //todo：在player::getMaxCards里加个参数，令其计算手牌上限时不考虑某技能
 
+/*
 class Neo2013RenWang: public TriggerSkill{
 public:
     Neo2013RenWang():TriggerSkill("neo2013renwang"){
@@ -579,6 +580,36 @@ public:
             }
             default:
                 Q_ASSERT(false);
+        }
+        return false;
+    }
+};
+*/
+
+class Neo2013Renwang: public TriggerSkill{
+public:
+    Neo2013Renwang(): TriggerSkill("neo2013renwang"){
+        events << CardUsed;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive() && target->getPhase() == Player::Play;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        CardUseStruct use = data.value<CardUseStruct>();
+        if (use.card->isKindOf("Slash") || use.card->isNDTrick()){
+            foreach(ServerPlayer *p, use.to){
+                if (TriggerSkill::triggerable(p)){
+                    if (!player->hasFlag(objectName()))
+                        room->setPlayerFlag(player, objectName());
+                    else if (p->canDiscard(player, "he") && p->askForSkillInvoke(objectName(), QVariant::fromValue(player))){
+                        int card_id = room->askForCardChosen(p, player, "he", objectName(), false, Card::MethodDiscard);
+
+                        room->throwCard(card_id, player, p);
+                    }
+                }
+            }
         }
         return false;
     }
@@ -1045,6 +1076,37 @@ public:
         if (player->getHp() >= splayer->getHp())
             room->askForUseCard(splayer, "@@neo2013fengyin", "@neo2013fengyin", -1, Card::MethodNone);
 
+        return false;
+    }
+};
+
+class Neo2013Chizhong: public MaxCardsSkill{
+public:
+    Neo2013Chizhong(): MaxCardsSkill("neo2013chizhong"){
+
+    }
+
+    virtual int getFixed(const Player *target) const{
+        return target->hasSkill(objectName()) ? target->getMaxHp() : -1;
+    }
+};
+
+class Neo2013ChizhongTr: public TriggerSkill{
+public:
+    Neo2013ChizhongTr(): TriggerSkill("#neo2013chizhong"){
+        events << Death;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        DeathStruct Death = data.value<DeathStruct>();
+        if (Death.who != player){
+            int maxhp = player->getMaxHp();
+            room->setPlayerProperty(player, "maxhp", maxhp + 1);
+            //room->broadcastProperty(player, "maxhp");
+            RecoverStruct recover;
+            recover.who = player;
+            room->recover(player, recover);
+        }
         return false;
     }
 };
@@ -1573,6 +1635,327 @@ public:
     }
 };
 
+Neo2013XiongyiCard::Neo2013XiongyiCard(): XiongyiCard(){
+    setObjectName("Neo2013XiongyiCard");
+}
+
+int Neo2013XiongyiCard::getDrawNum() const{
+    return 1;
+}
+
+class Neo2013Xiongyi: public ZeroCardViewAsSkill{
+public:
+    Neo2013Xiongyi(): ZeroCardViewAsSkill("neo2013xiongyi"){
+        frequency = Limited;
+        limit_mark = "@arise";
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return player->getMark("@arise") >= 1;
+    }
+
+    virtual const Card *viewAs() const{
+        return new Neo2013XiongyiCard;
+    }
+};
+
+class Neo2013Qijun: public TriggerSkill{
+public:
+    Neo2013Qijun(): TriggerSkill("neo2013qijun"){
+        events << EventPhaseStart << Damage;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        ServerPlayer *mateng = room->findPlayerBySkillName(objectName());
+
+        if (triggerEvent == EventPhaseStart){
+            if (player->getPhase() == Player::Play){
+                if (mateng == NULL || mateng->isDead())
+                    return false;
+
+                if (!mateng->canDiscard(mateng, "he"))
+                    return false;
+
+                if (!room->askForDiscard(mateng, objectName(), 1, 1, true, true, "@qijun-discard"))
+                    return false;
+
+                room->setPlayerMark(player, "qijun", 1);
+                room->setPlayerFlag(player, "qijun");
+                room->handleAcquireDetachSkills(player, "mashu");
+            }
+            else if (player->getPhase() == Player::NotActive){
+                if (player->getMark("qijun") < 1)
+                    return false;
+
+                room->handleAcquireDetachSkills(player, "-mashu");
+                room->setPlayerMark(player, "qijun", 0);
+            }
+        }
+        else if (player->hasFlag("qijun")){
+            room->setPlayerFlag(player, "-qijun");
+
+            if (mateng == NULL || mateng->isDead())
+                return false;
+
+            mateng->drawCards(1);
+
+        }
+        return false;
+    }
+};
+
+Neo2013ZhoufuCard::Neo2013ZhoufuCard() {
+    will_throw = false;
+    handling_method = Card::MethodNone;
+}
+
+bool Neo2013ZhoufuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return targets.isEmpty() && to_select != Self && to_select->getPile("incantationn").isEmpty();
+}
+
+void Neo2013ZhoufuCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+    ServerPlayer *target = targets.first();
+    target->tag["Neo2013ZhoufuSource" + QString::number(getEffectiveId())] = QVariant::fromValue((PlayerStar)source);
+    target->addToPile("incantationn", this);
+}
+
+class Neo2013ZhoufuViewAsSkill: public OneCardViewAsSkill {
+public:
+    Neo2013ZhoufuViewAsSkill(): OneCardViewAsSkill("neo2013zhoufu") {
+        filter_pattern = ".|.|.|hand";
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("Neo2013ZhoufuCard");
+    }
+
+    virtual const Card *viewAs(const Card *originalcard) const{
+        Card *card = new Neo2013ZhoufuCard;
+        card->addSubcard(originalcard);
+        return card;
+    }
+};
+
+class Neo2013Zhoufu: public TriggerSkill{
+public:
+    Neo2013Zhoufu(): TriggerSkill("neo2013zhoufu") {
+        events << StartJudge << Death;
+        view_as_skill = new Neo2013ZhoufuViewAsSkill;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->getPile("incantationn").length() > 0;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == StartJudge) {
+            int card_id = player->getPile("incantationn").first();
+
+            JudgeStar judge = data.value<JudgeStar>();
+            judge->card = Sanguosha->getCard(card_id);
+
+            LogMessage log;
+            log.type = "$ZhoufuJudge";
+            log.from = player;
+            log.arg = objectName();
+            log.card_str = QString::number(judge->card->getEffectiveId());
+            room->sendLog(log);
+
+            room->moveCardTo(judge->card, NULL, judge->who, Player::PlaceJudge,
+                CardMoveReason(CardMoveReason::S_REASON_JUDGE,
+                judge->who->objectName(),
+                QString(), QString(), judge->reason), true);
+            judge->updateResult();
+            room->setTag("SkipGameRule", true);
+        } else {
+            int id = player->getPile("incantationn").first();
+            PlayerStar zhangbao = player->tag["Neo2013ZhoufuSource" + QString::number(id)].value<PlayerStar>();
+            if (zhangbao && zhangbao->isAlive()){
+                RecoverStruct recover;
+                recover.who = zhangbao;
+                room->recover(zhangbao, recover);
+            }
+        }
+        return false;
+    }
+};
+
+class Neo2013Yingbing: public TriggerSkill {
+public:
+    Neo2013Yingbing(): TriggerSkill("neo2013yingbing") {
+        events << StartJudge;
+        frequency = Frequent;
+    }
+
+    virtual int getPriority() const{
+        return -1;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
+        JudgeStar judge = data.value<JudgeStar>();
+        int id = judge->card->getEffectiveId();
+        PlayerStar zhangbao = player->tag["Neo2013ZhoufuSource" + QString::number(id)].value<PlayerStar>();
+        if (zhangbao && TriggerSkill::triggerable(zhangbao)
+            && zhangbao->askForSkillInvoke(objectName(), data))
+            zhangbao->drawCards(2);
+        return false;
+    }
+};
+
+class Neo2013Yizhong: public TriggerSkill{
+public:
+    Neo2013Yizhong(): TriggerSkill("neo2013yizhong"){
+        events << SlashEffected;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        SlashEffectStruct effect = data.value<SlashEffectStruct>();
+        if (player->faceUp() && effect.slash->isBlack()){
+            LogMessage l;
+            l.type = "#DanlaoAvoid";
+            l.from = player;
+            l.arg = effect.slash->objectName();
+            l.arg2 = objectName();
+            room->sendLog(l);
+
+            return true;
+        }
+        return false;
+    }
+};
+
+class Neo2013Canhui: public ProhibitSkill{ //Room::askForCardChosen()
+public:
+    Neo2013Canhui(): ProhibitSkill("neo2013canhui"){
+
+    }
+
+    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others) const{
+        return (to->hasSkill(objectName()) && !to->faceUp() && card->isRed() && card->getSkillName() != "nosguhuo");
+    }
+};
+
+class Neo2013CanhuiTr: public TriggerSkill{
+public:
+    Neo2013CanhuiTr(): TriggerSkill("#neo2013canhui"){
+        events << CardsMoveOneTime;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+        if ((move.from == player || move.to == player) && (move.from_places.contains(Player::PlaceHand) || move.to_place == Player::PlaceHand)){
+            room->showAllCards(player);
+        }
+    }
+};
+
+class Neo2013Kunxiang: public TriggerSkill{
+public:
+    Neo2013Kunxiang(): TriggerSkill("neo2013kunxiang"){
+        events << EventPhaseStart;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (player->getPhase() != Player::RoundStart)
+            return false;
+
+        if (TriggerSkill::triggerable(player)){
+            if (!player->askForSkillInvoke(objectName()))
+                return false;
+
+            DummyCard dummy;
+            dummy.addSubcards(player->getEquips());
+            dummy.addSubcards(player->getJudgingArea());
+
+            if (dummy.subcardsLength() > 0)
+                room->moveCardTo(&dummy, player, Player::PlaceHand);
+
+            if (player->getHandcardNum() < 7)
+                room->drawCards(player, 7 - player->getHandcardNum());
+
+            throw TurnBroken;
+        }
+        else {
+            ServerPlayer *yujin = room->findPlayerBySkillName(objectName());
+            if (yujin == NULL || yujin->isDead() || yujin->faceUp() || yujin->isNude())
+                return false;
+
+            if (!player->askForSkillInvoke(objectName()))
+                return false;
+
+            int card_id = room->askForCardChosen(player, yujin, "he", objectName());
+
+            player->obtainCard(Sanguosha->getCard(card_id));
+
+            if (room->askForChoice(player, objectName(), "draw+dismiss") == "draw")
+                yujin->drawCards(1);
+
+        }
+        return false;
+    }
+};
+
+class Neo2013Zongxuan: public TriggerSkill{
+public:
+    Neo2013Zongxuan(): TriggerSkill("neo2013zongxuan"){
+        events << BeforeCardsMove;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+        if ((move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON == CardMoveReason::S_REASON_DISCARD)
+                && move.to_place == Player::DiscardPile){
+            QList<int> ids = move.card_ids;
+            if (ids.isEmpty() || player->isNude() || !player->askForSkillInvoke(objectName(), data))
+                return false;
+
+            while (!ids.isEmpty()){
+                room->fillAG(ids, player);
+                int id = room->askForAG(player, ids, true, objectName());
+                room->clearAG(player);
+                if (id == -1)
+                    return false;
+
+                const Card *c = room->askForExchange(player, objectName(), 1, true, "@zongxuan-card", true);
+                if (c == NULL)
+                    return false;
+
+                bool isDrawPileTop = (room->askForChoice(player, objectName(), "zongxuanup+zongxuandown", QVariant::fromValue(c)) == "zongxuanup");
+                if (isDrawPileTop){
+                    room->moveCardTo(c, NULL, Player::DrawPile);
+                }
+                else { // temp method for move cards to the bottom of drawpile, bugs exist probably
+                    QList<int> drawpile = room->getDrawPile();
+                    room->moveCardTo(c, NULL, Player::DrawPile);
+                    drawpile.append(c->getEffectiveId());
+                    room->getDrawPile() = drawpile;
+                    room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
+                }
+
+                ids.removeOne(id);
+                move.from_places.removeAt(move.card_ids.at(id));
+                move.card_ids.removeOne(id);
+                room->obtainCard(player, id);
+            }
+        }
+        return false;
+    }
+};
+
+
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
     neo2013_masu->addSkill(new Neo2013Xinzhan);
@@ -1602,7 +1985,7 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_sima->addSkill("guicai");
 
     General *neo2013_liubei = new General(this, "neo2013_liubei$", "shu");
-    neo2013_liubei->addSkill(new Neo2013RenWang);
+    neo2013_liubei->addSkill(new Neo2013Renwang);
     neo2013_liubei->addSkill("jijiang");
     neo2013_liubei->addSkill("rende");
 
@@ -1643,7 +2026,9 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
 
     General *neo2013_fuwan = new General(this, "neo2013_fuwan", "qun", 3);
     neo2013_fuwan->addSkill(new Neo2013Fengyin);
-    neo2013_fuwan->addSkill("chizhong");
+    neo2013_fuwan->addSkill(new Neo2013Chizhong);
+    neo2013_fuwan->addSkill(new Neo2013ChizhongTr);
+    related_skills.insertMulti("neo2013chizhong", "#neo2013chizhong");
 
     General *neo2013_fuhh = new General(this, "neo2013_fuhuanghou", "qun", 3);
     neo2013_fuhh->addSkill(new Neo2013Cangni);
@@ -1676,10 +2061,32 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_lvmeng->addRelateSkill("#neo2013muhui");
     related_skills.insertMulti("neo2013muhui", "#neo2013muhui");
 
+    General *neo2013_mateng = new General(this, "neo2013_mateng", "qun", 4);
+    neo2013_mateng->addSkill("mashu");
+    neo2013_mateng->addSkill(new Neo2013Xiongyi);
+    neo2013_mateng->addSkill(new Neo2013Qijun);
+
+    General *neo2013_zhangbao = new General(this, "neo2013_zhangbao", "qun", 3);
+    neo2013_zhangbao->addSkill(new Neo2013Zhoufu);
+    neo2013_zhangbao->addSkill(new Neo2013Yingbing);
+
+    General *neo2013_yujin = new General(this, "neo2013_yujin", "wei", 4);
+    neo2013_yujin->addSkill(new Neo2013Yizhong);
+    neo2013_yujin->addSkill(new Neo2013Canhui);
+    neo2013_yujin->addSkill(new Neo2013ChizhongTr);
+    neo2013_yujin->addSkill(new Neo2013Kunxiang);
+    related_skills.insertMulti("neo2013canhui", "#neo2013canhui");
+
+    General *neo2013_yufan = new General(this, "neo2013_yufan", "wu", 3);
+    neo2013_yufan->addSkill(new Neo2013Zongxuan);
+    neo2013_yufan->addSkill("zhiyan");
+
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();
     addMetaObject<Neo2013FengyinCard>();
     addMetaObject<Neo2013YongyiCard>();
+    addMetaObject<Neo2013XiongyiCard>();
+    addMetaObject<Neo2013ZhoufuCard>();
 
     skills << new Neo2013HuileiDecrease << new Neo2013Huwei
         << new Neo2013Tongwu << new Neo2013Bingyin << new Neo2013Touxi << new Neo2013Muhui << new Neo2013MuhuiDis;

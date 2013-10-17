@@ -1151,6 +1151,9 @@ int Room::askForCardChosen(ServerPlayer *player, ServerPlayer *who, const QStrin
             && getTag("Dongchaer").toString() == player->objectName())
         handcard_visible = true;
 
+    if (who->hasSkill("neo2013canhui") && !who->faceUp())
+        handcard_visible = true;
+
     if (handcard_visible && !who->isKongcheng()) {
         QList<int> handcards = who->handCards();
         Json::Value arg(Json::arrayValue);

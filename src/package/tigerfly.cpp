@@ -956,13 +956,13 @@ public:
 
             room->doNotify(player, QSanProtocol::S_COMMAND_SHOW_ALL_CARDS, gongxinArgs);
 
+            if (!watchlist.isEmpty()){
+                LogMessage l;
+                l.type = "$xiangshudrawpile";
+                l.card_str = IntList2StringList(watchlist).join("+");
 
-            LogMessage l;
-            l.type = "$xiangshudrawpile";
-            l.card_str = IntList2StringList(watchlist).join("+");
-
-            room->doNotify(player, QSanProtocol::S_COMMAND_LOG_SKILL, l.toJsonValue());
-
+                room->doNotify(player, QSanProtocol::S_COMMAND_LOG_SKILL, l.toJsonValue());
+            }
         }
         return false;
     }
