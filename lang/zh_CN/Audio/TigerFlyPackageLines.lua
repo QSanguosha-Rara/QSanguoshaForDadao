@@ -65,4 +65,12 @@ return {
 	["$zhanji"] = "我不会逃…因为我也想看看，父亲有多强…",
 	["$ZhanjiAnimate"] = "image=image/animate/zhanji.png",
 	["~zhangxingcai"] = "啊，臣妾不能再守卫陛下了~",
+
+	["cv:jiben"] = "lelek, unknown" ,
+	["$duyi"] = "藏毒于药，此贼合休！",
+	["$duanzhi"] = "断指明志，誓杀国贼！",
+	["~jiben"] = "一失足成千古恨呐……",
+
+
+	["~neo_mushun"] = "我宁死不屈！" ,
 }

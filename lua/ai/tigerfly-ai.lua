@@ -1371,3 +1371,41 @@ sgs.ai_skill_use_func.ZongjiuCard = function(card,use,self)
 end
 sgs.dynamic_value.benefit.ZongjiuCard = true
 
+duyi_skill = {}
+duyi_skill.name = "duyi"
+table.insert(sgs.ai_skills, duyi_skill)
+duyi_skill.getTurnUseCard = function(self)
+	if self.player:hasUsed("DuyiCard") then return end
+	return sgs.Card_Parse("@DuyiCard=.")
+end
+
+sgs.ai_skill_use_func.DuyiCard = function(card,use,self)
+	use.card = card
+end
+
+sgs.ai_skill_playerchosen.duyi = function(self, targets)
+	if self:needBear() then return self.player end
+	local to
+	if self:getOverflow() < 0 then
+		to = self:findPlayerToDraw(true)
+	else
+		to = self:findPlayerToDraw(false)
+	end
+	if to then return to
+	else return self.player
+	end
+end
+
+sgs.ai_skill_invoke.duanzhi = function(self, data)
+	local use = data:toCardUse()
+	if self:isEnemy(use.from) and use.card:getSubtype() == "attack_card" and self.player:getHp() == 1 and not self:getCard("Peach")
+		and not self:getCard("Analeptic") and not isLord(self.player) and self:getAllPeachNum() == 0 then
+		self.player:setFlags("AI_doNotSave")
+		return true
+	end
+	return use.from and self:isEnemy(use.from) and not self:doNotDiscard(use.from, "he", true, 2) and self.player:getHp() > 2
+end
+
+sgs.ai_skill_choice.duanzhi = function(self, choices)
+	return "discard"
+end

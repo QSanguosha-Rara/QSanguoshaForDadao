@@ -34,7 +34,7 @@ return {
 	["@weidi-jijiang"] = "请发动“激将”",
 	["#YongsiGood"] = "%from 的“%arg2”被触发，额外摸了 %arg 张牌",
 	["#YongsiBad"] = "%from 的“%arg2”被触发，须弃置 %arg 张牌",
-	["#YongsiJilei"] = "%from 的“%arg2”被触发，由于“<font color=\"yellow\"><b>鸡肋</b></font>”的效果，仅弃置了 %arg 张牌", 
+	["#YongsiJilei"] = "%from 的“%arg2”被触发，由于“<font color=\"yellow\"><b>鸡肋</b></font>”的效果，仅弃置了 %arg 张牌",
 	["#YongsiWorst"] = "%from 的“%arg2”被触发，弃置了所有牌（共 %arg 张）",
 
 	["#sp_guanyu"] = "汉寿亭侯",
@@ -67,6 +67,37 @@ return {
 	["$WujiAnimate"] = "image=image/animate/wuji.png",
 	["#WujiWake"] = "%from 本回合已造成 %arg 点伤害，触发“%arg2”觉醒",
 
+	["#liuxie"] = "受困天子",
+	["liuxie"] = "刘协",
+	["illustrator:liuxie"] = "LiuHeng",
+	["tianming"] = "天命",
+	[":tianming"] = "每当你被指定为【杀】的目标时，你可以弃置两张牌，然后摸两张牌。若全场唯一的体力值最多的角色不是你，该角色也可以弃置两张牌，然后摸两张牌。",
+	["mizhao"] = "密诏",
+	[":mizhao"] = "<font color=\"green\"><b>出牌阶段限一次，</b></font>你可以将所有手牌（至少一张）交给一名其他角色：若如此做，你令该角色与另一名由你指定的有手牌的角色拼点：若一名角色赢，视为该角色对没赢的角色使用一张【杀】。",
+	["@mizhao-pindian"] = "请选择与 %src 拼点的角色",
+
+	["#lingju"] = "情随梦逝",
+	["lingju"] = "灵雎",
+	["illustrator:lingju"] = "木美人",
+	["jieyuan"] = "竭缘",
+	[":jieyuan"] = "每当你对一名其他角色造成伤害时，若其体力值大于或等于你的体力值，你可以弃置一张黑色手牌：若如此做，此伤害+1。每当你受到一名其他角色造成的伤害时，若其体力值大于或等于你的体力值，你可以弃置一张红色手牌：若如此做，此伤害-1。",
+	["@jieyuan-increase"] = "你可以弃置一张黑色手牌令 %src 受到的伤害+1",
+	["@jieyuan-decrease"] = "你可以弃置一张红色手牌令 %src 造成的伤害-1",
+	["#JieyuanIncrease"] = "%from 发动了“<font color=\"yellow\"><b>竭缘</b></font>”，伤害点数从 %arg 点增加至 %arg2 点",
+	["#JieyuanDecrease"] = "%from 发动了“<font color=\"yellow\"><b>竭缘</b></font>”，伤害点数从 %arg 点减少至 %arg2 点",
+	["fenxin"] = "焚心",
+	[":fenxin"] = "<font color=\"red\"><b>限定技，</b></font>若你不是主公，你杀死一名非主公其他角色检验胜利条件之前，你可以与该角色交换身份牌。",
+	["@burnheart"] = "焚心",
+	["$FenxinAnimate"] = "image=image/animate/fenxin.png",
+
+	["#fuwan"] = "沉毅的国丈",
+	["fuwan"] = "伏完",
+	["illustrator:fuwan"] = "LiuHeng",
+	["moukui"] = "谋溃",
+	[":moukui"] = "每当你使用【杀】指定一名目标角色后，你可以选择一项：1.摸一张牌；2.弃置其一张牌。若如此做，当此【杀】被其使用的【闪】抵消时，你令其弃置你的一张牌。",
+	["moukui:draw"] = "摸一张牌",
+	["moukui:discard"] = "弃置目标角色一张牌",
+
 	["#xiahouba"] = "棘途壮志",
 	["xiahouba"] = "夏侯霸",
 	["illustrator:xiahouba"] = "熊猫探员",
@@ -96,7 +127,7 @@ return {
 	["@xingwu-choose"] = "请选择一名男性角色",
 	["luoyan"] = "落雁",
 	[":luoyan"] = "<font color=\"blue\"><b>锁定技，</b></font>若有“舞”，你视为拥有“天香”和“流离”。",
-	
+
 	["#xiahoushi"] = "疾冲之恋",
 	["xiahoushi"] = "夏侯氏",
 	["illustrator:xiahoushi"] = "牧童的短笛",
@@ -106,7 +137,7 @@ return {
 	["@yanyu-give"] = "你可以令一名角色获得 %arg[%arg2]",
 	["xiaode"] = "孝德",
 	[":xiaode"] = "每当一名其他角色死亡后，你可以声明该角色的武将牌的一项技能（觉醒技和主公技除外），直到你的回合结束，你拥有此技能且“孝德”无效。",
-	
+
 	["#zhangbao"] = "地公将军",
 	["zhangbao"] = "张宝",
 	["illustrator:zhangbao"] = "大佬荣",
@@ -116,7 +147,7 @@ return {
 	["yingbing"] = "影兵",
 	[":yingbing"] = "每当一张“咒”作为判定牌时，你可以摸两张牌。",
 	["$ZhoufuJudge"] = "%from 的判定牌为 %arg 牌 %card",
-	
+
 	["OL"] = "OL专属",
 
 	["#zhugeke"] = "兴家赤族",
@@ -126,16 +157,16 @@ return {
 	[":aocai"] = "你的回合外，每当你需要使用或打出一张基本牌时，你可以观看牌堆顶的两张牌，然后使用或打出其中一张该类别的基本牌。",
 	["duwu"] = "黩武",
 	[":duwu"] = "出牌阶段，你可以选择你攻击范围内的一名其他角色并弃置X张牌（X为该角色当前的体力值），对其造成1点伤害，若其因受到此伤害而进入濒死状态，当此濒死结算结束后，你失去1点体力，且“黩武”无效，直到回合结束。",
-	
+
 	--Chaos Package
 	["Chaos"] = "乱入",
-	
+
 	["#sunyang"] = "逐浪追风",
 	["sunyang"] = "孙杨",
 	["illustrator:sunyang"] = "LiuHeng",
 	["shuijian"] = "水箭",
 	[":shuijian"] = "摸牌阶段，你可以额外摸X+1张牌。（X为你装备区的牌数的一半，向下取整）",
-	
+
 	["#yeshiwen"] = "出水青莲",
 	["yeshiwen"] = "叶诗文",
 	["illustrator:yeshiwen"] = "LiuHeng",
@@ -158,7 +189,7 @@ return {
 	["xintan"] = "心惔" ,
 	[":xintan"] = "<font color=\"green\"><b>出牌阶段限一次，</b></font>你可以将两张“焚”置入弃牌区并选择一名角色，该角色失去一点体力。" ,
 	["$ZhiriAnimate"] = "image=image/animate/zhiri.png" ,
-	
+
 	-- HuLao Pass
 	["Hulaopass"] = "虎牢关模式",
 	["HulaoPass"] = "虎牢关",
@@ -195,7 +226,7 @@ return {
 	[":SPMoonSpear"] = "装备牌·武器<br />攻击范围：３<br />武器特效：你的回合外，每当你使用或打出一张黑色牌时，你可以令你攻击范围内的一名其他角色打出一张【闪】，否则该角色受到你对其造成的1点伤害。",
 	["@SPMoonSpear"] = "请选择攻击范围内的一名其他角色令其打出一张【闪】",
 	["@moon-spear-jink"] = "【银月枪】效果被触发，请打出一张【闪】",
-	
+
 	["Taiwan_sp"] = "台版SP",
 	["wangzhezhizhan"] = "王者之战专属",
 }

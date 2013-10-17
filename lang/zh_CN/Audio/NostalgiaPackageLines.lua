@@ -35,12 +35,27 @@ return {
 	["$nosmiji3"] = "救兵已到，乃解城围。", -- 他人
 	["$nosmiji4"] = "暂与汝和，仇必后报！", -- 马超
 	["~nos_wangyi"] = "吾之家仇，何日得报……" ,
-	
+
+	["cv:nos_as_fuhuanghou"] = "蒲小猫" ,
+	["$noscangni1"] = "糟了，先躲墙里吧。",
+	["$noscangni2"] = "幸好有陛下保护。",
+	["$noscangni3"] = "郗虑！你为虎作伥必受骂名千载！",
+	["$nosmixin1"] = "请父亲速杀曹贼！",
+	["$nosmixin2"] = "陛下快看，是父亲来了！",
+	["$nosmixin3"] = "密信落入曹贼之手,我等休矣！",
+	["~nos_as_fuhuanghou"] = "连陛下都救不了我吗？",
+
+	["cv:nos_as_fuwan"] = "喵小林" ,
+	["$nosfengyin1"] = "留得此命，徐图日后杀贼！",
+	["$nosfengyin2"] = "时机未至，汝等不必轻举妄动。",
+	["$noschizhong"] = "老成持重，隐忍于心。",
+	["~nos_as_fuwan"] = "真的老了吗？",
+
 	["$nosrende1"] = "以德服人。" ,
 	["$nosrende2"] = "惟贤惟德，能服于人。" ,
 	["$noslijian1"] = "嗯呵呵~~呵呵~~" ,
 	["$noslijian2"] = "夫君，你要替妾身做主啊……" ,
 	["$nosjizhi1"] = "哼哼" ,
 	["$nosjizhi2"] = "哼" ,
-	
+
 }

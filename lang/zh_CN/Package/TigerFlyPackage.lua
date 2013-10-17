@@ -233,5 +233,23 @@ return {
 	["zongjiu:damage"] = "为了主公，死也愿意" ,
 	["zongjiu:rob"] = "花钱买酒给主公喝" ,
 	["@zongjiu-give"] = "请将一张【桃】交给主公。" ,
+	
+	["#jiben"] = "誓死除奸恶",
+	["jiben"] = "吉本",
+	["designer:jiben"] = "凌天翼",
+	["illustrator:jiben"] = "Aimer彩三",
+	["duyi"] = "毒医",
+	[":duyi"] = "<font color=\"green\"><b>出牌阶段限一次，</b></font>你可以亮出牌堆顶的一张牌并交给一名角色，若此牌为黑色，该角色不能使用或打出其手牌，直到回合结束。",
+	["#duyi_eff"] = "由于 %from 的技能【%arg】的效果, %to 不能使用或打出其手牌",
+	["#duyi_clear"] = " %from 受到的【%arg】的效果消失",
+	["duanzhi"] = "断指",
+	[":duanzhi"] = "当你成为其他角色使用的牌的目标后，你可以弃置其至多两张牌（也可以不弃置），然后失去1点体力。",
+	["duanzhi:discard"] = "我想弃",
+	["duanzhi:cancel"] = "弃够了",
+
+	["#neo_mushun"] = "屈身为国",
+	["neo_mushun"] = "穆顺",
+	["illustrator:neo_mushun"] = "佚名",
+	["designer:neo_mushun"] = "嘉言懿行",
 
 }

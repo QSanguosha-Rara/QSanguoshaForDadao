@@ -12,6 +12,7 @@ return {
 	["nostal_yjcm"] = "怀旧-一将",
 	["nostal_yjcm2012"] = "怀旧-一将2",
 	["nostal_wind"] = "怀旧-风包" ,
+	["nostal_other"] = "怀旧-其他" ,
 	
 	["nos_liubei"] = "刘备-旧",
 	["&nos_liubei"] = "刘备",
@@ -134,4 +135,27 @@ return {
 	["illustrator:nos_guanxingzhangbao"] = "HOOO",
 	["nosfuhun"] = "父魂",
 	[":nosfuhun"] = "摸牌阶段开始时，你可以放弃摸牌，从牌堆顶亮出两张牌并获得之，若亮出的牌颜色不同，你拥有“武圣”、“咆哮”，直到回合结束。",
+	
+	["#nos_as_fuhuanghou"] = "与世不侵",
+	["nos_as_fuhuanghou"] = "伏皇后",
+	["designer:nos_as_fuhuanghou"] = "凌天翼",
+	["illustrator:nos_as_fuhuanghou"] = "G.G.G.",
+	["noscangni"] = "藏匿",
+	[":noscangni"] = "弃牌阶段开始时，你可以回复1点体力或摸两张牌，然后将你的武将牌翻面；其他角色的回合内，当你获得（每回合限一次）/失去一次牌时，若你的武将牌背面朝上，你可以令该角色摸/弃置一张牌。",
+	["noscangni:recover"] = "回复1点体力",
+	["noscangni:draw"] = "摸两张牌",
+	["nosmixin"] = "密信",
+	["#nosmixin"] = "请使用一张【杀】，否则对方将观看你的手牌并获得其中一张",
+	[":nosmixin"] = "摸牌阶段开始时，你可以放弃摸牌，改为观看牌堆顶的三张牌，然后获得其中两张，将另一张牌交给一名其他角色，该角色需对你选择的另一名角色使用一张【杀】（无距离限制），否则你选择的角色观看其手牌并获得其中任意一张。",
+
+	["nos_as_fuwan"] = "伏完",
+	["designer:nos_as_fuwan"] = "凌天翼",
+	["nosfengyin"] = "奉印",
+	[":nosfengyin"] = "其他角色的回合开始时，若其当前的体力值不比你少，你可以交给其一张【杀】，令其跳过其出牌阶段和弃牌阶段。",
+	["@fengyin"] = "是否发动技能【奉印】",
+	["~nosfengyin"] = "选择一张【杀】→点击确定",
+	["noschizhong"] = "持重",
+	[":noschizhong"] = "<font color=\"blue\"><b>锁定技，</b></font>你的手牌上限等于你的体力上限；其他角色死亡时，你加1点体力上限。",
+	["#Chizhong"] = " %from 受到【%arg】的影响，偷偷藏下了更多的手牌！",
+
 }
