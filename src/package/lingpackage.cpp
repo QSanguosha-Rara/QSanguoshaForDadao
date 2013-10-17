@@ -1855,6 +1855,7 @@ public:
         if ((move.from == player || move.to == player) && (move.from_places.contains(Player::PlaceHand) || move.to_place == Player::PlaceHand)){
             room->showAllCards(player);
         }
+        return false;
     }
 };
 
@@ -1916,7 +1917,7 @@ public:
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-        if ((move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON == CardMoveReason::S_REASON_DISCARD)
+        if (((move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD)
                 && move.to_place == Player::DiscardPile){
             QList<int> ids = move.card_ids;
             if (ids.isEmpty() || player->isNude() || !player->askForSkillInvoke(objectName(), data))
@@ -2073,7 +2074,7 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_yujin = new General(this, "neo2013_yujin", "wei", 4);
     neo2013_yujin->addSkill(new Neo2013Yizhong);
     neo2013_yujin->addSkill(new Neo2013Canhui);
-    neo2013_yujin->addSkill(new Neo2013ChizhongTr);
+    neo2013_yujin->addSkill(new Neo2013CanhuiTr);
     neo2013_yujin->addSkill(new Neo2013Kunxiang);
     related_skills.insertMulti("neo2013canhui", "#neo2013canhui");
 
