@@ -2730,9 +2730,11 @@ public:
         if (splayer == NULL || splayer == player)
             return false;
 
-        if (player->getHp() >= splayer->getHp())
+        if (player->getHp() >= splayer->getHp()){
+            room->setPlayerFlag(player, "Neo2013FengyinTarget");
             room->askForUseCard(splayer, "@@fengyin", "@fengyin", -1, Card::MethodNone);
-
+            room->setPlayerFlag(player, "-Neo2013FengyinTarget");
+        }
         return false;
     }
 };
