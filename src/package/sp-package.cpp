@@ -1262,7 +1262,6 @@ public:
 };
 
 ZhoufuCard::ZhoufuCard() {
-    mute = true;
     will_throw = false;
     handling_method = Card::MethodNone;
 }
@@ -1274,7 +1273,6 @@ bool ZhoufuCard::targetFilter(const QList<const Player *> &targets, const Player
 void ZhoufuCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
     ServerPlayer *target = targets.first();
     target->tag["ZhoufuSource" + QString::number(getEffectiveId())] = QVariant::fromValue((PlayerStar)source);
-    room->broadcastSkillInvoke("zhoufu");
     target->addToPile("incantation", this);
 }
 
