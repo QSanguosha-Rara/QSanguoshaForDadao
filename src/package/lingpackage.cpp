@@ -2371,7 +2371,8 @@ LingCardsPackage::LingCardsPackage(): Package("LingCards", Package::CardPack){
         c->setParent(this);
 
 
-    skills << new SixSwordsSkill << new TribladeSkill << new DragonPhoenixSkill;
+    skills << new SixSwordsSkill << new SixSwordsSkillRange << new TribladeSkill << new DragonPhoenixSkill;
+    related_skills.insertMulti("SixSwords", "#SixSwords");
 
     addMetaObject<SixSwordsSkillCard>();
     addMetaObject<TribladeSkillCard>();

@@ -2164,8 +2164,10 @@ ChaosPackage::ChaosPackage()
 
     General *hanba = new General(this, "hanba", "qun", 4, false);
     hanba->addSkill(new Fentian);
+    hanba->addSkill(new FentianRange);
     hanba->addSkill(new Zhiri);
     hanba->addRelateSkill("xintan");
+    related_skills.insertMulti("fentian", "#fentian");
 
     addMetaObject<JisuCard>();
     addMetaObject<XintanCard>();
