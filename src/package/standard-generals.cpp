@@ -341,10 +341,8 @@ public:
         } else if (triggerEvent == FinishJudge) {
             JudgeStar judge = data.value<JudgeStar>();
             if (judge->reason == objectName()) {
-                bool isHegVer = zhenji->getGeneralName() != "zhenji"
-                                && (zhenji->getGeneralName() == "heg_zhenji" || zhenji->getGeneral2Name() == "heg_zhenji");
                 if (judge->card->isBlack()) {
-                    if (isHegVer && zhenji->hasSkills("guicai|guidao|huanshi")) {
+                    if (Config.EnableHegemony) {
                         CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, zhenji->objectName(), QString(), judge->reason);
                         room->moveCardTo(judge->card, zhenji, NULL, Player::PlaceTable, reason, true);
                         QVariantList luoshen_list = zhenji->tag[objectName()].toList();
@@ -353,13 +351,12 @@ public:
                     } else {
                         zhenji->obtainCard(judge->card);
                     }
-                } else {
-                    if (isHegVer && zhenji->hasSkills("guicai|guidao|huanshi")) {
-                        DummyCard *dummy = new DummyCard(VariantList2IntList(zhenji->tag[objectName()].toList()));
-                        zhenji->obtainCard(dummy);
-                        zhenji->tag.remove(objectName());
-                        delete dummy;
-                    }
+                }
+                else if (Config.EnableHegemony) {
+                    DummyCard *dummy = new DummyCard(VariantList2IntList(zhenji->tag[objectName()].toList()));
+                    zhenji->obtainCard(dummy);
+                    zhenji->tag.remove(objectName());
+                    delete dummy;
                 }
             }
         }
