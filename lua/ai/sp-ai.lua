@@ -707,7 +707,15 @@ sgs.ai_skill_use["@@bifa"] = function(self, prompt)
 	self:sortByKeepValue(cards)
 	self:sort(self.enemies, "hp")
 	if #self.enemies < 0 then return "." end
-	for _, enemy in ipairs(self.enemies) do
+	
+	local enemies_to_bifa = self.enemies
+	for _, p in ipairs(self.enemies) do
+		if not p:getPile("bifa"):isEmpty() then
+			table.removeOne(enemies_to_bifa, p)
+		end
+	end
+	
+	for _, enemy in ipairs(enemies_to_bifa) do
 		if not (self:needToLoseHp(enemy) and not self:hasSkills(sgs.masochism_skill, enemy)) then
 			for _, c in ipairs(cards) do
 				if c:isKindOf("EquipCard") then return "@BifaCard=" .. c:getEffectiveId() .. "->" .. enemy:objectName() end
