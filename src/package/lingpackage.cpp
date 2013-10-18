@@ -1489,7 +1489,7 @@ public:
 
 };
 
-class Neo2013Touxi: public TriggerSkill{ //Player::getAttackRange()
+class Neo2013Touxi: public TriggerSkill{
 public:
     Neo2013Touxi(): TriggerSkill("neo2013touxi"){
         frequency = Compulsory;
