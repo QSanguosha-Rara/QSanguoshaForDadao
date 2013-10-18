@@ -6,37 +6,6 @@
 #include "room.h"
 #include "standard-skillcards.h"
 
-class Xiaoguo: public TriggerSkill {
-public:
-    Xiaoguo(): TriggerSkill("xiaoguo") {
-        events << EventPhaseStart;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL;
-    }
-
-    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
-        if (player->getPhase() != Player::Finish)
-            return false;
-        ServerPlayer *yuejin = room->findPlayerBySkillName(objectName());
-        if (!yuejin || yuejin == player)
-            return false;
-        if (yuejin->canDiscard(yuejin, "h") && room->askForCard(yuejin, ".Basic", "@xiaoguo", QVariant(), objectName())) {
-            room->broadcastSkillInvoke(objectName(), 1);
-            if (!room->askForCard(player, ".Equip", "@xiaoguo-discard", QVariant())) {
-                room->broadcastSkillInvoke(objectName(), 2);
-                room->damage(DamageStruct("xiaoguo", yuejin, player));
-            } else {
-                room->broadcastSkillInvoke(objectName(), 3);
-                if (yuejin->isAlive())
-                    yuejin->drawCards(1);
-            }
-        }
-        return false;
-    }
-};
-
 class Shushen: public TriggerSkill {
 public:
     Shushen(): TriggerSkill("shushen") {
@@ -694,8 +663,6 @@ public:
 HegemonyPackage::HegemonyPackage()
     : Package("hegemony")
 {
-    General *yuejin = new General(this, "heg_yuejin", "wei", 4, true, true); // WEI 016
-    yuejin->addSkill(new Xiaoguo);
 
     General *ganfuren = new General(this, "ganfuren", "shu", 3, false); // SHU 016
     ganfuren->addSkill(new Shushen);
@@ -732,38 +699,6 @@ HegemonyPackage::HegemonyPackage()
     General *zoushi = new General(this, "zoushi", "qun", 3, false); // QUN 018
     zoushi->addSkill(new Huoshui);
     zoushi->addSkill(new Qingcheng);
-
-    General *heg_caopi = new General(this, "heg_caopi$", "wei", 3, true, true); // WEI 014 G
-    heg_caopi->addSkill("fangzhu");
-    heg_caopi->addSkill("xingshang");
-    heg_caopi->addSkill("songwei");
-
-    General *heg_zhenji = new General(this, "heg_zhenji", "wei", 3, false, true); // WEI 007 G
-    heg_zhenji->addSkill("qingguo");
-    heg_zhenji->addSkill("luoshen");
-
-    General *heg_zhugeliang = new General(this, "heg_zhugeliang", "shu", 3, true, true); // SHU 004 G
-    heg_zhugeliang->addSkill("guanxing");
-    heg_zhugeliang->addSkill("kongcheng");
-
-    General *heg_huangyueying = new General(this, "heg_huangyueying", "shu", 3, false, true); // SHU 007 G
-    heg_huangyueying->addSkill("nosjizhi");
-    heg_huangyueying->addSkill("nosqicai");
-
-    General *heg_zhouyu = new General(this, "heg_zhouyu", "wu", 3, true, true); // WU 005 G
-    heg_zhouyu->addSkill("yingzi");
-    heg_zhouyu->addSkill("fanjian");
-
-    General *heg_xiaoqiao = new General(this, "heg_xiaoqiao", "wu", 3, false, true); // WU 011 G
-    heg_xiaoqiao->addSkill("tianxiang");
-    heg_xiaoqiao->addSkill("hongyan");
-
-    General *heg_lvbu = new General(this, "heg_lvbu", "qun", 4, true, true); // QUN 002 G
-    heg_lvbu->addSkill("wushuang");
-
-    General *heg_diaochan = new General(this, "heg_diaochan", "qun", 3, false, true); // QUN 003 G
-    heg_diaochan->addSkill("lijian");
-    heg_diaochan->addSkill("biyue");
 
     addMetaObject<DuoshiCard>();
     addMetaObject<FenxunCard>();

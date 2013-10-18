@@ -1540,6 +1540,37 @@ public:
     }
 };
 
+class Xiaoguo: public TriggerSkill {
+public:
+    Xiaoguo(): TriggerSkill("xiaoguo") {
+        events << EventPhaseStart;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
+        if (player->getPhase() != Player::Finish)
+            return false;
+        ServerPlayer *yuejin = room->findPlayerBySkillName(objectName());
+        if (!yuejin || yuejin == player)
+            return false;
+        if (yuejin->canDiscard(yuejin, "h") && room->askForCard(yuejin, ".Basic", "@xiaoguo", QVariant(), objectName())) {
+            room->broadcastSkillInvoke(objectName(), 1);
+            if (!room->askForCard(player, ".Equip", "@xiaoguo-discard", QVariant())) {
+                room->broadcastSkillInvoke(objectName(), 2);
+                room->damage(DamageStruct("xiaoguo", yuejin, player));
+            } else {
+                room->broadcastSkillInvoke(objectName(), 3);
+                if (yuejin->isAlive())
+                    yuejin->drawCards(1);
+            }
+        }
+        return false;
+    }
+};
+
 ZhoufuCard::ZhoufuCard() {
     will_throw = false;
     handling_method = Card::MethodNone;
@@ -2140,10 +2171,6 @@ SPPackage::SPPackage()
     yangxiu->addSkill(new Danlao);
     related_skills.insertMulti("jilei", "#jilei-clear");
 
-    General *sp_diaochan = new General(this, "sp_diaochan", "qun", 3, false, true); // SP 002
-    sp_diaochan->addSkill("lijian");
-    sp_diaochan->addSkill("biyue");
-
     General *gongsunzan = new General(this, "gongsunzan", "qun"); // SP 003
     gongsunzan->addSkill(new Yicong);
     gongsunzan->addSkill(new YicongEffect);
@@ -2205,10 +2232,6 @@ SPPackage::SPPackage()
     related_skills.insertMulti("huxiao", "#huxiao-count");
     related_skills.insertMulti("huxiao", "#huxiao-clear");
 
-    General *sp_zhenji = new General(this, "sp_zhenji", "wei", 3, false, true); // SP 015
-    sp_zhenji->addSkill("qingguo");
-    sp_zhenji->addSkill("luoshen");
-
     General *liuxie = new General(this, "liuxie", "qun", 3);
     liuxie->addSkill(new Tianming);
     liuxie->addSkill(new Mizhao);
@@ -2233,22 +2256,14 @@ SPPackage::SPPackage()
     erqiao->addSkill(new Xingwu);
     erqiao->addSkill(new Luoyan);
 
-    General *sp_shenlvbu = new General(this, "sp_shenlvbu", "god", 5, true, true); // SP 022
-    sp_shenlvbu->addSkill("kuangbao");
-    sp_shenlvbu->addSkill("wumou");
-    sp_shenlvbu->addSkill("wuqian");
-    sp_shenlvbu->addSkill("shenfen");
-
     General *xiahoushi = new General(this, "xiahoushi", "shu", 3, false); // SP 023
     xiahoushi->addSkill(new Yanyu);
     xiahoushi->addSkill(new Xiaode);
     xiahoushi->addSkill(new XiaodeEx);
     related_skills.insertMulti("xiaode", "#xiaode");
 
-    //rename sp_yuejin 2 yuejin, rename yuejin 2 heg_yuejin
-
     General *sp_yuejin = new General(this, "yuejin", "wei"); // SP 024
-    sp_yuejin->addSkill("xiaoguo");
+    sp_yuejin->addSkill(new Xiaoguo);
 
     General *zhangbao = new General(this, "zhangbao", "qun", 3); // SP 025
     zhangbao->addSkill(new Zhoufu);
@@ -2278,85 +2293,3 @@ OLPackage::OLPackage()
 }
 
 ADD_PACKAGE(OL)
-
-TaiwanSPPackage::TaiwanSPPackage()
-    : Package("Taiwan_sp")
-{
-    General *tw_diaochan = new General(this, "tw_diaochan", "qun", 3, false, true); // TW SP 002
-    tw_diaochan->addSkill("lijian");
-    tw_diaochan->addSkill("biyue");
-
-    General *tw_yuanshu = new General(this, "tw_yuanshu", "qun", 4, true, true); // TW SP 004
-    tw_yuanshu->addSkill("yongsi");
-    tw_yuanshu->addSkill("weidi");
-
-    General *tw_daqiao = new General(this, "tw_daqiao", "wu", 3, false, true); // TW SP 005
-    tw_daqiao->addSkill("guose");
-    tw_daqiao->addSkill("liuli");
-
-    General *tw_zhaoyun = new General(this, "tw_zhaoyun", "shu", 4, true, true); // TW SP 006
-    tw_zhaoyun->addSkill("longdan");
-
-    General *tw_zhenji = new General(this, "tw_zhenji", "wei", 3, false, true); // TW SP 007
-    tw_zhenji->addSkill("qingguo");
-    tw_zhenji->addSkill("luoshen");
-
-    General *tw_lvbu = new General(this, "tw_lvbu", "qun", 4, true, true); // TW SP 008
-    tw_lvbu->addSkill("wushuang");
-
-    General *tw_ganning = new General(this, "tw_ganning", "wu", 4, true, true); // TW SP 009
-    tw_ganning->addSkill("qixi");
-
-    General *tw_machao = new General(this, "tw_machao", "shu", 4, true, true); // TW SP 010
-    tw_machao->addSkill("mashu");
-    tw_machao->addSkill("tieji");
-
-    General *tw_huangyueying = new General(this, "tw_huangyueying", "shu", 3, false, true); // TW SP 011
-    tw_huangyueying->addSkill("nosjizhi");
-    tw_huangyueying->addSkill("nosqicai");
-
-    General *tw_zhugeliang = new General(this, "tw_zhugeliang", "shu", 3, true, true); // TW SP 012
-    tw_zhugeliang->addSkill("guanxing");
-    tw_zhugeliang->addSkill("kongcheng");
-
-    General *tw_zhangliao = new General(this, "tw_zhangliao", "wei", 4, true, true); // TW SP 013
-    tw_zhangliao->addSkill("tuxi");
-
-    General *tw_huanggai = new General(this, "tw_huanggai", "wu", 4, true, true); // TW SP 014
-    tw_huanggai->addSkill("kurou");
-
-    General *tw_guojia = new General(this, "tw_guojia", "wei", 3, true, true); // TW SP 015
-    tw_guojia->addSkill("tiandu");
-    tw_guojia->addSkill("yiji");
-
-    General *tw_luxun = new General(this, "tw_luxun", "wu", 3, true, true); // TW SP 016
-    tw_luxun->addSkill("qianxun");
-    tw_luxun->addSkill("lianying");
-}
-
-ADD_PACKAGE(TaiwanSP)
-
-WangZheZhiZhanPackage::WangZheZhiZhanPackage()
-    : Package("wangzhezhizhan")
-{
-    General *wz_daqiao = new General(this, "wz_daqiao", "wu", 3, false, true); // WZ 001
-    wz_daqiao->addSkill("guose");
-    wz_daqiao->addSkill("liuli");
-
-    General *wz_xiaoqiao = new General(this, "wz_xiaoqiao", "wu", 3, false, true); // WZ 002
-    wz_xiaoqiao->addSkill("tianxiang");
-    wz_xiaoqiao->addSkill("hongyan");
-}
-
-ADD_PACKAGE(WangZheZhiZhan)
-
-HegemonySPPackage::HegemonySPPackage()
-    : Package("hegemony_sp")
-{
-    General *sp_heg_zhouyu = new General(this, "sp_heg_zhouyu", "wu", 3, true, true); // GSP 001
-    sp_heg_zhouyu->addSkill("yingzi");
-    sp_heg_zhouyu->addSkill("fanjian");
-}
-
-ADD_PACKAGE(HegemonySP)
-

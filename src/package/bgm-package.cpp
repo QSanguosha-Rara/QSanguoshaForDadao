@@ -2297,10 +2297,6 @@ BGMDIYPackage::BGMDIYPackage(): Package("BGMDIY") {
     diy_xin->addSkill(new Yinzhi);
     related_skills.insertMulti("mingjian", "#mingjian-prevent");
 
-    General *diy_zhugeke = new General(this, "diy_zhugeke", "wu", 3, true, true);
-    diy_zhugeke->addSkill("aocai");
-    diy_zhugeke->addSkill("duwu");
-
     addMetaObject<ZhaoxinCard>();
     addMetaObject<FuluanCard>();
     addMetaObject<HuangenCard>();

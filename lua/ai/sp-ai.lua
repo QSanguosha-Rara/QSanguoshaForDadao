@@ -1059,6 +1059,116 @@ sgs.ai_skill_choice.xiaode = function(self, choices)
 	return sgs.xiaode_choice
 end
 
+sgs.ai_skill_cardask["@xiaoguo"] = function(self, data)
+	local currentplayer = self.room:getCurrent()
+
+	local has_anal, has_slash, has_jink
+	for _, acard in sgs.qlist(self.player:getHandcards()) do
+		if acard:isKindOf("Analeptic") then has_anal = acard
+		elseif acard:isKindOf("Slash") then has_slash = acard
+		elseif acard:isKindOf("Jink") then has_jink = acard
+		end
+	end
+	
+	local card
+
+	if has_slash then card = has_slash
+	elseif has_jink then card = has_jink
+	elseif has_anal then
+		if not self:isWeak() or self:getCardsNum("Analeptic") > 1 then
+			card = has_anal
+		end
+	end
+
+	if not card then return "." end
+	if self:isFriend(currentplayer) then
+		if self:needToThrowArmor(currentplayer) then 
+			if card:isKindOf("Slash") or (card:isKindOf("Jink") and self:getCardsNum("Jink") > 1) then
+				return "$" .. card:getEffectiveId()
+			else return "."
+			end
+		end
+	elseif self:isEnemy(currentplayer) then
+		if not self:damageIsEffective(currentplayer, sgs.DamageStruct_Normal, self.player) then return "." end
+		if self:getDamagedEffects(currentplayer, self.player) or self:needToLoseHp(currentplayer, self.player) then
+			return "."
+		end
+		if self:needToThrowArmor(currentplayer) then return "." end
+		if self:hasSkills(sgs.lose_equip_skill, currentplayer) and currentplayer:getCards("e"):length() > 0 then return "." end
+		return "$" .. card:getEffectiveId()
+	end
+	return "."
+end
+
+sgs.ai_choicemade_filter.cardResponded["@xiaoguo"] = function(player, promptlist, self)
+	if promptlist[#promptlist] ~= "_nil_" then
+		local current = player:getRoom():getCurrent()
+		if not current then return end
+		local intention = 10
+		if self:hasSkills(sgs.lose_equip_skill, current) and current:getCards("e"):length() > 0 then intention = 0 end
+		if self:needToThrowArmor(current) then intention = 0 end
+		sgs.updateIntention(player, current, intention)
+	end
+end
+
+sgs.ai_skill_cardask["@xiaoguo-discard"] = function(self, data)
+	local yuejin = self.room:findPlayerBySkillName("xiaoguo")
+	local player = self.player
+	
+	if self:needToThrowArmor() then
+		return "$" .. player:getArmor():getEffectiveId()
+	end
+	
+	if not self:damageIsEffective(player, sgs.DamageStruct_Normal, yuejin) then
+		return "."
+	end
+	if self:getDamagedEffects(self.player, yuejin) then
+		return "."
+	end
+	if self:needToLoseHp(player, yuejin) then
+		return "."
+	end
+	
+	local card_id
+	if self:hasSkills(sgs.lose_equip_skill, player) then
+		if player:getWeapon() then card_id = player:getWeapon():getId()
+		elseif player:getOffensiveHorse() then card_id = player:getOffensiveHorse():getId()
+		elseif player:getArmor() then card_id = player:getArmor():getId()
+		elseif player:getDefensiveHorse() then card_id = player:getDefensiveHorse():getId()	
+		end
+	end
+	
+	if not card_id then
+		for _, card in sgs.qlist(player:getCards("h")) do
+			if card:isKindOf("EquipCard") then
+				card_id = card:getEffectiveId()
+				break
+			end
+		end
+	end
+
+	if not card_id then
+		if player:getWeapon() then card_id = player:getWeapon():getId()
+		elseif player:getOffensiveHorse() then card_id = player:getOffensiveHorse():getId()
+		elseif self:isWeak(player) and player:getArmor() then card_id = player:getArmor():getId()
+		elseif self:isWeak(player) and player:getDefensiveHorse() then card_id = player:getDefensiveHorse():getId()	
+		end
+	end
+
+	if not card_id then
+		return "."
+	else
+		return "$" .. card_id
+	end
+	return "."
+end
+
+sgs.ai_cardneed.xiaoguo = function(to, card)
+	return getKnownCard(to, "BasicCard", true) == 0 and card:getTypeId() == sgs.Card_Basic
+end
+
+sgs.ai_chaofeng.yuejin = 2
+
 function sgs.ai_cardsview_valuable.aocai(self, class_name, player)
 	if player:hasFlag("Global_AocaiFailed") or player:getPhase() ~= sgs.Player_NotActive then return end
 	if class_name == "Slash" and sgs.Sanguosha:getCurrentCardUseReason() == sgs.CardUseStruct_CARD_USE_REASON_RESPONSE_USE then
@@ -1384,71 +1494,12 @@ sgs.ai_skill_invoke.cv_machao = function(self, data)
 		sgs.ai_skill_choice.cv_machao = "sp_machao"
 		return true
 	end
-	if math.random(0, 2) == 0 then
-		sgs.ai_skill_choice.cv_machao = "tw_machao"
-		return true
-	end
+	return false;
 end
 
 sgs.ai_chaofeng.sp_machao = sgs.ai_chaofeng.machao
 
-sgs.ai_skill_invoke.cv_diaochan = function(self, data)
-	if math.random(0, 2) == 0 then return false
-	elseif math.random(0, 3) == 0 then sgs.ai_skill_choice.cv_diaochan = "tw_diaochan" return true
-	elseif math.random(0, 3) == 0 then sgs.ai_skill_choice.cv_diaochan = "heg_diaochan" return true
-	else sgs.ai_skill_choice.cv_diaochan = "sp_diaochan" return true end
-end
-
-sgs.ai_chaofeng.sp_diaochan = sgs.ai_chaofeng.diaochan
-
 sgs.ai_skill_invoke.cv_pangde = sgs.ai_skill_invoke.cv_caiwenji
 sgs.ai_skill_invoke.cv_jiaxu = sgs.ai_skill_invoke.cv_caiwenji
 
-sgs.ai_skill_invoke.cv_yuanshu = function(self, data)
-	return math.random(0, 2) == 0
-end
-
-sgs.ai_skill_invoke.cv_zhaoyun = sgs.ai_skill_invoke.cv_yuanshu
-sgs.ai_skill_invoke.cv_ganning = sgs.ai_skill_invoke.cv_yuanshu
-sgs.ai_skill_invoke.cv_shenlvbu = sgs.ai_skill_invoke.cv_yuanshu
-
-sgs.ai_skill_invoke.cv_daqiao = function(self, data)
-	if math.random(0, 3) >= 1 then return false
-	elseif math.random(0, 4) == 0 then sgs.ai_skill_choice.cv_daqiao = "tw_daqiao" return true
-	else sgs.ai_skill_choice.cv_daqiao = "wz_daqiao" return true end
-end
-
-sgs.ai_skill_invoke.cv_xiaoqiao = function(self, data)
-	if math.random(0, 3) >= 1 then return false
-	elseif math.random(0, 4) == 0 then sgs.ai_skill_choice.cv_xiaoqiao = "wz_xiaoqiao" return true
-	else sgs.ai_skill_choice.cv_xiaoqiao = "heg_xiaoqiao" return true end
-end
-
-sgs.ai_skill_invoke.cv_zhouyu = function(self, data)
-	if math.random(0, 3) >= 1 then return false
-	elseif math.random(0, 4) == 0 then sgs.ai_skill_choice.cv_zhouyu = "heg_zhouyu" return true
-	else sgs.ai_skill_choice.cv_zhouyu = "sp_heg_zhouyu" return true end
-end
-
-sgs.ai_skill_invoke.cv_zhenji = function(self, data)
-	if math.random(0, 3) >= 2 then return false
-	elseif math.random(0, 4) == 0 then sgs.ai_skill_choice.cv_zhenji = "sp_zhenji" return true
-	elseif math.random(0, 4) == 0 then sgs.ai_skill_choice.cv_zhenji = "tw_zhenji" return true
-	else sgs.ai_skill_choice.cv_zhenji = "heg_zhenji" return true end
-end
-
-sgs.ai_skill_invoke.cv_lvbu = function(self, data)
-	if math.random(0, 3) >= 1 then return false
-	elseif math.random(0, 4) == 0 then sgs.ai_skill_choice.cv_lvbu = "tw_lvbu" return true
-	else sgs.ai_skill_choice.cv_lvbu = "heg_lvbu" return true end
-end
-
-sgs.ai_skill_invoke.cv_zhangliao = sgs.ai_skill_invoke.cv_yuanshu
-sgs.ai_skill_invoke.cv_luxun = sgs.ai_skill_invoke.cv_yuanshu
-
-sgs.ai_skill_invoke.cv_huanggai = function(self, data)
-	return math.random(0, 4) == 0
-end
-
-sgs.ai_skill_invoke.cv_guojia = sgs.ai_skill_invoke.cv_huanggai
-sgs.ai_skill_invoke.cv_zhugeke = sgs.ai_skill_invoke.cv_huanggai
+sgs.ai_skill_invoke.cv_fuwan = true
