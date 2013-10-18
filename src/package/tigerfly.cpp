@@ -609,6 +609,8 @@ public:
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == Damage){
+            if (player->getPhase() == Player::NotActive)
+                return false;
             DamageStruct damage = data.value<DamageStruct>();
             room->setPlayerMark(player, "xiongjiedamage", damage.damage + player->getMark("xiongjiedamage"));
         }
@@ -649,7 +651,7 @@ public:
         }
         else {
             if (player->getMark("@xiongjie") > 0)
-                player->loseMark("@xiongjie", player->getMark("xiongjie"));
+                player->loseMark("@xiongjie", player->getMark("xiongjiedamage"));
         }
 
         return false;
@@ -2367,13 +2369,9 @@ public:
         limit_mark = "@baozheng";
     }
 
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return PhaseChangeSkill::triggerable(target) && target->getMark("@baozheng") > 0;
-    }
-
     virtual bool onPhaseChange(ServerPlayer *target) const{
         if (target->getPhase() == Player::Draw){
-            if (!target->askForSkillInvoke(objectName()))
+            if (target->getMark("@baozheng") <= 0 || !target->askForSkillInvoke(objectName()))
                 return false;
 
             target->setFlags("baozhengused");
