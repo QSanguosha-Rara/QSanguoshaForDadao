@@ -2045,6 +2045,20 @@ bool Fentian::onPhaseChange(ServerPlayer *hanba) const{
     return false;
 }
 
+class FentianRange: public AttackRangeSkill{
+public:
+    FentianRange(): AttackRangeSkill("#fentian"){
+
+    }
+
+    virtual int getExtra(const Player *target, bool include_weapon) const{
+        if (target->hasSkill(objectName()))
+            return target->getPile("burn").length();
+
+        return 0;
+    }
+};
+
 Zhiri::Zhiri(): PhaseChangeSkill("zhiri") {
     frequency = Wake;
 }

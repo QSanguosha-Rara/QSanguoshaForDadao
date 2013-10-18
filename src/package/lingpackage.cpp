@@ -1513,6 +1513,27 @@ public:
     }
 };
 
+class Neo2013TouxiRange: public AttackRangeSkill{
+public:
+    Neo2013TouxiRange(): AttackRangeSkill("#neo2013touxi"){
+
+    }
+
+    virtual int getFixed(const Player *target, bool include_weapon) const{
+        const Player *current = NULL;
+        foreach (const Player *p, target->getAliveSiblings())
+            if (p->getPhase() != Player::NotActive){
+                current = p;
+                break;
+            }
+
+        if (current != NULL)
+            return current->getHp() > 0 ? current->getHp(): 0;
+
+        return -1;
+    }
+};
+
 class Neo2013Muhui: public ProhibitSkill{
 public:
     Neo2013Muhui(): ProhibitSkill("neo2013muhui"){
@@ -1951,8 +1972,10 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_lvmeng->addRelateSkill("neo2013tongwu");
     neo2013_lvmeng->addRelateSkill("neo2013bingyin");
     neo2013_lvmeng->addRelateSkill("neo2013touxi");
+    neo2013_lvmeng->addRelateSkill("#neo2013touxi");
     neo2013_lvmeng->addRelateSkill("neo2013muhui");
     neo2013_lvmeng->addRelateSkill("#neo2013muhui");
+    related_skills.insertMulti("neo2013touxi", "#neo2013touxi");
     related_skills.insertMulti("neo2013muhui", "#neo2013muhui");
 
     General *neo2013_mateng = new General(this, "neo2013_mateng", "qun", 4);
@@ -2181,6 +2204,19 @@ public:
             room->askForUseCard(player, "@@SixSwords", "@six_swords");
         }
         return false;
+    }
+};
+
+class SixSwordsSkillRange: public AttackRangeSkill{
+public:
+    SixSwordsSkillRange(): AttackRangeSkill("#SixSwords"){
+
+    }
+
+    virtual int getExtra(const Player *target, bool include_weapon) const{
+        if (target->getMark("@SixSwordsBuff") > 0)
+            return 1;
+        return 0;
     }
 };
 
