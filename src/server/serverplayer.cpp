@@ -991,8 +991,12 @@ void ServerPlayer::marshal(ServerPlayer *player) const{
 
     if (!getJudgingAreaID().isEmpty()) {
         CardsMoveStruct move;
-        foreach (int card_id, getJudgingAreaID())
+        foreach (int card_id, getJudgingAreaID()) {
             move.card_ids << card_id;
+            WrappedCard *wrapped = qobject_cast<WrappedCard *>(room->getCard(card_id));
+            if (wrapped->isModified())
+                room->notifyUpdateCard(player, card_id, wrapped);
+        }
         move.from_place = DrawPile;
         move.to_player_name = objectName();
         move.to_place = PlaceDelayedTrick;
