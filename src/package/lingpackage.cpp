@@ -1489,7 +1489,7 @@ public:
 
 };
 
-class Neo2013Touxi: public TriggerSkill{ //Player::getAttackRange()
+class Neo2013Touxi: public TriggerSkill{
 public:
     Neo2013Touxi(): TriggerSkill("neo2013touxi"){
         frequency = Compulsory;
@@ -1510,6 +1510,27 @@ public:
                 room->askForUseSlashTo(p, use.from, "@neo2013touxi-slash:" + use.from->objectName(), false);
 
         return false;
+    }
+};
+
+class Neo2013TouxiRange: public AttackRangeSkill{
+public:
+    Neo2013TouxiRange(): AttackRangeSkill("#neo2013touxi"){
+
+    }
+
+    virtual int getFixed(const Player *target, bool include_weapon) const{
+        const Player *current = NULL;
+        foreach (const Player *p, target->getAliveSiblings())
+            if (p->getPhase() != Player::NotActive){
+                current = p;
+                break;
+            }
+
+        if (current != NULL)
+            return current->getHp() > 0 ? current->getHp(): 0;
+
+        return -1;
     }
 };
 
@@ -1951,8 +1972,10 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_lvmeng->addRelateSkill("neo2013tongwu");
     neo2013_lvmeng->addRelateSkill("neo2013bingyin");
     neo2013_lvmeng->addRelateSkill("neo2013touxi");
+    neo2013_lvmeng->addRelateSkill("#neo2013touxi");
     neo2013_lvmeng->addRelateSkill("neo2013muhui");
     neo2013_lvmeng->addRelateSkill("#neo2013muhui");
+    related_skills.insertMulti("neo2013touxi", "#neo2013touxi");
     related_skills.insertMulti("neo2013muhui", "#neo2013muhui");
 
     General *neo2013_mateng = new General(this, "neo2013_mateng", "qun", 4);
@@ -2184,6 +2207,19 @@ public:
     }
 };
 
+class SixSwordsSkillRange: public AttackRangeSkill{
+public:
+    SixSwordsSkillRange(): AttackRangeSkill("#SixSwords"){
+
+    }
+
+    virtual int getExtra(const Player *target, bool include_weapon) const{
+        if (target->getMark("@SixSwordsBuff") > 0)
+            return 1;
+        return 0;
+    }
+};
+
 Triblade::Triblade(Card::Suit suit, int number): Weapon(suit, number, 3){
     setObjectName("Triblade");
 }
@@ -2335,7 +2371,8 @@ LingCardsPackage::LingCardsPackage(): Package("LingCards", Package::CardPack){
         c->setParent(this);
 
 
-    skills << new SixSwordsSkill << new TribladeSkill << new DragonPhoenixSkill;
+    skills << new SixSwordsSkill << new SixSwordsSkillRange << new TribladeSkill << new DragonPhoenixSkill;
+    related_skills.insertMulti("SixSwords", "#SixSwords");
 
     addMetaObject<SixSwordsSkillCard>();
     addMetaObject<TribladeSkillCard>();

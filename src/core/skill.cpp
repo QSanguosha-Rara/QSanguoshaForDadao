@@ -408,6 +408,18 @@ int TargetModSkill::getExtraTargetNum(const Player *, const Card *) const{
     return 0;
 }
 
+AttackRangeSkill::AttackRangeSkill(const QString &name): Skill(name, Skill::Compulsory){
+
+}
+
+int AttackRangeSkill::getExtra(const Player *, bool) const{
+    return 0;
+}
+
+int AttackRangeSkill::getFixed(const Player *, bool) const{
+    return -1;
+}
+
 SlashNoDistanceLimitSkill::SlashNoDistanceLimitSkill(const QString &skill_name)
     : TargetModSkill(QString("#%1-slash-ndl").arg(skill_name)), name(skill_name)
 {

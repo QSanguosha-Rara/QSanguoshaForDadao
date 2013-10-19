@@ -156,6 +156,7 @@ void Player::clearFlags() {
 }
 
 int Player::getAttackRange(bool include_weapon) const{
+/*
 
     if (hasSkill("neo2013touxi") && getPhase() == NotActive){
         const Player *current = NULL;
@@ -180,6 +181,32 @@ int Player::getAttackRange(bool include_weapon) const{
         weapon_range = card->getRange();
     }
     return qMax(original_range, weapon_range) + (hasSkill("fentian") ? getPile("burn").length() : 0) + (getMark("@SixSwordsBuff") > 0 ? 1 : 0);
+*/
+
+
+    if (hasFlag("InfinityAttackRange") || getMark("InfinityAttackRange") > 0)
+        return 1000;
+
+    include_weapon = include_weapon && weapon != NULL;
+
+    int fixeddis = Sanguosha->correctAttackRange(this, include_weapon, true);
+    if (fixeddis > 0)
+        return fixeddis;
+
+    int original_range = 1, weapon_range = 0;
+
+    if (include_weapon){
+        const Weapon *card = qobject_cast<const Weapon *>(weapon->getRealCard());
+        Q_ASSERT(card);
+        weapon_range = card->getRange();
+    }
+
+    int real_range = qMax(original_range, weapon_range) + Sanguosha->correctAttackRange(this, include_weapon, false);
+
+    if (real_range < 0)
+        real_range = 0;
+
+    return real_range;
 }
 
 bool Player::inMyAttackRange(const Player *other) const{

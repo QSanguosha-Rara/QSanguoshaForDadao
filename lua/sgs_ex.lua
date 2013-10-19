@@ -83,6 +83,22 @@ function sgs.CreateMaxCardsSkill(spec)
 	return skill
 end
 
+function sgs.CreateAttackRangeSkill(spec)
+	assert(type(spec.name) == "string")
+	assert(type(spec.extra_func) == "function" or type(spec.fixed.func) == "function")
+	
+	local skill = sgs.LuaAttackRangeSkill(spec.name)
+	
+	if spec.extra_func then
+		skill.extra_func = spec.extra_func or 0
+	end
+	if spec.fixed_func then
+		skill.fixed_func = spec.fixed_func or -1
+	end
+	
+	return skill
+end
+
 function sgs.CreateTargetModSkill(spec)
 	assert(type(spec.name) == "string")
 	assert(type(spec.residue_func) == "function" or type(spec.distance_limit_func) == "function" or type(spec.extra_target_func) == "function")

@@ -40,17 +40,6 @@ public:
     virtual void onMove(const CardMoveStruct &move) const;
 };*/
 
-/*
-class LianliCard: public SkillCard{
-    Q_OBJECT
-
-public:
-    Q_INVOKABLE LianliCard();
-
-    virtual void onEffect(const CardEffectStruct &effect) const;
-    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
-};*/
-
 class LianliSlashCard: public SkillCard{
     Q_OBJECT
 
