@@ -2715,7 +2715,7 @@ public:
 class Fengyin: public TriggerSkill{
 public:
     Fengyin(): TriggerSkill("fengyin"){
-        events << EventPhaseChanging;
+        events << EventPhaseStart;
         view_as_skill = new FengyinVS;
     }
 
@@ -2724,6 +2724,9 @@ public:
     }
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (player->getPhase() != Player::RoundStart)
+            return false;
+
         ServerPlayer *splayer = room->findPlayerBySkillName(objectName());
         if (splayer == NULL || splayer == player)
             return false;
