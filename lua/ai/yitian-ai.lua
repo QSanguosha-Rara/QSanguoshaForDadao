@@ -189,7 +189,7 @@ sgs.ai_skill_use_func.JuejiCard = function(card, use, self)
 	  and self:getEnemyNumBySeat(self.player, zhugeliang) > 0 and zhugeliang:getHp() <= 2 then
 		local cards = sgs.QList2Table(self.player:getHandcards())
 		self:sortByUseValue(cards, true)
-		use.card = sgs.Card_Parse("@JuejiCard=" .. cards[1]:getId())
+		use.card = sgs.Card_Parse("@JuejiCard=.")
 		zhugeliang:setFlags("jueji_target")
 		if use.to then use.to:append(zhugeliang) end
 		return
@@ -202,7 +202,7 @@ sgs.ai_skill_use_func.JuejiCard = function(card, use, self)
 	if (self:needKongcheng() and self.player:getHandcardNum() == 1) or not self:hasLoseHandcardEffective() then
 		for _, enemy in ipairs(self.enemies) do
 			if not self:doNotDiscard(enemy, "h") then
-				use.card = sgs.Card_Parse("@JuejiCard=" .. max_card:getId())
+				use.card = sgs.Card_Parse("@JuejiCard=.")
 				enemy:setFlags("jueji_target")
 				if use.to then use.to:append(enemy) end
 				return
@@ -220,7 +220,7 @@ sgs.ai_skill_use_func.JuejiCard = function(card, use, self)
 			if (enemy_max_card and max_point > enemy_max_card:getNumber() and allknown > 0)
 				or (enemy_max_card and max_point > enemy_max_card:getNumber() and allknown < 1 and max_point > 10) 
 				or (not enemy_max_card and max_point > 10) then
-				use.card = sgs.Card_Parse("@JuejiCard=" .. max_card:getId())
+				use.card = sgs.Card_Parse("@JuejiCard=.")
 				enemy:setFlags("jueji_target")
 				if use.to then use.to:append(enemy) end
 				return
@@ -232,7 +232,7 @@ sgs.ai_skill_use_func.JuejiCard = function(card, use, self)
 	if self:getOverflow() > 0 then
 		for _, enemy in ipairs(self.enemies) do
 			if not self:doNotDiscard(enemy, "h", true) then
-				use.card = sgs.Card_Parse("@JuejiCard=" .. cards[1]:getId())
+				use.card = sgs.Card_Parse("@JuejiCard=.")
 				enemy:setFlags("jueji_target")
 				if use.to then use.to:append(enemy) end
 				return

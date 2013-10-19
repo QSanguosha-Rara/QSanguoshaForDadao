@@ -70,10 +70,15 @@ end
 
 function sgs.CreateMaxCardsSkill(spec)
 	assert(type(spec.name) == "string")
-	assert(type(spec.extra_func) == "function")
+	assert(type(spec.extra_func) == "function" or type(spec.fixed_func) == "function")
 
 	local skill = sgs.LuaMaxCardsSkill(spec.name)
-	skill.extra_func = spec.extra_func
+	if spec.extra_func then
+		skill.extra_func = spec.extra_func
+	end
+	if spec.fixed_func then
+		skill.fixed_func = spec.fixed_func
+	end
 
 	return skill
 end

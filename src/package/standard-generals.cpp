@@ -1324,7 +1324,7 @@ public:
 
     virtual bool onPhaseChange(ServerPlayer *target) const{
         Room *room = target->getRoom();
-        if (!isNormalGameMode(room->getMode()))
+        if (!isNormalGameMode(room->getMode()) || Config.EnableHegemony) //fix hegemony mode that yuanshu can trigger wangzun to wei players
             return false;
         if (target->isLord() && target->getPhase() == Player::Start) {
             ServerPlayer *yuanshu = room->findPlayerBySkillName(objectName());
