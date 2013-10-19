@@ -352,6 +352,37 @@ sgs.ai_skill_invoke.neoaocai = function(self) --没细想
 		return false
 end
 
+sgs.ai_skill_choice.neoaocai = function(self, choices)
+	local from = self.room:getCurrent()
+	if self:isFriend(from) then return "give" 
+	elseif self:isEnemy(from) then
+		local cards = self.player:getCards("he")
+		for _, card in sgs.qlist(cards) do
+			if (card:isKindOf("AmazingGrace") or self:cardNeed(card) < 3) and not from:hasSkills("qingnang|jijiu|longhun") then return "give" end
+		end
+		if self:isWeak(from) and not self:isWeak() and self.player:getHandcardNum() >= 4 then return "discard" end
+		if self:isWeak(from) and self.player:getHandcardNum() > 7 then return "discard" end
+		if self:doNotDiscard(self.player) or self:hasLoseHandcardEffective() or self:getOverflow() > 0 then return "discard" end
+		if self.player:hasSkill("kongcheng") or self:needKongcheng(nil, true) then return "discard" end
+	end
+	local choice_table = choices:split("+")	
+	return choice_table[math.random(1, #choice_table)] 
+end
+sgs.ai_skill_discard["neoaocai-give"] = function(self, discard_num, min_num, optional, include_equip)
+	local to_id
+	local from = self.room:getCurrent()
+	local cards = sgs.QList2Table(self.player:getCards("he"))
+	if #cards < discard_num then return {} end
+	self:sortByCardNeed(cards)
+	if self:isFriend(from) then to_id = cards[math.random(1, #cards)]:getEffectiveId()
+	elseif self:isEnemy(from) then
+		if #cards > 0 and #cards <= 2 then to_id = cards[1]:getEffectiveId()
+		elseif #cards > 2 then to_id = cards[math.random(1, 2)]:getEffectiveId() end
+	end
+	local discard = {to_id}
+	return discard 
+end
+
 --技能：专权
 
 function sgs.ai_skill_invoke.zhuanquan(self, data)
