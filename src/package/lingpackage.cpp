@@ -1880,6 +1880,114 @@ public:
     }
 };
 
+Neo2013JiejiCard::Neo2013JiejiCard(){
+    target_fixed = true;
+    will_throw = false;
+    handling_method = Card::MethodNone;
+}
+
+void Neo2013JiejiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+    source->addToPile("robbery", this, false);
+}
+
+class Neo2013JiejiVS: public OneCardViewAsSkill{
+public:
+    Neo2013JiejiVS(): OneCardViewAsSkill("neo2013jieji"){
+        filter_pattern = ".|.|.|hand";
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("Neo2013JiejiCard");
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        Neo2013JiejiCard *jieji = new Neo2013JiejiCard;
+        jieji->addSubcard(originalCard);
+        return jieji;
+    }
+};
+
+class Neo2013Jieji: public TriggerSkill{
+public:
+    Neo2013Jieji(): TriggerSkill("neo2013jieji"){
+        events << CardUsed << CardsMoveOneTime;
+        view_as_skill = new Neo2013JiejiVS;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        ServerPlayer *selfplayer = room->findPlayerBySkillName(objectName());
+        if (selfplayer == NULL || selfplayer->getPile("robbery").length() == 0)
+            return false;
+
+        QList<int> robbery = selfplayer->getPile("robbery");
+        QList<int> disable, able;
+
+        if (triggerEvent == CardUsed){
+            CardUseStruct use = data.value<CardUseStruct>();
+            if (use.from != NULL && use.from->hasSkill(objectName()))
+                return false;
+
+            if (use.card == NULL || (use.card->isKindOf("SkillCard") || use.card->isKindOf("EquipCard")))
+                return false;
+            foreach(int id, robbery){
+                if (Sanguosha->getCard(id)->sameColorWith(use.card))
+                    able.append(id);
+                else
+                    disable.append(id);
+            }
+            if (able.isEmpty() || !selfplayer->askForSkillInvoke(objectName(), data))
+                return false;
+
+            room->fillAG(robbery, selfplayer, disable);
+            int card_id = room->askForAG(selfplayer, able, true, objectName());
+            if (card_id != -1){
+                room->throwCard(Sanguosha->getCard(card_id), CardMoveReason(CardMoveReason::S_REASON_PUT, QString()), NULL);
+                room->obtainCard(selfplayer, use.card);
+                use.to.clear();
+                data = QVariant::fromValue(use);
+            }
+            room->clearAG(selfplayer);
+        }
+        else {
+            if (!player->hasSkill(objectName()))
+                return false;
+
+            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+            if (move.from == NULL || move.to == NULL)
+                return false;
+
+            if (move.card_ids.length() != 1 || !move.from_places.contains(Player::PlaceHand) || move.to_place != Player::PlaceEquip)
+                return false;
+
+            const Card *card = Sanguosha->getCard(move.card_ids[0]);
+            if (!card->isKindOf("EquipCard"))
+                return false;
+
+            foreach(int id, robbery){
+                if (Sanguosha->getCard(id)->sameColorWith(card))
+                    able.append(id);
+                else
+                    disable.append(id);
+            }
+            if (able.isEmpty() || !selfplayer->askForSkillInvoke(objectName(), data))
+                return false;
+
+            room->fillAG(robbery, selfplayer, disable);
+            int card_id = room->askForAG(selfplayer, able, true, objectName());
+            if (card_id != -1){
+                room->throwCard(Sanguosha->getCard(card_id), CardMoveReason(CardMoveReason::S_REASON_PUT, QString()), NULL);
+                room->obtainCard(selfplayer, card);
+            }
+            room->clearAG(selfplayer);
+        }
+
+        return false;
+    }
+};
 
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
@@ -1998,11 +2106,16 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_yufan->addSkill(new Neo2013Zongxuan);
     neo2013_yufan->addSkill("zhiyan");
 
+    General *neo2013_panzmaz = new General(this, "neo2013_panzhangmazhong", "wu", 4);
+    neo2013_panzmaz->addSkill(new Neo2013Jieji);
+    neo2013_panzmaz->addSkill("anjian");
+
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();
     addMetaObject<Neo2013YongyiCard>();
     addMetaObject<Neo2013XiongyiCard>();
     addMetaObject<Neo2013ZhoufuCard>();
+    addMetaObject<Neo2013JiejiCard>();
 
     skills << new Neo2013HuileiDecrease << new Neo2013Huwei
         << new Neo2013Tongwu << new Neo2013Bingyin << new Neo2013Touxi << new Neo2013Muhui << new Neo2013MuhuiDis;
