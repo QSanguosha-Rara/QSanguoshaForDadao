@@ -1020,7 +1020,7 @@ jingshang.getTurnUseCard=function(self)
 		cardc = sgs.Card_Parse(cardstr)
 	elseif not card_id and powers:length() > 1 then
 		cardc = sgs.Card_Parse("@JingshangCard=.")
-	end
+	else return nil end
 	assert(cardc)
 	return cardc
 end
