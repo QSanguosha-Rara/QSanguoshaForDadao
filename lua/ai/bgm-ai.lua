@@ -1334,6 +1334,26 @@ end
 sgs.ai_skill_invoke.yinzhi = function(self, data)
 	local damage = data:toDamage()
 	local target = damage.from
-	if self:isFriend(target) and self:doNotDiscard(target) then return true end
+	if (self:isFriend(target) and self:doNotDiscard(target)) or self:isWeak() then return true end
 	return self:isEnemy(target) and not self:doNotDiscard(target)
+end
+sgs.ai_skill_playerchosen.yinzhi = function(self, targets)
+	self:sort(self.friends, "handcard")
+	local to = self:findPlayerToDraw(true, math.random(0, 2))
+	if to then return to end
+	for _, friend in ipairs(self.friends) do
+		if (not (self:needKongcheng(friend) or friend:hasSkill("manjuan"))) and friend:isAlive() then return friend end
+	end
+	return self.friends[1] or self.player
+end
+
+sgs.ai_skill_choice.mingjian = function(self, choices)
+	return "discard"
+end
+
+sgs.ai_skill_invoke.mingjian = function(self, data)
+	local target = data:toPlayer()
+	if not target or self:isEnemy(target) then return end
+	if self:willSkipPlayPhase(target) or self:willSkipDrawPhase(target) then return true end
+	return false
 end
