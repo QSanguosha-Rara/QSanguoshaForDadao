@@ -194,13 +194,11 @@ public:
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *jiangwei, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-        if(move.from == jiangwei && move.from_places.contains(Player::PlaceHand) && jiangwei->isKongcheng())
-        {
+        if (move.from == jiangwei && move.from_places.contains(Player::PlaceHand) && move.is_last_handcard){
             QList<ServerPlayer *> players;
             Slash *slash = new Slash(Card::NoSuit, 0);
             slash->setSkillName(objectName());
-            foreach(ServerPlayer *player, room->getOtherPlayers(jiangwei))
-            {
+            foreach (ServerPlayer *player, room->getOtherPlayers(jiangwei)){
                 if (jiangwei->canSlash(player, slash) && !jiangwei->isProhibited(jiangwei, slash))
                     players << player;
             }
