@@ -855,7 +855,7 @@ public:
 class Shien:public TriggerSkill{
 public:
     Shien():TriggerSkill("shien"){
-        events << CardUsed << CardResponded;
+        events << CardUsed;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -866,12 +866,7 @@ public:
         if (player == NULL) return false;
         if (player->getMark("forbid_shien") > 0 || player->hasFlag("forbid_shien"))
             return false;
-        CardStar card = NULL;
-        if(triggerEvent == CardUsed){
-            CardUseStruct use = data.value<CardUseStruct>();
-            card = use.card;
-        }else if(triggerEvent == CardResponded)
-            card = data.value<CardResponseStruct>().m_card;
+        CardStar card = data.value<CardUseStruct>().card;
 
         if(card && card->isNDTrick()){
             ServerPlayer *shuijing = room->findPlayerBySkillName(objectName());
