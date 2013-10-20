@@ -355,20 +355,12 @@ sgs.ai_use_value.BefriendAttacking = 7.8
 sgs.ai_use_priority.BefriendAttacking = 4.35
 
 function SmartAI:useCardKnownBoth(card, use)
-local usesed = self.player:usedTimes("KnownBoth")	
-local tars = self.room:getOtherPlayers(self.player)
-local to = tars:at(math.random(0,tars:length()-1))
-local voke = math.random(0,5) == 3
-local tw = math.random(0,1) == 1
-use.card = card
-if (not self:isWeak()) and not self.player:hasSkill("yongsi") and (voke or (usesed<=1 and tw)) and not self.room:isProhibited(self.player,to,card) and self:hasTrickEffective(card, to) and not to:isKongcheng() then
-if use.to then use.to:append(to) end
-return
-end 
+	use.card = card
+	return
 end
 sgs.ai_use_priority.KnownBoth = 8
 sgs.ai_use_value.KnownBoth = sgs.ai_use_value.AmazingGrace - 1
-sgs.ai_card_intention.KnownBoth = 70
+
 
 sgs.weapon_range.SixSwords = 2
 sgs.weapon_range.Triblade = 3
