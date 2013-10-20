@@ -413,7 +413,7 @@ struct JsonArrayForLUA{
     inline operator Json::Value() const{
         return m_realvalue;
     }
-    
+
     inline Json::Value &operator [](int x){
         return m_realvalue[x];
     }

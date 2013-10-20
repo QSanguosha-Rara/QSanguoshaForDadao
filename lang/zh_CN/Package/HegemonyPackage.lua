@@ -41,7 +41,7 @@ return {
 	[":xiongyi"] = "<font color=\"red\"><b>限定技，</b></font>出牌阶段，你可以令你与任意数量的其他角色各摸三张牌。若以此法摸牌的角色数不大于全场角色数的一半，你回复1点体力。",
 	["@arise"] = "雄异",
 	["$XiongyiAnimate"] = "image=image/animate/xiongyi.png",
-	
+
 	["#kongrong"] = "凛然重义",
 	["kongrong"] = "孔融",
 	["illustrator:kongrong"] = "苍月白龙",

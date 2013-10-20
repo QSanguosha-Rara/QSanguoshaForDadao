@@ -507,7 +507,7 @@ public:
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == EventPhaseStart) {
-            if (!TriggerSkill::triggerable(player) 
+            if (!TriggerSkill::triggerable(player)
                 || (player->getPhase() != Player::RoundStart || player->getPhase() != Player::NotActive)) return false;
         } else if (triggerEvent == Death) {
             DeathStruct death = data.value<DeathStruct>();

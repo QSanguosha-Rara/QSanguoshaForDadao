@@ -90,7 +90,7 @@ CommonTranslationTable = {
 	["armor"] = "防具",
 	["defensive_horse"] = "+1坐骑",
 	["offensive_horse"] = "-1坐骑",
-	
+
 	["luck_card"] = "手气卡",
 
 	["wei"] = "魏",
@@ -131,7 +131,7 @@ CommonTranslationTable = {
 	["$MoveToDiscardPile"] = "%from 将 %card 置入弃牌堆",
 	["$GotCardBack"] = "%from 收回了 %card",
 	["$RecycleCard"] = "%from 从弃牌堆获得了 %card",
- 	["$Dismantlement"] = "%from 的 %card 被弃置",
+	["$Dismantlement"] = "%from 的 %card 被弃置",
 	["$ShowCard"] = "%from 展示了 %card",
 	["$ShowAllCards"] = "%from 展示了所有手牌 %card",
 	["$ViewAllCards"] = "%from 观看了 %to 的所有手牌 %card",
@@ -181,7 +181,7 @@ CommonTranslationTable = {
 	["$CancelTargetNoUser"] = "【%arg】的目标 %to 被取消",
 	["$ViewRole"] = "%from 观看了 %to 的身份 %arg",
 	["$CancelTarget"] = "%from 使用【%arg】的目标 %to 被取消",
-	["$CancelTargetNoUser"] = "【%arg】的目标 %to 被取消", 
+	["$CancelTargetNoUser"] = "【%arg】的目标 %to 被取消",
 	["#UseLuckCard"] = "%from 使用了 <font color=\"yellow\"><b>手气卡</b></font>",
 
 	["cw"] = "顺时针",

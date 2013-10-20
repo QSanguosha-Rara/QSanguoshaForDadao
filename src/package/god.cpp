@@ -738,7 +738,7 @@ public:
             const Card *exchange_card = room->askForExchange(shenzhuge, "qixing", 7);
             shenzhuge->addToPile("stars", exchange_card->getSubcards(), false);
             delete exchange_card;
-        } 
+        }
         return false;
     }
 };
@@ -1270,7 +1270,7 @@ bool Longhun::viewFilter(const QList<const Card *> &selected, const Card *card) 
                slash->addSubcards(selected);
                slash->addSubcard(card->getEffectiveId());
                slash->deleteLater();
-               return slash->isAvailable(Self); 
+               return slash->isAvailable(Self);
             } else
                 return false;
         }

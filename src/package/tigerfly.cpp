@@ -506,7 +506,7 @@ const Card *JisiCard::validateInResponse(ServerPlayer *player) const{
     ServerPlayer *current = room->getCurrent();
     if (!current || current->isDead() || current->getPhase() == Player::NotActive || current == player)
         return NULL;
-    
+
     room->broadcastSkillInvoke("jisi", 1);
 
     if (player->pindian(current, "jisi")){
@@ -1873,7 +1873,7 @@ public:
     Zijun(): PhaseChangeSkill("zijun"){
 
     }
-    
+
     virtual bool triggerable(const ServerPlayer *target) const{
         return target != NULL && target->isAlive() && !target->hasSkill(objectName()) && target->getHandcardNum() < target->getHp();
     }
@@ -1906,7 +1906,7 @@ public:
                 if (to_give.isEmpty())
                     return false;
 
-                CardsMoveStruct move(to_give, target, Player::PlaceHand, 
+                CardsMoveStruct move(to_give, target, Player::PlaceHand,
                     CardMoveReason(CardMoveReason::S_REASON_GOTCARD, mizhu->objectName(), objectName(), QString()));
 
                 room->moveCards(move, true);
@@ -1961,7 +1961,7 @@ public:
                 target->addToPile("ju", c, true);
                 if (target->getPile("ju").length() == 3){
                     ServerPlayer *to_give = room->askForPlayerChosen(target, room->getOtherPlayers(target), objectName() + "-give", "@huaiju-give");
-                    CardsMoveStruct move(target->getPile("ju"), to_give, Player::PlaceHand, 
+                    CardsMoveStruct move(target->getPile("ju"), to_give, Player::PlaceHand,
                         CardMoveReason(CardMoveReason::S_REASON_GOTCARD, target->objectName(), objectName(), QString()));
 
                     room->moveCards(move, true);
@@ -2037,7 +2037,7 @@ public:
                 room->sendLog(l);
 
                 if (judge->who == luji)
-                    room->askForDiscard(luji, objectName(), tuwithsamesuit.length(), tuwithsamesuit.length(), false, true, 
+                    room->askForDiscard(luji, objectName(), tuwithsamesuit.length(), tuwithsamesuit.length(), false, true,
                         "@xingsuan-discard:" + QString::number(tuwithsamesuit.length()));
                 else
                     room->drawCards(luji, tuwithsamesuit.length(), objectName());
@@ -2173,7 +2173,7 @@ public:
     virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
         return player->hasFlag("chanyu_caninvoke") && player->getMark("chanyuused") == 0 && pattern == "nullification";
     }
-    
+
     virtual bool isEnabledAtNullification(const ServerPlayer *player) const{
         return player->hasFlag("chanyu_caninvoke") && player->getMark("chanyuused") == 0;
     }
@@ -2285,7 +2285,7 @@ public:
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        if (triggerEvent != DamageDone && !(TriggerSkill::triggerable(player))) 
+        if (triggerEvent != DamageDone && !(TriggerSkill::triggerable(player)))
             return false;
 
         switch (triggerEvent) {
@@ -2302,7 +2302,7 @@ public:
                         room->setCardFlag(use.card, "suoshi_invoked");
 
                     room->setPlayerProperty(player, "suoshitarget", QVariant());
-                    
+
                 }
             }
             case ConfirmDamage:{
@@ -2403,7 +2403,7 @@ public:
             Room *room = target->getRoom();
             room->setPlayerMark(target, "@baozheng", 0);
             room->broadcastSkillInvoke(objectName());
-            QList<ServerPlayer *> players = room->getOtherPlayers(target); 
+            QList<ServerPlayer *> players = room->getOtherPlayers(target);
 
             try {
                 foreach(ServerPlayer *p, players){
@@ -2867,7 +2867,7 @@ TigerFlyPackage::TigerFlyPackage(): Package("tigerfly") {
     General *mizhu = new General(this, "mizhu", "shu", 3);
     mizhu->addSkill(new Jingshang);
     mizhu->addSkill(new Zijun);
-    
+
     General *luji = new General(this, "luji", "wu", 3);
     luji->addSkill(new Huaiju);
     luji->addSkill(new Xingsuan);

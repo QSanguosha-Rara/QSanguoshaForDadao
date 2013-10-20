@@ -156,8 +156,8 @@ local t = {
 	["$shien1"] = "吾师教诲，终身不忘。",
 	["$shien2"] = "龙凤之才，全赖吾师。", -- 龙凤发动师恩
 	["~wis_shuijing"] = "儒生俗士，终究难平天下吗？",
-	
-	
+
+
 	["illustrator:wis_xuyou"] = "三国志大战",
 	["illustrator:wis_jiangwei"] = "巴萨小马",
 	["illustrator:wis_jiangwan"] = "Zero",

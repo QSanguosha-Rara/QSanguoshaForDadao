@@ -1259,7 +1259,7 @@ void XunzhiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) 
         general = room->askForChoice(source, "xunzhi", shu_generals.join("+"));
     else
         general = room->askForGeneral(source, shu_generals);
-    
+
     source->tag["newgeneral"] = general;
     bool isSecondaryHero = (source->getGeneralName() != "jiangboyue");
     room->changeHero(source, general, false, true, isSecondaryHero);
@@ -1544,11 +1544,11 @@ void YisheCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) c
     if(subcards.isEmpty()){
         foreach(int card_id, rice)
             room->obtainCard(source, card_id);
-        
+
     }else{
         foreach(int card_id, subcards)
             source->addToPile("rice", card_id);
-        
+
         room->broadcastSkillInvoke("yishe", 1);
     }
 }
@@ -1756,7 +1756,7 @@ public:
             log.arg = QString::number(damage.damage);
             log.arg2 = QString::number(-- damage.damage);
             room->sendLog(log);
-            
+
             room->broadcastSkillInvoke(objectName());
 
             if (damage.damage <= 0)

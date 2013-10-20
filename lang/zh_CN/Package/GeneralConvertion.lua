@@ -43,11 +43,11 @@ return {
 	["&sp_shenlvbu"] = "神吕布",
 	["illustrator:sp_shenlvbu"] = "干橘子",
 	["$ShenfenAnimateSP"] = "image=image/animate/shenfenSP.png",
-	
+
 	["yuejin"] = "乐进",
 	["&yuejin"] = "乐进",
 	["illustrator:yuejin"] = "巴萨小马",
-	
+
 	["cv_fuwan:convert"] = "你可以替换为铜雀台穆顺" ,
 
 	["tw_diaochan"] = "台版貂蝉",
@@ -55,65 +55,65 @@ return {
 	["illustrator:tw_diaochan"] = "陳俊佐",
 
 	["tw_yuanshu"] = "台版袁术",
-	["&tw_yuanshu"] = "袁术", 
+	["&tw_yuanshu"] = "袁术",
 	["illustrator:tw_yuanshu"] = "湯翔麟",
 
 	["tw_zhaoyun"] = "台版赵云",
-	["&tw_zhaoyun"] = "赵云", 
+	["&tw_zhaoyun"] = "赵云",
 	["illustrator:tw_zhaoyun"] = "湯翔麟",
 
 	["tw_daqiao"] = "台版大乔",
-	["&tw_daqiao"] = "大乔", 
+	["&tw_daqiao"] = "大乔",
 	["illustrator:tw_daqiao"] = "玄兔",
 
 	["tw_zhenji"] = "台版甄姬",
-	["&tw_zhenji"] = "甄姬", 
+	["&tw_zhenji"] = "甄姬",
 	["illustrator:tw_zhenji"] = "DM添",
 
 	["tw_machao"] = "台版马超",
-	["&tw_machao"] = "马超", 
+	["&tw_machao"] = "马超",
 	["illustrator:tw_machao"] = "greey",
 
 	["tw_ganning"] = "台版甘宁",
-	["&tw_ganning"] = "甘宁", 
+	["&tw_ganning"] = "甘宁",
 	["illustrator:tw_ganning"] = "greey",
 
 	["tw_huangyueying"] = "台版黄月英",
-	["&tw_huangyueying"] = "黄月英", 
+	["&tw_huangyueying"] = "黄月英",
 	["illustrator:tw_huangyueying"] = "焚烧的大葱",
 
 	["tw_zhugeliang"] = "台版诸葛亮",
-	["&tw_zhugeliang"] = "诸葛亮", 
+	["&tw_zhugeliang"] = "诸葛亮",
 	["illustrator:tw_zhugeliang"] = "巴萨小马",
 
 	["tw_lvbu"] = "台版吕布",
-	["&tw_lvbu"] = "吕布", 
+	["&tw_lvbu"] = "吕布",
 	["illustrator:tw_lvbu"] = "焚烧的大葱",
 
 	["tw_zhangliao"] = "台版张辽",
-	["&tw_zhangliao"] = "张辽", 
+	["&tw_zhangliao"] = "张辽",
 	["illustrator:tw_zhangliao"] = "巴萨小马",
 
 	["tw_luxun"] = "台版陆逊",
-	["&tw_luxun"] = "陆逊", 
+	["&tw_luxun"] = "陆逊",
 	["illustrator:tw_luxun"] = "巴萨小马",
 
 	["tw_guojia"] = "台版郭嘉",
-	["&tw_guojia"] = "郭嘉", 
+	["&tw_guojia"] = "郭嘉",
 	["illustrator:tw_guojia"] = "巴萨小马",
 
 	["tw_huanggai"] = "台版黄盖",
-	["&tw_huanggai"] = "黄盖", 
+	["&tw_huanggai"] = "黄盖",
 	["illustrator:tw_huanggai"] = "巴萨小马",
 
 	["wz_daqiao"] = "王战大乔",
-	["&wz_daqiao"] = "大乔", 
+	["&wz_daqiao"] = "大乔",
 	["illustrator:wz_daqiao"] = "Natsu",
 
 	["wz_xiaoqiao"] = "王战小乔",
-	["&wz_xiaoqiao"] = "小乔", 
+	["&wz_xiaoqiao"] = "小乔",
 	["illustrator:wz_xiaoqiao"] = "Natsu",
-	
+
 	["diy_zhugeke"] = "诸葛恪-贴纸",
 	["&diy_zhugeke"] = "诸葛恪",
 	["illustrator:diy_zhugeke"] = "大佬荣",
@@ -126,35 +126,35 @@ return {
 	["illustrator:sp_heg_zhouyu"] = "牧童的短笛",
 
 	["heg_caopi"] = "曹丕-国",
-	["&heg_caopi"] = "曹丕", 
+	["&heg_caopi"] = "曹丕",
 	["illustrator:heg_caopi"] = "DH",
 
 	["heg_zhenji"] = "甄姬-国",
-	["&heg_zhenji"] = "甄姬", 
+	["&heg_zhenji"] = "甄姬",
 	["illustrator:heg_zhenji"] = "DH",
 
 	["heg_zhugeliang"] = "诸葛亮-国",
-	["&heg_zhugeliang"] = "诸葛亮", 
+	["&heg_zhugeliang"] = "诸葛亮",
 	["illustrator:heg_zhugeliang"] = "木美人",
 
 	["heg_huangyueying"] = "黄月英-国",
-	["&heg_huangyueying"] = "黄月英", 
+	["&heg_huangyueying"] = "黄月英",
 	["illustrator:heg_huangyueying"] = "木美人",
 	["cv_nos_huangyueying:convert"] = "你可以替换为国战黄月英或台版黄月英",
 
 	["heg_zhouyu"] = "周瑜-国",
-	["&heg_zhouyu"] = "周瑜", 
+	["&heg_zhouyu"] = "周瑜",
 	["illustrator:heg_zhouyu"] = "苍月白龙",
 
 	["heg_xiaoqiao"] = "小乔-国",
-	["&heg_xiaoqiao"] = "小乔", 
+	["&heg_xiaoqiao"] = "小乔",
 	["illustrator:heg_xiaoqiao"] = "苍月白龙",
 
 	["heg_lvbu"] = "吕布-国",
-	["&heg_lvbu"] = "吕布", 
+	["&heg_lvbu"] = "吕布",
 	["illustrator:heg_lvbu"] = "LiuHeng",
 
 	["heg_diaochan"] = "貂蝉-国",
-	["&heg_diaochan"] = "貂蝉", 
+	["&heg_diaochan"] = "貂蝉",
 	["illustrator:heg_diaochan"] = "LiuHeng",
 }

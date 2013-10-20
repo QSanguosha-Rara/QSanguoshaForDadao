@@ -933,7 +933,7 @@ public:
         }
         return false;
     }
-}; 
+};
 
 class CuoruiForNormalMode: public TriggerSkill{
 public:
@@ -989,7 +989,7 @@ public:
         return slash;
     }
 };
-    
+
 class Niluan: public TriggerSkill {
 public:
     Niluan(): TriggerSkill("niluan") {
@@ -1035,7 +1035,7 @@ public:
         return false;
     }
 };
-            
+
 class NiluanRecord: public TriggerSkill {
 public:
     NiluanRecord(): TriggerSkill("#niluan-record") {
@@ -1075,7 +1075,7 @@ Drowning::Drowning(Suit suit, int number)
 
 bool Drowning::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
     int total_num = 1 + Sanguosha->correctCardTarget(TargetModSkill::ExtraTarget, Self, this);
-    return targets.length() < total_num && to_select != Self; 
+    return targets.length() < total_num && to_select != Self;
 }
 
 void Drowning::onEffect(const CardEffectStruct &effect) const{

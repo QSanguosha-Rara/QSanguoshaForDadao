@@ -13,7 +13,7 @@ return {
 	["nostal_yjcm2012"] = "怀旧-一将2",
 	["nostal_wind"] = "怀旧-风包" ,
 	["nostal_other"] = "怀旧-其他" ,
-	
+
 	["nos_liubei"] = "刘备-旧",
 	["&nos_liubei"] = "刘备",
 	["nosrende"] = "仁德",
@@ -30,12 +30,12 @@ return {
 	[":nosjizhi"] = "每当你使用非延时类锦囊牌时，你可以摸一张牌。",
 	["nosqicai"] = "奇才",
 	[":nosqicai"] = "<font color=\"blue\"><b>锁定技，</b></font>你使用锦囊牌无距离限制。",
-	
+
 	["nos_caoren"] = "曹仁-旧",
 	["&nos_caoren"] = "曹仁",
 	["nosjushou"] = "据守",
 	[":nosjushou"] = "结束阶段开始时，你可以摸三张牌，然后将你的武将牌翻面。",
-	
+
 	["nos_zhoutai"] = "周泰-旧",
 	["&nos_zhoutai"] = "周泰",
 	["nosbuqu"] = "不屈",
@@ -44,13 +44,13 @@ return {
 	["#NosBuquDuplicateGroup"] = "第 %arg 组重复点数为 %arg2",
 	["$NosBuquDuplicateItem"] = "重复“不屈牌”: %card",
 	["$NosBuquRemove"] = "%from 移除了“不屈牌”：%card",
-	
+
 	["nos_zhangjiao"] = "张角-旧",
 	["&nos_zhangjiao"] = "张角",
 	["illustrator:nos_zhangjiao"] = "LiuHeng",
 	["nosleiji"] = "雷击",
 	[":nosleiji"] = "每当你使用或打出【闪】时，你可以令一名角色进行判定，若结果为♠，你对其造成2点雷电伤害。",
-	
+
 	["nos_yuji"] = "于吉-旧",
 	["&nos_yuji"] = "于吉",
 	["nosguhuo"] = "蛊惑",
@@ -82,7 +82,7 @@ return {
 	["#JujianRecover"] = "%from 发动“<font color=\"yellow\"><b>举荐</b></font>”弃置了三张 %arg ，回复1点体力",
 
 	["nos_lingtong"] = "凌统-旧",
-	["&nos_lingtong"] = "凌统", 
+	["&nos_lingtong"] = "凌统",
 	["designer:nos_lingtong"] = "ShadowLee",
 	["illustrator:nos_lingtong"] = "绵Myan",
 	["nosxuanfeng"] = "旋风",
@@ -135,7 +135,7 @@ return {
 	["illustrator:nos_guanxingzhangbao"] = "HOOO",
 	["nosfuhun"] = "父魂",
 	[":nosfuhun"] = "摸牌阶段开始时，你可以放弃摸牌，从牌堆顶亮出两张牌并获得之，若亮出的牌颜色不同，你拥有“武圣”、“咆哮”，直到回合结束。",
-	
+
 	["#nos_as_fuhuanghou"] = "与世不侵",
 	["nos_as_fuhuanghou"] = "伏皇后",
 	["designer:nos_as_fuhuanghou"] = "凌天翼",
@@ -157,7 +157,7 @@ return {
 	["noschizhong"] = "持重",
 	[":noschizhong"] = "<font color=\"blue\"><b>锁定技，</b></font>你的手牌上限等于你的体力上限；其他角色死亡时，你加1点体力上限。",
 	["#Chizhong"] = " %from 受到【%arg】的影响，偷偷藏下了更多的手牌！",
-	
+
 	["nos_kongrong"] = "亮牌孔融" ,
 	["&nos_kongrong"] = "孔融" ,
 	["nosmingshi"] = "名士" ,

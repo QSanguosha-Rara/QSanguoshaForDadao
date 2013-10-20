@@ -503,7 +503,7 @@ void XianzhenCard::onEffect(const CardEffectStruct &effect) const{
         QStringList assignee_list = effect.from->property("extra_slash_specific_assignee").toString().split("+");
         assignee_list << target->objectName();
         room->setPlayerProperty(effect.from, "extra_slash_specific_assignee", assignee_list.join("+"));
- 
+
         room->setFixedDistance(effect.from, effect.to, 1);
         room->addPlayerMark(effect.to, "Armor_Nullified");
     } else {

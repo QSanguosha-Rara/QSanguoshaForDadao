@@ -210,7 +210,7 @@ return {
 	["$super_zhiheng2"] = "且慢。",
 
 	["wuxing_zhugeliang"] = "五星诸葛",
-	["&wuxing_zhugeliang"] = "诸葛亮", 
+	["&wuxing_zhugeliang"] = "诸葛亮",
 	["super_guanxing"] = "观星",
 	[":super_guanxing"] = "准备阶段开始时，你可以观看牌堆顶的五张牌，然后将任意数量的牌以任意顺序置于牌堆顶，将其余的牌以任意顺序置于牌堆底。",
 

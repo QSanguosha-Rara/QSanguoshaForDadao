@@ -56,7 +56,7 @@ return {
 	["illustrator:neo_zhugeke"] = "Aimer彩三",
 	["cv:neo_zhugeke"] = "Aimer彩三",
 	["@neoaocaigive"] = "请交给诸葛恪一张牌",
-	
+
 
 
 	["#liuzhang"] = "蹯踞西川",
@@ -134,16 +134,16 @@ return {
 	["illustrator:zhangxingcai"] = "地狱许",
 	["cv:zhangxingcai"] = "啦啦SLG", --娱乐，娱乐。
 	["@xuedian"]="你可以用一张红色牌替换牌堆顶的 %src 张牌",
-	
+
 	["#wenyang"] = "单骑退雄兵" ,
 	["wenyang"] = "文鸯" ,
-	["designer:wenyang"] = "凌天翼" , 
+	["designer:wenyang"] = "凌天翼" ,
 	["illustrator:wenyang"] = "KOEI" ,
 	["tuwei"] = "突围" ,
 	[":tuwei"] = "<b>锁定技</b>，若攻击范围内含有你的其他角色的数量大于你当前的体力值，你使用【杀】选择目标的个数上限+1。" ,
 	["gudan"] = "孤胆" ,
 	[":gudan"] = "你可以将所有手牌当一张基本牌使用或打出。" ,
-	
+
 	["bianfuren"] = "卞夫人",
 	["#bianfuren"] = "武宣皇后" ,
 	["designer:bianfuren"] = "凌天翼" ,
@@ -158,7 +158,7 @@ return {
 	["@shangjian-give"] = "你可以将至少一张手牌交给一名其他角色。" ,
 	["ci"] = "赐" ,
 	["@manwu"] = "请选择一名角色。" ,
-	
+
 	["liyan"] = "李严" ,
 	["#liyan"] = "腹有鳞甲" ,
 	["designer:liyan"] = "沸治•克里夫&凌天翼" ,
@@ -170,7 +170,7 @@ return {
 	["dangliang:d2p"] = "交换摸牌阶段与出牌阶段" ,
 	["danglinag:d2f"] = "交换摸牌阶段与结束阶段" ,
 	["@dangliang-discard"] = "你可以弃置一张牌发动【宕粮】" ,
-	
+
 	["mizhu"] = "糜竺" ,
 	["#mizhu"] = "德财兼备" ,
 	["designer:mizhu"] = "凌天翼" ,
@@ -182,7 +182,7 @@ return {
 	["zijun:dismiss"] = "不给了" ,
 	["zijun:give"] = "我想给" ,
 	["zijun:givecontinue"] = "继续给" ,
-	
+
 	["luji"] = "陆绩" ,
 	["#luji"] = "博学的孝子" ,
 	["designer:luji"] = "凌天翼" ,
@@ -197,7 +197,7 @@ return {
 	["@xingsuan-discard"] = "你的判定牌生效，“星算”触发，你需要弃置 %src 张牌。" ,
 	["#xingsuan-discard"] = "%from 触发“星算”，须弃置 %arg 张牌" ,
 	["#xingsuan-draw"] = "%from 触发“星算”，须摸 %arg 张牌" ,
-	
+
 	["zhangren"] = "张任" ,
 	["#zhangren"] = "魂断金雁桥" ,
 	["designer:zhangren"] = "凌天翼" ,
@@ -207,7 +207,7 @@ return {
 	["@fuji-discard"] = "你可以弃置一张牌发动“伏击”。" ,
 	["yongjie"] = "勇节" ,
 	[":yongjie"] = "每当你成为【杀】的目标后，你可以减1点体力上限，令此【杀】对你无效。" ,
-	
+
 	["jiachong"] = "贾充" ,
 	["#jiachong"] = "怀奸拥权" ,
 	["designer:jiachong"] = "凌天翼" ,
@@ -217,7 +217,7 @@ return {
 	["suoshi"] = "唆弑" ,
 	[":suoshi"] = "每当你使用【杀】指定目标后，你可以将一张手牌交给除目标外的一名角色，令该角色成为此【杀】造成伤害的来源，若如此做，当此【杀】结算结束后，若此【杀】造成过伤害，你对其造成1点伤害。" ,
 	["@suoshi-give"] = "你可以发动“唆弑”" ,
-	
+
 	["sunhao"] = "孙皓" ,
 	["#sunhao"] = "末路的暴君" ,
 	["designer:sunhao"] = "凌天翼" ,
@@ -237,7 +237,7 @@ return {
 	["zongjiu:damage"] = "为了主公，死也愿意" ,
 	["zongjiu:rob"] = "花钱买酒给主公喝" ,
 	["@zongjiu-give"] = "请将一张【桃】交给主公。" ,
-	
+
 	["#neo_fuhuanghou"] = "与世不侵" ,
 	["neo_fuhuanghou"] = "伏皇后" ,
 	["designer:neo_fuhuanghou"] = "凌天翼" ,
@@ -247,14 +247,14 @@ return {
 	[":mixin"] = "摸牌阶段开始时，你可以放弃摸牌，改为观看牌堆顶的三张牌，然后获得其中两张，将另一张牌交给一名其他角色，该角色需对你选择的另一名角色使用一张【杀】（无距离限制），否则你选择的角色观看其手牌并获得其中任意一张。" ,
 	["@mixin-give"] = "请选择这张牌的获得者" ,
 	["@mixin-slash"] = "请选择【杀】的目标" ,
-	
+
 	["#neo_fuwan"] = "沉毅的国丈" ,
 	["neo_fuwan"] = "伏完" ,
 	["fengyin"] = "奉印" ,
 	[":fengyin"] = "其他角色的回合开始时，若该角色当前的体力值不比你小，你可以将一张装备牌或【杀】 交给其，令其跳过其出牌阶段和弃牌阶段，然后你摸一张牌。" ,
 	["chizhong"] = "持重" ,
 	[":chizhong"] = "锁定技，你的手牌上限等于你的体力上限；锁定技，每当其他角色死亡时，你加 1 点体力上限，然后回复1点体力。 " ,
-	
+
 	["#jiben"] = "誓死除奸恶",
 	["jiben"] = "吉本",
 	["designer:jiben"] = "凌天翼",

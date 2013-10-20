@@ -2220,7 +2220,7 @@ public:
 
             QList<int> to_show = room->getNCards(2, false);
 
-            CardsMoveStruct move(to_show, NULL, Player::PlaceTable, 
+            CardsMoveStruct move(to_show, NULL, Player::PlaceTable,
                 CardMoveReason(CardMoveReason::S_REASON_TURNOVER, player->objectName(), objectName(), QString()));
             room->moveCardsAtomic(move, true);
             room->getThread()->delay();
@@ -2243,7 +2243,7 @@ public:
                         }
                     }
                 }
-                else 
+                else
                     dummyget.addSubcard(c);
 
             if (!dummythrow.getSubcards().isEmpty()){

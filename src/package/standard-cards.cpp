@@ -54,7 +54,7 @@ bool Slash::IsAvailable(const Player *player, const Card *slash, bool considerSp
                         return true;
                 }
             }
-        } 
+        }
         return false;
     } else {
         return true;
@@ -326,7 +326,7 @@ bool Slash::targetFilter(const QList<const Player *> &targets, const Player *to_
         }
     }
 
-    if (has_specific_assignee) { 
+    if (has_specific_assignee) {
         if (targets.isEmpty())
             return Slash::IsSpecificAssignee(to_select, Self, this) && Self->canSlash(to_select, this, distance_limit, rangefix);
         else {
@@ -997,7 +997,7 @@ Duel::Duel(Suit suit, int number)
 
 bool Duel::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
     int total_num = 1 + Sanguosha->correctCardTarget(TargetModSkill::ExtraTarget, Self, this);
-    return targets.length() < total_num && to_select != Self; 
+    return targets.length() < total_num && to_select != Self;
 }
 
 void Duel::onEffect(const CardEffectStruct &effect) const{
@@ -1059,7 +1059,7 @@ Snatch::Snatch(Suit suit, int number)
 
 bool Snatch::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
     int total_num = 1 + Sanguosha->correctCardTarget(TargetModSkill::ExtraTarget, Self, this);
-    if (targets.length() >= total_num || to_select->isAllNude() || to_select == Self) 
+    if (targets.length() >= total_num || to_select->isAllNude() || to_select == Self)
         return false;
 
     int distance_limit = 1 + Sanguosha->correctCardTarget(TargetModSkill::DistanceLimit, Self, this);
@@ -1098,7 +1098,7 @@ Dismantlement::Dismantlement(Suit suit, int number)
 
 bool Dismantlement::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
     int total_num = 1 + Sanguosha->correctCardTarget(TargetModSkill::ExtraTarget, Self, this);
-    return targets.length() < total_num && !to_select->isAllNude() && to_select != Self; 
+    return targets.length() < total_num && !to_select->isAllNude() && to_select != Self;
 }
 
 void Dismantlement::onEffect(const CardEffectStruct &effect) const{

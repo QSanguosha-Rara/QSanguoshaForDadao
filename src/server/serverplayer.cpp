@@ -492,7 +492,7 @@ bool ServerPlayer::pindian(ServerPlayer *target, const QString &reason, const Ca
         room->notifySkillInvoked(this, "qiangbian");
         room->broadcastSkillInvoke("qiangbian");
         card2 = Sanguosha->getCard(room->askForCardChosen(this, target, "h", "qiangbian"));
-        
+
         LogMessage l2;
         l2.type = "#qiangbianpd";
         l2.from = this;

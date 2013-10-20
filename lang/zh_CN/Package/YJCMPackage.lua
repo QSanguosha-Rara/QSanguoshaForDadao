@@ -118,7 +118,7 @@ return {
 	["shangshi"] = "伤逝",
 	[":shangshi"] = "弃牌阶段外，每当你的手牌数小于X时，你可以将手牌补至X张（X为你已损失的体力值且至多为2）。",
 
-    ["#zhonghui"] = "桀骜的野心家",
+	["#zhonghui"] = "桀骜的野心家",
 	["zhonghui"] = "钟会",
 	["illustrator:zhonghui"] = "雪君S",
 	["quanji"] = "权计",

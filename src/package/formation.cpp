@@ -42,7 +42,7 @@ public:
         }
         return false;
     }
-}; 
+};
 
 HuyuanCard::HuyuanCard() {
     will_throw = false;
@@ -112,7 +112,7 @@ public:
             room->askForUseCard(target, "@@huyuan", "@huyuan-equip", -1, Card::MethodNone);
         return false;
     }
-}; 
+};
 
 
 HeyiCard::HeyiCard() {
@@ -145,7 +145,7 @@ void HeyiCard::onUse(Room *room, const CardUseStruct &card_use) const{
 }
 
 void HeyiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
-    room->setTag("HeyiSource", QVariant::fromValue((PlayerStar)source)); 
+    room->setTag("HeyiSource", QVariant::fromValue((PlayerStar)source));
     QList<ServerPlayer *> players = room->getAllPlayers();
     int index1 = players.indexOf(targets.first()), index2 = players.indexOf(targets.last());
     int index_self = players.indexOf(source);
@@ -224,7 +224,7 @@ public:
             foreach (ServerPlayer *p, room->getOtherPlayers(player)) {
                 if (list.contains(p->objectName()))
                     room->detachSkillFromPlayer(p, "feiying", false, true);
-            } 
+            }
         }
         if (TriggerSkill::triggerable(player) && triggerEvent == EventPhaseChanging)
             room->askForUseCard(player, "@@heyi", "@heyi");
@@ -299,7 +299,7 @@ public:
         }
         return false;
     }
-}; 
+};
 
 class Qianhuan: public TriggerSkill {
 public:
@@ -471,7 +471,7 @@ public:
         return false;
     }
 };
- 
+
 
 class Shengxi: public TriggerSkill {
 public:
@@ -603,13 +603,13 @@ FormationPackage::FormationPackage()
 
     General *heg_dengai = new General(this, "heg_dengai", "wei"); // WEI 015 G
     heg_dengai->addSkill("tuntian");
-    heg_dengai->addSkill(new Ziliang); 
+    heg_dengai->addSkill(new Ziliang);
 
     General *heg_caohong = new General(this, "heg_caohong", "wei"); // WEI 018
     heg_caohong->addSkill(new Huyuan);
     heg_caohong->addSkill(new Heyi);
 
-    General *jiangwanfeiyi = new General(this, "jiangwanfeiyi", "shu", 3); // SHU 018 
+    General *jiangwanfeiyi = new General(this, "jiangwanfeiyi", "shu", 3); // SHU 018
     //ToDo: Add skin for jiangwanfeiyi @@Yan Guam
     jiangwanfeiyi->addSkill(new Shengxi);
     jiangwanfeiyi->addSkill(new Shoucheng);
@@ -627,7 +627,7 @@ FormationPackage::FormationPackage()
 
     General *hetaihou = new General(this, "hetaihou", "qun", 3, false); // QUN 020
     hetaihou->addSkill(new Zhendu);
-    hetaihou->addSkill(new Qiluan); 
+    hetaihou->addSkill(new Qiluan);
 
     addMetaObject<HuyuanCard>();
     addMetaObject<HeyiCard>();

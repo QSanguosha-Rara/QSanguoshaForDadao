@@ -284,7 +284,7 @@ DrawCardsSkill::DrawCardsSkill(const QString &name, bool is_initial)
         events << DrawInitialCards;
     else
         events << DrawNCards;
-} 
+}
 
 bool DrawCardsSkill::trigger(TriggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
     int n = data.toInt();

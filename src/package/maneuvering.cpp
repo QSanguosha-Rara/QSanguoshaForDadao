@@ -315,7 +315,7 @@ QString IronChain::getSubtype() const{
 
 bool IronChain::targetFilter(const QList<const Player *> &targets, const Player *, const Player *Self) const{
     int total_num = 2 + Sanguosha->correctCardTarget(TargetModSkill::ExtraTarget, Self, this);
-    return targets.length() < total_num && !Self->isCardLimited(this, Card::MethodUse); 
+    return targets.length() < total_num && !Self->isCardLimited(this, Card::MethodUse);
 }
 
 bool IronChain::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{

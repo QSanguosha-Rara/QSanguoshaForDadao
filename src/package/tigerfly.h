@@ -87,7 +87,7 @@ public:
 
 class ChanyuCard: public SkillCard{
     Q_OBJECT
-        
+
 public:
     Q_INVOKABLE ChanyuCard();
     virtual const Card *validateInResponse(ServerPlayer *user) const;

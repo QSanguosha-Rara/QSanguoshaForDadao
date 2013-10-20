@@ -679,7 +679,7 @@ QString Engine::getSetupString() const{
     if (mode == "02_1v1")
         mode = mode + Config.value("1v1/Rule", "2013").toString();
     else if (mode == "06_3v3")
-        mode = mode + Config.value("3v3/OfficialRule", "2013").toString(); 
+        mode = mode + Config.value("3v3/OfficialRule", "2013").toString();
     setup_items << server_name
                 << Config.GameMode
                 << QString::number(timeout)

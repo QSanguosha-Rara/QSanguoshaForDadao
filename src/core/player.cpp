@@ -156,33 +156,6 @@ void Player::clearFlags() {
 }
 
 int Player::getAttackRange(bool include_weapon) const{
-/*
-
-    if (hasSkill("neo2013touxi") && getPhase() == NotActive){
-        const Player *current = NULL;
-        foreach(const Player *p, getAliveSiblings()){
-            if (p->getPhase() != NotActive)
-                current = p;
-                break;
-            }
-        
-        if (current != NULL){
-            return current->getHp();
-        }
-    }
-
-    int original_range = 1;
-    if (hasSkill("zhengfeng") && !weapon && hp > 1) original_range = hp; // @todo_P: new way to remove coupling or just put it into TargetModSkill
-    if (hasFlag("InfinityAttackRange") || getMark("InfinityAttackRange") > 0) original_range = 10000; // Actually infinity
-    int weapon_range = 0;
-    if (include_weapon && weapon != NULL) {
-        const Weapon *card = qobject_cast<const Weapon *>(weapon->getRealCard());
-        Q_ASSERT(card);
-        weapon_range = card->getRange();
-    }
-    return qMax(original_range, weapon_range) + (hasSkill("fentian") ? getPile("burn").length() : 0) + (getMark("@SixSwordsBuff") > 0 ? 1 : 0);
-*/
-
 
     if (hasFlag("InfinityAttackRange") || getMark("InfinityAttackRange") > 0)
         return 1000;
@@ -359,7 +332,7 @@ bool Player::hasSkill(const QString &skill_name, bool include_lose) const{
                 return false;
             if (skill_name != "chanyuan" && hasSkill("chanyuan") && hp == 1 && (!skill || !skill->isAttachedLordSkill()))
                 return false;
-        } 
+        }
     }
     return skills.contains(skill_name)
            || acquired_skills.contains(skill_name);
@@ -765,7 +738,7 @@ int Player::getCardCount(bool include_equip, bool include_judging) const{
         if (offensive_horse != NULL) count++;
     }
     if (include_judging)
-        count += judging_area.length(); 
+        count += judging_area.length();
     return count;
 }
 

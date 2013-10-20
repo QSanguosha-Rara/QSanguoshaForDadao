@@ -1130,7 +1130,7 @@ public:
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == EventPhaseStart) {
-            if (!TriggerSkill::triggerable(player) 
+            if (!TriggerSkill::triggerable(player)
                 || (player->getPhase() != Player::RoundStart || player->getPhase() != Player::NotActive)) return false;
         } else if (triggerEvent == Death) {
             DeathStruct death = data.value<DeathStruct>();
@@ -1266,7 +1266,7 @@ public:
     virtual bool isEnabledAtPlay(const Player *player){
         return player->getMark("@neo2013xiechan") > 0;
     }
-    
+
     virtual const Card *viewAs() const{
         return new Neo2013XiechanCard;
     }
@@ -1351,7 +1351,7 @@ public:
 
         room->broadcastSkillInvoke(objectName());
         room->doLightbox("$neo2013xiangxue");
-        
+
         if (room->changeMaxHpForAwakenSkill(target)){
             room->setPlayerMark(target, objectName(), 1);
             room->drawCards(target, 2);
@@ -1370,8 +1370,8 @@ public:
     }
 
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
-        if (Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY 
-                || (Sanguosha->currentRoomState()->getCurrentCardUsePattern() == "slash" 
+        if (Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY
+                || (Sanguosha->currentRoomState()->getCurrentCardUsePattern() == "slash"
                 && Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE_USE))
             return selected.isEmpty() && to_select->isNDTrick();
         else if (Sanguosha->currentRoomState()->getCurrentCardUsePattern() == "@@neo2013tongwu")
@@ -1381,8 +1381,8 @@ public:
     }
 
     virtual const Card *viewAs(const QList<const Card *> &cards) const{
-        if (Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY 
-                || (Sanguosha->currentRoomState()->getCurrentCardUsePattern() == "slash" 
+        if (Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY
+                || (Sanguosha->currentRoomState()->getCurrentCardUsePattern() == "slash"
                 && Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE_USE)){
             if (cards.length() == 0)
                 return NULL;
@@ -1421,7 +1421,7 @@ public:
     virtual bool triggerable(const ServerPlayer *target) const{
         return target != NULL && target->isAlive();
     }
-    
+
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == DamageDone){
             DamageStruct damage = data.value<DamageStruct>();
@@ -2102,7 +2102,7 @@ public:
         frequency = Frequent;
         events << EventPhaseEnd << CardUsed << CardResponded;
     }
-    
+
     virtual bool triggerable(const ServerPlayer *target) const{
         return target != NULL && target->isAlive();
     }
@@ -2207,7 +2207,7 @@ public:
             catch (TriggerEvent errorevent){
                 if (errorevent == StageChange || errorevent == TurnBroken)
                     room->setPlayerProperty(player, "neo2013jinan", QVariant());
-                
+
                 throw errorevent;
             }
         }

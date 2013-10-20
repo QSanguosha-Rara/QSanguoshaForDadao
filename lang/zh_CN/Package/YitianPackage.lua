@@ -17,8 +17,8 @@ return {
 	["yt_shencaocao"] = "魏武帝",
 	["weiwudi_guixin"] = "归心",
 	[":weiwudi_guixin"] = "回合结束阶段，你可以做以下二选一：\
-      1. 永久改变一名其他角色的势力\
-      2. 永久获得一项未上场或已死亡角色的主公技。(获得后即使你不是主公仍然有效)",
+	  1. 永久改变一名其他角色的势力\
+	  2. 永久获得一项未上场或已死亡角色的主公技。(获得后即使你不是主公仍然有效)",
 	["weiwudi_guixin:yes"] = "永久改变一名其他角色的势力或永久获得一项未上场或已死亡角色的主公技",
 	["weiwudi_guixin:modify"] = "永久改变一名其他角色的势力",
 	["weiwudi_guixin:obtain"] = "永久获得一项未上场或已死亡角色的主公技",
@@ -223,7 +223,7 @@ return {
 	["$conghui"] = "吾虽年幼，智意所及，有若成人。",
 	["$zaoyao"] = "咳咳咳……",
 	["~yt_caochong"] = "仓舒，仓舒……", -- 曹操的声音
-	
+
 	["designer:zhangjunyi"] = "孔孟老庄胡",
 	["illustrator:zhangjunyi"] = "火凤燎原",
 	["cv:zhangjunyi"] = "裤衩",
