@@ -178,12 +178,5 @@ public:
     Q_INVOKABLE SPMoonSpear(Card::Suit suit = Diamond, int number = 12);
 };
 
-class HegemonySPPackage: public Package {
-    Q_OBJECT
-
-public:
-    HegemonySPPackage();
-};
-
 #endif
 
