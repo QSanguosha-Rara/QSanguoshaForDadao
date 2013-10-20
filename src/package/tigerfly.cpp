@@ -1720,7 +1720,6 @@ public:
     }
 };
 
-//for tigerfly liyan. Liyan's Dangliang is complicated
 class Jingao: public ProhibitSkill{
 public:
     Jingao(): ProhibitSkill("jingao"){
