@@ -1244,7 +1244,6 @@ public:
     }
 };
 
-
 class Xuedian: public TargetModSkill{
 public:
     Xuedian(): TargetModSkill("xuedian"){
@@ -1361,7 +1360,7 @@ public:
 
                     room->notifySkillInvoked(player, objectName());
                     LogMessage l;
-                    l.type = "#ZhanjiWake";
+                    l.type = "#WujiWake";
                     l.from = player;
                     l.arg = QString::number(player->getMark("zhanji_damage"));
                     l.arg2 = objectName();
@@ -1397,8 +1396,8 @@ public:
             return 0;
 
         int i = 0;
-        foreach(const Player *p, from->getAliveSiblings()) {
-            if(p->inMyAttackRange(from))
+        foreach (const Player *p, from->getAliveSiblings()){
+            if (p->inMyAttackRange(from))
                 i++;
         }
 
@@ -1730,6 +1729,32 @@ public:
 
     virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others = QList<const Player *>()) const{
         return to->hasSkill(objectName()) && from->getEquips().length() < to->getEquips().length() && card->isKindOf("BasicCard");
+    }
+};
+
+class Dangliang: public PhaseChangeSkill{
+public:
+    Dangliang(): PhaseChangeSkill("dangliang"){
+
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *player) const{ // ServerPlayer::play()
+        if (player->getPhase() != Player::RoundStart)
+            return false;
+
+        Room *room = player->getRoom();
+        ServerPlayer *liyan = room->findPlayerBySkillName(objectName());
+        if (liyan == NULL || liyan->isDead())
+            return false;
+
+        if (room->askForCard(liyan, "^BasicCard", "@dangliang-discard", QVariant::fromValue(player)))
+            player->tag["dangliang"] = room->askForChoice(liyan, objectName(), "d2p+d2f");
+
+        return false;
     }
 };
 
@@ -2835,6 +2860,10 @@ TigerFlyPackage::TigerFlyPackage(): Package("tigerfly") {
     bian->addSkill(new Shangjian);
     bian->addSkill(new Manwu);
     bian->addSkill(new Annei);
+
+    General *liyan = new General(this, "liyan", "shu", 4);
+    liyan->addSkill(new Jingao);
+    liyan->addSkill(new Dangliang);
 
     General *mizhu = new General(this, "mizhu", "shu", 3);
     mizhu->addSkill(new Jingshang);

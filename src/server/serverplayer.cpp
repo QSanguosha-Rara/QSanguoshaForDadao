@@ -705,6 +705,29 @@ void ServerPlayer::play(QList<Player::Phase> set_phases) {
             thread->trigger(EventPhaseEnd, room, this);
         else
             break;
+
+        if (getPhase() == RoundStart && tag["dangliang"].toString().length() != 0){
+            int to_swap1 = -1, to_swap2 = -1;
+            for (int i = 0; i < phases.length(); i++){
+                if (phases[i] == Draw)
+                    to_swap1 = i;
+                else if (phases[i] == Play && tag["dangliang"].toString() == "d2p")
+                    to_swap2 = i;
+                else if (phases[i] == Finish && tag["dangliang"].toString() == "d2f")
+                    to_swap2 = i;
+            }
+            tag["dangliang"] = QString();
+            if (to_swap1 == -1 || to_swap2 == -1)
+                continue;
+
+            Player::Phase phasetemp = phases[to_swap1];
+            phases[to_swap1] = phases[to_swap2];
+            phases[to_swap2] = phasetemp;
+
+            PhaseStruct phasechangetemp = _m_phases_state[to_swap1];
+            _m_phases_state[to_swap1] = _m_phases_state[to_swap2];
+            _m_phases_state[to_swap2] = phasechangetemp;
+        }
     }
 }
 
