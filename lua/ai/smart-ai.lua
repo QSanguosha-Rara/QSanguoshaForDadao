@@ -4902,6 +4902,7 @@ function SmartAI:getAoeValueTo(card, to, from)
 		elseif card:isKindOf("SavageAssault") and sj_num >= 1 then
 			if to:hasSkill("gushou") then value = value + 8 end
 			if to:hasSkill("xiaoguo") then value = value - 4 end
+			if to:hasSkills("juxiang|huoshou|manyi") then value = value - 1000 end
 		end
 
 		if to:hasSkills("longdan+chongzhen") and self:isEnemy(to) then
