@@ -1989,6 +1989,113 @@ public:
     }
 };
 
+class Neo2013Yanyu: public TriggerSkill{
+public:
+    Neo2013Yanyu(): TriggerSkill("neo2013yanyu"){
+        events << BeforeCardsMove << EventPhaseStart;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+private:
+    void moveToEndOfDrawPile(Room *room, int card_id) const{
+        QList<int> drawpile = room->getDrawPile();
+        room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
+        drawpile.append(card_id);
+        room->getDrawPile() = drawpile;
+        room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
+    }
+
+public:
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == BeforeCardsMove && TriggerSkill::triggerable(player)){
+            if (room->getCurrent() == NULL || room->getCurrent() == player || room->getCurrent()->getPhase() != Player::Play)
+                return false;
+
+            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+            if ((move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_PUT && move.to_place == Player::DiscardPile){
+
+                if (player->getMark("neo2013yanyu") >= 3 || !player->askForSkillInvoke(objectName(), data))
+                    return false;
+
+                while (!move.card_ids.isEmpty() && player->getMark("neo2013yanyu") < 3){
+                    room->fillAG(move.card_ids, player);
+                    int selected = room->askForAG(player, move.card_ids, false, objectName());
+                    room->clearAG(player);
+
+                    QStringList choices;
+                    choices << "cancel";
+                    if (!player->isNude()){
+                        choices << "gain";
+                        QList<int> cards = player->handCards();
+                        foreach (const Card *c, player->getEquips())
+                            cards << c->getEffectiveId();
+
+                        foreach (int card_id, cards)
+                            if (Sanguosha->getCard(card_id)->getType() == Sanguosha->getCard(selected)->getType()){
+                                choices << "give";
+                                break;
+                            }
+                    }
+                    if (choices.length() == 1)
+                        break;
+
+                    QString choice = room->askForChoice(player, objectName(), choices.join("+"), QVariant(selected));
+
+                    if (choice != "cancel"){
+                        room->setPlayerMark(player, "neo2013yanyu", player->getMark("neo2013yanyu") + 1);
+                    }
+
+                    if (choice == "cancel")
+                        break;
+                    else if (choice == "gain"){
+                        const Card *card = room->askForExchange(player, objectName() + "-gain", 1, true, "@neo2013yanyu-gain", false);
+                        int id = card->getEffectiveId();
+                        moveToEndOfDrawPile(room, id);
+                        move.from_places.removeAt(move.card_ids.at(selected));
+                        move.card_ids.removeOne(selected);
+                        room->obtainCard(player, selected);
+                    }
+                    else if (choice == "give"){
+                        QString pattern;
+                        switch (Sanguosha->getCard(selected)->getTypeId()){
+                            case Card::TypeBasic:
+                                pattern == ".Basic";
+                                break;
+                            case Card::TypeEquip:
+                                pattern == ".Equip";
+                                break;
+                            case Card::TypeTrick:
+                                pattern == ".Trick";
+                                break;
+                            default:
+                                Q_ASSERT(false);
+                        }
+                        const Card *card = room->askForCard(player, pattern, "@yanyu-give", QVariant(selected), Card::MethodNone, NULL, false, objectName());
+                        QString choice2 = room->askForChoice(player, objectName() + "-moveplace", "up+down", QVariant(QVariantList() << selected << card->getEffectiveId()));
+                        ServerPlayer *to_give = room->askForPlayerChosen(player, room->getOtherPlayers(player), objectName() + "-give", "@yanyu-giveplayer");
+                        if (choice2 == "up")
+                            room->moveCardTo(card, NULL, Player::DrawPile);
+                        else
+                            moveToEndOfDrawPile(room, card->getEffectiveId());
+
+                        move.from_places.removeAt(move.card_ids.at(selected));
+                        move.card_ids.removeOne(selected);
+                        room->obtainCard(to_give, selected);
+                    }
+                }
+            }
+        }
+        else if (triggerEvent == EventPhaseStart && player->getPhase() == Player::RoundStart){
+            foreach (ServerPlayer *p, room->findPlayersBySkillName(objectName()))
+                room->setPlayerMark(p, "neo2013yanyu", 0);
+        }
+        return false;
+    }
+};
+
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
     neo2013_masu->addSkill(new Neo2013Xinzhan);
@@ -2109,6 +2216,10 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_panzmaz = new General(this, "neo2013_panzhangmazhong", "wu", 4);
     neo2013_panzmaz->addSkill(new Neo2013Jieji);
     neo2013_panzmaz->addSkill("anjian");
+
+    General *neo2013_xiahoushi = new General(this, "neo2013_xiaohoushi", "shu", 3);
+    neo2013_xiahoushi->addSkill(new Neo2013Yanyu);
+    neo2013_xiahoushi->addSkill("xiaode");
 
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();
