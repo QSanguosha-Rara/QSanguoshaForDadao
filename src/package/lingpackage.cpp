@@ -2096,6 +2096,209 @@ public:
     }
 };
 
+class Neo2013Jingce: public TriggerSkill{
+public:
+    Neo2013Jingce(): TriggerSkill("neo2013jingce"){
+        frequency = Frequent;
+        events << EventPhaseEnd << CardUsed << CardResponded;
+    }
+    
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if ((triggerEvent == CardUsed || triggerEvent == CardResponded) /*&& TriggerSkill::triggerable(player)*/){
+            ServerPlayer *current = room->getCurrent();
+            if (current == NULL || current->getPhase() != Player::Play)
+                return false;
+
+            const Card *card = NULL;
+            if (triggerEvent == CardUsed)
+                card = data.value<CardUseStruct>().card;
+            else
+                card = data.value<CardResponseStruct>().m_card;
+
+            if (card != NULL && !card->isKindOf("SkillCard"))
+                room->setPlayerMark(player, objectName(), player->getMark(objectName()) + 1);
+        }
+        else if (triggerEvent == EventPhaseEnd && player->getPhase() == Player::Play){
+            foreach (ServerPlayer *p, room->findPlayersBySkillName(objectName())){
+                if (p->getMark(objectName()) >= p->getHp() && p->askForSkillInvoke(objectName()))
+                    p->drawCards(2);
+            }
+            foreach (ServerPlayer *p, room->getAlivePlayers())
+                room->setPlayerMark(p, objectName(), 0);
+        }
+        return false;
+    }
+};
+
+
+Neo2013JinanCard::Neo2013JinanCard(){
+    will_throw = false;
+    handling_method = Card::MethodNone;
+}
+
+bool Neo2013JinanCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return targets.length() == 0 && to_select->objectName() == Self->property("neo2013jinan").toString();
+}
+
+void Neo2013JinanCard::onEffect(const CardEffectStruct &effect) const{
+    Room *room = effect.to->getRoom();
+    int id = getEffectiveId();
+    Player::Place cardplace = room->getCardPlace(id);
+    room->moveCardTo(Sanguosha->getCard(id), effect.to, cardplace);
+}
+
+class Neo2013JinanVS: public OneCardViewAsSkill{
+public:
+    Neo2013JinanVS(): OneCardViewAsSkill("neo2013jinan"){
+        response_pattern = "@@neo2013jinan";
+    }
+
+    virtual bool viewFilter(const Card *to_select) const{
+        const Player *target = NULL;
+        foreach (const Player *p, Self->getAliveSiblings())
+            if (p->objectName() == Self->property("neo2013jinan").toString()){
+                target = p;
+                break;
+            }
+        if (target == NULL)
+            return false;
+
+        if (!to_select->isEquipped())
+            return true;
+        else {
+            const EquipCard *equip = qobject_cast<const EquipCard *>(to_select->getRealCard());
+            if (target->getEquip((int)(equip->location())))
+                return false;
+            return true;
+        }
+
+        return false;
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        Neo2013JinanCard *card = new Neo2013JinanCard;
+        card->addSubcard(card);
+        return card;
+    }
+};
+
+class Neo2013Jinan: public TriggerSkill{
+public:
+    Neo2013Jinan(): TriggerSkill("neo2013jinan"){
+        events << TargetConfirmed;
+        view_as_skill = new Neo2013JinanVS;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        CardUseStruct use = data.value<CardUseStruct>();
+        foreach (ServerPlayer *p, use.to){
+            if (p == player)
+                continue;
+
+            room->setPlayerProperty(player, "neo2013jinan", p->objectName());
+            try {
+                room->askForUseCard(player, "@@neo2013jinan", "@neo2013jinan", -1, Card::MethodNone);
+                room->setPlayerProperty(player, "neo2013jinan", QVariant());
+            }
+            catch (TriggerEvent errorevent){
+                if (errorevent == StageChange || errorevent == TurnBroken)
+                    room->setPlayerProperty(player, "neo2013jinan", QVariant());
+                
+                throw errorevent;
+            }
+        }
+        return false;
+    }
+};
+
+class Neo2013Enyuan: public TriggerSkill{
+public:
+    Neo2013Enyuan(): TriggerSkill("neo2013enyuan"){
+        events << HpRecover << Damaged << CardsMoveOneTime;
+    }
+
+private:
+    const static int NotInvoke = 0;
+    const static int En = 1;
+    const static int Yuan = 2;
+
+public:
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        ServerPlayer *target = NULL;
+        int enyuaninvoke = NotInvoke;
+        int triggertimes = 0;
+        switch (triggerEvent){
+            case (HpRecover):{
+                RecoverStruct recover = data.value<RecoverStruct>();
+                if (recover.who != NULL && recover.who != player){
+                    target = recover.who;
+                    enyuaninvoke = En;
+                    triggertimes = recover.recover;
+                }
+                break;
+            }
+            case (Damaged):{
+                DamageStruct damage = data.value<DamageStruct>();
+                if (damage.from != NULL && damage.from != player){
+                    target = damage.from;
+                    enyuaninvoke = Yuan;
+                    triggertimes = damage.damage;
+                }
+                break;
+            }
+            case (CardsMoveOneTime):{
+                CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+                if (move.from == player && move.to != NULL && move.to != player && player->getPhase() == Player::NotActive){
+                    target = (ServerPlayer *)(move.to);
+                    enyuaninvoke = Yuan;
+                    triggertimes = 1;
+                }
+                else if (move.to == player && move.from != NULL && move.from != player){
+                    target = (ServerPlayer *)(move.from);
+                    enyuaninvoke = En;
+                    triggertimes = 1;
+                }
+                break;
+            }
+            default:
+                Q_ASSERT(false);
+        }
+        room->setPlayerMark(player, objectName(), enyuaninvoke);
+        switch (enyuaninvoke){
+            case (NotInvoke):{
+                break;
+            }
+            case (En):{
+                for (int i = 0; i < triggertimes; i++){
+                    if (player->askForSkillInvoke(objectName(), QVariant::fromValue(target)))
+                        target->drawCards(1);
+                }
+                break;
+            }
+            case (Yuan):{
+                for (int i = 0; i < triggertimes; i++){
+                    if (player->askForSkillInvoke(objectName(), QVariant::fromValue(target))){
+                        const Card *red = room->askForCard(target, ".red", "@enyuanheart", QVariant::fromValue(player), Card::MethodNone);
+                        if (red == NULL)
+                            room->loseHp(target);
+                        else
+                            room->obtainCard(player, red);
+                    }
+                }
+                break;
+            }
+            default:
+                Q_ASSERT(false);
+        }
+        room->setPlayerMark(player, objectName(), 0);
+        return false;
+    }
+};
+
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
     neo2013_masu->addSkill(new Neo2013Xinzhan);
@@ -2221,12 +2424,21 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_xiahoushi->addSkill(new Neo2013Yanyu);
     neo2013_xiahoushi->addSkill("xiaode");
 
+    General *neo2013_guohuai = new General(this, "neo2013_guohuai", "wei", 3);
+    neo2013_guohuai->addSkill(new Neo2013Jingce);
+    neo2013_guohuai->addSkill(new Neo2013Jinan);
+
+    General *neo2013_fazheng = new General(this, "neo2013_fazheng", "shu", 3);
+    neo2013_fazheng->addSkill("nosxuanhuo");
+    neo2013_fazheng->addSkill(new Neo2013Enyuan);
+
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();
     addMetaObject<Neo2013YongyiCard>();
     addMetaObject<Neo2013XiongyiCard>();
     addMetaObject<Neo2013ZhoufuCard>();
     addMetaObject<Neo2013JiejiCard>();
+    addMetaObject<Neo2013JinanCard>();
 
     skills << new Neo2013HuileiDecrease << new Neo2013Huwei
         << new Neo2013Tongwu << new Neo2013Bingyin << new Neo2013Touxi << new Neo2013Muhui << new Neo2013MuhuiDis;
