@@ -76,7 +76,7 @@ public:
     bool hasShownRole() const;
     void setShownRole(bool shown);
 
-    int getMaxCards() const;
+    int getMaxCards(const QString &except = QString()) const;
 
     QString getKingdom() const;
     void setKingdom(const QString &kingdom);
