@@ -841,6 +841,7 @@ qice_skill.getTurnUseCard = function(self)
 		for i=1, #aoenames do
 			local newqice = aoenames[i]
 			aoe = sgs.Sanguosha:cloneCard(newqice, sgs.Card_NoSuit, 0)
+			--self.player:speak(aoe:objectName() .. ":" .. tostring(self:getAoeValue(aoe))) --
 			if self:getAoeValue(aoe) > 0 then
 				local parsed_card = sgs.Card_Parse("@QiceCard=" .. table.concat(allcard, "+") .. ":" .. newqice)
 				return parsed_card
@@ -860,6 +861,7 @@ qice_skill.getTurnUseCard = function(self)
 		for i=1, #aoenames do
 			local newqice = aoenames[i]
 			aoe = sgs.Sanguosha:cloneCard(newqice, sgs.Card_NoSuit, 0)
+			--self.player:speak(aoe:objectName() .. ":" .. tostring(self:getAoeValue(aoe))) --
 			if self:getAoeValue(aoe) > 0 then
 				local parsed_card = sgs.Card_Parse("@QiceCard=" .. table.concat(allcard, "+") .. ":" .. newqice)
 				return parsed_card

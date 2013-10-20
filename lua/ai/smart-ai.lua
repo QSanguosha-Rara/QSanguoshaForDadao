@@ -4745,7 +4745,7 @@ function SmartAI:aoeIsEffective(card, to, source)
 	source = source or self.room:getCurrent()
 
 	if to:hasArmorEffect("Vine") then
-		return false
+		return card:isKindOf("NeoDrowning")
 	end
 	if self.room:isProhibited(self.player, to, card) then
 		return false
@@ -4763,7 +4763,7 @@ function SmartAI:aoeIsEffective(card, to, source)
 	end
 	
 	if card:isKindOf("SavageAssault") then
-		if to:hasSkill("huoshou") or to:hasSkill("juxiang") then
+		if to:hasSkill("huoshou") or to:hasSkill("juxiang") or to:hasSkill("manyi") then
 			return false
 		end
 	end
@@ -4803,6 +4803,11 @@ function SmartAI:canAvoidAOE(card)
 	end
 	if card:isKindOf("ArcheryAttack") then
 		if self:getCardsNum("Jink") > 0 or (self:hasEightDiagramEffect() and self.player:getHp() > 1) then
+			return true
+		end
+	end
+	if card:isKindOf("NeoDrowning") then
+		if not self.player:getEquips():isEmpty() then
 			return true
 		end
 	end
@@ -4866,6 +4871,7 @@ function SmartAI:getAoeValueTo(card, to, from)
 	local value, sj_num = 0, 0
 	if card:isKindOf("ArcheryAttack") then sj_num = getCardsNum("Jink", to) end
 	if card:isKindOf("SavageAssault") then sj_num = getCardsNum("Slash", to) end
+	if card:isKindOf("NeoDrowning") then sj_num = (self.player:getEquips():isEmpty() and 1 or 0) end
 
 	if self:aoeIsEffective(card, to, from) then
 		if card:isKindOf("SavageAssault") and sgs.card_lack[to:objectName()]["Slash"] == 1 
@@ -4893,6 +4899,12 @@ function SmartAI:getAoeValueTo(card, to, from)
 				elseif self:getFinalRetrial(to) == 1 then
 					value = value + 10
 				end
+			end
+		end
+		
+		if card:isKindOf("NeoDrowning") then
+			if to:hasSkills(sgs.lose_equip_skill) then
+				value = value + 100
 			end
 		end
 		
@@ -4958,7 +4970,7 @@ function SmartAI:getAoeValueTo(card, to, from)
 		
 	else
 		value = value + 10
-		if to:hasSkill("juxiang") and not card:isVirtualCard() then value = value + 20 end
+		if to:hasSkill("juxiang") and not card:isVirtualCard() and card:isKindOf("SavageAssault") then value = value + 20 end
 		if to:hasSkill("danlao") and self.player:aliveCount() > 2 then value = value + 20 end
 	end
 	
@@ -5131,7 +5143,7 @@ function SmartAI:getAoeValue(card, player)
 		end
 	end
 	
-	if attacker:hasSkills("jianxiong|luanji|qice|manjuan") then good = good + 2 * enemy_number end
+	if attacker:hasSkills("jianxiong|luanji|manjuan") then good = good + 2 * enemy_number end
 	
 	local xiahou = self.room:findPlayerBySkillName("yanyu")
 	if xiahou and self:isEnemy(xiahou) and xiahou:getMark("YanyuDiscard2") > 0 then bad = bad + 50 end
