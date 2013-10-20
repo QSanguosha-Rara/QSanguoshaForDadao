@@ -818,7 +818,7 @@ qice_skill.getTurnUseCard = function(self)
 	local cards = self.player:getHandcards()
 	local allcard = {}
 	cards = sgs.QList2Table(cards)
-	local aoename = "savage_assault|archery_attack|neo_drowning"
+	local aoename = "neo_drowning|savage_assault|archery_attack"
 	local aoenames = aoename:split("|")
 	local aoe
 	local i	
