@@ -818,12 +818,12 @@ qice_skill.getTurnUseCard = function(self)
 	local cards = self.player:getHandcards()
 	local allcard = {}
 	cards = sgs.QList2Table(cards)
-	local aoename = "savage_assault|archery_attack"
+	local aoename = "savage_assault|archery_attack|neo_drowning"
 	local aoenames = aoename:split("|")
 	local aoe
 	local i	
 	local caocao = self.room:findPlayerBySkillName("jianxiong") 
-	local qicetrick = "savage_assault|archery_attack|ex_nihilo|god_salvation"
+	local qicetrick = "savage_assault|archery_attack|neo_drowning|ex_nihilo|god_salvation"
 	local qicetricks = qicetrick:split("|")
 	for i=1, #qicetricks do
 		local forbiden = qicetricks[i]
@@ -874,6 +874,28 @@ qice_skill.getTurnUseCard = function(self)
 			return parsed_card
 		end
 	end
+	
+	if self.player:hasSkill("kongcheng") then
+		local alivefriends = false
+		for _, p in ipairs(self.friends) do
+			if p:isAlive() then
+				alivefriends = true
+				break
+			end
+		end
+		if not (alivefriends and self:getCardsNum("Peach") > 0) then
+			local dismantlement = sgs.Sanguosha:cloneCard("dismantlement", sgs.Card_NoSuit, 0)
+			if not self.player:isLocked(dismantlement) then
+				local dummyuse = {isDummy = true}
+				self:useTrickCard(dismantlement, dummyuse)
+				if dummyuse.card then
+					local parsed_card = sgs.Card_Parse("@QiceCard=" .. table.concat(allcard, "+") .. ":dismantlement")
+					return parsed_card
+				end
+			end
+		end
+	end
+	
 	for i=1, #aoenames do
 		local newqice = aoenames[i]
 		aoe = sgs.Sanguosha:cloneCard(newqice, sgs.Card_NoSuit, 0)
