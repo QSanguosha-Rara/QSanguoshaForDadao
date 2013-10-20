@@ -26,20 +26,6 @@ public:
     OLPackage();
 };
 
-class TaiwanSPPackage: public Package {
-    Q_OBJECT
-
-public:
-    TaiwanSPPackage();
-};
-
-class WangZheZhiZhanPackage: public Package {
-    Q_OBJECT
-
-public:
-    WangZheZhiZhanPackage();
-};
-
 class Yongsi: public TriggerSkill {
     Q_OBJECT
 
