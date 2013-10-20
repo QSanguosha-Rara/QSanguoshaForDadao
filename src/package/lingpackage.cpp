@@ -2420,7 +2420,7 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_panzmaz->addSkill(new Neo2013Jieji);
     neo2013_panzmaz->addSkill("anjian");
 
-    General *neo2013_xiahoushi = new General(this, "neo2013_xiaohoushi", "shu", 3);
+    General *neo2013_xiahoushi = new General(this, "neo2013_xiahoushi", "shu", 3);
     neo2013_xiahoushi->addSkill(new Neo2013Yanyu);
     neo2013_xiahoushi->addSkill("xiaode");
 
