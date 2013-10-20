@@ -2299,6 +2299,37 @@ public:
     }
 };
 
+class Neo2013Ganglie: public MasochismSkill{
+public:
+    Neo2013Ganglie(): MasochismSkill("neo2013ganglie"){
+
+    }
+
+    virtual void onDamaged(ServerPlayer *player, const DamageStruct &damage) const{
+        Room *room = player->getRoom();
+        ServerPlayer *target = room->askForPlayerChosen(player, room->getOtherPlayers(player), objectName(), "@neo2013ganglie", true, true);
+        if (target != NULL){
+            JudgeStruct judge;
+            judge.who = player;
+            judge.pattern = ".|heart";
+            judge.good = false;
+            room->judge(judge);
+
+            if (judge.isBad()){
+                QStringList choicelist;
+                choicelist << "damage";
+                if (target->getHandcardNum() > 1)
+                    choicelist << "throw";
+                QString choice = room->askForChoice(player, objectName(), choicelist.join("+"));
+                if (choice == "damage")
+                    room->damage(DamageStruct(objectName(), player, target));
+                else
+                    room->askForDiscard(target, objectName(), 2, 2);
+            }
+        }
+    }
+};
+
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
     neo2013_masu->addSkill(new Neo2013Xinzhan);
@@ -2431,6 +2462,9 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_fazheng = new General(this, "neo2013_fazheng", "shu", 3);
     neo2013_fazheng->addSkill("nosxuanhuo");
     neo2013_fazheng->addSkill(new Neo2013Enyuan);
+
+    General *neo2013_xiahou = new General(this, "neo2013_xiahoudun", "wei", 4);
+    neo2013_xiahou->addSkill(new Neo2013Ganglie);
 
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();
