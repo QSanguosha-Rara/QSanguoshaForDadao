@@ -909,7 +909,7 @@ sgs.ai_skill_cardask["@dangliang-discard"] = function(self, data)
 		return "."
 	end
 	
-	if (invoke == 0)
+	if (invoke == 0) then
 		return "."
 	elseif invoke == 1 then
 		sgs.ai_skill_choice.dangliang = "d2f"
