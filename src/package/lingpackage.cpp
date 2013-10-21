@@ -486,7 +486,6 @@ public:
     }
 };
 
-/*
 class Neo2013Xiezun: public MaxCardsSkill{
 public:
     Neo2013Xiezun(): MaxCardsSkill("neo2013xiezun"){
@@ -494,11 +493,21 @@ public:
     }
 
     virtual int getFixed(const Player *target) const{
+        if (target->hasSkill(objectName())) {
+            int maxcards = 0;
+            QList<const Player *> players = target->getAliveSiblings();
+            players << target;
+            foreach(const Player *p, players){
+                int maxcard = p->getMaxCards(objectName());
+                if (maxcards < maxcard)
+                    maxcards = maxcard;
+            }
 
+            return maxcards;
+        }
+        return 0;
     }
 };
-*/ //temporily lay it aside
-//todo：在player::getMaxCards里加个参数，令其计算手牌上限时不考虑某技能
 
 /*
 class Neo2013RenWang: public TriggerSkill{
@@ -2357,6 +2366,11 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_sima = new General(this, "neo2013_simayi", "wei", 3);
     neo2013_sima->addSkill(new Neo2013Fankui);
     neo2013_sima->addSkill("guicai");
+
+    General *neo2013_caocao = new General(this, "neo2013_caocao$", "wei");
+    neo2013_caocao->addSkill(new Neo2013Xiezun);
+    neo2013_caocao->addSkill("jianxiong");
+    neo2013_caocao->addSkill("hujia");
 
     General *neo2013_liubei = new General(this, "neo2013_liubei$", "shu");
     neo2013_liubei->addSkill(new Neo2013Renwang);
