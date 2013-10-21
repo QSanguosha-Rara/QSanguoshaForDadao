@@ -865,6 +865,60 @@ sgs.ai_skill_askforag.annei = function(self, card_ids)
 	return cards[1]:getEffectiveId()
 end
 
+-- dangliang AI by Fsu0413
+sgs.ai_skill_cardask["@dangliang-discard"] = function(self, data)
+	local _cards = self.player:getCards("he")
+	local cards = {}
+	for _, c in sgs.qlist(_cards) do
+		if not c:isKindOf("BasicCard") then
+			table.insert(cards, c)
+		end
+	end
+	
+	if #cards == 0 then return "." end
+	self:sortByKeepValue(cards)
+	local use_card = cards[1]
+	local to_return = "$" .. cards[1]:getEffectiveId()
+	
+	local target = data:toPlayer()
+	local invoke = 0 -- 0: not invoke, 1:d2f, -1:d2p
+	
+	if self:isFriend(target) then
+		if self:willSkipDrawPhase(target) then
+			return "."
+		end
+		if target:hasSkills("yongsi|jiangchi") and target:getHandcardNum() < 4 then
+			invoke = 1
+		elseif target:hasSkill("longhun") and target:getHp() == 1 then
+			invoke = 1
+		elseif self:isWeak(target) then
+			invoke = 1
+		end
+	elseif self:isEnemy(target) then
+		if self:willSkipPlayPhase(target) then
+			return "."
+		end
+		if self:needKongcheng(target, true) then
+			invoke = -1
+		elseif target:getHp() == 1 and target:getHandcardNum() <= 3 then
+			invoke = -1
+		elseif self:isWeak(target) then
+			invoke = -1
+		end
+	else
+		return "."
+	end
+	
+	if (invoke == 0)
+		return "."
+	else if invoke == 1 then
+		sgs.ai_skill_choice.dangliang = "d2f"
+	else if invoke == -1 then
+		sgs.ai_skill_choice.dangliang = "d2p"
+	end
+	
+	return to_return
+end
 
 function JS_Card(self) --选择一张手牌或装备区的牌
 	local card_id = nil
