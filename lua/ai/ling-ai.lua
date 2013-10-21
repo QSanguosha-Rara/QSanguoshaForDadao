@@ -20,7 +20,7 @@ neoluoyi_skill.getTurnUseCard = function(self)
 	local noHorseTargets = 0
 	self:sort(self.enemies,"hp")
 	for _, card in sgs.qlist(self.player:getCards("he")) do
-		if card:isKindOf("EquipCard") and not (card:isKindOf("Weapon") and self:hasEquip(card)) then
+		if card:isKindOf("EquipCard") and not (card:isKindOf("Weapon") and self.player:hasEquip(card)) then
 			equipnum = equipnum + 1
 		end
 	end
@@ -197,18 +197,26 @@ sgs.ai_skill_invoke.zhulou = function(self, data)
 	return false
 end
 
-sgs.ai_skill_cardask["@zhulou-discard"] =  function(self, data)
-	if self.player:getWeapon() then
-		return "$" .. self.player:getWeapon():getEffectiveId()
-	end
-
-	for _, card in sgs.qlist(self.player:getCards("he")) do
-		if card:isKindOf("Weapon") then
-			return "$" .. card:getEffectiveId()
+sgs.ai_skill_cardask["@zhulou-discard"] =  function(self, data, pattern)
+	local ccards = sgs.QList2Table(self.player:getCards("he"))
+	local lightning = self:getCard("Lightning")
+	self:sortByCardNeed(ccards)
+	if pattern == ".Weapon" then
+		if self.player:getWeapon() then return "$" .. self.player:getWeapon():getEffectiveId() end
+		for _, card in sgs.list(ccards) do
+			if card:isKindOf("Weapon") then return "$" .. card:getEffectiveId() end
 		end
+	elseif pattern == "^BasicCard" then
+		if self:needToThrowArmor() then return "$" .. self.player:getArmor():getEffectiveId() end
+		if lightning then return lightning:getEffectiveId() end
+		for _, card in sgs.list(ccards) do
+			if card:getTypeId() ~= sgs.Card_TypeBasic then return "$" .. card:getEffectiveId() end
+		end
+		return "."
 	end
 	return "."
 end
+
 
 sgs.ai_cardneed.zhulou = sgs.ai_cardneed.weapon
 
@@ -417,4 +425,37 @@ sgs.ai_skill_invoke.DragonPhoenix = function(self, data)
 	end
 	return false
 end
+
+sgs.ai_skill_invoke.neo2013renwang = sgs.ai_skill_invoke.danlao
+	
+local neo2013xinzhan_skill={}
+neo2013xinzhan_skill.name="neo2013xinzhan"
+table.insert(sgs.ai_skills,neo2013xinzhan_skill)
+neo2013xinzhan_skill.getTurnUseCard=function(self)
+	if not self.player:hasUsed("Neo2013XinzhanCard") and self.player:getHandcardNum() > self.player:getLostHp() then
+		return sgs.Card_Parse("@Neo2013XinzhanCard=.")
+	end
+end
+
+sgs.ai_skill_use_func.Neo2013XinzhanCard=function(card,use,self)
+	use.card = card
+end
+
+sgs.ai_use_value.Neo2013XinzhanCard = 4.5
+sgs.ai_use_priority.Neo2013XinzhanCard = 9.5
+
+sgs.ai_slash_prohibit.neo2013huilei = sgs.ai_slash_prohibit.huilei
+
+sgs.ai_skill_invoke.neo2013yishi = sgs.ai_skill_invoke.yishi 
+
+function sgs.ai_cardsview.neo2013haoyin(self, class_name, player)
+	if class_name == "Analeptic" and player:hasSkill("neo2013haoyin") and sgs.Sanguosha:getCurrentCardUseReason() == sgs.CardUseStruct_CARD_USE_REASON_PLAY then
+		if player:getHp() < 2 or self:isWeak(player) then return nil end
+		return ("analeptic:neo2013haoyin[no_suit:0]=.")
+	end
+end
+
+sgs.ai_skill_invoke.neo2013zhulou = sgs.ai_skill_invoke.zhulou
+sgs.ai_cardneed.neo2013zhulou = sgs.ai_cardneed.weapon
+sgs.neo2013zhulou_keep_value = sgs.qiangxi_keep_value
 
