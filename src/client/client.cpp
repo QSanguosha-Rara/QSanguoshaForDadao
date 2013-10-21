@@ -1374,7 +1374,10 @@ void Client::askForSinglePeach(const Json::Value &arg) {
         pattern << "peach";
         _m_roomState.setCurrentCardUsePattern("peach");
     }
-    if (Self->hasFlag("Global_PreventPeach")) {
+
+    Peach *temp_peach = new Peach(Card::NoSuit, 0);
+    temp_peach->deleteLater();
+    if (Self->hasFlag("Global_PreventPeach") || Self->isProhibited(dying, temp_peach)) {
         bool has_skill = false;
         foreach (const Skill *skill, Self->getVisibleSkillList(true)) {
             const ViewAsSkill *view_as_skill = ViewAsSkill::parseViewAsSkill(skill);
