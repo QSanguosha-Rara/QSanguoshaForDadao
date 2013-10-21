@@ -505,7 +505,7 @@ public:
 
             return maxcards;
         }
-        return 0;
+        return -1;
     }
 };
 
