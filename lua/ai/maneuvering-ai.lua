@@ -292,7 +292,7 @@ function SmartAI:isGoodChainPartner(player)
 end
 
 function SmartAI:isGoodChainTarget(who, source, nature, damagecount, slash)
-	if not who:isChained() then return false end
+	if not who or not who:isChained() then return false end
 	source = source or self.player
 	nature = nature or sgs.DamageStruct_Fire
 	

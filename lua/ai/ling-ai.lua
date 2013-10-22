@@ -459,3 +459,82 @@ sgs.ai_skill_invoke.neo2013zhulou = sgs.ai_skill_invoke.zhulou
 sgs.ai_cardneed.neo2013zhulou = sgs.ai_cardneed.weapon
 sgs.neo2013zhulou_keep_value = sgs.qiangxi_keep_value
 
+local neo2013fanjian_skill = {}
+neo2013fanjian_skill.name = "neo2013fanjian"
+table.insert(sgs.ai_skills, neo2013fanjian_skill)
+neo2013fanjian_skill.getTurnUseCard = function(self)
+	if self.player:isKongcheng() or self.player:hasUsed("Neo2013FanjianCard") then return nil end
+	return sgs.Card_Parse("@Neo2013FanjianCard=.")
+end
+
+sgs.ai_skill_use_func.Neo2013FanjianCard = function(card, use, self)
+	self:sort(self.enemies, "defense")
+	local target
+	for _, enemy in ipairs(self.enemies) do
+		if self:canAttack(enemy) and not self:hasSkills("qingnang|tianxiang", enemy) then
+			target = enemy
+
+			local wuguotai = self.room:findPlayerBySkillName("buyi")
+			local care = (target:getHp() <= 1) and (self:isFriend(target, wuguotai))
+			local ucard = nil
+			local handcards = self.player:getCards("h")
+			handcards = sgs.QList2Table(handcards)
+			self:sortByKeepValue(handcards)
+			for _,cd in ipairs(handcards) do
+				local flag = not (cd:isKindOf("Peach") or cd:isKindOf("Analeptic"))
+				local suit = cd:getSuit()
+				if flag and care then
+					flag = cd:isKindOf("BasicCard")
+				end
+				if flag and target:hasSkill("longhun") then
+					flag = (suit ~= sgs.Card_Heart)
+				end
+				if flag and target:hasSkill("jiuchi") then
+					flag = (suit ~= sgs.Card_Spade)
+				end
+				if flag and target:hasSkill("jijiu") then
+					flag = (cd:isBlack())
+				end
+				if flag then
+					ucard = cd
+					break
+				end
+			end
+			if ucard then
+				local keep_value = self:getKeepValue(ucard)
+				if ucard:getSuit() == sgs.Card_Diamond then keep_value = keep_value + 0.5 end
+				if keep_value < 6 then
+					use.card = sgs.Card_Parse("@Neo2013FanjianCard=" .. ucard:getEffectiveId())
+					if use.to then use.to:append(target) end
+					return
+				end
+			end
+		end
+	end
+end
+
+sgs.ai_card_intention.Neo2013FanjianCard = sgs.ai_card_intention.FanjianCard
+
+function sgs.ai_skill_suit.neo2013fanjian(self)
+	local map = {0, 0, 1, 2, 2, 3, 3, 3}
+	local suit = map[math.random(1, 8)]
+	if self.player:hasSkill("hongyan") and suit == sgs.Card_Spade then return sgs.Card_Heart else return suit end
+end
+
+sgs.ai_skill_playerchosen.neo2013fankui = function(self, targets)
+	local to
+	local player = self:findPlayerToDiscard("he", false, false, targets)
+	targets = sgs.QList2Table(targets)
+	self:sort(self.friends_noself, "threat")
+	self:sort(self.enemies, "defense")
+	for _, enemy in ipairs(self.enemies) do
+		if not self:doNotDiscard(enemy) or self:getOverflow(fr) >= 0 then to = enemy break end
+	end
+	if not to then
+		for _, fr in ipairs(self.friends_noself) do
+			if self:doNotDiscard(fr) or self:getOverflow(fr) > 2 then to = fr break end
+		end
+	end
+	return player or to or nil
+end
+sgs.ai_playerchosen_intention.neo2013fankui = 30
