@@ -1347,13 +1347,41 @@ sgs.ai_skill_playerchosen.yinzhi = function(self, targets)
 	return self.friends[1] or self.player
 end
 
-sgs.ai_skill_choice.mingjian = function(self, choices)
-	return "discard"
-end
-
 sgs.ai_skill_invoke.mingjian = function(self, data)
 	local target = data:toPlayer()
-	if not target or self:isEnemy(target) then return end
-	if self:willSkipPlayPhase(target) or self:willSkipDrawPhase(target) then return true end
+	
+	local hasDelayedTrick = function(target)
+		local cards = target:getJudgingArea()
+		if cards:isEmpty() then return false end
+		for _, c in sgs.qlist(cards) do
+			if c:isKindOf("YanxiaoCard") then return false end
+		end
+		return true
+	end
+	
+	if not target then return false end
+	if self:isFriend(target) then
+		if hasDelayedTrick(target) and self:getFinalRetrial(target) ~= 1 then
+			sgs.ai_skill_choice.mingjian = "discard"
+			return true
+		elseif self:getFinalRetrial(target) == 2 and target:hasSkills(sgs.judge_reason) and (self.player:getHandcardNum() > 2) then
+			sgs.ai_skill_choice.mingjian = "put"
+			return true
+		end
+	elseif self:isEnemy(target) and (not self.player:isKongcheng()) then
+		if hasDelayedTrick(target) and self:getFinalRetrial(target) == 2 then
+			sgs.ai_skill_choice.mingjian = "put"
+			return true
+		end
+	end
 	return false
 end
+
+sgs.ai_skill_discard["mingjian-discard"] = function(self)
+	return self:askForDiscard("dummyreason", 1, 1, false, true)
+end
+
+sgs.ai_skill_discard["mingjian-put"] = function(self)
+	return self:askForDiscard("dummyreason", 1, 1, false, false)
+end
+
