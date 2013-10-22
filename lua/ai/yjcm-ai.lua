@@ -368,7 +368,7 @@ function sgs.ai_skill_invoke.xuanfeng(self, data)
 end
 sgs.ai_skill_playerchosen.xuanfeng = function(self, targets)
 	local to
-	local player = self:findPlayerToDiscard()
+	local player = self:findPlayerToDiscard("he", false)
 	targets = sgs.QList2Table(targets)
 	self:sort(self.friends_noself, "threat")
 	self:sort(self.enemies, "defense")
