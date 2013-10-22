@@ -102,7 +102,7 @@ return {
 	["illustrator:guanlu"] = "大佬荣",
 	["cv:guanlu"] = "白水",
 	["$xiangshudrawpile"] = "牌堆顶的牌为： %card" ,
-	["@bushi-discard"]="你可以弃置一张牌发动“卜筮”。",
+	["@bushi-discard"]="你可以展示一张手牌发动“卜筮”。",
 	["bushiinc"]="手牌上限+1",
 	["bushidec"]="手牌上限-1",
 	["#bushi_inc"] = "%from 发动 %arg ，%to 手牌上限<font color='yellow'><b>+1</b></font>",
