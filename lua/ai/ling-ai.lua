@@ -521,3 +521,20 @@ function sgs.ai_skill_suit.neo2013fanjian(self)
 	if self.player:hasSkill("hongyan") and suit == sgs.Card_Spade then return sgs.Card_Heart else return suit end
 end
 
+sgs.ai_skill_playerchosen.neo2013fankui = function(self, targets)
+	local to
+	local player = self:findPlayerToDiscard("he", false, false, targets)
+	targets = sgs.QList2Table(targets)
+	self:sort(self.friends_noself, "threat")
+	self:sort(self.enemies, "defense")
+	for _, enemy in ipairs(self.enemies) do
+		if not self:doNotDiscard(enemy) or self:getOverflow(fr) >= 0 then to = enemy break end
+	end
+	if not to then
+		for _, fr in ipairs(self.friends_noself) do
+			if self:doNotDiscard(fr) or self:getOverflow(fr) > 2 then to = fr break end
+		end
+	end
+	return player or to or nil
+end
+sgs.ai_playerchosen_intention.neo2013fankui = 30
