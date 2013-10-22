@@ -2261,6 +2261,10 @@ public:
             }
             case (CardsMoveOneTime):{
                 CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+                if (move.to_place != Player::PlaceHand && move.to_place != Player::PlaceEquip){
+                    enyuaninvoke = NotInvoke;
+                    break;
+                }
                 if (move.from == player && move.to != NULL && move.to != player && player->getPhase() == Player::NotActive){
                     target = (ServerPlayer *)(move.to);
                     enyuaninvoke = Yuan;
