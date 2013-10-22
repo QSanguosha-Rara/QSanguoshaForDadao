@@ -1784,9 +1784,11 @@ public:
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-        if ((move.from == player || move.to == player) && (move.from_places.contains(Player::PlaceHand) || move.to_place == Player::PlaceHand)){
-            room->showAllCards(player);
+        if (!player->faceUp()){
+            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+            if ((move.from == player || move.to == player) && (move.from_places.contains(Player::PlaceHand) || move.to_place == Player::PlaceHand)){
+                room->showAllCards(player);
+            }
         }
         return false;
     }
