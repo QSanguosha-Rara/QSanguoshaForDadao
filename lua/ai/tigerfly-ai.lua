@@ -472,8 +472,15 @@ sgs.ai_skill_use["@@tushou"]=function(self, prompt)
 end
 
 
-
-sgs.ai_skill_invoke.kangdao = true
+function sgs.ai_skill_invoke.kangdao(self, data)
+	if self.player:hasSkill("kongcheng") and self.player:isKongcheng() then return end
+	local move = data:toMoveOneTime()
+	if not move.from then return false end
+	local from = findPlayerByObjectName(self.room, move.from:objectName())
+	--local card = sgs.Sanguosha:getCard(move.card_ids:first())
+	if not from then return false end
+	return self:isFriend(from) 
+end
 
 sgs.ai_skill_cardask["@bushi-discard"] = function(self, data)
 	if self.player:isNude() then return "." end
@@ -1252,10 +1259,13 @@ sgs.ai_skill_choice.kuxing = function(self, choices, data)
 		if not self:doNotDiscard(self.player) then return "draw" end
 		return "discard" 
 	else
+		local slash_num = getCardsNum("Slash", from)
 		if from:getPhase() == sgs.Player_NotActive and self:needKongcheng(from, true) then return "draw" end
 		if self:isWeak(from) and not self:isWeak() then return "discard" end
-		if self.player:getHandcardNum() > 4 and self.player:getEquips():isEmpty() then return "discard" end
+		if self.player:getHandcardNum() > 3 and self.player:getEquips():isEmpty() then return "discard" end
 		if self.player:getHandcardNum() > 4 and self.player:getEquips():length() > 1 then return "discard" end
+		if (slash_num < 2 or from:getHandcardNum() < 4) and from:hasWeapon("Crossbow") then return "discard" end
+		if (self.player:getHandcardNum() > 2 or not self:isWeak()) and self:hasSkills(sgs.cardneed_skill, from) then return "discard" end
 		if self:doNotDiscard(self.player) then return "discard" else return "draw" end
 	end
 	local choice_table = choices:split("+")	
