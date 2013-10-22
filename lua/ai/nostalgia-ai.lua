@@ -984,3 +984,15 @@ sgs.ai_skill_use["@@nosfengyin"] = function(self, data)
 	return "."
 end
 
+
+sgs.ai_skill_choice.mingshi = function(self, choices, data)
+	local damage = data:toDamage()
+	if self:isFriend(damage.to) then
+		return "dismiss"
+	elseif self:isEnemy(damage.to) then
+		return "show"
+	end
+	
+	return "dismiss"
+		
+end
