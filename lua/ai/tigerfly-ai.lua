@@ -1152,7 +1152,7 @@ local discard = {to_id}
 return discard 
 end
 
---[[function sgs.ai_cardsview_valuable.chanyu(self, class_name, player) 使用此技能导致程序退出
+function sgs.ai_cardsview_valuable.chanyu(self, class_name, player) --使用此技能导致程序退出？
 	if class_name == "Nullification" then
 		local nullnum = 0 
 		for _,idx in sgs.qlist(player:handCards()) do
@@ -1165,7 +1165,7 @@ end
 		if player:isLocked(null) then return nil end
 		return "@ChanyuCard=."
 	end
-end]]
+end
 
 sgs.ai_skill_use["@@suoshi"]=function(self, prompt)
 	if self:isWeak() then return "." end
