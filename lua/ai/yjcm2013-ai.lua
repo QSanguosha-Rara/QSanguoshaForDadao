@@ -900,7 +900,7 @@ end
 
 sgs.ai_card_intention.ExtraCollateralCard = 0
 
-local function getFenchengValue(self, player)
+function getFenchengValue(self, player)
 	if not self:damageIsEffective(player, sgs.DamageStruct_Fire, self.player) then return 0 end
 	if not player:canDiscard(player, "he") then return self:isWeak(player) and 1.5 or 1 end
 	if self.player:hasSkill("juece") and self:isEnemy(player)
