@@ -1217,7 +1217,7 @@ public:
                 }
             }
         }
-        else if (triggerEvent == EventPhaseChanging && data.value<PhaseChangeStruct>().to == Player::NotActive){
+        else if (triggerEvent == EventPhaseChanging && data.value<PhaseChangeStruct>().to == Player::RoundStart){
             QStringList Qingchenglist = player->tag["neo2013qingcheng"].toStringList();
             if (Qingchenglist.isEmpty()) return false;
             foreach (QString skill_name, Qingchenglist) {
