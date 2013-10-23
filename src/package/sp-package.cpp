@@ -1673,6 +1673,35 @@ public:
     }
 };
 
+class Kangkai: public TriggerSkill{
+public:
+    Kangkai(): TriggerSkill("kangkai"){
+        events << TargetConfirmed;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        CardUseStruct use = data.value<CardUseStruct>();
+        if (use.card == NULL || !use.card->isKindOf("Slash"))
+            return false;
+        foreach(ServerPlayer *p, use.to){
+            if ((player->distanceTo(p) <= 1 || player == p) && player->askForSkillInvoke(objectName(), data)){
+                player->drawCards(1);
+                if (player != p){
+                    const Card *c = room->askForExchange(player, objectName(), 1);
+                    const Card *realcard = Sanguosha->getCard(c->getEffectiveId());
+
+                    p->obtainCard(realcard, true);
+                    if (realcard->isKindOf("EquipCard") && (room->askForChoice(p, objectName(), "use+dismiss", QVariant::fromValue(realcard)) == "use")){
+                        room->useCard(CardUseStruct(realcard, p, p));
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+};
+
 #include "jsonutils.h"
 class AocaiViewAsSkill: public ZeroCardViewAsSkill {
 public:
@@ -2284,6 +2313,9 @@ SPPackage::SPPackage()
     General *zhangbao = new General(this, "zhangbao", "qun", 3); // SP 025
     zhangbao->addSkill(new Zhoufu);
     zhangbao->addSkill(new Yingbing);
+
+    General *caoang = new General(this, "caoang", "wei", 4);
+    caoang->addSkill(new Kangkai);
 
     addMetaObject<WeidiCard>();
     addMetaObject<YuanhuCard>();
