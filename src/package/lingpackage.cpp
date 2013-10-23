@@ -1185,7 +1185,7 @@ public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == EventPhaseStart && player->getPhase() == Player::RoundStart){
             ServerPlayer *zou = room->findPlayerBySkillName(objectName());
-            if (zou == NULL || zou->isNude())
+            if (zou == NULL || zou->isNude() || zou == player)
                 return false;
 
             if (room->askForDiscard(zou, "neo2013qingcheng", 1, 1, true, true, "@neo2013qingcheng-discard")){
