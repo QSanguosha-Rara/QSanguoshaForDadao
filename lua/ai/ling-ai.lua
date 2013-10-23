@@ -9,7 +9,7 @@ neoluoyi_skill.getTurnUseCard = function(self)
 		luoyicard = self.player:getArmor()
 		return sgs.Card_Parse("@LuoyiCard=" .. luoyicard:getEffectiveId())
 	end
-	
+
 	if not self:slashIsAvailable(self.player) then return nil end
 	local cards = self.player:getHandcards()
 	cards = sgs.QList2Table(cards)
@@ -41,20 +41,20 @@ neoluoyi_skill.getTurnUseCard = function(self)
 			for _, enemy in ipairs(self.enemies) do
 				if self:getCardsNum("Slash") >= getCardsNum("Slash", enemy) and sgs.isGoodTarget(enemy, self.enemies, self)
 				and self:objectiveLevel(enemy) > 3 and not self:cantbeHurt(enemy, 2) and self:damageIsEffective(enemy) and enemy:getMark("@late") == 0 then
-					dueltarget = dueltarget + 1 
+					dueltarget = dueltarget + 1
 				end
 			end
 		end
-	end		
+	end
 	if (slashtarget + dueltarget) > 0 and equipnum > 0 then
 		self:speak("luoyi")
 		if self:needToThrowArmor() then
 			luoyicard = self.player:getArmor()
 		end
-		
+
 		if not luoyicard then
 			for _, card in sgs.qlist(self.player:getCards("he")) do
-				if card:isKindOf("EquipCard") and not self.player:hasEquip(card) then 
+				if card:isKindOf("EquipCard") and not self.player:hasEquip(card) then
 					luoyicard = card
 					break
 				end
@@ -63,7 +63,7 @@ neoluoyi_skill.getTurnUseCard = function(self)
 		if not luoyicard and offhorse then
 			if noHorseTargets == 0 then
 				for _, card in sgs.qlist(self.player:getCards("he")) do
-					if card:isKindOf("EquipCard") and not card:isKindOf("OffensiveHorse") then 
+					if card:isKindOf("EquipCard") and not card:isKindOf("OffensiveHorse") then
 						luoyicard = card
 						break
 					end
@@ -173,7 +173,7 @@ sgs.ai_skill_invoke.yishi = function(self, data)
 		if self:getDangerousCard(target) then return true end
 		if target:getDefensiveHorse() then return true end
 		return false
-	end 
+	end
 end
 
 sgs.ai_skill_invoke.zhulou = function(self, data)
@@ -185,7 +185,7 @@ sgs.ai_skill_invoke.zhulou = function(self, data)
 	end
 
 	if weaponnum > 0 then return true end
-		
+
 	if self.player:getHandcardNum() < 3 and self.player:getHp() > 2 then
 		return true
 	end
@@ -241,10 +241,10 @@ sgs.ai_skill_invoke.neoganglie = function(self, data)
 		who:setFlags("ganglie_target")
 		return true
 	end
-	if self:getDamagedEffects(who, self.player) and self:isEnemy(who) and who:getHandcardNum() < 2 then 
+	if self:getDamagedEffects(who, self.player) and self:isEnemy(who) and who:getHandcardNum() < 2 then
 		return false
 	end
-	
+
 	return not self:isFriend(who)
 end
 
@@ -304,7 +304,7 @@ sgs.ai_skill_discard.neoganglie = function(self, discard_num, min_num, optional,
 			index = index + 1
 			if index == 2 then break end
 		end
-	end	
+	end
 	return to_discard
 end
 
@@ -342,7 +342,7 @@ function SmartAI:useCardBefriendAttacking(card, use)
 	for _, friend in ipairs(self.friends_noself) do
 		if not self.room:isProhibited(self.player, friend, card) and self:hasTrickEffective(card, friend) and
 			self.player:distanceTo(friend) == distance then target:append(friend) end
-		if target:length() >= targets_num then break end	
+		if target:length() >= targets_num then break end
 	end
 	if target:length() == 0 then
 	for _, en in ipairs(self.enemies) do
@@ -392,7 +392,7 @@ sgs.ai_skill_use["@@Triblade"]=function(self,prompt)
 	for _,lightning in ipairs(lightnings) do
 		if lightning and not self:willUseLightning(lightning) then cdid = lightning:getEffectiveId() break end
 	end
-	if not cdid and self.player:getHandcardNum() >= self.player:getHp() - 1 then 
+	if not cdid and self.player:getHandcardNum() >= self.player:getHp() - 1 then
 		for _,card in ipairs(cards) do
 			if not isCard("Peach", card, self.player) and not isCard("Analeptic", card, self.player) then cdid = card:getEffectiveId() break end
 		end
@@ -400,11 +400,11 @@ sgs.ai_skill_use["@@Triblade"]=function(self,prompt)
 	if not cdid or self.player:isKongcheng() then return "." end
 	self:sort(self.enemies, "hp")
 	self:sort(self.friends, "threat")
-	for _,e in ipairs(self.enemies) do 
+	for _,e in ipairs(self.enemies) do
 		if e:hasFlag("TribladeFilter") and not self:getDamagedEffects(e, self.player) and self:canAttack(e) then tar = e break end
 	end
 	if not tar then
-		for _,f in ipairs(self.friends) do 
+		for _,f in ipairs(self.friends) do
 			if f:hasFlag("TribladeFilter") and self:getDamagedEffects(f, self.player) and not self:isWeak(f) then tar = f break end
 		end
 	end
@@ -417,7 +417,7 @@ sgs.ai_card_intention.TribladeSkillCard = 30
 sgs.ai_skill_invoke.DragonPhoenix = function(self, data)
 	local use = data:toCardUse()
 	if use then
-		for _,to in sgs.qlist(use.to) do 
+		for _,to in sgs.qlist(use.to) do
 			if self:isFriend(to) and self:doNotDiscard(to) then return true end
 			if self:isEnemy(to) and not self:doNotDiscard(to) then return true end
 		end
@@ -427,7 +427,7 @@ sgs.ai_skill_invoke.DragonPhoenix = function(self, data)
 end
 
 sgs.ai_skill_invoke.neo2013renwang = sgs.ai_skill_invoke.danlao
-	
+
 local neo2013xinzhan_skill={}
 neo2013xinzhan_skill.name="neo2013xinzhan"
 table.insert(sgs.ai_skills,neo2013xinzhan_skill)
@@ -446,7 +446,7 @@ sgs.ai_use_priority.Neo2013XinzhanCard = 9.5
 
 sgs.ai_slash_prohibit.neo2013huilei = sgs.ai_slash_prohibit.huilei
 
-sgs.ai_skill_invoke.neo2013yishi = sgs.ai_skill_invoke.yishi 
+sgs.ai_skill_invoke.neo2013yishi = sgs.ai_skill_invoke.yishi
 
 function sgs.ai_cardsview.neo2013haoyin(self, class_name, player)
 	if class_name == "Analeptic" and player:hasSkill("neo2013haoyin") and sgs.Sanguosha:getCurrentCardUseReason() == sgs.CardUseStruct_CARD_USE_REASON_PLAY then
@@ -546,15 +546,15 @@ sgs.ai_skill_discard.neo2013yongyi = function(self, discard_num, min_num, option
 	cards = sgs.QList2Table(cards)
 	self:sortByKeepValue(cards)
 	for _,cd in ipairs(cards) do
-		if not cd:isKindOf("Peach") and (self:getKeepValue(cd) < 4 or self:cardNeed(cd) < 7) then return {cd:getEffectiveId()} end  
+		if not cd:isKindOf("Peach") and (self:getKeepValue(cd) < 4 or self:cardNeed(cd) < 7) then return {cd:getEffectiveId()} end
 	end
-	return {} 
+	return {}
 end
 
 function sgs.ai_cardsview.neo2013yongyi(self, class_name, player)
 	if class_name == "Slash" and player:hasSkill("neo2013yongyi") and (sgs.Sanguosha:getCurrentCardUseReason() == sgs.CardUseStruct_CARD_USE_REASON_PLAY or sgs.Sanguosha:getCurrentCardUseReason() == sgs.CardUseStruct_CARD_USE_REASON_RESPONSE_USE) then
 		if player:getPile("neoarrow"):length() == 0 then return nil end
-		return ("@Neo2013YongyiCard=.:slash") 
+		return ("@Neo2013YongyiCard=.:slash")
 	end
 end
 
@@ -569,9 +569,9 @@ sgs.ai_skill_discard.neo2013duoyi = function(self, discard_num, min_num, optiona
 	local cards = sgs.QList2Table(self.player:getCards("h"))
 	self:sortByKeepValue(cards)
 	for _,cd in ipairs(cards) do
-		if not cd:isKindOf("Peach") and self:getKeepValue(cd) <= 2 then return {cd:getEffectiveId()} end  
+		if not cd:isKindOf("Peach") and self:getKeepValue(cd) <= 2 then return {cd:getEffectiveId()} end
 	end
-	local id = JS_Card(self) 
+	local id = JS_Card(self)
 	if id then return {id} else return {} end
 end
 sgs.ai_skill_choice.neo2013duoyi = function(self, choices)
@@ -580,12 +580,12 @@ sgs.ai_skill_choice.neo2013duoyi = function(self, choices)
 	if getCardsNum("TrickCard", current) - getCardsNum("Nullification", current) > 0 or getCardsNum("TrickCard", current) > 1 or getCardsNum("ExNihilo", current) > 0 then
 		return "TrickCard"
 	end
-	if self:hasSkills("jizhi|nosjizhi|jilve", current) and getCardsNum("TrickCard", current) > 0 then return "TrickCard" end	
+	if self:hasSkills("jizhi|nosjizhi|jilve", current) and getCardsNum("TrickCard", current) > 0 then return "TrickCard" end
 	if self:isWeak(current) and getCardsNum("Peach", current) > 0 then return "BasicCard" end
 	if self:hasCrossbowEffect(current) and getCardsNum("Slash", current) > 1 then return "BasicCard" end
-	if (self:hasSkills(sgs.lose_equip_skill, current) or current:getEquips():isEmpty()) and current:getHandcardNum() > 2 then return "EquipCard" end	
+	if (self:hasSkills(sgs.lose_equip_skill, current) or current:getEquips():isEmpty()) and current:getHandcardNum() > 2 then return "EquipCard" end
 	if self:hasCrossbowEffect(current) and getCardsNum("Slash", current) > 0 then return "BasicCard" end
-	local choice_table = choices:split("+")	
-	return choice_table[math.random(1, #choice_table)] 
+	local choice_table = choices:split("+")
+	return choice_table[math.random(1, #choice_table)]
 end
 

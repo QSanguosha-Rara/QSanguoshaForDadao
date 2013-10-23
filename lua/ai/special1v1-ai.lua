@@ -62,10 +62,10 @@ sgs.ai_skill_choice.drowning = function(self, choices, data)
 		or self:getDamagedEffects(self.player, effect.from) then return "damage" end
 	if self:isWeak() and not self:needDeath() then return "throw" end
 	if effect.from:getMark("@xiongjie") > 1 and effect.from:hasSkill("xiongjie") and not self:getDamagedEffects(self.player, effect.from) then return "throw" end
-	if effect.from:getMark("@xiongjie") > 1 and effect.from:hasSkill("xiongjie") and self:getDamagedEffects(self.player, effect.from) then 
+	if effect.from:getMark("@xiongjie") > 1 and effect.from:hasSkill("xiongjie") and self:getDamagedEffects(self.player, effect.from) then
 		if self:getCardsNum("Peach") < effect.from:getMark("@xiongjie") then return "throw" else return "damage" end
 	end
-	
+
 	local value = 0
 	for _, equip in sgs.qlist(self.player:getEquips()) do
 		if equip:isKindOf("Weapon") then value = value + self:evaluateWeapon(equip)
@@ -130,7 +130,7 @@ sgs.ai_skill_use_func.XiechanCard = function(card, use, self)
 	self.player:setFlags("-AI_XiechanUsing")
 	if max_card:isKindOf("Slash") and self:getCardsNum("Slash") <= 2 then return end
 	local max_point = max_card:getNumber()
-	
+
 	local dummy_use = { isDummy = true, xiechan = true, to = sgs.SPlayerList() }
 	local duel = sgs.Sanguosha:cloneCard("Duel")
 	self:useCardDuel(duel, dummy_use)
@@ -215,14 +215,14 @@ sgs.ai_skill_use_func.MouzhuCard = function(card, use, self)
 		end
 	end
 
-	for _, enemy in ipairs(self.enemies) do	
+	for _, enemy in ipairs(self.enemies) do
 		if enemy:getHandcardNum() > 0 and  (self:getDamagedEffects(self.player, enemy) or self:needToLoseHp(self.player, enemy)) then
 			use.card = card
 			if use.to then use.to:append(enemy) end
 			return
 		end
 	end
-	
+
 	local first, second, third, fourth
 	local slash = self:getCard("Slash")
 	local slash_nosuit = sgs.Sanguosha:cloneCard("slash")
@@ -235,7 +235,7 @@ sgs.ai_skill_use_func.MouzhuCard = function(card, use, self)
 				second = enemy
 			elseif not enemy:hasSkills("wushuang|mengjin|tieji")
 				and not ((enemy:hasSkill("roulin") or enemy:hasWeapon("DoubleSword")) and enemy:getGender() ~= self.player:getGender()) then
-				
+
 				if enemy:getHandcardNum() == 1 and slash and not third and self.player:inMyAttackRange(enemy)
 					and (self:hasHeavySlashDamage(self.player, slash, enemy) or self.player:hasWeapon("GudingBlade") and not self:needKongcheng(enemy))
 					and (not self:isWeak() or self:getCardsNum("Peach") + self:getCardsNum("Analeptic") > 0) then
@@ -246,7 +246,7 @@ sgs.ai_skill_use_func.MouzhuCard = function(card, use, self)
 			end
 		end
 	end
-	
+
 	local target
 	if canleiji then
 		target = fourth and third or first or second
@@ -258,7 +258,7 @@ sgs.ai_skill_use_func.MouzhuCard = function(card, use, self)
 		if use.to then use.to:append(target) end
 		return
 	end
-	
+
 end
 
 sgs.ai_skill_cardask["@mouzhu-give"] = function(self, data)
@@ -277,7 +277,7 @@ sgs.ai_skill_cardask["@mouzhu-give"] = function(self, data)
 			elseif spade or jink then return spade or jink
 			end
 		end
-		
+
 	else
 		if target:hasSkill("leiji") then
 			for _, c in ipairs(cards) do
@@ -290,7 +290,7 @@ sgs.ai_skill_cardask["@mouzhu-give"] = function(self, data)
 			if not c:isKindOf("Peach") then return c:getEffectiveId() end
 		end
 	end
-	
+
 	return cards[1]:getEffectiveId()
 end
 
@@ -304,7 +304,7 @@ sgs.ai_skill_choice.mouzhu = function(self, choices)
 			if choices:match("duel") then return "duel" end
 		end
 	end
-	
+
 	if self:isFriend(target) then
 		if (target:hasSkill("leiji") or not self:slashIsEffective(slash, target)) and choices:match("slash") then return "slash" end
 		if self:getDamagedEffects(self.player, target) and getCardsNum("Slash", target) >= 1 and choices:match("duel") then return "duel" end
@@ -312,7 +312,7 @@ sgs.ai_skill_choice.mouzhu = function(self, choices)
 		if target:hasSkill("leiji") and choices:match("duel") then return "duel" end
 		if self:getCardsNum("Slash") > getCardsNum("Slash", target) and choices:match("duel") then return "duel" end
 	end
-	
+
 	if choices:match("slash") then return "slash" else return "duel" end
 end
 
@@ -338,7 +338,7 @@ function sgs.ai_slash_prohibit.renwang(self, to, card, from)
 		if not self:isValuableCard(card, from) then return false end
 	end
 	return true
-	
+
 end
 
 sgs.ai_skill_invoke.kofkuanggu = function(self, data)

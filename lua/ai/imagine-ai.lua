@@ -142,7 +142,7 @@ function SmartAI:DamageToCards(target, source, count)
 		end
 		--节命（按点数结算，应取前count名补牌空间最大的同伴计总数）
 		if target:hasSkill("jieming") then
-			for i=1, count, 1 do 
+			for i=1, count, 1 do
 				local minCount = 6
 				local maxCount = -1
 				local flag = false
@@ -220,7 +220,7 @@ function SmartAI:DamageToCards(target, source, count)
 				end
 			end
 			local times = math.min(maxlength, count) --归心的次数
-			for i=1, times, 1 do 
+			for i=1, times, 1 do
 				local k = 0
 				for _,p in pairs(enemies) do --由于是统计收益，也就是差值，所以只看能收对方多少牌就行了。
 					if not p:isAllNude() then
@@ -243,8 +243,8 @@ function SmartAI:DamageToCards(target, source, count)
 						thisRangeMax = thisRangeMax + count
 						thisRangeMin = thisRangeMin + count
 					else --将伤害弹到对方身上
-						thatRangeMax = thatRangeMax + count 
-						thatRangeMin = thatRangeMin + count 
+						thatRangeMax = thatRangeMax + count
+						thatRangeMin = thatRangeMin + count
 					end
 				end
 			end
@@ -285,7 +285,7 @@ function SmartAI:DamageToCards(target, source, count)
 					end
 				end
 				if flag then
-					thisRangeMax = thisRangeMax + maxCount - 1 
+					thisRangeMax = thisRangeMax + maxCount - 1
 					thisRangeMin = thisRangeMin + minCount - 1
 				end
 			end
@@ -315,7 +315,7 @@ function SmartAI:DamageToCards(target, source, count)
 		end
 		--连理
 		if target:getMark("@tie") > 0 then
-			for _,p in pairs(enemies) do 
+			for _,p in pairs(enemies) do
 				if p:getMark("@tie") > 0 then
 					thatRangeMax = thatRangeMax + count
 					thatRangeMin = thatRangeMin + count
@@ -323,8 +323,8 @@ function SmartAI:DamageToCards(target, source, count)
 			end
 			for _,p in pairs(friends) do
 				if p:getMark("@tie") > 0 then
-					thisRangeMax = thisRangeMax + count 
-					thisRangeMin = thisRangeMin + count 
+					thisRangeMax = thisRangeMax + count
+					thisRangeMin = thisRangeMin + count
 				end
 			end
 		end
@@ -412,7 +412,7 @@ function SmartAI:DamageToTurnOver(target, source, count)
 		end
 		--破军（按次数结算，被忽略）
 		--[[if source and source:hasSkill("pojun") then
-			if civil then 
+			if civil then
 				if target:faceUp() then
 					if target:getHp() > 2 then
 						thisDownCount = thisDownCount + 1
@@ -542,7 +542,7 @@ function SmartAI:DamageResult(target, source, nature, card, chained)
 			nature = sgs.DamageStruct_Normal
 		end
 		local shrink = false --伤害缩水标志
-		local armor = target:getArmor() 
+		local armor = target:getArmor()
 		if armor and armor:isKindOf("SilverLion") then --目标装备有白银狮子
 			shrink = true
 		end
@@ -848,7 +848,7 @@ function SmartAI:ImitateResult_DrawNCards(player, skills, overall)
 			elseif skillname == "shuangxiong" then --双雄，放弃摸牌
 				return 1
 			elseif skillname == "zaiqi" then --再起，放弃摸牌（摸牌数目不定，返回期望值）
-				return math.floor(lost * 3 / 4) 
+				return math.floor(lost * 3 / 4)
 			elseif skillname == "shelie" then --涉猎，放弃摸牌（摸牌数目不定，返回期望值）
 				return 3
 			elseif skillname == "xuanhuo" then --眩惑，放弃摸牌（摸牌数目不定，返回期望值）
@@ -872,7 +872,7 @@ function SmartAI:ImitateResult_DrawNCards(player, skills, overall)
 				local choices = "jiang+chi+cancel"
 				local func = sgs.ai_skill_choice.jiangchi
 				if func then
-					local choice = func(self, choices) 
+					local choice = func(self, choices)
 					if choice == "jiang" then
 						count = count + 1
 					elseif choice == "chi" then

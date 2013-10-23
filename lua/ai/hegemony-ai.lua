@@ -23,7 +23,7 @@ local duoshi_skill = {}
 duoshi_skill.name = "duoshi"
 table.insert(sgs.ai_skills, duoshi_skill)
 duoshi_skill.getTurnUseCard = function(self, inclusive)
-	if self.player:usedTimes("DuoshiCard") >= 4 then return end 
+	if self.player:usedTimes("DuoshiCard") >= 4 then return end
 	if sgs.turncount <= 1 and #self.friends_noself == 0 and not self:isWeak() then return end
 	local cards = self.player:getCards("h")
 	cards = sgs.QList2Table(cards)
@@ -137,7 +137,7 @@ fenxun_skill.getTurnUseCard = function(self)
 				end
 			end
 		end
-		
+
 		if not card_id and self.player:getWeapon() then
 			card_id = self.player:getWeapon():getId()
 		end
@@ -354,7 +354,7 @@ table.insert(sgs.ai_skills, xiongyi_skill)
 xiongyi_skill.getTurnUseCard = function(self)
 	if self.player:getMark("@arise") < 1 then return end
 	if (#self.friends <= #self.enemies and sgs.turncount > 2 and self.player:getLostHp() > 0) or (sgs.turncount > 1 and self:isWeak()) then
-		return sgs.Card_Parse("@XiongyiCard=.") 
+		return sgs.Card_Parse("@XiongyiCard=.")
 	end
 end
 

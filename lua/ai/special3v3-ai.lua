@@ -28,7 +28,7 @@ end
 
 function sgs.ai_cardneed.huanshi(to, card, self)
 	for _, player in ipairs(self.friends) do
-		if self:getFinalRetrial(to) == 1 then 
+		if self:getFinalRetrial(to) == 1 then
 			if self:willSkipDrawPhase(player) then
 				return card:getSuit() == sgs.Card_Club and not self:hasSuit("club", true, to)
 			end
@@ -98,7 +98,7 @@ end
 
 sgs.ai_card_intention.HongyuanCard = -70
 
-sgs.ai_suit_priority.mingzhe=function(self)	
+sgs.ai_suit_priority.mingzhe=function(self)
 	return self.player:getPhase()==sgs.Player_NotActive and "diamond|heart|club|spade" or "club|spade|diamond|heart"
 end
 

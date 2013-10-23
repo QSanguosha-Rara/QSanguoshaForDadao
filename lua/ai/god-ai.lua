@@ -337,7 +337,7 @@ sgs.ai_skill_invoke.qinyin = function(self, data)
 	self:sort(self.enemies, "hp")
 	local up = 0
 	local down = 0
-	
+
 	for _, friend in ipairs(self.friends) do
 		down = down - 10
 		up = up + (friend:isWounded() and 10 or 0)
@@ -347,7 +347,7 @@ sgs.ai_skill_invoke.qinyin = function(self, data)
 		end
 		if self:needToLoseHp(friend, nil, nil, true) then down = down + 5 end
 		if self:needToLoseHp(friend, nil, nil, true, true) and friend:isWounded() then up = up - 5 end
-		
+
 		if self:isWeak(friend) then
 			if friend:isWounded() then up = up + 10 + (friend:isLord() and 20 or 0) end
 			down = down - 10 - (friend:isLord() and 40 or 0)
@@ -356,17 +356,17 @@ sgs.ai_skill_invoke.qinyin = function(self, data)
 			end
 		end
 	end
-	
+
 	for _, enemy in ipairs(self.enemies) do
 		down = down + 10
 		up = up - (enemy:isWounded() and 10 or 0)
-		if self:hasSkills(sgs.masochism_skill, enemy) then 
+		if self:hasSkills(sgs.masochism_skill, enemy) then
 			down = down + 10
 			if enemy:isWounded() then up = up - 10 end
 		end
 		if self:needToLoseHp(enemy, nil, nil, true) then down = down - 5 end
 		if self:needToLoseHp(enemy, nil, nil, true, true) and enemy:isWounded() then up = up - 5 end
-		
+
 		if self:isWeak(enemy) then
 			if enemy:isWounded() then up = up - 10 end
 			down = down + 10
@@ -376,7 +376,7 @@ sgs.ai_skill_invoke.qinyin = function(self, data)
 		end
 	end
 
-	if down > 0 then 
+	if down > 0 then
 		sgs.ai_skill_choice.qinyin = "down"
 		return true
 	elseif up > 0 then
@@ -423,7 +423,7 @@ yeyan_skill.getTurnUseCard = function(self)
 	local target_num = 0
 	local chained = 0
 	for _, enemy in ipairs(self.enemies) do
-		if ((enemy:hasArmorEffect("Vine") or enemy:getMark("@gale") > 0) or enemy:getHp() <= 1) 
+		if ((enemy:hasArmorEffect("Vine") or enemy:getMark("@gale") > 0) or enemy:getHp() <= 1)
 			and not (self.role == "renegade" and enemy:isLord()) then
 			target_num = target_num + 1
 		end
@@ -462,7 +462,7 @@ sgs.ai_skill_use_func.GreatYeyanCard = function(card, use, self)
 	if #need_cards < 4 then return end
 	local greatyeyan = sgs.Card_Parse("@GreatYeyanCard=" .. table.concat(need_cards, "+"))
 	assert(greatyeyan)
-	
+
 	local first
 	self:sort(self.enemies, "hp")
 	for _, enemy in ipairs(self.enemies) do
@@ -481,21 +481,21 @@ sgs.ai_skill_use_func.GreatYeyanCard = function(card, use, self)
 	end
 	if first then
 		use.card = greatyeyan
-		if use.to then 
+		if use.to then
 			use.to:append(first)
 			use.to:append(first)
 			use.to:append(first)
 		end
 		return
 	end
-	
+
 	local second
 	for _, enemy in ipairs(self.enemies) do
 		if not enemy:hasArmorEffect("SilverLion") and self:objectiveLevel(enemy) > 3 and self:damageIsEffective(enemy, sgs.DamageStruct_Fire)
 			and not (enemy:hasSkill("tianxiang") and enemy:getHandcardNum() > 0) and not enemy:isChained() and self:isGoodChainTarget(enemy, nil, nil, 3) then
 			if enemy:hasArmorEffect("Vine") then
 				use.card = greatyeyan
-				if use.to then 
+				if use.to then
 					use.to:append(enemy)
 					use.to:append(enemy)
 					use.to:append(enemy)
@@ -506,7 +506,7 @@ sgs.ai_skill_use_func.GreatYeyanCard = function(card, use, self)
 	end
 	if second then
 		use.card = greatyeyan
-		if use.to then 
+		if use.to then
 			use.to:append(second)
 			use.to:append(second)
 			use.to:append(second)
@@ -541,7 +541,7 @@ sgs.ai_skill_use_func.SmallYeyanCard = function(card, use, self)
 				if targets:length() >= 3 then break end
 			end
 		end
-	end	
+	end
 	if targets:length() < 3 then
 		for _, enemy in ipairs(self.enemies) do
 			if not targets:contains(enemy)
@@ -630,16 +630,16 @@ sgs.ai_skill_use["@@dawu"] = function(self, prompt)
 	local lord = self.room:getLord()
 	self:sort(self.friends_noself,"defense")
 	if lord and lord:getMark("@fog") == 0 and self:isFriend(lord) and not sgs.isLordHealthy() and not self.player:isLord() and not hasBuquEffect(lord)
-		and not (lord:hasSkill("hunzi") and lord:getMark("hunzi") == 0 and lord:getHp() > 1) then 
+		and not (lord:hasSkill("hunzi") and lord:getMark("hunzi") == 0 and lord:getHp() > 1) then
 			table.insert(targets, lord:objectName())
 	else
 		for _, friend in ipairs(self.friends_noself) do
-			if friend:getMark("@fog") == 0 and self:isWeak(friend) and not friend:hasSkill("buqu") 
+			if friend:getMark("@fog") == 0 and self:isWeak(friend) and not friend:hasSkill("buqu")
 				and not (friend:hasSkill("hunzi") and friend:getMark("hunzi") == 0 and friend:getHp() > 1) then
 					table.insert(targets, friend:objectName())
-					break 
+					break
 			end
-		end	
+		end
 	end
 	if self.player:getPile("stars"):length() > #targets and self:isWeak() then table.insert(targets, self.player:objectName()) end
 	if #targets > 0 then return "@DawuCard=.->" .. table.concat(targets, "+") end
@@ -661,7 +661,7 @@ sgs.ai_skill_invoke.guixin = function(self, data)
 	return self.room:alivePlayerCount() > 2 or not self.player:faceUp()
 end
 
-sgs.ai_need_damaged.guixin = function (self, attacker, player)	
+sgs.ai_need_damaged.guixin = function (self, attacker, player)
 	if not player:hasSkill("guixin") then return false end
 	if self.room:alivePlayerCount() <=3 then return false end
 	local drawcards = 0
@@ -690,7 +690,7 @@ wuqian_skill.getTurnUseCard = function(self)
 	self:sort(self.enemies, "hp")
 	local has_enemy
 	for _, enemy in ipairs(self.enemies) do
-		if enemy:getHp() <= 2 and getCardsNum("Jink", enemy) < 2 and enemy:getHandcardNum() > 0 and self.player:distanceTo(enemy) <= self.player:getAttackRange() then 
+		if enemy:getHp() <= 2 and getCardsNum("Jink", enemy) < 2 and enemy:getHandcardNum() > 0 and self.player:distanceTo(enemy) <= self.player:getAttackRange() then
 			has_enemy = enemy break end
 	end
 
@@ -730,12 +730,12 @@ function SmartAI:cansaveplayer(player)
 	player = player or self.player
 	local good = 0
 	if  self:hasSkills("jijiu|nosjiefan",player)  and player:getHandcardNum() > 0  then
-		good = good + 0.5 
+		good = good + 0.5
 	end
 	if player:hasSkill("chunlao") and player:getPile("wine"):length() > 0 then
-		good = good + 1 
+		good = good + 1
 	end
-	if player:hasSkill("buyi") then 
+	if player:hasSkill("buyi") then
 		good = good +0.5
 	end
 	return good
@@ -792,39 +792,39 @@ end
 sgs.ai_skill_use_func.ShenfenCard = function(card,use,self)
 	local friends_ZDL, enemies_ZDL = 0, 0
 	local good = (#self.enemies - #self.friends_noself) * 1.5
-	
+
 	if self:isEnemy(self.player:getNextAlive()) and self.player:getHp() > 2 then good = good - 0.5 end
-	if self.player:getRole() == "rebel" then good = good + 1 end	
-	if self.player:getRole() == "renegade" then good = good + 0.5 end	
+	if self.player:getRole() == "rebel" then good = good + 1 end
+	if self.player:getRole() == "renegade" then good = good + 0.5 end
 	if not self.player:faceUp() then good = good + 1 end
 	if self.player:hasSkills("jushou|nosjushou|neojushou|kuiwei") then good = good + 1 end
 	if self.player:getWeapon() and self.player:getWeapon():isKindOf("Crossbow") and self:getCardsNum("Slash", self.player) > 1 then good = good + 1 end
-	
+
 	for _, p in sgs.qlist(self.room:getOtherPlayers(self.player)) do
 		good = good + self:dangerousshenguanyu(p)
 		if p:hasSkill("dushi") and p:getHp() < 2 then good = good - 1 end
 	end
-	
+
 	for _, friend in ipairs(self.friends_noself) do
-		if (friend:hasSkill("fangzhu") and friend:getHp() > 1) or 
+		if (friend:hasSkill("fangzhu") and friend:getHp() > 1) or
 		(friend:hasSkill("jilve") and friend:getMark("@waked") > 0 and friend:getMark("@bear") > 0 and friend:getHp() > 1) then
 			good = good + friend:getLostHp() * 0.25 + 0.5
 			break
 		end
 	end
-	
+
 	for _, friend in ipairs(self.friends_noself) do
 		if friend:hasSkill("jujian") then
 			good = good + 0.5
 			break
 		end
-	end	
-	
+	end
+
 	if self.role == "renegade" then
 		local lord = getLord(self.player)
 		if lord and not self:isFriend(lord) and lord:getHp() == 1 and self:damageIsEffective(lord) and self:getCardsNum("Peach") == 0 then return end
 	end
-	
+
 	for _, friend in ipairs(self.friends_noself) do
 		friends_ZDL = friends_ZDL + friend:getCardCount(true) + friend:getHp()
 		if friend:getHandcardNum() > 4 then good = good + friend:getHandcardNum() * 0.25 end
@@ -833,7 +833,7 @@ sgs.ai_skill_use_func.ShenfenCard = function(card,use,self)
 		if self:damageIsEffective(friend) then
 			if friend:getHp() == 1 and self:getAllPeachNum() < 1 then
 				if isLord(friend) then
-					good = good - 100 
+					good = good - 100
 				elseif self.room:getMode() ~= "06_3v3" then
 					if isLord(self.player) and sgs.evaluatePlayerRole(friend) == "loyalist" then
 						good = good - 0.6 + (self.player:getCardCount(true)*0.3)
@@ -849,13 +849,13 @@ sgs.ai_skill_use_func.ShenfenCard = function(card,use,self)
 			good = good + 1
 		end
 		if friend:hasSkill("guixin") and friend:getHp()>1 then good = good + 1 end
-	end	
-	
+	end
+
 	for _,enemy in ipairs(self.enemies) do
 		enemies_ZDL = enemies_ZDL + enemy:getCardCount(true) + enemy:getHp()
 		if enemy:getHandcardNum() > 4 then good = good - enemy:getHandcardNum()*0.25 end
 		good = good - self:cansaveplayer(enemy)
-		
+
 		if self:damageIsEffective(enemy) then
 			if isLord(enemy) and self.player:getRole() == "rebel" then
 				good = good + 1
@@ -864,27 +864,27 @@ sgs.ai_skill_use_func.ShenfenCard = function(card,use,self)
 				if isLord(enemy) and self.player:getRole() == "rebel" then
 					good = good + 3
 				elseif enemy:getRole() ~= "lord" then
-					good = good + 1 
+					good = good + 1
 				end
 			end
-			
+
 			if enemy:hasSkill("guixin") and enemy:getHp() > 1 then good = good - self.player:aliveCount()*0.2 end
 			if enemy:hasSkill("ganglie") and enemy:getHp() > 1 then good = good - 1 end
 			if enemy:hasSkill("xuehen") and enemy:getHp() > 1 then good = good - 1 end
 			if enemy:hasArmorEffect("SilverLion") and enemy:getHp() > 1 then good = good - 0.5 end
-		else    
+		else
 			good = good - 1
 		end
 	end
-	
+
 	local Combat_Effectiveness = ((#self.friends_noself > 0 and friends_ZDL/#self.friends_noself or 0) - (#self.enemies > 0 and enemies_ZDL/#self.enemies or 0))/2
 	-- self.room:writeToConsole("friendsZDL:"..friends_ZDL..", enemiesZDL:"..enemies_ZDL..", CE:"..Combat_Effectiveness)
 	good = good - Combat_Effectiveness
-	
+
 	-- self.room:writeToConsole("UseShenfen:"..good)
-	if good > 0 and self.player:getMark("@wrath") >5 then 
-		use.card = card		
-	end	
+	if good > 0 and self.player:getMark("@wrath") >5 then
+		use.card = card
+	end
 end
 
 local shenfen_filter = function(player, carduse)
@@ -1002,7 +1002,7 @@ jilve_skill.getTurnUseCard = function(self)
 				local wanshacard = sgs.Card_Parse("@JilveCard=.")
 				dummy_use={isDummy=true}
 				self:useSkillCard(wanshacard, dummy_use)
-				return sgs.Card_Parse("@JilveCard=.") 
+				return sgs.Card_Parse("@JilveCard=.")
 			end
 		end
 	end
@@ -1027,7 +1027,7 @@ jilve_skill.getTurnUseCard = function(self)
 				local wanshacard = sgs.Card_Parse("@JilveCard=.")
 				dummy_use = {isDummy=true}
 				self:useSkillCard(wanshacard,dummy_use)
-				return sgs.Card_Parse("@JilveCard=.") 
+				return sgs.Card_Parse("@JilveCard=.")
 			end
 		end
 	end

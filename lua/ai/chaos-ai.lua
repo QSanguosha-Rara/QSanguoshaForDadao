@@ -3,7 +3,7 @@ sgs.ai_skill_use["@@jisu"] = function(self, prompt)
 	return string.gsub(card_str, "ShensuCard", "JisuCard")
 end
 
-sgs.ai_card_intention.JisuCard = sgs.ai_card_intention.Slash 
+sgs.ai_card_intention.JisuCard = sgs.ai_card_intention.Slash
 
 sgs.ai_slash_prohibit.shuiyong = function(self, to, card, from)
 	if from:hasSkill("jueqing") then return false end

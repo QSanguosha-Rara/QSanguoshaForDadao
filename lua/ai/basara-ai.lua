@@ -1,5 +1,5 @@
 function askForShowGeneral(self, choices)
-	
+
 	local event = self.player:getTag("event"):toInt()
 	local data = self.player:getTag("event_data")
 	local generals = self.player:getTag("roles"):toString():split("+")
@@ -9,7 +9,7 @@ function askForShowGeneral(self, choices)
 		player:setGeneral(sgs.Sanguosha:getGeneral(general))
 		table.insert(players, player)
 	end
-	
+
 	if event == sgs.DamageInflicted then
 		local damage = data:toDamage()
 		for _, player in ipairs(players) do
@@ -37,13 +37,13 @@ function askForShowGeneral(self, choices)
 	end
 
 	if self.player:getDefensiveHorse() and self.player:getArmor() and not self:isWeak() then return "yes" end
-	
+
 end
 
 sgs.ai_skill_choice.RevealGeneral = function(self, choices)
-	
+
 	if askForShowGeneral(self, choices) == "yes" then return "yes" end
-	
+
 	local anjiang = 0
 	for _, player in sgs.qlist(self.room:getOtherPlayers(self.player)) do
 		if player:getGeneralName() == "anjiang" then
@@ -68,7 +68,7 @@ if sgs.GetConfig("EnableHegemony", false) then
 		init(self, player)
 	end
 	sgs.ai_skill_choice.RevealGeneral = function(self, choices)
-		
+
 		if askForShowGeneral(self, choices) == "yes" then return "yes" end
 
 		for _, player in sgs.qlist(self.room:getOtherPlayers(self.player)) do

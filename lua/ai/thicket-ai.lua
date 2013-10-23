@@ -11,15 +11,15 @@ function SmartAI:toTurnOver(player, n, isFangzhu)
 			return false
 		end
 	end
-	
+
 	if isFangzhu and player:getHp() == 1 and sgs.ai_AOE_data then
 		local use = sgs.ai_AOE_data:toCardUse()
 		if use.to:contains(player) and self:aoeIsEffective(use.card, player) and self:playerGetRound(player) > self:playerGetRound(self.player)
 			and player:isKongcheng() then
-				return false 
+				return false
 			end
-	end	
-	
+	end
+
 	if player:hasUsed("ShenfenCard") and player:faceUp() and player:getPhase() == sgs.Player_Play
 		and (not player:hasUsed("ShenfenCard") and player:getMark("@wrath") >= 6 or player:hasFlag("ShenfenUsing")) then
 		return false
@@ -60,7 +60,7 @@ sgs.ai_skill_playerchosen.fangzhu = function(self, targets)
 						break
 					end
 				end
-			end	
+			end
 		else
 			self:sort(self.enemies, "chaofeng")
 			for _, enemy in ipairs(self.enemies) do
@@ -192,9 +192,9 @@ sgs.ai_skill_invoke.lieren = function(self, data)
 		local card  = self.player:getHandcards():first()
 		if card:isKindOf("Jink") or card:isKindOf("Peach") then return end
 	end
-	
-	if (self.player:getHandcardNum() >= self.player:getHp() or self:getMaxCard():getNumber() > 10 
-		or (self:needKongcheng() and self.player:getHandcardNum() == 1) or not self:hasLoseHandcardEffective()) 
+
+	if (self.player:getHandcardNum() >= self.player:getHp() or self:getMaxCard():getNumber() > 10
+		or (self:needKongcheng() and self.player:getHandcardNum() == 1) or not self:hasLoseHandcardEffective())
 		and not self:doNotDiscard(damage.to, "h", true) and not (self.player:getHandcardNum() == 1 and self:doNotDiscard(damage.to, "e", true)) then
 			return true
 	end
@@ -321,8 +321,8 @@ sgs.ai_skill_playerchosen.yinghun = function(self, targets)
 			if not wf then
 				for _, friend in ipairs(self.friends_noself) do
 					if self:isWeak(friend) then
-						wf = true 
-						break 
+						wf = true
+						break
 					end
 				end
 			end
@@ -367,7 +367,7 @@ sgs.ai_skill_playerchosen.yinghun = function(self, targets)
 	if not self.yinghun and x > 1 and #self.enemies > 0 then
 		self:sort(self.enemies, "handcard")
 		for _, enemy in ipairs(self.enemies) do
-			if enemy:getCards("he"):length() >= n 
+			if enemy:getCards("he"):length() >= n
 			  and not self:doNotDiscard(enemy, "he", true, n, true) then
 				self.yinghunchoice = "d1tx"
 				return enemy
@@ -551,7 +551,7 @@ end
 local dimeng_discard = function(self, discard_num, mycards)
 	local cards = mycards
 	local to_discard = {}
-	
+
 	local aux_func = function(card)
 		local place = self.room:getCardPlace(card:getEffectiveId())
 		if place == sgs.Player_PlaceEquip then
@@ -567,7 +567,7 @@ local dimeng_discard = function(self, discard_num, mycards)
 		end
 		return 0
 	end
-	
+
 	local compare_func = function(a, b)
 		if aux_func(a) ~= aux_func(b) then
 			return aux_func(a) < aux_func(b)
@@ -604,8 +604,8 @@ sgs.ai_skill_use_func.DimengCard = function(card,use,self)
 		end
 	end
 	for _, c in sgs.qlist(self.player:getEquips()) do
-		if not self.player:isJilei(c) then 
-			cardNum = cardNum + 1 
+		if not self.player:isJilei(c) then
+			cardNum = cardNum + 1
 			table.insert(mycards, c)
 			table.insert(myequips, c)
 		end
@@ -788,7 +788,7 @@ end
 
 function sgs.ai_cardneed.roulin(to, card, self)
 	for _, enemy in ipairs(self.enemies) do
-		if card:isKindOf("Slash") and to:canSlash(enemy, nil, true) and self:slashIsEffective(card, enemy) 
+		if card:isKindOf("Slash") and to:canSlash(enemy, nil, true) and self:slashIsEffective(card, enemy)
 				and not (enemy:hasSkill("kongcheng") and enemy:isKongcheng())
 				and sgs.isGoodTarget(enemy, self.enemies, self) and not self:slashProhibit(card, enemy) and enemy:isFemale() then
 			return getKnownCard(to, "Slash", true) == 0
