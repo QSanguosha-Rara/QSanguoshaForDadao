@@ -589,3 +589,166 @@ sgs.ai_skill_choice.neo2013duoyi = function(self, choices)
 	return choice_table[math.random(1, #choice_table)]
 end
 
+
+function PujiCard(self) --选择一张黑色牌
+	local card_id 
+	local cards = self.player:getHandcards()
+	cards = sgs.QList2Table(cards)
+	self:sortByCardNeed(cards)
+	local lightning = self:getCard("Lightning")
+	if lightning and lightning:isBlack() and not self:willUseLightning(lightning) then card_id = lightning:getEffectiveId() end
+	if not card_id then
+		if self:needToThrowArmor() and self.player:getArmor():isBlack() then card_id = self.player:getArmor():getId()
+		elseif self.player:getHandcardNum() >= self.player:getHp() then			
+			for _, acard in ipairs(cards) do
+				if not acard:isBlack() then continue end
+				if (acard:isKindOf("EquipCard") or acard:isKindOf("AmazingGrace") or acard:isKindOf("BasicCard"))
+					and self:cardNeed(acard) < 7 and not acard:isKindOf("Peach") then card_id = acard:getEffectiveId() break 
+				elseif acard:getTypeId() == sgs.Card_TypeTrick then
+					local dummy_use = { isDummy = true }
+					self:useTrickCard(acard, dummy_use)
+					if not dummy_use.card then card_id = acard:getEffectiveId() break end	
+				end
+			end
+		elseif not self.player:getEquips():isEmpty() then
+			local equips=sgs.QList2Table(self.player:getEquips())
+			self:sortByCardNeed(equips)
+			for _, card in ipairs(equips) do
+				if not card:isBlack() then continue end
+				if card:getId() ~= self:getValuableCard(self.player) and not card:isKindOf("Armor") then 
+					card_id = card:getEffectiveId() break end 
+			end
+		end
+	end
+	return card_id
+end
+
+local neo2013puji_skill = {}
+neo2013puji_skill.name = "neo2013puji"
+table.insert(sgs.ai_skills, neo2013puji_skill)
+neo2013puji_skill.getTurnUseCard = function(self)
+	if self.player:isNude() or self.player:hasUsed("Neo2013PujiCard") then return nil end
+	local cardid = PujiCard(self) or JS_Card(self)
+	if not cardid then return end
+	local cardstr = ("@Neo2013PujiCard=%d"):format(cardid)
+	local cardc = sgs.Card_Parse(cardstr)
+	assert(cardc)
+	return cardc
+end
+
+sgs.ai_skill_use_func.Neo2013PujiCard = function(card, use, self)
+	self:sort(self.enemies, "threat")
+	self:sort(self.friends_noself, "defense")
+	if sgs.getDefense(self.friends_noself[1]) > 5 then self:sort(self.friends_noself, "hp") end
+	for _, friend in ipairs(self.friends_noself) do
+		if friend and self:needToThrowArmor(friend) and friend:getArmor():isBlack() then
+			use.card = card
+			if use.to then use.to:append(friend) end
+			return
+		end
+	end
+	
+	for _, friend in ipairs(self.friends_noself) do
+		if friend and not friend:getEquips():isEmpty() and friend:hasSkills(sgs.lose_equip_skill) then
+			for _, card in sgs.list(friend:getEquips()) do
+				if card:isBlack() then
+					use.card = card
+					if use.to then use.to:append(friend) end
+					return
+				end
+			end
+		end
+	end
+		
+	for _, friend in ipairs(self.friends_noself) do
+		local rednum = self:getSuitNum("diamond|heart", true, friend)
+		local blacknum = self:getSuitNum("club|spade", true, friend)
+		if blacknum >= rednum and not friend:isNude() and friend:isWounded() then
+			use.card = card
+			if use.to then use.to:append(friend) end
+			return
+		end
+	end
+		
+	for _, friend in ipairs(self.friends_noself) do
+		local blacknum = self:getSuitNum("club|spade", true, friend)
+		if blacknum > 0 and not friend:isNude() and (friend:isWounded() or self:getOverflow(friend) > 0) then
+			use.card = card
+			if use.to then use.to:append(friend) end
+			return
+		end
+	end
+	
+	for _, enemy in ipairs(self.enemies) do
+		local rednum = self:getSuitNum("diamond|heart", true, enemy)
+		if (rednum > 0 or self:getOverflow(enemy) > 0) and not enemy:isNude() then
+			use.card = card
+			if use.to then use.to:append(enemy) end
+			return
+		end
+	end	
+	for _, enemy in ipairs(self.enemies) do
+		local rednum = self:getSuitNum("diamond|heart", true, enemy)
+		if rednum > 0 and not enemy:getEquips():isEmpty() then
+			use.card = card
+			if use.to then use.to:append(enemy) end
+			return
+		end
+	end	
+	for _, enemy in ipairs(self.enemies) do
+		local rednum = self:getSuitNum("diamond|heart", true, enemy)
+		local cards = sgs.QList2Table(enemy:getCards("he"))
+		if rednum > 0 and #cards > 2 then
+			use.card = card
+			if use.to then use.to:append(enemy) end
+			return
+		end
+	end	
+end
+sgs.ai_use_priority.Neo2013PujiCard = 4.3
+sgs.ai_use_value.Neo2013PujiCard = 7
+sgs.dynamic_value.lucky_chance.Neo2013PujiCard = true
+
+sgs.ai_skill_cardchosen.Neo2013PujiCard  = function(self, who)
+	if self:isFriend(who) then
+		if self:needToThrowArmor(who) and who:getArmor():isBlack() then return who:getArmor() end
+		if not who:getEquips():isEmpty() and who:hasSkills(sgs.lose_equip_skill) then
+			local equips = sgs.QList2Table(who:getEquips())
+			self:sortByCardNeed(equips)
+			for _, card in ipairs(equips) do
+				if card:isBlack() then return card end
+			end
+		end
+		local cards = sgs.QList2Table(who:getCards("h"))
+		self:sortByKeepValue(cards)
+		if #cards > 0 then
+			for _, card in ipairs(cards) do
+				if not (card:isKindOf("Peach") or card:isKindOf("Analeptic")) and card:isBlack() then return card end
+			end
+		end
+		local equips2 = sgs.QList2Table(who:getEquips())
+		self:sortByCardNeed(equips2)
+		if #equips2 > 0 then
+			for _, card in ipairs(equips2) do
+				if not card:isBlack() then continue end
+				if card:getId() ~= self:getValuableCard(who) and not card:isKindOf("Armor") then return card end
+			end
+		end
+	elseif self:isEnemy(who) then
+		local equips3 = sgs.QList2Table(who:getEquips())
+		self:sortByCardNeed(equips3, true)
+		if #equips3 > 0 then
+			for _, card in ipairs(equips3) do
+				if not card:isRed() then continue end
+				if card:getId() == self:getValuableCard(who) or card:isKindOf("Armor") or card:getId() == self:getDangerousCard(who) then return card end
+			end
+		end
+		local cards2 = sgs.QList2Table(who:getCards("he"))
+		self:sortByUseValue(cards2)
+		if #cards2 > 0 then
+			for _, card in ipairs(cards2) do
+				if card:isRed() then return card end
+			end
+		end
+	end
+end
