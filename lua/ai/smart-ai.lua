@@ -1421,26 +1421,80 @@ function SmartAI:isEnemy(other, another)
 	return false
 end
 ]]
+
 function SmartAI:isFriend(other, another)
-    if another then return self:isFriend(other) == self:isFriend(another) end
+	local rebel_num = sgs.current_mode_players["rebel"]
+	local loyal_num = sgs.current_mode_players["loyalist"]
+	local renegade_num = sgs.current_mode_players["renegade"]
+	local lord_man
+	for _, p in sgs.list(self.room:getAlivePlayers()) do
+		if p:getRole() == "lord" then
+			lord_man = p
+		end
+	end
 	if not other then self.room:writeToConsole(debug.traceback()) return end
 	if self.player:objectName() == other:objectName() then return true end
     if self.player:getMark("Global_TurnCount") < 2 then
+	    if another then return self:isFriend(other) == self:isFriend(another) end
 	    if sgs.isRolePredictable(true) and self.lua_ai:relationTo(other) ~= sgs.AI_Neutrality then return self.lua_ai:isFriend(other) end
 	    if self:objectiveLevel(other) < 0 then return true end
 	else
-		local rebel_num = sgs.current_mode_players["rebel"]
-		local loyal_num = sgs.current_mode_players["loyalist"]
-		local renegade_num = sgs.current_mode_players["renegade"]
-		local lord_man
-		for _, p in sgs.list(self.room:getAlivePlayers()) do
-		    if p:getRole() == "lord" then
-			    lord_man = p
+	    if another then
+		if (other:getRole() == "Lord" or other:getRole() == "loyalist") then
+		    if other:getRole() == "lord" then
+			    return true
+    		elseif another:getRole() == "loyalist" then
+     		    return true
+			elseif another:getRole() == "renegade" then
+				if self:isWeak(lord_man) then
+					if rebel_num > 0 then
+						return true
+					end
+				else
+					if (loyal_num+1) < rebel_num then
+						return true
+					end
+				end
 			end
+		end
+		if other:getRole() == "rebel" then
+		    if another:getRole() == "rebel" then
+     		    return true
+			elseif another:getRole() == "renegade" then
+			    if not self:isWeak(lord_man) then
+				    if (loyal_num+1) > rebel_num then
+					    return true
+					end
+				end
+			end
+		end
+		if other:getRole() == "renegade" then
+		    if another:getRole() == "Lord" then
+			    if loyal_num > 0 or rebel_num > 0 then
+				    return true
+				end
+			elseif another:getRole() == "loyalist" then
+			    if (loyal_num+1) < rebel_num then
+				    return true
+				end
+			elseif another:getRole() == "rebel" then
+			    if not self:isWeak(lord_man) then
+				    if (loyal_num+1) > rebel_num then
+					    return true
+					end
+				end	
+			elseif another:getRole() == "renegade" then
+			    if self:isWeak(lord_man) and (loyal_num+1) < rebel_num then
+				    return true
+				end
+			end
+		end
 		end
 		--主与忠的策略
 	    if (self.player:getRole() == "Lord" or self.player:getRole() == "loyalist") then
-    		if other:getRole() == "loyalist" then
+		    if other:getRole() == "lord" then
+			    return true
+    		elseif other:getRole() == "loyalist" then
      		    return true
 			elseif other:getRole() == "renegade" then
 				if self:isWeak(lord_man) then
@@ -1494,25 +1548,79 @@ function SmartAI:isFriend(other, another)
 end
 
 function SmartAI:isEnemy(other, another)
-    if another then return self:isFriend(other) ~= self:isFriend(another) end
+    local rebel_num = sgs.current_mode_players["rebel"]
+	local loyal_num = sgs.current_mode_players["loyalist"]
+	local renegade_num = sgs.current_mode_players["renegade"]
+	local lord_man
+	for _, p in sgs.list(self.room:getAlivePlayers()) do
+		if p:getRole() == "lord" then
+			lord_man = p
+		end
+	end
 	if not other then self.room:writeToConsole(debug.traceback()) return end
 	if self.player:objectName() == other:objectName() then return false end
 	if self.player:getMark("Global_TurnCount") < 2 then
+        if another then return self:isFriend(other) ~= self:isFriend(another) end
 	    if sgs.isRolePredictable(true) and self.lua_ai:relationTo(other) ~= sgs.AI_Neutrality then return self.lua_ai:isEnemy(other) end
 		if self:objectiveLevel(other) > 0 then return true end
 	else
-	    local rebel_num = sgs.current_mode_players["rebel"]
-		local loyal_num = sgs.current_mode_players["loyalist"]
-		local renegade_num = sgs.current_mode_players["renegade"]
-		local lord_man
-		for _, p in sgs.list(self.room:getAlivePlayers()) do
-		    if p:getRole() == "lord" then
-			    lord_man = p
+	    if another then
+		if (other:getRole() == "Lord" or other:getRole() == "loyalist") then
+		    if other:getRole() == "lord" then
+			    return false
+    		elseif another:getRole() == "loyalist" then
+     		    return false
+			elseif another:getRole() == "renegade" then
+				if self:isWeak(lord_man) then
+					if rebel_num > 0 then
+						return false
+					end
+				else
+					if (loyal_num+1) < rebel_num then
+						return false
+					end
+				end
 			end
+		end
+		if other:getRole() == "rebel" then
+		    if another:getRole() == "rebel" then
+     		    return false
+			elseif another:getRole() == "renegade" then
+			    if not self:isWeak(lord_man) then
+				    if (loyal_num+1) > rebel_num then
+					    return false
+					end
+				end
+			end
+		end
+		if other:getRole() == "renegade" then
+		    if another:getRole() == "Lord" then
+			    if loyal_num > 0 or rebel_num > 0 then
+				    return false
+				end
+			elseif another:getRole() == "loyalist" then
+			    if (loyal_num+1) < rebel_num then
+				    return false
+				end
+			elseif another:getRole() == "rebel" then
+			    if not self:isWeak(lord_man) then
+				    if (loyal_num+1) > rebel_num then
+					    return false
+					end
+				end	
+			elseif another:getRole() == "renegade" then
+			    if self:isWeak(lord_man) and (loyal_num+1) < rebel_num then
+				    return false
+				end
+			end
+		end
+		return true
 		end
 	    --主与忠的策略
 	    if (self.player:getRole() == "Lord" or self.player:getRole() == "loyalist") then
-    		if other:getRole() == "loyalist" then
+		    if other:getRole() == "lord" then
+			    return false
+    		elseif other:getRole() == "loyalist" then
      		    return false
 			elseif other:getRole() == "renegade" then
 			    if self:isWeak(lord_man) then
