@@ -1662,9 +1662,11 @@ public:
         filter_pattern = ".|.|.|hand";
     }
 
+/*
     virtual bool isEnabledAtPlay(const Player *player) const{
         return !player->hasUsed("Neo2013ZhoufuCard");
     }
+*/
 
     virtual const Card *viewAs(const Card *originalcard) const{
         Card *card = new Neo2013ZhoufuCard;
