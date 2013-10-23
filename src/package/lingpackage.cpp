@@ -832,7 +832,7 @@ bool Neo2013PujiCard::targetFilter(const QList<const Player *> &targets, const P
 
 void Neo2013PujiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
     ServerPlayer *target = targets[0];
-    const Card *card = Sanguosha->getCard(room->askForCardChosen(source, target, "he", objectName(), false, Card::MethodDiscard));
+    const Card *card = Sanguosha->getCard(room->askForCardChosen(source, target, "he", "neo2013puji", false, Card::MethodDiscard));
 
     QList<ServerPlayer *> beneficiary;
     if (Sanguosha->getCard(getSubcards()[0])->isBlack())
@@ -850,7 +850,7 @@ void Neo2013PujiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *
             if (p->isWounded())
                 choicelist << "recover";
 
-            QString choice = room->askForChoice(p, objectName(), choicelist.join("+"));
+            QString choice = room->askForChoice(p, "neo2013puji", choicelist.join("+"));
 
             if (choice == "draw")
                 p->drawCards(1);
@@ -2500,6 +2500,7 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     addMetaObject<Neo2013ZhoufuCard>();
     addMetaObject<Neo2013JiejiCard>();
     addMetaObject<Neo2013JinanCard>();
+    addMetaObject<Neo2013PujiCard>();
 
     skills << new Neo2013HuileiDecrease << new Neo2013Huwei
         << new Neo2013Tongwu << new Neo2013Bingyin << new Neo2013Touxi << new Neo2013Muhui << new Neo2013MuhuiDis;
