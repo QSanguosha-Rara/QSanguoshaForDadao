@@ -2427,7 +2427,7 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_spguanyu->addSkill("wusheng");
     neo2013_spguanyu->addRelateSkill("neo2013huwei");
 
-    General *neo2013_zoushi = new General(this, "neo2013_zoushi", "qun", 3);
+    General *neo2013_zoushi = new General(this, "neo2013_zoushi", "qun", 3, false);
     neo2013_zoushi->addSkill(new Neo2013Huoshui);
     neo2013_zoushi->addSkill(new Neo2013Qingcheng);
 
@@ -2471,7 +2471,7 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_panzmaz->addSkill(new Neo2013Jieji);
     neo2013_panzmaz->addSkill("anjian");
 
-    General *neo2013_xiahoushi = new General(this, "neo2013_xiahoushi", "shu", 3);
+    General *neo2013_xiahoushi = new General(this, "neo2013_xiahoushi", "shu", 3, false);
     neo2013_xiahoushi->addSkill(new Neo2013Yanyu);
     neo2013_xiahoushi->addSkill("xiaode");
 
