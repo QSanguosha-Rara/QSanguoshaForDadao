@@ -1780,14 +1780,24 @@ function SmartAI:updatePlayers(clear_flags)
 	self.harsh_retain = true
 
 	for _,player in sgs.qlist(self.room:getOtherPlayers(self.player)) do
-		if self:objectiveLevel(player) < 0 and player:isAlive() then 
-			table.insert(self.friends_noself, player)
-			table.insert(self.friends, player)
+	    if self.player:getMark("Global_TurnCount") < 2 then
+		    if self:objectiveLevel(player) < 0 and player:isAlive() then 
+			    table.insert(self.friends_noself, player)
+			    table.insert(self.friends, player)
+		    end
+		    if self:objectiveLevel(player) > 0 and player:isAlive() then
+			    table.insert(self.enemies, player)
+			end
+		else
+		    if self:isFriend(player) and player:isAlive() then
+			    table.insert(self.friends_noself, player)
+			    table.insert(self.friends, player)
+			end
+			if self:isEnemy(player) and player:isAlive() then
+			    table.insert(self.enemies, player)
+			end
 		end
-		if self:objectiveLevel(player) > 0 and player:isAlive() then
-			table.insert(self.enemies, player)
-		end
-	end	
+	end
 	table.insert(self.friends,self.player)
 	
 	if sgs.isRolePredictable() then return end
