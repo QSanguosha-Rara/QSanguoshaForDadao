@@ -137,13 +137,17 @@ public:
             if (use.card->getSkillName() == "jiushi")
                 player->turnOver();
         } else if (triggerEvent == PreDamageDone) {
+            room->addPlayerMark(player, "jiushi");
             player->tag["PredamagedFace"] = player->faceUp();
         } else if (triggerEvent == DamageComplete) {
-            bool faceup = player->tag.value("PredamagedFace").toBool();
-            player->tag.remove("PredamagedFace");
-            if (!faceup && !player->faceUp() && player->askForSkillInvoke("jiushi", data)) {
-                room->broadcastSkillInvoke("jiushi", 2);
-                player->turnOver();
+            if (player->getMark("jiushi") > 0){
+                room->setPlayerMark(player, "jiushi", 0);
+                bool faceup = player->tag.value("PredamagedFace").toBool();
+                player->tag.remove("PredamagedFace");
+                if (!faceup && !player->faceUp() && player->askForSkillInvoke("jiushi", data)) {
+                    room->broadcastSkillInvoke("jiushi", 2);
+                    player->turnOver();
+                }
             }
         }
 
