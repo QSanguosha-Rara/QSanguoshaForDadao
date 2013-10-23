@@ -473,13 +473,22 @@ end
 
 
 function sgs.ai_skill_invoke.kangdao(self, data)
-	if self.player:hasSkill("kongcheng") and self.player:isKongcheng() then return end
 	local move = data:toMoveOneTime()
 	if not move.from then return false end
 	local from = findPlayerByObjectName(self.room, move.from:objectName())
 	--local card = sgs.Sanguosha:getCard(move.card_ids:first())
 	if not from then return false end
 	return self:isFriend(from) 
+end
+sgs.ai_skill_choice.kangdao = function(self)
+	local zc = self.room:findPlayerBySkillName("kangdao")
+	if zc and self:isFriend(zc) then
+		if zc:hasSkill("kongcheng") and zc:isKongcheng() then return "kangdaocancel" end
+		if self:needKongcheng(zc, true) then return "kangdaocancel" end
+		if self:isWeak() or self:hasSkills(sgs.lose_equip_skill, zc) then return "kangdaogain" end
+		if self.player:getPhase() == sgs.Player_NotActive then return "kangdaogain" end
+	end
+	return math.random(0, 1) == 0 and "kangdaogain" or "kangdaocancel"
 end
 
 sgs.ai_skill_cardask["@bushi-discard"] = function(self, data)
