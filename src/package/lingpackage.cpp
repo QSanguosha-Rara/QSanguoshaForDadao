@@ -1171,7 +1171,7 @@ public:
 class Neo2013Qingcheng: public TriggerSkill{
 public:
     Neo2013Qingcheng(): TriggerSkill("neo2013qingcheng"){
-        events << EventPhaseStart << EventPhaseChanging;
+        events << EventPhaseStart;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -1183,7 +1183,30 @@ public:
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        if (triggerEvent == EventPhaseStart && player->getPhase() == Player::RoundStart){
+        if (player->getPhase() == Player::RoundStart){
+            QStringList Qingchenglist = player->tag["neo2013qingcheng"].toStringList();
+            if (!Qingchenglist.isEmpty()){
+                foreach (QString skill_name, Qingchenglist) {
+                    room->setPlayerMark(player, "Qingcheng" + skill_name, 0);
+                    if (player->hasSkill(skill_name)) {
+                        LogMessage log;
+                        log.type = "$QingchengReset";
+                        log.from = player;
+                        log.arg = skill_name;
+                        room->sendLog(log);
+                    }
+                }
+                player->tag.remove("neo2013qingcheng");
+                room->broadcastSkillInvoke(objectName(), 2);
+
+                foreach (ServerPlayer *p, room->getAllPlayers())
+                    room->filterCards(p, p->getCards("he"), true);
+
+                Json::Value args;
+                args[0] = QSanProtocol::S_GAME_EVENT_UPDATE_SKILL;
+                room->doBroadcastNotify(QSanProtocol::S_COMMAND_LOG_EVENT, args);
+
+            }
             ServerPlayer *zou = room->findPlayerBySkillName(objectName());
             if (zou == NULL || zou->isNude() || zou == player)
                 return false;
@@ -1217,24 +1240,6 @@ public:
                 }
             }
         }
-        else if (triggerEvent == EventPhaseChanging && data.value<PhaseChangeStruct>().to == Player::RoundStart){
-            QStringList Qingchenglist = player->tag["neo2013qingcheng"].toStringList();
-            if (Qingchenglist.isEmpty()) return false;
-            foreach (QString skill_name, Qingchenglist) {
-                room->setPlayerMark(player, "Qingcheng" + skill_name, 0);
-                if (player->hasSkill(skill_name)) {
-                    LogMessage log;
-                    log.type = "$QingchengReset";
-                    log.from = player;
-                    log.arg = skill_name;
-                    room->sendLog(log);
-                }
-            }
-            player->tag.remove("neo2013qingcheng");
-            room->broadcastSkillInvoke(objectName(), 2);
-        }
-        else
-            return false;
 
         foreach (ServerPlayer *p, room->getAllPlayers())
             room->filterCards(p, p->getCards("he"), true);
