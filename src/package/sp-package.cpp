@@ -1684,7 +1684,7 @@ public:
         if (use.card == NULL || !use.card->isKindOf("Slash"))
             return false;
         foreach(ServerPlayer *p, use.to){
-            if ((player->distanceTo(p) <= 1 || player == p) && player->askForSkillInvoke(objectName(), data)){
+            if ((player->distanceTo(p) <= 1 || player == p) && player->askForSkillInvoke(objectName(), QVariant::fromValue(p))){
                 player->drawCards(1);
                 if (player != p){
                     const Card *c = room->askForExchange(player, objectName(), 1);

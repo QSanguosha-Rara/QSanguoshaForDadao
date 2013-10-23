@@ -1460,6 +1460,48 @@ sgs.ai_card_intention.ZhoufuCard = 0
 sgs.ai_use_value.ZhoufuCard = 2
 sgs.ai_use_priority.ZhoufuCard = 1.0
 
+
+sgs.ai_skill_invoke.kangkai = function(self, data)
+    local target = data:toPlayer()
+	if self:isFriend(target) then
+		self.kangkai_target = target
+        return true
+	end
+    return false	
+end
+sgs.ai_skill_discard.kangkai = function(self)
+    local target = self.kangkai_target
+	local best_card, better_card, normal_card
+	local cards = sgs.QList2Table(self.player:getHandcards())
+	self:sortByUseValue(cards, true)
+	for _, cd in sgs.list(self.player:getHandcards()) do
+	    if (self:getCardsNum("Jink", target) == 0 and cd:isKindOf("Jink")) or ((not target:getArmor() or target:hasArmorEffect("SilverLion")) and cd:isKindOf("Armor")) then
+		    best_card = cd
+		elseif (not target:getWeapon() and cd:isKindOf("Weapon")) or (not target:getDefensiveHorse() and cd:isKindOf("DefensiveHorse")) or (not target:getOffensiveHorse() and cd:isKindOf("OffensiveHorse")) then
+		    better_card = cd
+		else
+		    normal_card = cd
+		end
+	end
+	local to_give = best_card or better_card or normal_card
+	local r = {}
+	if to_give then
+		table.insert(r, to_give:getEffectiveId())
+	else
+		table.insert(r, self.player:getRandomHandcardId())
+	end
+	return r
+end
+sgs.ai_skill_choice.kangkai = "use"
+--嘲讽值
+sgs.ai_chaofeng.caoang = 3
+--需求
+sgs.ai_cardneed.kangkai = function(to, card, self)
+    if to:getHandcardNum() < 4 then
+	    return card:isKindOf("EquipCard") or card:isKindOf("Jink")
+	end
+end
+
 sgs.ai_skill_invoke.cv_sunshangxiang = function(self, data)
 	local lord = self.room:getLord()
 	if lord and lord:hasLordSkill("shichou") then
