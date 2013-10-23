@@ -28,7 +28,7 @@ sgs.ai_skill_use_func.JuaoCard = function(card, use, self)
 					use.card = sgs.Card_Parse("@JuaoCard=" .. table.concat(givecard, "+"))
 					if use.to then 
 						use.to:append(friend) 
-						self:speak("顶住，你的快递马上就到了。")
+						self.player:speak("顶住，你的快递马上就到了。")
 					end
 					return
 				end
@@ -73,7 +73,7 @@ sgs.ai_skill_use_func.JuaoCard = function(card, use, self)
 					use.card = sgs.Card_Parse("@JuaoCard=" .. table.concat(givecard, "+"))
 					if use.to then 
 						use.to:append(friend) 
-						self:speak("我知道你有什么牌，哼哼。")
+						self.player:speak("我知道你有什么牌，哼哼。")
 					end
 					return
 				end

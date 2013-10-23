@@ -538,3 +538,54 @@ sgs.ai_skill_playerchosen.neo2013fankui = function(self, targets)
 	return player or to or nil
 end
 sgs.ai_playerchosen_intention.neo2013fankui = 30
+
+
+sgs.ai_skill_discard.neo2013yongyi = function(self, discard_num, min_num, optional, include_equip)
+	local cards = self.player:getCards("h")
+	if (cards and cards:length() < discard_num) or self:isWeak() then return {} end
+	cards = sgs.QList2Table(cards)
+	self:sortByKeepValue(cards)
+	for _,cd in ipairs(cards) do
+		if not cd:isKindOf("Peach") and (self:getKeepValue(cd) < 4 or self:cardNeed(cd) < 7) then return {cd:getEffectiveId()} end  
+	end
+	return {} 
+end
+
+function sgs.ai_cardsview.neo2013yongyi(self, class_name, player)
+	if class_name == "Slash" and player:hasSkill("neo2013yongyi") and (sgs.Sanguosha:getCurrentCardUseReason() == sgs.CardUseStruct_CARD_USE_REASON_PLAY or sgs.Sanguosha:getCurrentCardUseReason() == sgs.CardUseStruct_CARD_USE_REASON_RESPONSE_USE) then
+		if player:getPile("neoarrow"):length() == 0 then return nil end
+		return ("@Neo2013YongyiCard=.:slash") 
+	end
+end
+
+sgs.ai_skill_use_func.Neo2013YongyiCard = function(card, use, self)
+	use.card = card
+end
+
+
+sgs.ai_skill_discard.neo2013duoyi = function(self, discard_num, min_num, optional, include_equip)
+	if self.player:isNude() then return {} end
+	if self:needKongcheng(self.player, true) and self.player:getHandcardNum() == 1 then return {self.player:handCards():first()} end
+	local cards = sgs.QList2Table(self.player:getCards("h"))
+	self:sortByKeepValue(cards)
+	for _,cd in ipairs(cards) do
+		if not cd:isKindOf("Peach") and self:getKeepValue(cd) <= 2 then return {cd:getEffectiveId()} end  
+	end
+	local id = JS_Card(self) 
+	if id then return {id} else return {} end
+end
+sgs.ai_skill_choice.neo2013duoyi = function(self, choices)
+	local current = self.room:getCurrent()
+	if not current then return "BasicCard" end
+	if getCardsNum("TrickCard", current) - getCardsNum("Nullification", current) > 0 or getCardsNum("TrickCard", current) > 1 or getCardsNum("ExNihilo", current) > 0 then
+		return "TrickCard"
+	end
+	if self:hasSkills("jizhi|nosjizhi|jilve", current) and getCardsNum("TrickCard", current) > 0 then return "TrickCard" end	
+	if self:isWeak(current) and getCardsNum("Peach", current) > 0 then return "BasicCard" end
+	if self:hasCrossbowEffect(current) and getCardsNum("Slash", current) > 1 then return "BasicCard" end
+	if (self:hasSkills(sgs.lose_equip_skill, current) or current:getEquips():isEmpty()) and current:getHandcardNum() > 2 then return "EquipCard" end	
+	if self:hasCrossbowEffect(current) and getCardsNum("Slash", current) > 0 then return "BasicCard" end
+	local choice_table = choices:split("+")	
+	return choice_table[math.random(1, #choice_table)] 
+end
+
