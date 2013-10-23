@@ -732,7 +732,13 @@ gudan_skill.getTurnUseCard = function(self)
 		self:useBasicCard(peachcard, dummy_use)
 		if dummy_use.card then return cardx end
 	end
-	
+	if self:getCardsNum("Peach") == 0 and self.player:getHandcardNum() < 2 and not self:needToLoseHp() and self.player:isWounded() then
+		local cardx = sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "peach")
+		local peachcard = sgs.Sanguosha:cloneCard("peach", cardx:getSuit(), cardx:getNumber())
+		local dummy_use = { isDummy = true }
+		self:useBasicCard(peachcard, dummy_use)
+		if dummy_use.card then return cardx end
+	end
 
 	if self.player:hasSkill("kongcheng") and self:getCardsNum("Peach") == 0 and self.player:isWounded() then
 		local cardx = sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "peach")
@@ -773,7 +779,68 @@ sgs.ai_skill_use_func.GudanCard=function(card,use,self)
 	if not use.card then return end
 	use.card=card
 end
-sgs.ai_use_priority.GudanCard = sgs.ai_use_priority.QiceCard + 0.1
+sgs.ai_use_priority.GudanCard = sgs.ai_use_priority.Indulgence - 0.05
+sgs.ai_skill_choice.gudan_slash = function(self, choices)
+	local str = choices
+	choices = str:split("+")
+	local slashtables = {}
+	if table.contains(choices, "fire_slash") then
+		slashtables = {"slash", "fire_slash", "thunder_slash", "fire_slash", "thunder_slash"}
+	else	
+		slashtables = {"slash"}
+	end	
+	sgs_gudan_slash = slashtables[math.random(1, #choices)]
+	return sgs_gudan_slash
+end
+sgs.ai_skill_choice.gudan_saveself = function(self, choices)
+	local str = choices
+	choices = str:split("+")
+	if self.player:hasFlag("Global_PreventPeach") then return "analeptic" end
+	local anal = sgs.Sanguosha:cloneCard("analeptic")
+	local peach = sgs.Sanguosha:cloneCard("peach")
+	if self.player:isLocked(anal) then return "peach" end
+	if self.player:isLocked(peach) then return "analeptic" end
+	return choices[math.random(1, #choices)]
+end
+sgs.ai_view_as.gudan = function(card, player, card_place, class_name)
+	local allcard = {}
+	local cards = sgs.QList2Table(player:getHandcards())
+	if #cards == 0 then return nil end
+	for _,card in ipairs(cards)  do
+		table.insert(allcard, card:getEffectiveId()) 
+	end
+	local idstr = table.concat(allcard, "+")
+	local jinknum = 0
+	local slashnum = 0
+	local peachnum = 0
+	local analnum = 0
+	for _,card in ipairs(cards)  do
+		if card:isKindOf("Jink") then jinknum = jinknum + 1
+		elseif card:isKindOf("Slash") then slashnum = slashnum + 1
+		elseif card:isKindOf("Peach") then peachnum = peachnum + 1
+		elseif card:isKindOf("Analeptic") then analnum = analnum + 1 end
+	end
+	if class_name == "Slash" then
+		if player:getHp() < 3 and player:getHandcardNum() < 3 and slashnum == 0 and peachnum == 0 then
+			if sgs_gudan_slash then return (sgs_gudan_slash..":".."gudan[to_be_decided:0]".."="..idstr)
+			else
+				return ("slash:gudan[to_be_decided:0]".."="..idstr)
+			end	
+		end	
+	elseif	class_name == "Jink" then
+		if (player:getHp() < 2 or player:getHandcardNum() < 4) and jinknum == 0 and peachnum == 0 and analnum == 0 then
+			return ("jink:gudan[to_be_decided:0]".."="..idstr)
+		end	
+	elseif (class_name == "Peach" and not player:hasFlag("Global_PreventPeach")) then
+		if peachnum == 0 and analnum == 0 then
+			return ("peach:gudan[to_be_decided:0]".."="..idstr)
+		end
+	elseif	class_name == "Analeptic" then	
+		if peachnum == 0 and analnum == 0 then
+			return ("analeptic:gudan[to_be_decided:0]".."="..idstr)
+		end
+	end
+end
 
 --勇节 by Fsu0413（没写过几次AI的渣）
 sgs.ai_skill_invoke.yongjie = function(self, data)
