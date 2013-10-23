@@ -709,7 +709,7 @@ sgs.ai_use_priority.Neo2013PujiCard = 4.3
 sgs.ai_use_value.Neo2013PujiCard = 7
 sgs.dynamic_value.lucky_chance.Neo2013PujiCard = true
 
-sgs.ai_skill_cardchosen.Neo2013PujiCard  = function(self, who)
+sgs.ai_skill_cardchosen.neo2013puji  = function(self, who)
 	if self:isFriend(who) then
 		if self:needToThrowArmor(who) and who:getArmor():isBlack() then return who:getArmor() end
 		if not who:getEquips():isEmpty() and who:hasSkills(sgs.lose_equip_skill) then
@@ -751,4 +751,8 @@ sgs.ai_skill_cardchosen.Neo2013PujiCard  = function(self, who)
 			end
 		end
 	end
+end
+
+sgs.ai_skill_choice.neo2013puji = function(self)
+	return (self.player.isWounded() and (not player:hasSkills("yinghun|hunzi|ganlu|liegong|quhu|longhun|shangshi|nosshangshi|miji|nosmiji|jingce|xueji|baobian")) and "recover" or "draw"
 end
