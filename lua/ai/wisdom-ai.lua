@@ -27,8 +27,7 @@ sgs.ai_skill_use_func.JuaoCard = function(card, use, self)
 				elseif #givecard == 2 then
 					use.card = sgs.Card_Parse("@JuaoCard=" .. table.concat(givecard, "+"))
 					if use.to then 
-						use.to:append(friend) 
-						self.player:speak("顶住，你的快递马上就到了。")
+						use.to:append(friend)
 					end
 					return
 				end
@@ -73,7 +72,6 @@ sgs.ai_skill_use_func.JuaoCard = function(card, use, self)
 					use.card = sgs.Card_Parse("@JuaoCard=" .. table.concat(givecard, "+"))
 					if use.to then 
 						use.to:append(friend) 
-						self.player:speak("我知道你有什么牌，哼哼。")
 					end
 					return
 				end
@@ -111,7 +109,6 @@ sgs.ai_skill_use_func.JuaoCard = function(card, use, self)
 					use.card = sgs.Card_Parse("@JuaoCard=" .. table.concat(givecard, "+"))
 					if use.to then 
 						use.to:append(enemy) 
-						self:speak("咱最擅长落井下石了。")
 					end
 					return
 				else
@@ -235,7 +232,6 @@ sgs.ai_skill_playerchosen.beifa = function(self, targets)
 		if self:isEnemy(target) then
 			if self:slashIsEffective(slash, target) then
 				if sgs.isGoodTarget(target, targetlist, self) then
---					self:speak("嘿！没想到吧？")
 					return target
 				end
 			end
