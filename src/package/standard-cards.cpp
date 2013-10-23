@@ -206,6 +206,9 @@ void Slash::onUse(Room *room, const CardUseStruct &card_use) const{
     } else if (use.to.size() > 1 && player->hasSkill("duanbing")) {
         room->broadcastSkillInvoke("duanbing");
         room->notifySkillInvoked(player, "duanbing");
+    } else if (use.to.size() > 1 && player->hasSkill("xuedian")) {
+        room->broadcastSkillInvoke("xuedian", 1);
+        room->notifySkillInvoked(player, "xuedian");
     }
 
     int rangefix = 0;
