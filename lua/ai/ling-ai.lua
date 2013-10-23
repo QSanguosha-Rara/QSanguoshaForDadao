@@ -754,5 +754,5 @@ sgs.ai_skill_cardchosen.neo2013puji  = function(self, who)
 end
 
 sgs.ai_skill_choice.neo2013puji = function(self)
-	return (self.player.isWounded() and (not player:hasSkills("yinghun|hunzi|ganlu|liegong|quhu|longhun|shangshi|nosshangshi|miji|nosmiji|jingce|xueji|baobian")) and "recover" or "draw"
+	return (self.player.isWounded() and (not player:hasSkills("yinghun|hunzi|ganlu|liegong|quhu|longhun|shangshi|nosshangshi|miji|nosmiji|jingce|xueji|baobian"))) and "recover" or "draw"
 end
