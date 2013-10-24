@@ -784,3 +784,60 @@ sgs.ai_skill_invoke.neo2013shenzhi = function(self, data)
 	if self.player:hasSkill("sijian") and self.player:getHandcardNum() == 1 then return true end
 	return false
 end
+
+
+sgs.ai_skill_cardask["@neo2013longyin"] = function(self, data, pattern)
+	local function SameCard(cd)
+		if pattern == ".|red" then return cd:isRed() end
+		return cd:isBlack() 
+	end
+	local function getLeastValueCard()
+		local offhorse_avail, weapon_avail
+		for _, enemy in ipairs(self.enemies) do
+			if self:canAttack(enemy, self.player) then
+				if not offhorse_avail and self.player:getOffensiveHorse() and self.player:distanceTo(enemy, 1) <= self.player:getAttackRange() then
+					offhorse_avail = true
+				end
+				if not weapon_avail and self.player:getWeapon() and self.player:distanceTo(enemy) == 1 then
+					weapon_avail = true
+				end
+			end
+			if offhorse_avail and weapon_avail then break end
+		end
+		if self:needToThrowArmor() and SameCard(self.player:getArmor()) then return "$" .. self.player:getArmor():getEffectiveId() end
+		if self.player:getPhase() > sgs.Player_Play then
+			local cards = sgs.QList2Table(self.player:getHandcards())
+			self:sortByKeepValue(cards)
+			for _, c in ipairs(cards) do
+				if self:getKeepValue(c) < 8 and not self.player:isJilei(c) and not self:isValuableCard(c) and SameCard(c) then return "$" .. c:getEffectiveId() end
+			end
+			if offhorse_avail and not self.player:isJilei(self.player:getOffensiveHorse()) and SameCard(self.player:getOffensiveHorse()) then return "$" .. self.player:getOffensiveHorse():getEffectiveId() end
+			if weapon_avail and not self.player:isJilei(self.player:getWeapon()) and self:evaluateWeapon(self.player:getWeapon()) < 5 and SameCard(self.player:getWeapon()) then return "$" .. self.player:getWeapon():getEffectiveId() end
+		else
+			local slashc
+			local cards = sgs.QList2Table(self.player:getHandcards())
+			self:sortByUseValue(cards, true)
+			for _, c in ipairs(cards) do
+				if self:getUseValue(c) < 6 and not self:isValuableCard(c) and not self.player:isJilei(c) and SameCard(c) and then
+					if self:getCardsNum("Slash") < 3 then 
+						if not isCard("Slash", c, self.player) then return "$" .. c:getEffectiveId() end
+					else	
+						return "$" .. c:getEffectiveId()
+					end
+					return "."
+				end	
+			end	
+			if offhorse_avail and not self.player:isJilei(self.player:getOffensiveHorse()) and SameCard(self.player:getOffensiveHorse()) then return "$" .. self.player:getOffensiveHorse():getEffectiveId() end
+		end
+	end
+	local use = data:toCardUse()
+	local slash = use.card
+	local slash_num = 0
+	if use.from:objectName() == self.player:objectName() then slash_num = self:getCardsNum("Slash") else slash_num = getCardsNum("Slash", use.from) end
+	if self:isEnemy(use.from) and use.m_addHistory and not self:hasCrossbowEffect(use.from) and slash_num > 0 then return "." end
+	if (slash) or (use.m_reason == sgs.CardUseStruct_CARD_USE_REASON_PLAY and use.m_addHistory and self:isFriend(use.from) and slash_num >= 1) then
+		local str = getLeastValueCard()
+		if str then return str end
+	end
+	return "."
+end
