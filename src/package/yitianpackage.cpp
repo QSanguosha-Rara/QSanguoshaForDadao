@@ -193,7 +193,7 @@ public:
             QString old_kingdom = to_modify->getKingdom();
             room->setPlayerProperty(to_modify, "kingdom", kingdom);
 
-            room->broadcastSkillInvoke(objectName(), index);
+            room->broadcastSkillInvoke(objectName(), index + 1);
 
             LogMessage log;
             log.type = "#ChangeKingdom";
@@ -203,7 +203,7 @@ public:
             log.arg2 = kingdom;
             room->sendLog(log);
         } else if (choice == "obtain") {
-            room->broadcastSkillInvoke(objectName(), index + 2);
+            room->broadcastSkillInvoke(objectName(), index + 3);
             QStringList lords = Sanguosha->getLords();
             foreach (ServerPlayer *player, room->getAlivePlayers()) {
                 QString name = player->getGeneralName();
