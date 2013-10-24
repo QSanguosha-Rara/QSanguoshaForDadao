@@ -1567,7 +1567,7 @@ ShangjianCard::ShangjianCard(): SkillCard(){
 }
 
 void ShangjianCard::onEffect(const CardEffectStruct &effect) const{
-    effect.to->obtainCard(this);
+    effect.to->obtainCard(this, false);
 }
 
 class ShangjianVS: public ViewAsSkill{
