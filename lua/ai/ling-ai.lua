@@ -756,3 +756,34 @@ end
 sgs.ai_skill_choice.neo2013puji = function(self)
 	return (self.player.isWounded() and (not player:hasSkills("yinghun|hunzi|ganlu|liegong|quhu|longhun|shangshi|nosshangshi|miji|nosmiji|jingce|xueji|baobian"))) and "recover" or "draw"
 end
+
+
+sgs.ai_skill_invoke.neo2013suishi = function(self, data)
+	local tf = self.room:findPlayerBySkillName("neo2013suishi")
+	local damage = data:toDamage()
+	if damage then
+		if tf:getPhase() == sgs.Player_NotActive and self:needKongcheng(tf, true) then return false end
+		return self:isFriend(tf)
+	end
+	local death = data:toDeath()
+	if death and death.damage then
+		local player = self:findPlayerToDiscard("he", false)
+		if tf and self:isFriend(tf) and player == tf then return true end
+		return self:isEnemy(tf) and not self:doNotDiscard(tf)
+	end
+    return	
+end
+
+sgs.ai_skill_playerchosen.neo2013shushen = function(self)
+	return self:findPlayerToDraw(true) or self.player
+end
+sgs.ai_playerchosen_intention.neo2013shushen = -50
+
+sgs.ai_skill_invoke.neo2013shenzhi = function(self, data)
+	if self:getCardsNum("Peach") > 0 then return false end
+	if self.player:getHandcardNum() >= 3 then return false end
+	if self.player:isWounded() then return true end
+	if self.player:hasSkill("beifa") and self.player:getHandcardNum() == 1 and self:needKongcheng() then return true end
+	if self.player:hasSkill("sijian") and self.player:getHandcardNum() == 1 then return true end
+	return false
+end
