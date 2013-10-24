@@ -89,6 +89,7 @@ function sgs.ai_armor_value.Vine(player, self)
 	if self.player:hasSkill("sizhan") then return 4.9 end
 	if player:hasSkill("jujian") and not player:getArmor() and #(self:getFriendsNoself(player)) > 0 and player:getPhase() == sgs.Player_Play then return 3 end
 	if player:hasSkill("diyyicong") and not player:getArmor() and player:getPhase() == sgs.Player_Play then return 3 end
+	if (#self.enemies < 2 and sgs.turncount > 1) then return 2 end
 
 	if (player:isChained() and not self:isGoodChainTarget(player)) or not self:isGoodChainTarget(player, self.player, sgs.DamageStruct_Thunder) then return -2 end
 
@@ -100,7 +101,7 @@ function sgs.ai_armor_value.Vine(player, self)
 	end
 
 	if (#self.enemies < 3 and sgs.turncount > 2) or player:getHp() <= 2 then return 5 end
-	return -1
+	return 0
 end
 
 function SmartAI:useCardAnaleptic(card, use)
