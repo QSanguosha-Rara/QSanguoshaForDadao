@@ -310,7 +310,7 @@ sgs.ai_skill_discard.yicheng = function(self, discard_num, min_num, optional, in
 	return self:askForDiscard("dummyreason", 1, 1, false, true)
 end
 
-sgs.ai_skill_invoke.qianhuan = function(self, data)
+--[[sgs.ai_skill_invoke.qianhuan = function(self, data)
 	local use = data:toCardUse()
 	local to = use.to:first()
 	if to:objectName() == self.player:objectName() then
@@ -319,6 +319,23 @@ sgs.ai_skill_invoke.qianhuan = function(self, data)
 	else
 		return self:isFriend(to) and not (use.from and use.from:objectName() == to:objectName())
 	end
+end]]
+sgs.ai_skill_invoke.qianhuan = function(self, data)
+	local promptlist = data:toString():split(":")
+	local effect = promptlist[1]
+	local yuji = findPlayerByObjectName(self.room, promptlist[2])
+	local use = data:toCardUse()
+    local to = use.to:first()
+	if effect and effect == "choice" then return yuji and self:isFriend(yuji) end
+    if use and to then
+        if to == self.player then
+            return not (use.from and (use.from == to
+                    or (use.card:isKindOf("Slash") and self:isPriorFriendOfSlash(self.player, use.card, use.from))))
+        else
+            return self:isFriend(to) and not (use.from and use.from == to)
+        end
+	end	
+	return
 end
 
 sgs.ai_skill_choice.qianhuan = function(self, choices, data)
