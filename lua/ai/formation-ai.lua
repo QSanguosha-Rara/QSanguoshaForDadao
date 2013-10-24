@@ -317,7 +317,7 @@ sgs.ai_skill_invoke.qianhuan = function(self, data)
 		return yuji and self:isFriend(yuji) and yuji:getPile("sorcery"):length() < 4
 	else
 		local to = use.to:first()
-		if to:objectName() == self.player:objectName() then
+		if to and to:objectName() == self.player:objectName() then
 			return not (use.from and (use.from:objectName() == to:objectName()
 										or (use.card:isKindOf("Slash") and self:isPriorFriendOfSlash(self.player, use.card, use.from))))
 		else
