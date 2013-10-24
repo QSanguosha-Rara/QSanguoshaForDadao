@@ -818,7 +818,7 @@ sgs.ai_skill_cardask["@neo2013longyin"] = function(self, data, pattern)
 			local cards = sgs.QList2Table(self.player:getHandcards())
 			self:sortByUseValue(cards, true)
 			for _, c in ipairs(cards) do
-				if self:getUseValue(c) < 6 and not self:isValuableCard(c) and not self.player:isJilei(c) and SameCard(c) and then
+				if self:getUseValue(c) < 6 and not self:isValuableCard(c) and not self.player:isJilei(c) and SameCard(c) --[[and]] then
 					if self:getCardsNum("Slash") < 3 then 
 						if not isCard("Slash", c, self.player) then return "$" .. c:getEffectiveId() end
 					else	
