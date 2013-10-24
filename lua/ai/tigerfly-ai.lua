@@ -700,7 +700,7 @@ gudan_skill.getTurnUseCard = function(self)
 		table.insert(allcard, card:getId())
 	end
 
-	if self.player:getHandcardNum() <= 3 and self:getCardsNum("Analeptic")==0 and self:slashIsAvailable() and sgs.Analeptic_IsAvailable(self.player) and self:hasLoseHandcardEffective() then
+	if self.player:getHandcardNum() <= 3 and self:getCardsNum("Analeptic")==0 and self:slashIsAvailable() and sgs.Analeptic_IsAvailable(self.player) and not self:hasLoseHandcardEffective() then
 		local parsed_card = sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "analeptic")
 			return parsed_card
 	end
@@ -720,7 +720,7 @@ gudan_skill.getTurnUseCard = function(self)
 	end
 
 
-	if self:hasLoseHandcardEffective() and self:getCardsNum("Peach") == 0 and (not self:needToLoseHp() or self:isWeak()) and self.player:isWounded() then
+	if not self:hasLoseHandcardEffective() and self:getCardsNum("Peach") == 0 and (not self:needToLoseHp() or self:isWeak()) and self.player:isWounded() then
 		local cardx = sgs.Card_Parse("@GudanCard=" .. table.concat(allcard, "+") .. ":" .. "peach")
 		local peachcard = sgs.Sanguosha:cloneCard("peach", cardx:getSuit(), cardx:getNumber())
 		local dummy_use = { isDummy = true }
