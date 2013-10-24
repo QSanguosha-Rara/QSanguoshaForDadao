@@ -432,13 +432,25 @@ public:
                 if (owner != NULL && room->askForSkillInvoke(owner, objectName())){
                     room->broadcastSkillInvoke(objectName());
                     int x = player->getHandcardNum() - player->getMaxCards();
-                    //ToAsk: 这个弃牌是一张一张弃？还是一起弃？要是一起弃的话要不要加Flag和FakeMoveSkill？
-                    for (int i = 0; i < x; ++i){
-                        int card = room->askForCardChosen(owner, player, "h", objectName());
-                        //ToAsk: CardMoveReason哪里去了？
-                        //ToDo: 忘了问了……
-                        room->throwCard(card, player, owner);
+                    room->setPlayerFlag(player, "Zhuanquan_InTempMoving");
+                    QList<int> cards;
+                    QList<Player::Place> places;
+
+                    for (int i = 0; i < x; i++){
+                        int card_id = room->askForCardChosen(owner, player, "h", objectName());
+                        Player::Place place = room->getCardPlace(card_id);
+                        cards << card_id;
+                        places << place;
+                        player->addToPile("#zhuanquan", card_id);
                     }
+
+                    for (int i = 0; i < x; i++){
+                        room->moveCardTo(Sanguosha->getCard(cards[i]), player, places[i]);
+                    }
+
+                    room->setPlayerFlag(player, "-Zhuanquan_InTempMoving");
+                    DummyCard dummy(cards);
+                    room->throwCard(&dummy, player, owner);
                 }
             }
         return false;
@@ -974,7 +986,7 @@ public:
 class Bushi: public TriggerSkill{
 public:
     Bushi(): TriggerSkill("bushi"){
-        events << EventPhaseStart << CardsMoveOneTime << EventPhaseChanging;
+        events << EventPhaseStart << CardUsed << CardResponded << EventPhaseChanging;
     }
 
 private:
@@ -1012,30 +1024,31 @@ public:
 
                 break;
             }
-            case (CardsMoveOneTime):{
-                CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-                if (move.from != player || move.to == player || player->getMark("bushi_color") == bushi_notinvoke)
-                    return false;
-
-                if (player->getPhase() != Player::Play || player->hasFlag("bushi_candraw"))
-                    return false;
-
-                foreach(int id, move.card_ids){
-                    const Card *c = Sanguosha->getCard(id);
-                    bool iscolor = (c->isRed() && player->getMark("bushi_color") == bushi_red)
-                                || (c->isBlack() && player->getMark("bushi_color") == bushi_black);
-
-                    if (!iscolor)
-                        continue;
-
-                    int index = move.card_ids.indexOf(id);
-                    if (move.from_places[index] == Player::PlaceHand || move.from_places[index] == Player::PlaceEquip){
-                        //ToAsk: 如果牌移动过程是不可见的，怎么确定已经失去了这个颜色的牌？
-                        //这个也忘了……
-                        room->setPlayerFlag(player, "bushi_candraw");
-                        return false;
-                    }
+            case (CardUsed):
+            case (CardResponded):{
+                const Card *card = NULL;
+                if (triggerEvent == CardUsed){
+                    card = data.value<CardUseStruct>().card;
                 }
+                else {
+                    CardResponseStruct resp = data.value<CardResponseStruct>();
+                    if (resp.m_isUse)
+                        card = resp.m_card;
+                }
+
+                int bushicolor = player->getMark("bushi_color");
+                bool can_invoke = false;
+                if (card != NULL && bushicolor != bushi_notinvoke){
+                    if (card->isRed() && bushicolor == bushi_red)
+                        can_invoke = true;
+                    else if (card->isBlack() && bushicolor == bushi_black)
+                        can_invoke = true;
+                }
+
+                if (!can_invoke)
+                    return false;
+
+                room->setPlayerFlag(player, "bushi_candraw");
                 break;
             }
             case (EventPhaseChanging):{
@@ -2885,6 +2898,8 @@ TigerFlyPackage::TigerFlyPackage(): Package("tigerfly") {
     neo_zhugeke->addSkill(new Skill("qiangbian", Skill::Compulsory));
     neo_zhugeke->addSkill(new NeoAocai);
     neo_zhugeke->addRelateSkill("zhuanquan");
+    neo_zhugeke->addRelateSkill("#Zhuanquan-fake-move");
+    related_skills.insertMulti("zhuanquan", "#Zhuanquan-fake-move");
 
     General *tadun = new General(this, "tadun", "qun", 4);
     tadun->addSkill(new Xiongjie);
@@ -2988,7 +3003,7 @@ TigerFlyPackage::TigerFlyPackage(): Package("tigerfly") {
     addMetaObject<SuoshiCard>();
     addMetaObject<ZongjiuCard>();
 
-    skills << new Zhuanquan;
+    skills << new Zhuanquan << new FakeMoveSkill("Zhuanquan");
 };
 
 ADD_PACKAGE(TigerFly)
