@@ -753,10 +753,7 @@ sgs.ai_skill_cardchosen.neo2013puji  = function(self, who)
 	end
 end
 
-sgs.ai_skill_choice.neo2013puji = function(self)
-	return (self.player.isWounded() and (not player:hasSkills("yinghun|hunzi|ganlu|liegong|quhu|longhun|shangshi|nosshangshi|miji|nosmiji|jingce|xueji|baobian"))) and "recover" or "draw"
-end
-
+sgs.ai_skill_choice.neo2013puji = sgs.ai_skill_choice.yaowu
 
 sgs.ai_skill_invoke.neo2013suishi = function(self, data)
 	local tf = self.room:findPlayerBySkillName("neo2013suishi")
