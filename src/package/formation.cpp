@@ -114,7 +114,8 @@ public:
     }
 };
 
-
+/*
+//Para's version
 HeyiCard::HeyiCard() {
 }
 
@@ -228,6 +229,85 @@ public:
         }
         if (TriggerSkill::triggerable(player) && triggerEvent == EventPhaseChanging)
             room->askForUseCard(player, "@@heyi", "@heyi");
+        return false;
+    }
+};
+*/
+
+HeyiCard::HeyiCard(){
+
+}
+
+bool HeyiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return to_select->isAdjacentTo(Self);
+}
+
+void HeyiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+    QStringList targetnames;
+    foreach (ServerPlayer *p, targets){
+        targetnames << p->objectName();
+        room->acquireSkill(p, "feiying");
+    }
+    source->tag["heyi"] = targetnames;
+}
+
+class HeyiVS: public ZeroCardViewAsSkill{
+public:
+    HeyiVS(): ZeroCardViewAsSkill("heyi"){
+        response_pattern = "@@heyi";
+    }
+
+    virtual const Card *viewAs() const{
+        return new HeyiCard;
+    }
+};
+
+class Heyi: public TriggerSkill{
+public:
+    Heyi(): TriggerSkill("heyi"){
+        view_as_skill = new HeyiVS;
+        events << EventPhaseStart << Death << EventLoseSkill;
+    }
+
+private:
+    void loseEffect(Room *room, ServerPlayer *Caohong) const{
+        QStringList effectlist = Caohong->tag["heyi"].toStringList();
+        if (effectlist.isEmpty())
+            return;
+
+        foreach (ServerPlayer *p, room->getAlivePlayers()){
+            if (effectlist.contains(p->objectName()) && !p->hasInnateSkill("feiying"))
+                room->detachSkillFromPlayer(p, "feiying");
+        }
+
+        Caohong->tag.remove("heyi");
+    }
+
+public:
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == EventPhaseStart && TriggerSkill::triggerable(player)){
+            if (player->getPhase() == Player::RoundStart)
+                loseEffect(room, player);
+            else if (player->getPhase() == Player::Start)
+                room->askForUseCard(player, "@@heyi", "@heyi");
+        }
+        else {
+            bool loseeffect = false;
+            if (triggerEvent == Death){
+                if (data.value<DeathStruct>().who == player)
+                    loseeffect = true;
+            }
+            else if (triggerEvent == EventLoseSkill){
+                if (data.toString() == objectName())
+                    loseeffect = true;
+            }
+            if (loseeffect)
+                loseEffect(room, player);
+        }
         return false;
     }
 };
@@ -603,6 +683,7 @@ FormationPackage::FormationPackage()
 
     General *heg_dengai = new General(this, "heg_dengai", "wei"); // WEI 015 G
     heg_dengai->addSkill("tuntian");
+    heg_dengai->addSkill("zaoxian");
     heg_dengai->addSkill(new Ziliang);
 
     General *heg_caohong = new General(this, "heg_caohong", "wei"); // WEI 018

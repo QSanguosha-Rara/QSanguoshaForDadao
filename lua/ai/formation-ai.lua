@@ -156,6 +156,21 @@ sgs.huyuan_keep_value = {
 	EquipCard = 4.8
 }
 
+sgs.ai_skill_use["@@heyi"] = function(self)
+	local playernames = {}
+	for _, p in sgs.qlist(room:getOtherPlayers(self.player)) do
+		if p:isAdjacentTo(self.player) and self.player:isFriend(p) then
+			table.insert(playernames, p:objectName())
+		end
+	end
+	if not #playernames == 0 then
+		return ("@HeyiCard=.->" .. table.concat(playernames, "+"))
+	else
+		return "."
+	end
+end
+
+--[[
 sgs.ai_skill_use["@@heyi"] = function(self, prompt)
 	local players = sgs.QList2Table(self.room:getOtherPlayers(self.player))
 	local first, last = self.player, self.player
@@ -197,6 +212,9 @@ sgs.ai_card_intention.HeyiCard = function(self, card, from, tos)
 		sgs.updateIntention(from, first, -60)
 	end
 end
+]]
+
+
 
 sgs.ai_skill_invoke.tianfu = function(self, data)
 	local jiangwei = data:toPlayer()
