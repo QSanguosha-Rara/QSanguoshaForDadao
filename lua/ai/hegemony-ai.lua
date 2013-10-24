@@ -331,7 +331,7 @@ sgs.ai_skill_askforyiji.lirang = function(self, card_ids)
 			if not another or not self:isFriend(another) then insert = false end
 		end
 		if insert and Shenfen_user and friend:objectName() ~= Shenfen_user:objectName() and friend:getHandcardNum() < 4 then insert = false end
-		if insert and self:isLihunTarget(friend) then insert = false end
+		if insert and self:IsLihunTarget(friend) then insert = false end
 		if insert then table.insert(available_friends, friend) end
 	end
 
