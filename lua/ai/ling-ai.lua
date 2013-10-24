@@ -312,6 +312,8 @@ sgs.ai_suit_priority.yishi= "club|spade|diamond|heart"
 
 
 function SmartAI:useCardAwaitExhausted(card, use)
+	if #self.friends_noself == 0 and not self:isWeak() then return end
+	if self.player:getCardCount(false) <= 2 or self:needBear() then return end
 	use.card = card
 	for _, player in ipairs(self.friends_noself) do
 		if use.to and not player:hasSkill("manjuan") and not self.room:isProhibited(self.player, player, card) then
@@ -841,3 +843,187 @@ sgs.ai_skill_cardask["@neo2013longyin"] = function(self, data, pattern)
 	end
 	return "."
 end
+
+
+local neo2013duoshi_skill = {}
+neo2013duoshi_skill.name = "neo2013duoshi"
+table.insert(sgs.ai_skills, neo2013duoshi_skill)
+neo2013duoshi_skill.getTurnUseCard = function(self, inclusive)
+	if self.player:usedTimes("NeoDuoshiAE") >= 4 or sgs.turncount <= 1 then return nil end 
+	local cards = sgs.QList2Table(self.player:getCards("h"))
+	local red_card
+	self:sortByUseValue(cards, true)
+	
+	for _, card in ipairs(cards) do
+		if card:isRed() then
+			local shouldUse = true
+			if card:isKindOf("Slash") then
+				local dummy_use = { isDummy = true }
+				if self:getCardsNum("Slash") == 1 then
+					self:useBasicCard(card, dummy_use)
+					if dummy_use.card then shouldUse = false end
+				end
+			end
+
+			if self:getUseValue(card) > 3.5 and card:isKindOf("TrickCard") then
+				local dummy_use = { isDummy = true }
+				self:useTrickCard(card, dummy_use)
+				if dummy_use.card then shouldUse = false end
+			end
+
+			if shouldUse and not card:isKindOf("Peach") then
+				red_card = card
+				break
+			end
+
+		end
+	end
+
+	if red_card then
+		local suit = red_card:getSuitString()
+		local number = red_card:getNumberString()
+		local card_id = red_card:getEffectiveId()
+		local card_str = ("await_exhausted:neo2013duoshi[%s:%s]=%d"):format(suit, number, card_id)
+		local await = sgs.Card_Parse(card_str)
+		
+		assert(await)
+
+		return await
+	end
+end
+
+sgs.ai_cardneed.neo2013danji = function(to)
+	return to:getMark("neo2013danji") == 0 and to:getHandcardNum() <= to:getHp()
+end
+
+sgs.ai_skill_invoke.neo2013huwei = function(self)
+	local NeoDrowning = sgs.Sanguosha:cloneCard("neo_drowning", sgs.Card_NoSuit, 0)
+	local dummy_use = { isDummy = true }
+	self:useTrickCard(NeoDrowning, dummy_use)
+	if dummy_use.card and self:getAoeValue(NeoDrowning) > 0 then return true end
+	return
+end
+
+sgs.ai_skill_discard.neo2013qingcheng = function(self, discard_num, min_num, optional, include_equip)
+	if self.player:isNude() or self:needBear() then return {} end
+	if self.room:alivePlayerCount() == 2 then
+		local only_enemy = self.room:getOtherPlayers(self.player):first()
+		if only_enemy:getLostHp() < 3 then return {} end
+	end
+	local invoke = false
+	local from = self.room:getCurrent()
+	if self:isFriend(from) then
+		if from:hasSkills("shiyong|benghuai") then invoke = true end
+	end	
+	if self:isEnemy(from) then
+		local skills = from:getVisibleSkillList()
+		if from:hasSkill("shiyong") and skills:length() == 1 then invoke = false end
+		if skills:length() > 0 then invoke = true end
+	end	
+	if invoke then
+		if self:needKongcheng(self.player, true) and self.player:getHandcardNum() == 1 then return {self.player:handCards():first()} end
+		local id = JS_Card(self) 
+		if id then return {id}  end
+		return self:askForDiscard("dummyreason", 1, 1, true, true)
+	end
+	return {}
+end
+sgs.ai_skill_choice.neo2013qingcheng = sgs.ai_skill_choice.qingcheng
+sgs.ai_choicemade_filter.skillChoice.neo2013qingcheng = sgs.ai_choicemade_filter.skillChoice.qingcheng 
+
+
+local neo2013xiechan_skill = {}
+neo2013xiechan_skill.name = "neo2013xiechan"
+table.insert(sgs.ai_skills, neo2013xiechan_skill)
+neo2013xiechan_skill.getTurnUseCard = function(self)
+	if self:needBear() or self.player:getMark("@neo2013xiechan") == 0 then return nil end
+	if not self.player:hasUsed("Neo2013XiechanCard") and not self.player:isKongcheng() then return sgs.Card_Parse("@Neo2013XiechanCard=.") end
+end
+
+sgs.ai_skill_use_func.Neo2013XiechanCard = function(card,use,self)
+	if sgs.turncount == 0 then return nil end
+	self:sort(self.enemies, "hp")
+	local max_card = self:getMaxCard()
+	if self:isWeak() and max_card and not max_card:isKindOf("Peach") then 
+		for _, enemy in ipairs(self.enemies) do
+			local emaxcard = self:getMaxCard(enemy)
+			if not enemy:isKongcheng() and not self:doNotDiscard(enemy, "h") and not emaxcard and self:canAttack(enemy) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			local emaxcard = self:getMaxCard(enemy)
+			if not enemy:isKongcheng() and not self:doNotDiscard(enemy, "h") and emaxcard and max_card:getNumber() > emaxcard:getNumber() and self:canAttack(enemy) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+	elseif not self:isWeak() then
+		for _, enemy in ipairs(self.enemies) do
+			local emaxcard = self:getMaxCard(enemy)
+			if not enemy:isKongcheng() and not self:doNotDiscard(enemy, "h") and not emaxcard and self:canAttack(enemy) and (self:isWeak(enemy) or enemy:getHp() < 3) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if enemy:hasFlag("AI_HuangtianPindian") and enemy:getHandcardNum() == 1 and self:canAttack(enemy) then
+				use.card = card
+				if use.to then
+					use.to:append(enemy)
+					enemy:setFlags("-AI_HuangtianPindian")
+				end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if not enemy:isKongcheng() and not self:doNotDiscard(enemy, "h") and self:canAttack(enemy) and (self:isWeak(enemy) or enemy:getHp() < 3) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if not enemy:isKongcheng() and self:canAttack(enemy) and (self:isWeak(enemy) or enemy:getHp() < 3) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if not enemy:isKongcheng() and self:canAttack(enemy) and enemy:isWounded() then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if not enemy:isKongcheng() and self:isWeak(enemy) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if enemy:hasFlag("AI_HuangtianPindian") and enemy:getHandcardNum() == 1 then
+				use.card = card
+				if use.to then
+					use.to:append(enemy)
+					enemy:setFlags("-AI_HuangtianPindian")
+				end
+				return
+			end
+		end
+	end
+	return nil
+end
+sgs.dynamic_value.damage_card.Neo2013XiechanCard = true
+sgs.ai_use_value.Neo2013XiechanCard = 5
+sgs.ai_use_priority.Neo2013XiechanCard = sgs.ai_use_priority.Slash + 0.1
+sgs.ai_card_intention.Neo2013XiechanCard = sgs.ai_card_intention.Slash
+
+
