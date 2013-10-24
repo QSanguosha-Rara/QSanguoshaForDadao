@@ -312,6 +312,8 @@ sgs.ai_suit_priority.yishi= "club|spade|diamond|heart"
 
 
 function SmartAI:useCardAwaitExhausted(card, use)
+	if #self.friends_noself == 0 and not self:isWeak() then return end
+	if self.player:getCardCount(false) <= 2 or self:needBear() then return end
 	use.card = card
 	for _, player in ipairs(self.friends_noself) do
 		if use.to and not player:hasSkill("manjuan") and not self.room:isProhibited(self.player, player, card) then
@@ -840,4 +842,52 @@ sgs.ai_skill_cardask["@neo2013longyin"] = function(self, data, pattern)
 		if str then return str end
 	end
 	return "."
+end
+
+
+local neo2013duoshi_skill = {}
+neo2013duoshi_skill.name = "neo2013duoshi"
+table.insert(sgs.ai_skills, neo2013duoshi_skill)
+neo2013duoshi_skill.getTurnUseCard = function(self, inclusive)
+	if self.player:usedTimes("NeoDuoshiAE") >= 4 or sgs.turncount <= 1 then return nil end 
+	local cards = sgs.QList2Table(self.player:getCards("h"))
+	local red_card
+	self:sortByUseValue(cards, true)
+	
+	for _, card in ipairs(cards) do
+		if card:isRed() then
+			local shouldUse = true
+			if card:isKindOf("Slash") then
+				local dummy_use = { isDummy = true }
+				if self:getCardsNum("Slash") == 1 then
+					self:useBasicCard(card, dummy_use)
+					if dummy_use.card then shouldUse = false end
+				end
+			end
+
+			if self:getUseValue(card) > 3.5 and card:isKindOf("TrickCard") then
+				local dummy_use = { isDummy = true }
+				self:useTrickCard(card, dummy_use)
+				if dummy_use.card then shouldUse = false end
+			end
+
+			if shouldUse and not card:isKindOf("Peach") then
+				red_card = card
+				break
+			end
+
+		end
+	end
+
+	if red_card then
+		local suit = red_card:getSuitString()
+		local number = red_card:getNumberString()
+		local card_id = red_card:getEffectiveId()
+		local card_str = ("await_exhausted:neo2013duoshi[%s:%s]=%d"):format(suit, number, card_id)
+		local await = sgs.Card_Parse(card_str)
+		
+		assert(await)
+
+		return await
+	end
 end
