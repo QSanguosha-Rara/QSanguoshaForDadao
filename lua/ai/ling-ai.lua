@@ -891,3 +891,39 @@ neo2013duoshi_skill.getTurnUseCard = function(self, inclusive)
 		return await
 	end
 end
+
+sgs.ai_cardneed.neo2013danji = function(to)
+	return to:getMark("neo2013danji") == 0 and to:getHandcardNum() <= to:getHp()
+end
+
+sgs.ai_skill_invoke.neo2013huwei = function(self)
+	local NeoDrowning = sgs.Sanguosha:cloneCard("neo_drowning", sgs.Card_NoSuit, 0)
+	local dummy_use = { isDummy = true }
+	self:useTrickCard(NeoDrowning, dummy_use)
+	if dummy_use.card and self:getAoeValue(NeoDrowning) > 0 then return true end
+	return
+end
+
+sgs.ai_skill_discard.neo2013qingcheng = function(self, discard_num, min_num, optional, include_equip)
+	if self.player:isNude() then return {} end
+	local invoke = false
+	local from = self.room:getCurrent()
+	if self:isFriend(from) then
+		if from:hasSkills("shiyong|benghuai") then invoke = true end
+	end	
+	if self:isEnemy(from) then
+		local skills = from:getVisibleSkillList()
+		if from:hasSkill("shiyong") and skills:length() == 1 then invoke = false end
+		if skills:length() > 0 then invoke = true end
+	end	
+	if invoke then
+		if self:needKongcheng(self.player, true) and self.player:getHandcardNum() == 1 then return {self.player:handCards():first()} end
+		local id = JS_Card(self) 
+		if id then return {id}  end
+		return self:askForDiscard("dummyreason", 1, 1, true, true)
+	end
+	return {}
+end
+sgs.ai_skill_choice.neo2013qingcheng = sgs.ai_skill_choice.qingcheng
+sgs.ai_choicemade_filter.skillChoice.neo2013qingcheng = sgs.ai_choicemade_filter.skillChoice.qingcheng 
+
