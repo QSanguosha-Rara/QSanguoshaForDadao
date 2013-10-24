@@ -905,7 +905,11 @@ sgs.ai_skill_invoke.neo2013huwei = function(self)
 end
 
 sgs.ai_skill_discard.neo2013qingcheng = function(self, discard_num, min_num, optional, include_equip)
-	if self.player:isNude() then return {} end
+	if self.player:isNude() or self:needBear() then return {} end
+	if self.room:alivePlayerCount() == 2 then
+		local only_enemy = self.room:getOtherPlayers(self.player):first()
+		if only_enemy:getLostHp() < 3 then return {} end
+	end
 	local invoke = false
 	local from = self.room:getCurrent()
 	if self:isFriend(from) then
@@ -926,4 +930,100 @@ sgs.ai_skill_discard.neo2013qingcheng = function(self, discard_num, min_num, opt
 end
 sgs.ai_skill_choice.neo2013qingcheng = sgs.ai_skill_choice.qingcheng
 sgs.ai_choicemade_filter.skillChoice.neo2013qingcheng = sgs.ai_choicemade_filter.skillChoice.qingcheng 
+
+
+local neo2013xiechan_skill = {}
+neo2013xiechan_skill.name = "neo2013xiechan"
+table.insert(sgs.ai_skills, neo2013xiechan_skill)
+neo2013xiechan_skill.getTurnUseCard = function(self)
+	if self:needBear() or self.player:getMark("@neo2013xiechan") == 0 then return nil end
+	if not self.player:hasUsed("Neo2013XiechanCard") and not self.player:isKongcheng() then return sgs.Card_Parse("@Neo2013XiechanCard=.") end
+end
+
+sgs.ai_skill_use_func.Neo2013XiechanCard = function(card,use,self)
+	if sgs.turncount == 0 then return nil end
+	self:sort(self.enemies, "hp")
+	local max_card = self:getMaxCard()
+	if self:isWeak() and max_card and not max_card:isKindOf("Peach") then 
+		for _, enemy in ipairs(self.enemies) do
+			local emaxcard = self:getMaxCard(enemy)
+			if not enemy:isKongcheng() and not self:doNotDiscard(enemy, "h") and not emaxcard and self:canAttack(enemy) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			local emaxcard = self:getMaxCard(enemy)
+			if not enemy:isKongcheng() and not self:doNotDiscard(enemy, "h") and emaxcard and max_card:getNumber() > emaxcard:getNumber() and self:canAttack(enemy) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+	elseif not self:isWeak() then
+		for _, enemy in ipairs(self.enemies) do
+			local emaxcard = self:getMaxCard(enemy)
+			if not enemy:isKongcheng() and not self:doNotDiscard(enemy, "h") and not emaxcard and self:canAttack(enemy) and (self:isWeak(enemy) or enemy:getHp() < 3) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if enemy:hasFlag("AI_HuangtianPindian") and enemy:getHandcardNum() == 1 and self:canAttack(enemy) then
+				use.card = card
+				if use.to then
+					use.to:append(enemy)
+					enemy:setFlags("-AI_HuangtianPindian")
+				end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if not enemy:isKongcheng() and not self:doNotDiscard(enemy, "h") and self:canAttack(enemy) and (self:isWeak(enemy) or enemy:getHp() < 3) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if not enemy:isKongcheng() and self:canAttack(enemy) and (self:isWeak(enemy) or enemy:getHp() < 3) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if not enemy:isKongcheng() and self:canAttack(enemy) and enemy:isWounded() then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if not enemy:isKongcheng() and self:isWeak(enemy) then
+				use.card = card
+				if use.to then use.to:append(enemy) end
+				return
+			end
+		end
+		for _, enemy in ipairs(self.enemies) do
+			if enemy:hasFlag("AI_HuangtianPindian") and enemy:getHandcardNum() == 1 then
+				use.card = card
+				if use.to then
+					use.to:append(enemy)
+					enemy:setFlags("-AI_HuangtianPindian")
+				end
+				return
+			end
+		end
+	end
+	return nil
+end
+sgs.dynamic_value.damage_card.Neo2013XiechanCard = true
+sgs.ai_use_value.Neo2013XiechanCard = 5
+sgs.ai_use_priority.Neo2013XiechanCard = sgs.ai_use_priority.Slash + 0.1
+sgs.ai_card_intention.Neo2013XiechanCard = sgs.ai_card_intention.Slash
+
 
