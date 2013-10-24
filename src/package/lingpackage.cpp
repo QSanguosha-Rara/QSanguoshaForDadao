@@ -1019,9 +1019,9 @@ public:
             if (selfplayer != NULL && selfplayer->canDiscard(selfplayer, "he")){
                 const Card *c = NULL;
                 if (use.card->isRed())
-                    c = room->askForCard(selfplayer, ".|red", "@neo2013longyin", data, objectName());
+                    c = room->askForCard(selfplayer, "..red", "@neo2013longyin", data, objectName());
                 else if (use.card->isBlack())
-                    c = room->askForCard(selfplayer, ".|black", "@neo2013longyin", data, objectName());
+                    c = room->askForCard(selfplayer, "..black", "@neo2013longyin", data, objectName());
                 if (c != NULL){
                     if (use.m_addHistory)
                         room->addPlayerHistory(player, use.card->getClassName(), -1);
