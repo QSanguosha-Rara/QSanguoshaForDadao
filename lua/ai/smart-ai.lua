@@ -1440,11 +1440,9 @@ function SmartAI:isFriend(other, another)
 	    if self:objectiveLevel(other) < 0 then return true end
 	else
 	    if another then
-		if (other:getRole() == "Lord" or other:getRole() == "loyalist") then
-		    if other:getRole() == "lord" then
+		if (other:getRole() == "lord" or other:getRole() == "loyalist") then
+		    if another:getRole() == "lord" or another:getRole() == "loyalist" then
 			    return true
-    		elseif another:getRole() == "loyalist" then
-     		    return true
 			elseif another:getRole() == "renegade" then
 				if self:isWeak(lord_man) then
 					if rebel_num > 0 then
@@ -1469,7 +1467,7 @@ function SmartAI:isFriend(other, another)
 			end
 		end
 		if other:getRole() == "renegade" then
-		    if another:getRole() == "Lord" then
+		    if another:getRole() == "lord" then
 			    if loyal_num > 0 or rebel_num > 0 then
 				    return true
 				end
@@ -1491,11 +1489,9 @@ function SmartAI:isFriend(other, another)
 		end
 		end
 		--主与忠的策略
-	    if (self.player:getRole() == "Lord" or self.player:getRole() == "loyalist") then
-		    if other:getRole() == "lord" then
+	    if (self.player:getRole() == "lord" or self.player:getRole() == "loyalist") then
+		    if other:getRole() == "lord" or other:getRole() == "loyalist" then
 			    return true
-    		elseif other:getRole() == "loyalist" then
-     		    return true
 			elseif other:getRole() == "renegade" then
 				if self:isWeak(lord_man) then
 					if rebel_num > 0 then
@@ -1522,7 +1518,7 @@ function SmartAI:isFriend(other, another)
 		end
 		--内的策略
 		if self.player:getRole() == "renegade" then
-		    if other:getRole() == "Lord" then
+		    if other:getRole() == "lord" then
 			    if loyal_num > 0 or rebel_num > 0 then
 				    return true
 				end
@@ -1565,11 +1561,9 @@ function SmartAI:isEnemy(other, another)
 		if self:objectiveLevel(other) > 0 then return true end
 	else
 	    if another then
-		if (other:getRole() == "Lord" or other:getRole() == "loyalist") then
-		    if other:getRole() == "lord" then
+		if (other:getRole() == "lord" or other:getRole() == "loyalist") then
+		    if another:getRole() == "lord" or another:getRole() == "loyalist" then
 			    return false
-    		elseif another:getRole() == "loyalist" then
-     		    return false
 			elseif another:getRole() == "renegade" then
 				if self:isWeak(lord_man) then
 					if rebel_num > 0 then
@@ -1594,7 +1588,7 @@ function SmartAI:isEnemy(other, another)
 			end
 		end
 		if other:getRole() == "renegade" then
-		    if another:getRole() == "Lord" then
+		    if another:getRole() == "lord" then
 			    if loyal_num > 0 or rebel_num > 0 then
 				    return false
 				end
@@ -1617,11 +1611,9 @@ function SmartAI:isEnemy(other, another)
 		return true
 		end
 	    --主与忠的策略
-	    if (self.player:getRole() == "Lord" or self.player:getRole() == "loyalist") then
-		    if other:getRole() == "lord" then
+	    if (self.player:getRole() == "lord" or self.player:getRole() == "loyalist") then
+		    if other:getRole() == "lord" or other:getRole() == "loyalist" then
 			    return false
-    		elseif other:getRole() == "loyalist" then
-     		    return false
 			elseif other:getRole() == "renegade" then
 			    if self:isWeak(lord_man) then
 				    if rebel_num > 0 then
@@ -1648,7 +1640,7 @@ function SmartAI:isEnemy(other, another)
 		end
 		--内的策略
 		if self.player:getRole() == "renegade" then
-		    if other:getRole() == "Lord" then
+		    if other:getRole() == "lord" then
 			    if loyal_num > 0 or rebel_num > 0 then
 				    return false
 				end
