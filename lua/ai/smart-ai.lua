@@ -183,7 +183,7 @@ function SmartAI:initialize(player)
 		global_room:writeToConsole(version .. ", Powered by " .. _VERSION)
 
 		setInitialTables()
-		if sgs.isRolePredictable() then
+		if sgs.isRolePredictable() or player:getMark("Global_TurnCount") > 1 then
 			sgs.explicit_renegade = true
 			for _, aplayer in sgs.qlist(global_room:getAllPlayers()) do
 				if aplayer:getRole() ~= "lord" then
@@ -947,13 +947,13 @@ function sgs.evaluatePlayerRole(player)
 	end
 	local res = pcall(test_func, player)
 	if not res then global_room:writeToConsole(debug.traceback()) return elseif res == "loyalist" then return "loyalist" end
-	if sgs.isRolePredictable() then return player:getRole() end
+	if sgs.isRolePredictable() or player:getMark("Global_TurnCount") > 1 then return player:getRole() end
 	return sgs.ai_role[player:objectName()]
 end
 
 function sgs.compareRoleEvaluation(player, first, second)
 	if player:isLord() then return "loyalist" end
-	if sgs.isRolePredictable() then return player:getRole() end
+	if sgs.isRolePredictable() or player:getMark("Global_TurnCount") > 1 then return player:getRole() end
 	if (first == "renegade" or second == "renegade") and sgs.ai_role[player:objectName()] == "renegade" then return "renegade" end
 	if sgs.ai_role[player:objectName()] == first then return first end
 	if sgs.ai_role[player:objectName()] == second then return second end
@@ -995,7 +995,7 @@ function sgs.findUnionSkills(first, second)
 end
 
 sgs.ai_card_intention.general = function(from, to, level)
-	if sgs.isRolePredictable() then return end
+	if sgs.isRolePredictable() or from:getMark("Global_TurnCount") > 1 then return end
 	if not to then global_room:writeToConsole(debug.traceback()) return end
 	if from:isLord() or level == 0 then return end
 
@@ -1166,7 +1166,7 @@ function SmartAI:objectiveLevel(player)
 
 	if #players == 1 then return 5 end
 
-	if sgs.isRolePredictable(true) then
+	if sgs.isRolePredictable(true) and player:getMark("Global_TurnCount") < 2 then
 		if self.lua_ai:isFriend(player) then return -2
 		elseif self.lua_ai:isEnemy(player) then return 5
 		elseif self.lua_ai:relationTo(player) == sgs.AI_Neutrality then
@@ -1728,7 +1728,7 @@ function SmartAI:updatePlayers(clear_flags)
 		end
 	end
 
-	if sgs.isRolePredictable(true) then
+	if sgs.isRolePredictable(true) and self.player:getMark("Global_TurnCount") < 2 then
 		self.friends = {}
 		self.friends_noself = {}
 		local friends = sgs.QList2Table(self.lua_ai:getFriends())
@@ -1792,7 +1792,7 @@ function SmartAI:updatePlayers(clear_flags)
 	end
 	table.insert(self.friends,self.player)
 
-	if sgs.isRolePredictable() then return end
+	if sgs.isRolePredictable() or self.player:getMark("Global_TurnCount") > 1 then return end
 	self:updateAlivePlayerRoles()
 	sgs.evaluateAlivePlayersRole()
 end
