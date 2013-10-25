@@ -790,7 +790,7 @@ end
 
 sgs.ai_skill_cardask["@neo2013longyin"] = function(self, data, pattern)
 	local function SameCard(cd)
-		if pattern == "..red" then return cd:isRed() end
+		if pattern == ".|red" then return cd:isRed() end
 		return cd:isBlack() 
 	end
 	local function getLeastValueCard()
