@@ -757,8 +757,14 @@ sgs.ai_compare_funcs = {
 		end
 	end,
 
-	defense = function(a,b)
-		return sgs.getDefenseSlash(a) < sgs.getDefenseSlash(b)
+	defense = function(a, b)
+		local de1 = sgs.getDefense(a)
+		local de2 = sgs.getDefense(b)
+		if de1 == de2 then
+			return sgs.getDefenseSlash(a) < sgs.getDefenseSlash(b)
+		else
+			return de1 < de2
+		end
 	end,
 
 	threat = function (a, b)
