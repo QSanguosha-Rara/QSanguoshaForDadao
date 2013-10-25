@@ -371,9 +371,11 @@ public:
         return Analeptic::IsAvailable(player);
     }
 
+/*
     virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
         return pattern.contains("analeptic");
     }
+*/
 
     virtual const Card *viewAs() const{
         Analeptic *a = new Analeptic(Card::NoSuit, 0);
