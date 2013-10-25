@@ -1228,8 +1228,7 @@ public:
                         QList<ServerPlayer *> targets;
                         foreach(QString name, players)
                             targets << findPlayerByObjectName(room, name);
-                        while (room->askForYiji(player, ids, objectName(), false, false, true ,-1, targets))
-                            ;
+                        room->askForRende(player, ids, objectName(), false, true, -1, targets);
                         room->setPlayerFlag(player, "-choudumove");
                         if (player->getMark("choudutargets") > 0){
                             room->broadcastSkillInvoke(objectName(), 4);
