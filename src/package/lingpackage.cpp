@@ -2033,7 +2033,7 @@ public:
                 return false;
 
             CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-            if ((move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_PUT && move.to_place == Player::DiscardPile){
+            if (/*(move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_PUT &&*/ move.to_place == Player::DiscardPile){
 
                 if (player->getMark("neo2013yanyu") >= 3 || !player->askForSkillInvoke(objectName(), data))
                     return false;
