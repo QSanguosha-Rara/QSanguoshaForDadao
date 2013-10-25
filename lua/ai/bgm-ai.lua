@@ -303,7 +303,7 @@ end
 
 sgs.ai_skill_playerchosen.dahe = function(self, targets)
 	targets = sgs.QList2Table(targets)
-	self:sort(targets, "defense")
+	self:sort(targets, "defenseSlash")
 	for _, target in ipairs(targets) do
 		if target:hasSkill("kongcheng") and target:isKongcheng()
 			and target:hasFlag("dahe") then
