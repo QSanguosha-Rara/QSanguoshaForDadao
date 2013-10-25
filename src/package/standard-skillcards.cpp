@@ -19,6 +19,7 @@ void ZhihengCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &)
         room->drawCards(source, subcards.length());
 }
 
+/*
 RendeCard::RendeCard() {
     will_throw = false;
     handling_method = Card::MethodNone;
@@ -55,6 +56,19 @@ void RendeCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &tar
     room->addPlayerHistory(source, "RendeCard", -1);
     if (!room->askForUseCard(source, "@@rende", "@rende-give", -1, Card::MethodNone))
         room->addPlayerHistory(source, "RendeCard");
+}
+*/
+
+RendeCard::RendeCard(){
+    target_fixed = true;
+}
+
+void RendeCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+    if (room->askForRende(source, source->handCards(), "rende", false, true, -1, QList<ServerPlayer *>(), CardMoveReason(), "@rende", false) >= 2){
+        RecoverStruct rec;
+        rec.who = source;
+        room->recover(source, rec);
+    }
 }
 
 JieyinCard::JieyinCard() {

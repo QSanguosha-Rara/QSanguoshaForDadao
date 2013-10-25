@@ -839,7 +839,7 @@ sgs.qingguo_suit_value = {
 	spade = 4.1,
 	club = 4.2
 }
-
+--[[
 function SmartAI:shouldUseRende()
 	if (self:hasCrossbowEffect() or self:getCardsNum("Crossbow") > 0) and self:getCardsNum("Slash") > 0 then
 		self:sort(self.enemies, "defense")
@@ -978,7 +978,7 @@ sgs.ai_skill_use["@@rende"] = function(self, prompt)
 		if usecard then return usecard .. "->" .. friend:objectName() end
 	end
 end
-
+]]
 table.insert(sgs.ai_global_flags, "jijiangsource")
 local jijiang_filter = function(player, carduse)
 	if carduse.card:isKindOf("JijiangCard") then

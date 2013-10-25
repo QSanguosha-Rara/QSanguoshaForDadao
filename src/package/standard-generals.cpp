@@ -380,6 +380,22 @@ public:
     }
 };
 
+class Rende: public ZeroCardViewAsSkill{
+public:
+    Rende(): ZeroCardViewAsSkill("rende"){
+
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("RendeCard");
+    }
+
+    virtual const Card *viewAs() const{
+        return new RendeCard;
+    }
+};
+
+/*
 class RendeViewAsSkill: public ViewAsSkill {
 public:
     RendeViewAsSkill(): ViewAsSkill("rende") {
@@ -438,6 +454,7 @@ public:
         return false;
     }
 };
+*/
 
 JijiangViewAsSkill::JijiangViewAsSkill(): ZeroCardViewAsSkill("jijiang$") {
 }
