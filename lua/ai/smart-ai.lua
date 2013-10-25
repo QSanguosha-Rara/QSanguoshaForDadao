@@ -1273,7 +1273,8 @@ function SmartAI:objectiveLevel(player)
 
 	if #players == 1 then return 5 end
 	
-	self:HatredValue(player)
+	local va = self:HatredValue(player)
+	if va and type(va) == "number" then return va end 
 
 	if sgs.isRolePredictable(true) and player:getMark("Global_TurnCount") < 2 then
 		if self.lua_ai:isFriend(player) then return -2
