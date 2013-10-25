@@ -1041,7 +1041,7 @@ return self:isWeak() and self.player:getHp() < 2 and _cards < 4
 end
 
 sgs.ai_compare_funcs.value_sha = function(a, b)
-return sgs.getDefenseSlash(a, self) > sgs.getDefenseSlash(b, self) end
+return sgs.getDefenseSlash(a) > sgs.getDefenseSlash(b) end
 
 local jingshang={}
 jingshang.name="jingshang"
