@@ -5630,12 +5630,6 @@ bool Room::askForYiji(ServerPlayer *guojia, QList<int> &cards, const QString &sk
     }
     Q_ASSERT(target != NULL);
 
-    DummyCard *dummy_card = new DummyCard;
-    foreach (int card_id, ids) {
-        cards.removeOne(card_id);
-        dummy_card->addSubcard(card_id);
-    }
-
     QVariant decisionData = QVariant::fromValue(QString("Yiji:%1:%2:%3:%4")
                                                 .arg(skill_name).arg(guojia->objectName()).arg(target->objectName())
                                                 .arg(IntList2StringList(ids).join("+")));
@@ -5650,14 +5644,16 @@ bool Room::askForYiji(ServerPlayer *guojia, QList<int> &cards, const QString &sk
 
         const Skill *skill = Sanguosha->getSkill(skill_name);
         if (skill)
-            broadcastSkillInvoke(skill_name, skill->getEffectIndex(target, dummy_card));
+            broadcastSkillInvoke(skill_name);
         notifySkillInvoked(guojia, skill_name);
     }
 
     guojia->setFlags("Global_GongxinOperator");
-    moveCardTo(dummy_card, target, Player::PlaceHand, reason, visible);
+    foreach (int card_id, ids) {
+        cards.removeOne(card_id);
+        moveCardTo(Sanguosha->getCard(card_id), target, Player::PlaceHand, reason, visible);
+    }
     guojia->setFlags("-Global_GongxinOperator");
-    delete dummy_card;
 
     return true;
 }
