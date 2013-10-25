@@ -895,6 +895,17 @@ rende_skill.getTurnUseCard = function(self)
 end
 
 sgs.ai_skill_use_func.RendeCard = function(card, use, self)
+	use.card = card
+end
+
+sgs.ai_skill_askforyiji.rende = sgs.ai_skill_askforyiji.yiji
+
+sgs.ai_use_value.RendeCard = 8.5
+sgs.ai_use_priority.RendeCard = 8.8
+sgs.dynamic_value.benefit.RendeCard = true
+
+--[[
+sgs.ai_skill_use_func.RendeCard = function(card, use, self)
 	local cards = sgs.QList2Table(self.player:getHandcards())
 	self:sortByUseValue(cards,true)
 	local name = self.player:objectName()
@@ -933,9 +944,6 @@ sgs.ai_skill_use_func.RendeCard = function(card, use, self)
 	end
 end
 
-sgs.ai_use_value.RendeCard = 8.5
-sgs.ai_use_priority.RendeCard = 8.8
-
 sgs.ai_card_intention.RendeCard = function(self,card, from, tos)
 	local to = tos[1]
 	local intention = -70
@@ -946,8 +954,6 @@ sgs.ai_card_intention.RendeCard = function(self,card, from, tos)
 	end
 	sgs.updateIntention(from, to, intention)
 end
-
-sgs.dynamic_value.benefit.RendeCard = true
 
 sgs.ai_skill_use["@@rende"] = function(self, prompt)
 	local cards = {}
@@ -978,6 +984,7 @@ sgs.ai_skill_use["@@rende"] = function(self, prompt)
 		if usecard then return usecard .. "->" .. friend:objectName() end
 	end
 end
+]]
 
 table.insert(sgs.ai_global_flags, "jijiangsource")
 local jijiang_filter = function(player, carduse)

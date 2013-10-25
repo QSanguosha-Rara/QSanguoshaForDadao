@@ -1193,6 +1193,10 @@ public:
                                     bool distance_limit = true, bool disable_extra = false, bool addHistory = false);
     int askForAG(ServerPlayer *player, const QList<int> &card_ids, bool refusable, const char *reason);
     const Card *askForCardShow(ServerPlayer *player, ServerPlayer *requestor, const char *reason);
+    int askForRende(ServerPlayer *liubei, QList<int> &cards, const char *skill_name = QString(),
+                    bool visible = false, bool optional = true, int max_num = -1,
+                    QList<ServerPlayer *> players = QList<ServerPlayer *>(), CardMoveReason reason = CardMoveReason(),
+                    const char *prompt = QString(), bool notify_skill = false);
     bool askForYiji(ServerPlayer *guojia, QList<int> &cards, const char *skill_name = NULL,
                     bool is_preview = false, bool visible = false, bool optional = true, int max_num = -1,
                     QList<ServerPlayer *> players = QList<ServerPlayer *>(), CardMoveReason reason = CardMoveReason(),
