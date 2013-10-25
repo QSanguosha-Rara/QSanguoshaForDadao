@@ -179,9 +179,8 @@ void Yiji::onDamaged(ServerPlayer *guojia, const DamageStruct &damage) const{
             room->notifyMoveCards(true, moves, false, _guojia);
             room->notifyMoveCards(false, moves, false, _guojia);
 
-            DummyCard *dummy = new DummyCard(yiji_cards);
-            guojia->obtainCard(dummy, false);
-            delete dummy;
+            foreach (int id, yiji_cards)
+                guojia->obtainCard(Sanguosha->getCard(id), false);
         }
     }
 }
