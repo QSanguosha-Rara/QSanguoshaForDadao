@@ -5508,6 +5508,13 @@ int Room::askForRende(ServerPlayer *liubei, QList<int> &cards, const QString &sk
 
         num -= ids.length();
     }
+
+    while(!optional && num > 0){
+        int id = remain_cards[qrand() % remain_cards.length()];
+        remain_cards.removeOne(id);
+        num --;
+        give_map.insert(id, players[qrand() % players.length()]);
+    }
     
     if (give_map.isEmpty())
         return 0;

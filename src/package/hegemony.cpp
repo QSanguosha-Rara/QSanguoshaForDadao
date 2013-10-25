@@ -218,10 +218,12 @@ public:
                 return false;
 
             QList<int> original_lirang = lirang_card;
-            while (room->askForYiji(kongrong, lirang_card, objectName(), false, true, true, -1,
+            /*while (room->askForYiji(kongrong, lirang_card, objectName(), false, true, true, -1,
                                     QList<ServerPlayer *>(), move.reason, "@lirang-distribute", true)) {
                 if (kongrong->isDead()) break;
-            }
+            }*/
+            room->askForRende(kongrong, lirang_card, objectName(), true, true, -1, 
+                              QList<ServerPlayer *>(), move.reason, "@lirang-distribute", true);
 
             QList<int> ids = move.card_ids;
             i = 0;

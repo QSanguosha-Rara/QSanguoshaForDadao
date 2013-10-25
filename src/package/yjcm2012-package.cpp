@@ -83,35 +83,7 @@ public:
             target->drawCards(num, objectName());
 
             if (!target->isKongcheng()) {
-                int n = 0;
-                forever {
-                    int original_handcardnum = target->getHandcardNum();
-                    if (n < num && !target->isKongcheng()) {
-                        QList<int> handcards = target->handCards();
-                        if (!room->askForYiji(target, handcards, objectName(), false, false, false, num - n))
-                            break;
-                        n += original_handcardnum - target->getHandcardNum();
-                    } else {
-                        break;
-                    }
-                }
-                // give the rest cards randomly
-                if (n < num && !target->isKongcheng()) {
-                    int rest_num = num - n;
-                    forever {
-                        QList<int> handcard_list = target->handCards();
-                        qShuffle(handcard_list);
-                        int give = qrand() % rest_num + 1;
-                        rest_num -= give;
-                        QList<int> to_give = handcard_list.length() < give ? handcard_list : handcard_list.mid(0, give);
-                        ServerPlayer *receiver = room->getOtherPlayers(target).at(qrand() % (target->aliveCount() - 1));
-                        DummyCard *dummy = new DummyCard(to_give);
-                        room->obtainCard(receiver, dummy, false);
-                        delete dummy;
-                        if (rest_num == 0 || target->isKongcheng())
-                            break;
-                    }
-                }
+                room->askForRende(target, target->handCards(), objectName(), false, false, qMin(num, target->getHandcardNum()));
             }
         }
         return false;
