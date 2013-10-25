@@ -104,7 +104,7 @@ function sgs.isGoodTarget(player, targets, self, isSlash)
 	end
 end
 
-function sgs.getDefenseSlash(player, self)
+function sgs.getDefenseSlash(player)
 	if not player then return 0 end
 	local attacker = global_room:getCurrent()
 	local defense = getCardsNum("Jink", player)
@@ -195,7 +195,7 @@ function sgs.getDefenseSlash(player, self)
 			defense = 0
 		end
 
-		if attacker:hasSkill("dahe") and player:hasFlag("dahe") and self:getKnownNum(player) / player:getHandcardNum() >= 0.7 then
+		if attacker:hasSkill("dahe") and player:hasFlag("dahe") and self and self:getKnownNum(player) / player:getHandcardNum() >= 0.7 then
 			local cards = player:getHandcards()
 			local known = 0
 			for _, card in sgs.qlist(cards) do
@@ -301,7 +301,7 @@ function sgs.getDefenseSlash(player, self)
 end
 
 sgs.ai_compare_funcs["defenseSlash"] = function(a,b)
-	return sgs.getDefenseSlash(a, self) < sgs.getDefenseSlash(b, self)
+	return sgs.getDefenseSlash(a) < sgs.getDefenseSlash(b)
 end
 
 function SmartAI:slashProhibit(card, enemy, from)
