@@ -90,10 +90,10 @@ function sgs.CreateAttackRangeSkill(spec)
 	local skill = sgs.LuaAttackRangeSkill(spec.name)
 	
 	if spec.extra_func then
-		skill.extra_func = spec.extra_func or 0
+		skill.extra_func = spec.extra_func
 	end
 	if spec.fixed_func then
-		skill.fixed_func = spec.fixed_func or -1
+		skill.fixed_func = spec.fixed_func
 	end
 	
 	return skill
