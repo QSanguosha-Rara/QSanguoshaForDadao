@@ -1933,7 +1933,7 @@ public:
 class Neo2013Jieji: public TriggerSkill{
 public:
     Neo2013Jieji(): TriggerSkill("neo2013jieji"){
-        events << CardUsed << CardsMoveOneTime;
+        events << CardUsed << CardResponded << JinkEffect << CardsMoveOneTime;
         view_as_skill = new Neo2013JiejiVS;
     }
 
@@ -1967,15 +1967,43 @@ public:
 
             room->fillAG(robbery, selfplayer, disable);
             int card_id = room->askForAG(selfplayer, able, true, objectName());
+            room->clearAG(selfplayer);
             if (card_id != -1){
                 room->throwCard(Sanguosha->getCard(card_id), CardMoveReason(CardMoveReason::S_REASON_PUT, QString()), NULL);
                 room->obtainCard(selfplayer, use.card);
                 use.to.clear();
                 data = QVariant::fromValue(use);
             }
-            room->clearAG(selfplayer);
         }
-        else {
+        else if (triggerEvent == CardResponded){
+            CardResponseStruct resp = data.value<CardResponseStruct>();
+            if (resp.m_card->isKindOf("Jink") && resp.m_isUse){
+                foreach(int id, robbery){
+                    if (Sanguosha->getCard(id)->sameColorWith(resp.m_card))
+                        able.append(id);
+                    else
+                        disable.append(id);
+                }
+                if (able.isEmpty() || !selfplayer->askForSkillInvoke(objectName(), data))
+                    return false;
+
+                room->fillAG(robbery, selfplayer, disable);
+                int card_id = room->askForAG(selfplayer, able, true, objectName());
+                room->clearAG(selfplayer);
+                if (card_id != -1){
+                    room->throwCard(Sanguosha->getCard(card_id), CardMoveReason(CardMoveReason::S_REASON_PUT, QString()), NULL);
+                    player->tag["jiejijink"] = QVariant::fromValue(resp.m_card);
+                    return true;
+                }
+            }
+        }
+        else if (triggerEvent == JinkEffect){
+            if (player->tag["jiejijink"].value<const Card *>() == data.value<const Card *>()){
+                player->tag.remove("jiejijink");
+                return true;
+            }
+        }
+        else if (triggerEvent == CardsMoveOneTime){
             if (!player->hasSkill(objectName()))
                 return false;
 
@@ -2001,11 +2029,11 @@ public:
 
             room->fillAG(robbery, selfplayer, disable);
             int card_id = room->askForAG(selfplayer, able, true, objectName());
+            room->clearAG(selfplayer);
             if (card_id != -1){
                 room->throwCard(Sanguosha->getCard(card_id), CardMoveReason(CardMoveReason::S_REASON_PUT, QString()), NULL);
                 room->obtainCard(selfplayer, card);
             }
-            room->clearAG(selfplayer);
         }
 
         return false;
