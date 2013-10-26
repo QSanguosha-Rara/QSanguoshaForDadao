@@ -172,6 +172,37 @@ function sgs.CreateGameStartSkill(spec)
 	return sgs.CreateTriggerSkill(spec)
 end
 
+function sgs.CreateFakeMoveSkill(spec)
+	assert((type(spec) == "string") or ((type(spec) == "table") and (type(spec.skillname) == "string")))
+	local skillname
+	if (type(spec) == "string")
+		skillname = spec
+	else
+		skillname = spec.skillname
+	end
+	
+	local theskill = {
+		name = skillname .. "-fake-move" ,
+		events = {sgs.BeforeCardsMove, sgs.CardsMoveOneTime} ,
+		priority = 10 ,
+		can_trigger = function(self, player)
+			return player
+		end ,
+		on_trigger = function(self, event, player, data)
+			local room = player:getRoom()
+			local flag = skillname .. "_InTempMoving"
+			
+			for _, p in sgs.qlist(room:getAllPlayers()) do
+				if p:hasFlag(flag) then return true end
+			end
+			
+			return false
+		end ,
+	}
+	
+	return sgs.CreateTriggerSkill(theskill)
+end
+
 --------------------------------------------
 
 -- skill cards
