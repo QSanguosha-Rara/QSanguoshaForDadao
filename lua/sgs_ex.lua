@@ -175,7 +175,7 @@ end
 function sgs.CreateFakeMoveSkill(spec)
 	assert((type(spec) == "string") or ((type(spec) == "table") and (type(spec.skillname) == "string")))
 	local skillname
-	if (type(spec) == "string")
+	if (type(spec) == "string") then
 		skillname = spec
 	else
 		skillname = spec.skillname
