@@ -422,3 +422,10 @@ sgs.ai_skill_cardask["@zhendu-discard"] = function(self, data)
 	end
 	return "."
 end
+
+sgs.ai_skill_invoke.jizhao = function(self, data)
+	local dying = data:toDying()
+	local peaches = 1 - dying.who:getHp()
+
+	return self:getCardsNum("Peach") + self:getCardsNum("Analeptic") < peaches
+end
