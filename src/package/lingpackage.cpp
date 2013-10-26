@@ -1081,9 +1081,7 @@ public:
         if (room->changeMaxHpForAwakenSkill(player)){
             room->setPlayerProperty(player, "kingdom", "shu");
             room->setPlayerMark(player, objectName(), 1);
-            room->acquireSkill(player, "mashu");
-            room->acquireSkill(player, "zhongyi");
-            room->acquireSkill(player, "neo2013huwei");
+            room->handleAcquireDetachSkills(player, "mashu|zhongyi|neo2013huwei");
         }
 
         return false;
