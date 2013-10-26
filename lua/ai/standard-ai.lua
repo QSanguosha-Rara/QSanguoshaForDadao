@@ -998,7 +998,7 @@ end
 table.insert(sgs.ai_choicemade_filter.cardUsed, jijiang_filter)
 
 sgs.ai_skill_invoke.jijiang = function(self, data)
-	if not self.player:isLord() then return end
+	if not self.player:hasLordSkill("jijiang") then return false end
 	if sgs.jijiangsource then return false end
 	local asked = data:toStringList()
 	local prompt = asked[2]
