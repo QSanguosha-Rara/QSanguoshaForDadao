@@ -165,11 +165,11 @@ public:
     Q_INVOKABLE SixSwords(Card::Suit suit, int number);
 };
 
-class SixSwordsSkillCard: public SkillCard{
+class SixSwordsCard: public SkillCard{
     Q_OBJECT
 
 public:
-    Q_INVOKABLE SixSwordsSkillCard();
+    Q_INVOKABLE SixSwordsCard();
     virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
     virtual void onEffect(const CardEffectStruct &effect) const;
 };
@@ -181,11 +181,11 @@ public:
     Q_INVOKABLE Triblade(Card::Suit suit, int number);
 };
 
-class TribladeSkillCard: public SkillCard{
+class TribladeCard: public SkillCard{
     Q_OBJECT
 
 public:
-    Q_INVOKABLE TribladeSkillCard();
+    Q_INVOKABLE TribladeCard();
     virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
     virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
 };

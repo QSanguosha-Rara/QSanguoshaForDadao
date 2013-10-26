@@ -2727,15 +2727,15 @@ SixSwords::SixSwords(Card::Suit suit, int number): Weapon(suit, number, 2){
     setObjectName("SixSwords");
 }
 
-SixSwordsSkillCard::SixSwordsSkillCard(): SkillCard(){
-    setObjectName("SixSwords");
+SixSwordsCard::SixSwordsCard(): SkillCard(){
+
 }
 
-bool SixSwordsSkillCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool SixSwordsCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
     return to_select != Self;
 }
 
-void SixSwordsSkillCard::onEffect(const CardEffectStruct &effect) const{
+void SixSwordsCard::onEffect(const CardEffectStruct &effect) const{
     effect.to->gainMark("@SixSwordsBuff");
 }
 
@@ -2746,7 +2746,7 @@ public:
     }
 
     virtual const Card *viewAs() const{
-        return new SixSwordsSkillCard;
+        return new SixSwordsCard;
     }
 };
 
@@ -2799,15 +2799,15 @@ Triblade::Triblade(Card::Suit suit, int number): Weapon(suit, number, 3){
     setObjectName("Triblade");
 }
 
-TribladeSkillCard::TribladeSkillCard(): SkillCard(){
-    setObjectName("Triblade");
+TribladeCard::TribladeCard(): SkillCard(){
+
 }
 
-bool TribladeSkillCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool TribladeCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
     return targets.length() == 0 && to_select->hasFlag("TribladeFilter");
 }
 
-void TribladeSkillCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+void TribladeCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
     room->damage(DamageStruct("Triblade", source, targets[0]));
 }
 
@@ -2819,7 +2819,7 @@ public:
     }
 
     virtual const Card *viewAs(const Card *originalCard) const{
-        TribladeSkillCard *c = new TribladeSkillCard;
+        TribladeCard *c = new TribladeCard;
         c->addSubcard(originalCard);
         return c;
     }
@@ -2949,8 +2949,8 @@ LingCardsPackage::LingCardsPackage(): Package("LingCards", Package::CardPack){
     skills << new SixSwordsSkill << new SixSwordsSkillRange << new TribladeSkill << new DragonPhoenixSkill;
     related_skills.insertMulti("SixSwords", "#SixSwords");
 
-    addMetaObject<SixSwordsSkillCard>();
-    addMetaObject<TribladeSkillCard>();
+    addMetaObject<SixSwordsCard>();
+    addMetaObject<TribladeCard>();
 }
 
 ADD_PACKAGE(LingCards)

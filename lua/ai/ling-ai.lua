@@ -380,7 +380,7 @@ sgs.ai_skill_use["@@SixSwords"] = function(self, prompt)
 	local targets = {}
 	self:sort(self.friends_noself, "defense")
 	for _, friend in ipairs(self.friends_noself) do table.insert(targets, friend:objectName()) end
-	if #targets == 0 then return "." else return "@SixSwordsSkillCard=.->" .. table.concat(targets, "+") end
+	if #targets == 0 then return "." else return "@SixSwordsCard=.->" .. table.concat(targets, "+") end
 end
 
 sgs.ai_skill_use["@@Triblade"]=function(self,prompt)
@@ -410,10 +410,10 @@ sgs.ai_skill_use["@@Triblade"]=function(self,prompt)
 			if f:hasFlag("TribladeFilter") and self:getDamagedEffects(f, self.player) and not self:isWeak(f) then tar = f break end
 		end
 	end
-	if tar then return "@TribladeSkillCard="..cdid.."->"..tar:objectName() end
+	if tar then return "@TribladeCard="..cdid.."->"..tar:objectName() end
 	return "."
 end
-sgs.ai_card_intention.TribladeSkillCard = 30
+sgs.ai_card_intention.TribladeCard = 30
 
 
 sgs.ai_skill_invoke.DragonPhoenix = function(self, data)
