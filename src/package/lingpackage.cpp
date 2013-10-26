@@ -733,7 +733,7 @@ public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == TargetConfirmed){
             CardUseStruct use = data.value<CardUseStruct>();
-            if ((use.card->isKindOf("Slash") || use.card->isNDTrick()) && use.to.contains(player)){
+            if ((use.card->isKindOf("Slash") || use.card->isNDTrick()) && use.to.length() == 1 && use.to.contains(player)){
                 const Card *c = room->askForExchange(player, objectName(), 1, false, "@neo2013yongyiput", true);
                 if (c != NULL)
                     player->addToPile("neoarrow", c, false);
@@ -1657,7 +1657,7 @@ Neo2013ZhoufuCard::Neo2013ZhoufuCard() {
 }
 
 bool Neo2013ZhoufuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    return targets.isEmpty() && to_select != Self && to_select->getPile("incantationn").isEmpty();
+    return targets.isEmpty() &&  to_select->getPile("incantationn").isEmpty();
 }
 
 void Neo2013ZhoufuCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{

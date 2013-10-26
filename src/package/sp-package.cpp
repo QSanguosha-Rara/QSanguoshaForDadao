@@ -1577,7 +1577,7 @@ ZhoufuCard::ZhoufuCard() {
 }
 
 bool ZhoufuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    return targets.isEmpty() && to_select != Self && to_select->getPile("incantation").isEmpty();
+    return targets.isEmpty() && to_select->getPile("incantation").isEmpty();
 }
 
 void ZhoufuCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
