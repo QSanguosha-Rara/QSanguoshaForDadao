@@ -215,20 +215,33 @@ end
 ]]
 
 
-
+--[[
 sgs.ai_skill_invoke.tianfu = function(self, data)
 	local jiangwei = data:toPlayer()
 	return jiangwei and self:isFriend(jiangwei)
 end
+]]
 
-sgs.ai_skill_invoke.shoucheng = function(self, data)
-	local move = data:toMoveOneTime()
-	return move.from and self:isFriend(move.from)
-			and not (move.from:getPhase() == sgs.Player_NotActive and (move.from:hasSkill("manjuan") or self:needKongcheng(move.from, true)))
+sgs.ai_skill_playerchosen.tianfu = function(self, targets)
+	for _, p in sgs.qlist(targets) do
+		if self:isFriend(p) then return p end
+	end
+	for _, p in sgs.qlist(targets) do
+		if not self:isEnemy(p) then return p end
+	end
+	return targets:at(math.random(0, 1))
 end
 
-sgs.ai_skill_choice.shoucheng = function(self, choices)
-	return (self.player:getPhase() == sgs.Player_NotActive and self:needKongcheng(self.player, true)) and "reject" or "accept"
+sgs.ai_skill_invoke.tianfu = function(self, data)
+	local d = data:toStringList()
+	if d[2] == "invoke" return true end
+	local p = findPlayerByObjectName(self.room, d[1])
+	return not self:isEnemy(p)
+end
+
+sgs.ai_skill_invoke.shoucheng = function(self, data)
+	local target = data:toPlayer()
+	return (self:isFirend(p) and not self:needKongcheng(target, true)) or (self:isEnemy(p) and self:needKongcheng(target, true))
 end
 
 local shangyi_skill = {}
@@ -338,6 +351,7 @@ end
 		return self:isFriend(to) and not (use.from and use.from:objectName() == to:objectName())
 	end
 end]]
+
 sgs.ai_skill_invoke.qianhuan = function(self, data)
 	local promptlist = data:toString():split(":")
 	local effect = promptlist[1]
@@ -350,12 +364,17 @@ sgs.ai_skill_invoke.qianhuan = function(self, data)
             return not (use.from and (use.from == to
                     or (use.card:isKindOf("Slash") and self:isPriorFriendOfSlash(self.player, use.card, use.from))))
         else
-            return self:isFriend(to) and not (use.from and use.from == to)
+            if self:isFriend(to) and not (use.from and use.from == to) then
+				return true
+			elseif self:isEnemy(to) and (use.card:isKindOf("Peach") or (use.card:isKindOf("Analeptic") and use.from and use.from:getHp() < 1)) then
+				return true
+			end
         end
 	end	
 	return
 end
 
+--[[
 sgs.ai_skill_choice.qianhuan = function(self, choices, data)
 	local use = data:toCardUse()
 	if use.card:isKindOf("Peach") or use.card:isKindOf("Analeptic") or use.card:isKindOf("ExNihilo") then return "reject" end
@@ -363,6 +382,7 @@ sgs.ai_skill_choice.qianhuan = function(self, choices, data)
 	if use.from and use.card:isKindOf("Slash") and self:isPriorFriendOfSlash(self.player, use.card, use.from) then return "reject" end
 	return "accept"
 end
+]]
 
 local function will_discard_zhendu(self)
 	local current = self.room:getCurrent()

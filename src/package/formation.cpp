@@ -312,20 +312,7 @@ public:
     }
 };
 
-class Tianfu: public TriggerSkill {
-public:
-    Tianfu(): TriggerSkill("tianfu") {
-        events << EventPhaseStart << EventPhaseChanging;
-    }
-
-    virtual int getPriority() const{
-        return 4;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL;
-    }
-
+/*
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == EventPhaseStart && player->getPhase() == Player::RoundStart) {
             QList<ServerPlayer *> jiangweis = room->findPlayersBySkillName(objectName());
@@ -353,6 +340,59 @@ public:
                     p->setMark(objectName(), 0);
                     room->detachSkillFromPlayer(p, "kanpo", false, true);
                 }
+            }
+        }
+        return false;
+    }
+*/
+// Paracel's Version
+
+class Tianfu: public TriggerSkill {
+public:
+    Tianfu(): TriggerSkill("tianfu") {
+        events << EventPhaseStart << EventLoseSkill;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == EventPhaseStart){
+            if (player->getPhase() == Player::RoundStart){
+                QList<ServerPlayer *> jiangweis = room->findPlayersBySkillName(objectName());
+                foreach (ServerPlayer *jiangwei, jiangweis){
+                    ServerPlayer *asker = NULL;
+                    if (player == jiangwei){
+                        QList<ServerPlayer *> to_select;
+                        foreach(ServerPlayer *p, room->getOtherPlayers(jiangwei))
+                            if (p->isAdjacentTo(jiangwei))
+                                to_select << p;
+                        asker = room->askForPlayerChosen(jiangwei, to_select, objectName(), "@tianfu-select", true, false);
+                    }
+                    else if (player->isAdjacentTo(jiangwei))
+                        if (jiangwei->askForSkillInvoke(objectName(), QStringList() << player->objectName() << "invoke"))
+                            asker = player;
+
+                    if (asker != NULL && asker->askForSkillInvoke(objectName(), QStringList() << jiangwei->objectName() << "gain")){
+                        room->setPlayerFlag(jiangwei, "tianfu_kanpo");
+                        room->acquireSkill(jiangwei, "kanpo");
+                    }
+                }
+            }
+            else if (player->getPhase() == Player::NotActive){
+                foreach (ServerPlayer *p, room->getAllPlayers()){
+                    if ((p->isAdjacentTo(player) || p == player) && p->hasFlag("tianfu_kanpo") && !p->hasInnateSkill("kanpo")){
+                        room->setPlayerFlag(p, "-tianfu_kanpo");
+                        room->detachSkillFromPlayer(p, "kanpo");
+                    }
+                }
+            }
+        }
+        else {
+            if (data.toString() == "tianfu" && player->hasFlag("tianfu_kanpo") && !player->hasInnateSkill("kanpo")){
+                room->setPlayerFlag(player, "-tianfu_kanpo");
+                room->detachSkillFromPlayer(player, "kanpo");
             }
         }
         return false;
@@ -431,41 +471,31 @@ public:
             if (room->askForSkillInvoke(yuji, objectName(), data)) {
                 room->broadcastSkillInvoke(objectName());
                 room->notifySkillInvoked(yuji, objectName());
-                if (yuji == player || room->askForChoice(player, objectName(), "accept+reject", data) == "accept") {
-                    QList<int> ids = yuji->getPile("sorcery");
-                    int id = -1;
-                    if (ids.length() > 1) {
-                        room->fillAG(ids, yuji);
-                        id = room->askForAG(yuji, ids, false, objectName());
-                        room->clearAG(yuji);
-                    } else {
-                        id = ids.first();
-                    }
-                    CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, QString(), objectName(), QString());
-                    room->throwCard(Sanguosha->getCard(id), reason, NULL);
-
-                    LogMessage log;
-                    if (use.from) {
-                        log.type = "$CancelTarget";
-                        log.from = use.from;
-                    } else {
-                        log.type = "$CancelTargetNoUser";
-                    }
-                    log.to = use.to;
-                    log.arg = use.card->objectName();
-                    room->sendLog(log);
-
-
-                    use.to.clear();
-                    data = QVariant::fromValue(use);
+                QList<int> ids = yuji->getPile("sorcery");
+                int id = -1;
+                if (ids.length() > 1) {
+                    room->fillAG(ids, yuji);
+                    id = room->askForAG(yuji, ids, false, objectName());
+                    room->clearAG(yuji);
                 } else {
-                    LogMessage log;
-                    log.type = "#ZhibaReject";
-                    log.from = player;
-                    log.to << yuji;
-                    log.arg = objectName();
-                    room->sendLog(log);
+                    id = ids.first();
                 }
+                CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, QString(), objectName(), QString());
+                room->throwCard(Sanguosha->getCard(id), reason, NULL);
+
+                LogMessage log;
+                if (use.from) {
+                    log.type = "$CancelTarget";
+                    log.from = use.from;
+                } else {
+                    log.type = "$CancelTargetNoUser";
+                }
+                log.to = use.to;
+                log.arg = use.card->objectName();
+                room->sendLog(log);
+
+                use.to.clear();
+                data = QVariant::fromValue(use);
             }
         }
         return false;
@@ -593,18 +623,9 @@ public:
         if (move.from && move.from->isAlive() && move.from->getPhase() == Player::NotActive
             && move.from_places.contains(Player::PlaceHand) && move.is_last_handcard) {
             if (room->askForSkillInvoke(player, objectName(), data)) {
-                if (move.from == player || room->askForChoice(player, objectName(), "accept+reject") == "accept") {
-                    room->broadcastSkillInvoke(objectName());
-                    ServerPlayer *from = (ServerPlayer *)move.from;
-                    from->drawCards(1);
-                } else {
-                    LogMessage log;
-                    log.type = "#ZhibaReject";
-                    log.from = (ServerPlayer *)move.from;
-                    log.to << player;
-                    log.arg = objectName();
-                    room->sendLog(log);
-                }
+                room->broadcastSkillInvoke(objectName());
+                ServerPlayer *from = (ServerPlayer *)move.from;
+                from->drawCards(1);
             }
         }
         return false;
@@ -687,7 +708,8 @@ FormationPackage::FormationPackage()
     heg_dengai->addSkill(new Ziliang);
 
     General *heg_caohong = new General(this, "heg_caohong", "wei"); // WEI 018
-    heg_caohong->addSkill(new Huyuan);
+    //heg_caohong->addSkill(new Huyuan);
+    heg_caohong->addSkill("yuanhu");
     heg_caohong->addSkill(new Heyi);
 
     General *jiangwanfeiyi = new General(this, "jiangwanfeiyi", "shu", 3); // SHU 018
@@ -701,6 +723,7 @@ FormationPackage::FormationPackage()
     jiangqin->addSkill(new Niaoxiang);
 
     General *heg_xusheng = new General(this, "heg_xusheng", "wu"); // WU 020
+    heg_xusheng->addSkill("pojun");
     heg_xusheng->addSkill(new Yicheng);
 
     General *heg_yuji = new General(this, "heg_yuji", "qun", 3); // QUN 011 G
@@ -713,6 +736,8 @@ FormationPackage::FormationPackage()
     addMetaObject<HuyuanCard>();
     addMetaObject<HeyiCard>();
     addMetaObject<ShangyiCard>();
+
+    skills << new Huyuan; // for future use
 }
 
 ADD_PACKAGE(Formation)
