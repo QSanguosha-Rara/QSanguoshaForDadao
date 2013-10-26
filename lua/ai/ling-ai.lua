@@ -1027,3 +1027,53 @@ sgs.ai_use_priority.Neo2013XiechanCard = sgs.ai_use_priority.Slash + 0.1
 sgs.ai_card_intention.Neo2013XiechanCard = sgs.ai_card_intention.Slash
 
 
+sgs.ai_skill_invoke.neo2013chengxiang = sgs.ai_skill_invoke.chengxiang
+sgs.ai_skill_askforag.neo2013chengxiang = sgs.ai_skill_askforag.chengxiang
+
+local neo2013tongwu_skill = {}
+neo2013tongwu_skill.name = "neo2013tongwu"
+table.insert(sgs.ai_skills, neo2013tongwu_skill)
+neo2013tongwu_skill.getTurnUseCard = function(self, inclusive)
+	local cards = self.player:getCards("he")
+	cards = sgs.QList2Table(cards)
+
+	local red_card
+	self:sortByUseValue(cards, true)
+	for _, card in ipairs(cards) do
+		if not card:isKindOf("Slash")
+			and not isCard("Peach", card, self.player) and not isCard("ExNihilo", card, self.player)
+			and card:isNDTrick() and (self:getUseValue(card) < sgs.ai_use_value.Slash or inclusive or sgs.Sanguosha:correctCardTarget(sgs.TargetModSkill_Residue, self.player, sgs.Sanguosha:cloneCard("slash")) > 0) then
+			red_card = card
+			break
+		end
+	end
+
+	if red_card then
+		local suit = red_card:getSuitString()
+		local number = red_card:getNumberString()
+		local card_id = red_card:getEffectiveId()
+		local card_str = ("slash:neo2013tongwu[%s:%s]=%d"):format(suit, number, card_id)
+		local slash = sgs.Card_Parse(card_str)
+
+		assert(slash)
+		return slash
+	end
+end
+
+sgs.ai_view_as.neo2013tongwu = function(card, player, card_place)
+	local suit = card:getSuitString()
+	local number = card:getNumberString()
+	local card_id = card:getEffectiveId()
+	if card_place ~= sgs.Player_PlaceSpecial and card:isNDTrick() and not card:isKindOf("Peach") and not card:hasFlag("using") and sgs.Sanguosha:getCurrentCardUseReason() == sgs.CardUseStruct_CARD_USE_REASON_RESPONSE_USE then
+		return ("slash:neo2013tongwu[%s:%s]=%d"):format(suit, number, card_id)
+	end
+end
+
+sgs.ai_skill_invoke.neo2013tongwu = function(self, data)
+	local tc = data:toCard()
+	local dummy_use = { isDummy = true }
+	self:useTrickCard(tc, dummy_use)
+	if dummy_use.card then return true end
+	return
+end
+
