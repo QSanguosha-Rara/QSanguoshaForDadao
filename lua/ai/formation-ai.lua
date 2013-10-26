@@ -234,7 +234,7 @@ end
 
 sgs.ai_skill_invoke.tianfu = function(self, data)
 	local d = data:toStringList()
-	if d[2] == "invoke" return true end
+	if d[2] == "invoke" then return true end
 	local p = findPlayerByObjectName(self.room, d[1])
 	return not self:isEnemy(p)
 end

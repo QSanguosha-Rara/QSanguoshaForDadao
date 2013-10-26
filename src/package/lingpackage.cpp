@@ -2357,6 +2357,49 @@ public:
     }
 };
 
+class Neo2013Kuangfu: public TriggerSkill{
+public:
+    Neo2013Kuangfu(): TriggerSkill("neo2013kuangfu"){
+        events << Damage;
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *panfeng, QVariant &data) const{
+        DamageStruct damage = data.value<DamageStruct>();
+        ServerPlayer *target = damage.to;
+        if (target->getHp() <= panfeng->getHp() && target->hasEquip()) {
+            QStringList equiplist;
+            for (int i = 0; i <= 3; i++) {
+                if (!target->getEquip(i)) continue;
+                if (panfeng->canDiscard(target, target->getEquip(i)->getEffectiveId()) || panfeng->getEquip(i) == NULL)
+                    equiplist << QString::number(i);
+            }
+            if (equiplist.isEmpty() || !panfeng->askForSkillInvoke(objectName(), data))
+                return false;
+            int equip_index = room->askForChoice(panfeng, "kuangfu_equip", equiplist.join("+"), QVariant::fromValue((PlayerStar)target)).toInt();
+            const Card *card = target->getEquip(equip_index);
+            int card_id = card->getEffectiveId();
+
+            QStringList choicelist;
+            if (panfeng->canDiscard(target, card_id))
+                choicelist << "throw";
+            if (equip_index > -1 && panfeng->getEquip(equip_index) == NULL)
+                choicelist << "move";
+
+            QString choice = room->askForChoice(panfeng, "kuangfu", choicelist.join("+"));
+
+            if (choice == "move") {
+                room->broadcastSkillInvoke(objectName(), 1);
+                room->moveCardTo(card, panfeng, Player::PlaceEquip);
+            } else {
+                room->broadcastSkillInvoke(objectName(), 2);
+                room->throwCard(card, target, panfeng);
+            }
+        }
+
+        return false;
+    }
+};
+
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
     neo2013_masu->addSkill(new Neo2013Xinzhan);
@@ -2497,6 +2540,9 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
 
     General *neo2013_xiahou = new General(this, "neo2013_xiahoudun", "wei", 4);
     neo2013_xiahou->addSkill(new Neo2013Ganglie);
+
+    General *neo2013_panfeng = new General(this, "neo2013_panfeng", "qun", 4);
+    neo2013_panfeng->addSkill(new Neo2013Kuangfu);
 
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();
