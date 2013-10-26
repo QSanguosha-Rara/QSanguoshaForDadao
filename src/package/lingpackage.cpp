@@ -328,7 +328,7 @@ public:
             else
                 room->broadcastSkillInvoke(objectName(), 2);
 
-            killer->throwAllHandCardsAndEquips();
+            killer->throwAllHandCards();
             room->setPlayerMark(killer, "@HuileiDecrease", 1);
             room->acquireSkill(killer, "#neo2013huilei-maxcards", false);
         }

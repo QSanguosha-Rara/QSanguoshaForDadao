@@ -58,7 +58,7 @@ return {
 	["neo2013xinzhan"]="心战",
 	[":neo2013xinzhan"]= "<font color=\"green\"><b>出牌阶段限一次，</b></font>若你的手牌数大于你已损失的体力值，你可以观看牌堆顶的三张牌，然后先展示其中任意数量的红桃牌再获得之，其余以任意顺序置于牌堆顶。",
 	["neo2013huilei"]="挥泪",
-	[":neo2013huilei"]= "<font color=\"blue\"><b>锁定技，</b></font>当你死亡后，你令杀死你的角色弃置其所有牌且其手牌上限-1。",
+	[":neo2013huilei"]= "<font color=\"blue\"><b>锁定技，</b></font>当你死亡后，你令杀死你的角色弃置其所有手牌且其手牌上限-1。",
 	["designer:neo2013_masu"] = "凌天翼",
 	["illustrator:neo2013_masu"] = "张帅",
 	-- ["cv:yi_masu"] = "官方",
