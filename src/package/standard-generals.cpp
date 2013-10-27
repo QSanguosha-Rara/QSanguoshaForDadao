@@ -1329,6 +1329,26 @@ public:
     }
 };
 
+class Mashu1v1: public TriggerSkill{
+public:
+    Mashu1v1(): TriggerSkill("#mashu-1v1-clear"){
+        events << Debut;
+    }
+
+    virtual int getPriority() const{
+        return 10;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return Config.GameMode == "02_1v1" && TriggerSkill::triggerable(target) && target->hasSkill("xiaoxi");
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        room->handleAcquireDetachSkills(player, "-mashu");
+        return false;
+    }
+};
+
 class Wangzun: public PhaseChangeSkill {
 public:
     Wangzun(): PhaseChangeSkill("wangzun") {
@@ -1482,6 +1502,8 @@ void StandardPackage::addGenerals() {
     General *machao = new General(this, "machao", "shu"); // SHU 006
     machao->addSkill(new Tieji);
     machao->addSkill(new Mashu);
+    machao->addSkill(new Mashu1v1);
+    related_skills.insertMulti("mashu", "#mashu-1v1-clear");
 
     General *huangyueying = new General(this, "huangyueying", "shu", 3, false); // SHU 007
     huangyueying->addSkill(new Jizhi);

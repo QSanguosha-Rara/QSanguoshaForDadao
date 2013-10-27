@@ -1026,8 +1026,8 @@ public:
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
         if (player->getPhase() == Player::Finish) {
             ServerPlayer *hansui = room->findPlayerBySkillName(objectName());
-            if (hansui && hansui != player && hansui->canSlash(player, false)
-                && (player->getHp() > hansui->getHp() || hansui->hasFlag("NiluanSlashTarget"))) {
+            if (hansui && hansui != player && hansui->canSlash(player) && hansui->inMyAttackRange(player) 
+                && (player->getHp() > hansui->getHp() || player->hasFlag("NiluanSlashUsed"))) {
                     if (hansui->isKongcheng()) {
                         bool has_black = false;
                         for (int i = 0; i < 4; i++) {
@@ -1075,15 +1075,11 @@ public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == TargetConfirmed) {
             CardUseStruct use = data.value<CardUseStruct>();
-            if (use.from && use.from == player && use.card->isKindOf("Slash")) {
-                foreach (ServerPlayer *to, use.to) {
-                    if (!to->hasFlag("NiluanSlashTarget"))
-                        to->setFlags("NiluanSlashTarget");
-                }
+            if (use.from && use.from == player && use.card->isKindOf("Slash") && use.from->getPhase() != Player::NotActive) {
+                use.from->setFlags("NiluanSlashUsed");
             }
-        } else if (player->getPhase() == Player::RoundStart) {
-            foreach (ServerPlayer *p, room->getAlivePlayers())
-                p->setFlags("-NiluanSlashTarget");
+        } else if (player->getPhase() == Player::NotActive) {
+            player->setFlags("-NiluanSlashUsed");
         }
         return false;
     }
@@ -1138,6 +1134,7 @@ Special1v1Package::Special1v1Package()
     General *kof_machao = new General(this, "kof_machao", "shu");
     kof_machao->addSkill("tieji");
     kof_machao->addSkill(new Xiaoxi);
+    kof_machao->addSkill("mashu");
 
     General *kof_nos_huangyueying = new General(this, "kof_nos_huangyueying", "shu", 3, false);
     kof_nos_huangyueying->addSkill("nosjizhi");
@@ -1209,6 +1206,7 @@ Special1v1OLPackage::Special1v1OLPackage()
     General *kof_pangde = new General(this, "kof_pangde", "qun", 4);
     kof_pangde->addSkill("mengjin");
     kof_pangde->addSkill("xiaoxi");
+    kof_pangde->addSkill("mashu");
 
     addMetaObject<PujiCard>();
 }
@@ -1227,6 +1225,7 @@ Special1v1ExtPackage::Special1v1ExtPackage() :Package("Special1v1Ext"){
     hansui->addSkill(new Niluan);
     hansui->addSkill(new NiluanRecord);
     hansui->addSkill("xiaoxi");
+    hansui->addSkill("mashu");
     related_skills.insertMulti("niluan", "#niluan-record");
 }
 
