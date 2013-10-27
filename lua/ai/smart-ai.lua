@@ -1538,7 +1538,7 @@ function SmartAI:isFriend(other, another)
 	if another then
 	    local mode = string.lower(self.room:getMode())
 	    if (string.sub(mode, -1) == "p" or string.sub(mode, -2) == "pd" or string.sub(mode, -2) == "pz") and not mode == "02p" then
-		    return self:objectiveLevel(other) >= self:objectiveLevel(another)
+		    return (self:objectiveLevel(other) > 0 and self:objectiveLevel(another) > 0) or (self:objectiveLevel(other) < 0 and self:objectiveLevel(another) < 0)
 		else
 		    return self:isFriend(other) == self:isFriend(another)
 		end
@@ -1554,7 +1554,7 @@ function SmartAI:isEnemy(other, another)
 	if another then
 	    local mode = string.lower(self.room:getMode())
 	    if (string.sub(mode, -1) == "p" or string.sub(mode, -2) == "pd" or string.sub(mode, -2) == "pz") and not mode == "02p" then
-		    return self:objectiveLevel(other) < self:objectiveLevel(another)
+		    return not ((self:objectiveLevel(other) > 0 and self:objectiveLevel(another) > 0) or (self:objectiveLevel(other) < 0 and self:objectiveLevel(another) < 0))
 		else
 		    return self:isFriend(other) ~= self:isFriend(another)
 		end
