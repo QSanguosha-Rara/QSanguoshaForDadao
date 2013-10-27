@@ -706,8 +706,10 @@ private:
     void moveToEndOfDrawPile(Room *room, int card_id) const{
         QList<int> drawpile = room->getDrawPile();
         room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
-        drawpile.append(card_id);
-        room->getDrawPile() = drawpile;
+        if (room->getCardPlace(card_id) == Player::DrawPile){
+            drawpile.append(card_id);
+            room->getDrawPile() = drawpile;
+        }
         room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
     }
 
@@ -725,6 +727,8 @@ public:
             return false;
 
         if (triggerEvent == CardsMoveOneTime){
+            if (move.to_place == Player::DrawPile)
+                return false;
             if (move.to_place == Player::DiscardPile || (move.to_place == Player::PlaceEquip && move.to != player))
                 player->obtainCard(Sanguosha->getCard(fldfid));
         }

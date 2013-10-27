@@ -1860,6 +1860,18 @@ public:
         events << BeforeCardsMove;
     }
 
+private:
+    void moveToEndOfDrawPile(Room *room, int card_id) const{
+        QList<int> drawpile = room->getDrawPile();
+        room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
+        if (room->getCardPlace(card_id) == Player::DrawPile){
+            drawpile.append(card_id);
+            room->getDrawPile() = drawpile;
+        }
+        room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
+    }
+
+public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
         if (((move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD)
@@ -1884,11 +1896,7 @@ public:
                     room->moveCardTo(c, NULL, Player::DrawPile);
                 }
                 else { // temp method for move cards to the bottom of drawpile, bugs exist probably
-                    QList<int> drawpile = room->getDrawPile();
-                    room->moveCardTo(c, NULL, Player::DrawPile);
-                    drawpile.append(c->getEffectiveId());
-                    room->getDrawPile() = drawpile;
-                    room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
+                    moveToEndOfDrawPile(room, c->getEffectiveId());
                 }
 
                 ids.removeOne(id);
@@ -2052,8 +2060,10 @@ private:
     void moveToEndOfDrawPile(Room *room, int card_id) const{
         QList<int> drawpile = room->getDrawPile();
         room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
-        drawpile.append(card_id);
-        room->getDrawPile() = drawpile;
+        if (room->getCardPlace(card_id) == Player::DrawPile){
+            drawpile.append(card_id);
+            room->getDrawPile() = drawpile;
+        }
         room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
     }
 
