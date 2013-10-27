@@ -137,7 +137,7 @@ return {
 	[":nosfuhun"] = "摸牌阶段开始时，你可以放弃摸牌，从牌堆顶亮出两张牌并获得之，若亮出的牌颜色不同，你拥有“武圣”、“咆哮”，直到回合结束。",
 
 	["#nos_as_fuhuanghou"] = "与世不侵",
-	["nos_as_fuhuanghou"] = "伏皇后",
+	["nos_as_fuhuanghou"] = "伏皇后-旧",
 	["designer:nos_as_fuhuanghou"] = "凌天翼",
 	["illustrator:nos_as_fuhuanghou"] = "G.G.G.",
 	["noscangni"] = "藏匿",
@@ -148,7 +148,7 @@ return {
 	["#nosmixin"] = "请使用一张【杀】，否则对方将观看你的手牌并获得其中一张",
 	[":nosmixin"] = "<font color=\"green\"><b>出牌阶段限一次，</b></font>你可以将一张手牌交给一名其他角色，该角色须对你选择的另一名角色使用一张【杀】（无距离限制），否则你选择的角色观看其手牌并获得其中任意一张。",
 
-	["nos_as_fuwan"] = "伏完",
+	["nos_as_fuwan"] = "伏完-旧",
 	["designer:nos_as_fuwan"] = "凌天翼",
 	["nosfengyin"] = "奉印",
 	[":nosfengyin"] = "其他角色的回合开始时，若其当前的体力值不比你少，你可以交给其一张【杀】，令其跳过其出牌阶段和弃牌阶段。",
@@ -158,7 +158,7 @@ return {
 	[":noschizhong"] = "<font color=\"blue\"><b>锁定技，</b></font>你的手牌上限等于你的体力上限；其他角色死亡时，你加1点体力上限。",
 	["#Chizhong"] = " %from 受到【%arg】的影响，偷偷藏下了更多的手牌！",
 
-	["nos_kongrong"] = "亮牌孔融" ,
+	["nos_kongrong"] = "孔融-旧" ,
 	["&nos_kongrong"] = "孔融" ,
 	["nosmingshi"] = "名士" ,
 	[":nosmingshi"] = "<b>锁定技</b>，每当你受到伤害时，若伤害来源有手牌，需展示所有手牌，否则此伤害-1。" ,
