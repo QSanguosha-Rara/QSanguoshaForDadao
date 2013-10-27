@@ -435,33 +435,6 @@ public:
     }
 };
 
-/*
-
-class ManyiAvoid: public TriggerSkill {
-public:
-    ManyiAvoid(): TriggerSkill("#manyi-avoid") {
-        events << CardEffected;
-    }
-
-    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
-        CardEffectStruct effect = data.value<CardEffectStruct>();
-        if (effect.card->isKindOf("SavageAssault")) {
-            room->broadcastSkillInvoke(player->isFemale() ? "juxiang" : "huoshou");
-
-            LogMessage log;
-            log.type = "#SkillNullify";
-            log.from = player;
-            log.arg = "manyi";
-            log.arg2 = "savage_assault";
-            room->sendLog(log);
-
-            return true;
-        } else
-            return false;
-    }
-};*/
-
-
 class KOFXiaoji: public TriggerSkill {
 public:
     KOFXiaoji(): TriggerSkill("kofxiaoji") {
@@ -921,26 +894,12 @@ public:
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        if (Config.GameMode != "02_1v1")
-            return false;
+        if (Config.GameMode == "02_1v1"){
+            if (triggerEvent == DrawInitialCards) {
+                int n = player->tag["1v1Arrange"].toStringList().length();
+                if (Config.value("1v1/Rule", "2013").toString() != "OL")
+                    n += 3;
 
-        if (triggerEvent == DrawInitialCards) {
-            int n = player->tag["1v1Arrange"].toStringList().length();
-            if (Config.value("1v1/Rule", "2013").toString() != "OL")
-                n += 3;
-
-            LogMessage log;
-            log.type = "#TriggerSkill";
-            log.from = player;
-            log.arg = "cuorui";
-            room->sendLog(log);
-            room->broadcastSkillInvoke("cuorui");
-            room->notifySkillInvoked(player, "cuorui");
-
-            data = data.toInt() + n;
-        } else if (triggerEvent == EventPhaseChanging) {
-            PhaseChangeStruct change = data.value<PhaseChangeStruct>();
-            if (change.to == Player::Judge && player->getMark("CuoruiSkipJudge") == 0) {
                 LogMessage log;
                 log.type = "#TriggerSkill";
                 log.from = player;
@@ -949,33 +908,48 @@ public:
                 room->broadcastSkillInvoke("cuorui");
                 room->notifySkillInvoked(player, "cuorui");
 
-                player->skip(Player::Judge);
-                player->addMark("CuoruiSkipJudge");
+                data = data.toInt() + n;
+            } else if (triggerEvent == EventPhaseChanging) {
+                PhaseChangeStruct change = data.value<PhaseChangeStruct>();
+                if (change.to == Player::Judge && player->getMark("CuoruiSkipJudge") == 0) {
+                    LogMessage log;
+                    log.type = "#TriggerSkill";
+                    log.from = player;
+                    log.arg = "cuorui";
+                    room->sendLog(log);
+                    room->broadcastSkillInvoke("cuorui");
+                    room->notifySkillInvoked(player, "cuorui");
+
+                    player->skip(Player::Judge);
+                    player->addMark("CuoruiSkipJudge");
+                }
             }
         }
-        return false;
-    }
-};
+        else {
+            if (triggerEvent == DrawInitialCards){
+                LogMessage log;
+                log.type = "#TriggerSkill";
+                log.from = player;
+                log.arg = "cuorui";
+                room->sendLog(log);
+                room->broadcastSkillInvoke("cuorui");
+                room->notifySkillInvoked(player, "cuorui");
 
-class CuoruiForNormalMode: public TriggerSkill{
-public:
-    CuoruiForNormalMode(): TriggerSkill("#cuorui"){
-        events << EventPhaseStart << GameStart;
-    }
+                data = data.toInt() + 2;
+            }
+            else {
+                if (data.value<PhaseChangeStruct>().to == Player::Judge && player->getEquips().length() < player->getHandcardNum()){
+                    LogMessage log;
+                    log.type = "#TriggerSkill";
+                    log.from = player;
+                    log.arg = "cuorui";
+                    room->sendLog(log);
+                    room->broadcastSkillInvoke("cuorui");
+                    room->notifySkillInvoked(player, "cuorui");
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        if (Config.GameMode == "02_1v1")
-            return false;
-
-        if (triggerEvent == GameStart)
-            player->gainMark("@cuorui");
-        else if(triggerEvent == EventPhaseStart && player->getMark("@cuorui") > 0 && player->getPhase() == Player::RoundStart){
-            if (!player->askForSkillInvoke("cuorui"))
-                return false;
-
-            player->loseMark("@cuorui");
-            player->drawCards(2 + player->getLostHp());
-            player->skip(Player::Judge);
+                    player->skip(Player::Judge);
+                }
+            }
         }
         return false;
     }
@@ -989,10 +963,36 @@ public:
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        DeathStruct death = data.value<DeathStruct>();
-        if (death.who != player && death.damage && death.damage->from == player && player->askForSkillInvoke(objectName()))
-            player->drawCards(3, objectName());
+        if (Config.GameMode == "02_1v1"){
+            DeathStruct death = data.value<DeathStruct>();
+            if (death.who != player && death.damage && death.damage->from == player && player->askForSkillInvoke(objectName()))
+                player->drawCards(3, objectName());
+        }
+        return false;
+    }
+};
 
+class LieweiForNormalGameMode: public TriggerSkill{
+public:
+    LieweiForNormalGameMode(): TriggerSkill("#liewei"){
+        events << BuryVictim;
+    }
+
+    virtual int getPriority() const{
+        return -2;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (Config.GameMode != "02_1v1"){
+            DeathStruct death = data.value<DeathStruct>();
+            if (death.damage && death.damage->from != NULL && death.damage->from->hasSkill("liewei") 
+                    && death.damage->from->askForSkillInvoke("liewei", data))
+                death.damage->from->drawCards(3, "liewei");
+        }
         return false;
     }
 };
@@ -1150,7 +1150,6 @@ Special1v1Package::Special1v1Package()
 
     General *kof_menghuo = new General(this, "kof_menghuo", "shu");
     kof_menghuo->addSkill(new Manyi);
-    //kof_menghuo->addSkill(new ManyiAvoid);
     kof_menghuo->addSkill(new SavageAssaultAvoid("manyi"));
     kof_menghuo->addSkill("zaiqi");
     related_skills.insertMulti("manyi", "#sa_avoid_manyi");
@@ -1217,9 +1216,9 @@ Special1v1ExtPackage::Special1v1ExtPackage() :Package("Special1v1Ext"){
 
     General *niujin = new General(this, "niujin", "wei", 4); //D.WEI 025
     niujin->addSkill(new Cuorui);
-    niujin->addSkill(new CuoruiForNormalMode);
     niujin->addSkill(new Liewei);
-    related_skills.insertMulti("cuorui", "#cuorui");
+    niujin->addSkill(new LieweiForNormalGameMode);
+    related_skills.insertMulti("liewei", "#liewei");
 
     General *hansui = new General(this, "hansui", "qun", 4); //D.QUN 027
     hansui->addSkill(new Niluan);
