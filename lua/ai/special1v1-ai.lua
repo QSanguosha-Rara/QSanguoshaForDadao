@@ -364,7 +364,19 @@ sgs.ai_skill_invoke.xiaoxi = function(self, data)
 	self:useBasicCard(slash, dummy_use)
 	return (dummy_use.card ~= nil)
 end
-
+--[[
+sgs.ai_skill_use["@@xiaoxi"] = function(self)
+	local slashlist = sgs.SPlayerList()
+	for _, p in sgs.qlist(room:getOtherPlayers(self.player)) do
+		if self.player:canSlash(p) then
+			slashlist:append(p)
+		end
+	end
+	local slashtarget = sgs.ai_skill_playerchosen.zero_card_as_slash(self, slashlist)
+	
+	local slash = sgs.Sanguosha:cloneCard("Slash", sgs.Card_NoSuit, 0)
+end
+]] --not finished
 sgs.ai_skill_invoke.manyi = function(self, data)
 	local sa = sgs.Sanguosha:cloneCard("savage_assault")
 	local dummy_use = { isDummy = true }

@@ -200,24 +200,46 @@ public:
     }
 };
 
+class XiaoxiVS: public ZeroCardViewAsSkill{
+public:
+    XiaoxiVS(): ZeroCardViewAsSkill("xiaoxi"){
+        response_pattern = "@@xiaoxi";
+    }
+
+    virtual const Card *viewAs() const{
+        Slash *s = new Slash(Card::NoSuit, 0);
+        s->setSkillName(objectName());
+        return s;
+    }
+};
+
 class Xiaoxi: public TriggerSkill {
 public:
     Xiaoxi(): TriggerSkill("xiaoxi") {
-        events << Debut;
+        events << Debut << EventPhaseStart;
+        frequency = Limited;
+        limit_mark = "@xiaoxi";
+        view_as_skill = new XiaoxiVS;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
-        ServerPlayer *opponent = player->getNext();
-        if (!opponent->isAlive())
-            return false;
-        Slash *slash = new Slash(Card::NoSuit, 0);
-        slash->setSkillName("_xiaoxi"); //this typo......
-        if (player->isLocked(slash) || !player->canSlash(opponent, slash, false)) {
-            delete slash;
-            return false;
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
+        if (Config.GameMode == "02_1v1" && triggerEvent == Debut){
+            ServerPlayer *opponent = player->getNext();
+            if (!opponent->isAlive())
+                return false;
+            Slash *slash = new Slash(Card::NoSuit, 0);
+            slash->setSkillName("_xiaoxi"); //this typo......
+            if (player->isLocked(slash) || !player->canSlash(opponent, slash, false)) {
+                delete slash;
+                return false;
+            }
+            if (room->askForSkillInvoke(player, objectName()))
+                room->useCard(CardUseStruct(slash, player, opponent), false);
         }
-        if (room->askForSkillInvoke(player, objectName()))
-            room->useCard(CardUseStruct(slash, player, opponent), false);
+        else if (Config.GameMode != "02_1v1" && triggerEvent == EventPhaseStart && player->getPhase() == Player::RoundStart && player->getMark(limit_mark) > 0){
+            if (room->askForUseCard(player, "@@xiaoxi", "@askforslash", -1, Card::MethodUse, false))
+                player->loseMark(limit_mark);
+        }
         return false;
     }
 };

@@ -37,7 +37,9 @@ return {
 	["kof_machao"] = "马超1v1",
 	["&kof_machao"] = "马超",
 	["xiaoxi"] = "骁袭",
-	[":xiaoxi"] = "你登场时，你可以视为使用一张【杀】。",
+	[":xiaoxi"] = "你登场时，你可以视为使用一张【杀】。\
+身份局：限定技：回合开始时，你可以视为使用一张【杀】。",
+	["~xiaoxi"] = "选择【杀】的目标→点击确定" ,
 
 	["kof_nos_huangyueying"] = "黄月英1v1",
 	["&kof_nos_huangyueying"] = "黄月英",
