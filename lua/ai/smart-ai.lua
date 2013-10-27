@@ -1611,6 +1611,7 @@ function SmartAI:updateAlivePlayerRoles()
 	for _, aplayer in sgs.qlist(self.room:getAllPlayers()) do
 		sgs.current_mode_players[aplayer:getRole()] = sgs.current_mode_players[aplayer:getRole()] + 1
 	end
+	sgs.checkMisjudge()
 end
 
 function SmartAI:updatePlayers(clear_flags)
