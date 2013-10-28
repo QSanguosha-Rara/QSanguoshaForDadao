@@ -224,17 +224,17 @@ config = {
 	couple_couples = {
 		"caopi|caozhi+zhenji",
 		"simayi+zhangchunhua",
-		"liubei+ganfuren|sp_sunshangxiang",
+		"liubei·bgm_liubei+ganfuren|sp_sunshangxiang",
 		"zhangfei|bgm_zhangfei+xiahoushi|xiahoujuan",
 		"zhugeliang|wolong+huangyueying",
 		"menghuo+zhurong",
 		"zhouyu+xiaoqiao",
-		"lvbu|dongzhuo+diaochan",
+		"lvbu|dongzhuo+diaochan|bgm_diaochan",
 		"sunjian+wuguotai",
-		"sunce+daqiao",
+		"sunce+daqiao|bgm_daqiao",
 		"sunquan+bulianshi",
 		"diy_simazhao+diy_wangyuanji",
-		"liuxie|diy_liuxie+fuhuanghou|as_fuhuanghou"
+		"liuxie|diy_liuxie+fuhuanghou"
 	},
 	
 	convert_pairs = {
