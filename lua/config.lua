@@ -224,7 +224,7 @@ config = {
 	couple_couples = {
 		"caopi|caozhi+zhenji",
 		"simayi+zhangchunhua",
-		"liubei·bgm_liubei+ganfuren|sp_sunshangxiang",
+		"liubei|bgm_liubei+ganfuren|sp_sunshangxiang",
 		"zhangfei|bgm_zhangfei+xiahoushi|xiahoujuan",
 		"zhugeliang|wolong+huangyueying",
 		"menghuo+zhurong",
