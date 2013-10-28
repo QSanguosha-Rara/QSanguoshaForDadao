@@ -1178,7 +1178,7 @@ function SmartAI:HatredValue(player)
 		if self.player:getMark("Global_TurnCount") < 2 then
 			if sgs.isRolePredictable(true) and self.lua_ai:relationTo(player) ~= sgs.AI_Neutrality then 
 				if self.lua_ai:isFriend(player) then return -2 end
-				if self.lua_ai:isEnemy(player) then return 2 end
+				if self.lua_ai:isEnemy(player) then return 3 end
 			end	
 		else
 			local lord = self.room:getLord()
@@ -1259,7 +1259,7 @@ function SmartAI:HatredValue(player)
 					end
 				end
 			end
-			if player_role == "renegade" then return math.random(0, 1) else return 2 end
+			if player_role == "renegade" then return math.random(0, 1) else return 5 end
 		end	
 		return 0
 	end
@@ -1534,14 +1534,32 @@ end
 
 function SmartAI:isFriend(other, another)
 	if not other then self.room:writeToConsole(debug.traceback()) return end
-	if another then return self:isFriend(other) == self:isFriend(another) end
+--	if another then return self:isFriend(other) == self:isFriend(another) end
+	if another then
+	    local mode = string.lower(self.room:getMode())
+	    if (string.sub(mode, -1) == "p" or string.sub(mode, -2) == "pd" or string.sub(mode, -2) == "pz") and not mode == "02p" then
+		    return (self:objectiveLevel(other) > 0 and self:objectiveLevel(another) > 0) or (self:objectiveLevel(other) < 0 and self:objectiveLevel(another) < 0)
+		else
+		    return self:isFriend(other) == self:isFriend(another)
+		end
+		return false
+	end
 	if (self:objectiveLevel(other)) < 0 or self.player == other then return true end
 	return false
 end
 
 function SmartAI:isEnemy(other, another)
 	if not other then self.room:writeToConsole(debug.traceback()) return end
-	if another then return self:isFriend(other) ~= self:isFriend(another) end
+--if another then return self:isFriend(other) ~= self:isFriend(another) end
+	if another then
+	    local mode = string.lower(self.room:getMode())
+	    if (string.sub(mode, -1) == "p" or string.sub(mode, -2) == "pd" or string.sub(mode, -2) == "pz") and not mode == "02p" then
+		    return not ((self:objectiveLevel(other) > 0 and self:objectiveLevel(another) > 0) or (self:objectiveLevel(other) < 0 and self:objectiveLevel(another) < 0))
+		else
+		    return self:isFriend(other) ~= self:isFriend(another)
+		end
+		return true
+	end
 	if self:objectiveLevel(other) > 0 then return true end
 	if self.player == other then return false end
 	local rebel_num = sgs.current_mode_players["rebel"]
@@ -1593,6 +1611,7 @@ function SmartAI:updateAlivePlayerRoles()
 	for _, aplayer in sgs.qlist(self.room:getAllPlayers()) do
 		sgs.current_mode_players[aplayer:getRole()] = sgs.current_mode_players[aplayer:getRole()] + 1
 	end
+	sgs.checkMisjudge()
 end
 
 function SmartAI:updatePlayers(clear_flags)
@@ -5949,7 +5968,7 @@ function SmartAI:findPlayerToDiscard(flags, include_self, isDiscard, players, re
 				if enemy:getOffensiveHorse() and (not enemy:hasSkill("jijiu") or enemy:getOffensiveHorse():isRed()) and (not isDiscard or self.player:canDiscard(enemy, enemy:getOffensiveHorse():getEffectiveId())) then
 					table.insert(player_table, enemy)
 				end
-				if who:getWeapon() and (not enemy:hasSkill("jijiu") or enemy:getWeapon():isRed()) and (not isDiscard or self.player:canDiscard(enemy, enemy:getWeapon():getEffectiveId())) then
+				if enemy:getWeapon() and (not enemy:hasSkill("jijiu") or enemy:getWeapon():isRed()) and (not isDiscard or self.player:canDiscard(enemy, enemy:getWeapon():getEffectiveId())) then
 					table.insert(player_table, enemy)
 				end
 			end

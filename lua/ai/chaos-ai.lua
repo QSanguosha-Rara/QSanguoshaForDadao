@@ -21,8 +21,8 @@ sgs.ai_skill_playerchosen.fentian = function(self, targets)
 			table.insert(targetstable, p)
 		end
 	end
-	self:sort(p)
-	return p[1]
+	self:sort(targetstable)
+	return targetstable[1]
 end
 
 local xintan_skill = {}

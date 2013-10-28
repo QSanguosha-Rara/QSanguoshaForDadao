@@ -1077,3 +1077,16 @@ sgs.ai_skill_invoke.neo2013tongwu = function(self, data)
 	return
 end
 
+neo2013xiongyi_skill = {}
+neo2013xiongyi_skill.name = "neo2013xiongyi"
+table.insert(sgs.ai_skills, neo2013xiongyi_skill)
+neo2013xiongyi_skill.getTurnUseCard = function(self)
+	if self.player:getMark("@arise") < 1 then return end
+	if (#self.friends <= #self.enemies and sgs.turncount > 2 and self.player:getLostHp() > 0) or (sgs.turncount > 1 and self:isWeak()) then
+		return sgs.Card_Parse("Neo2013XiongyiCard=.") 
+	end
+end
+sgs.ai_skill_use_func.Neo2013XiongyiCard = sgs.ai_skill_use_func.XiongyiCard
+
+sgs.ai_card_intention.Neo2013XiongyiCard = sgs.ai_card_intention.XiongyiCard
+sgs.ai_use_priority.Neo2013XiongyiCard = sgs.ai_use_priority.XiongyiCard
