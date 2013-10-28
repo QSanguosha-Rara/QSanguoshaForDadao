@@ -1862,11 +1862,11 @@ public:
 
 private:
     void moveToEndOfDrawPile(Room *room, int card_id) const{
-        QList<int> drawpile = room->getDrawPile();
         room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
         if (room->getCardPlace(card_id) == Player::DrawPile){
+            QList<int> &drawpile = room->getDrawPile();
+            drawpile.removeOne(card_id);
             drawpile.append(card_id);
-            room->getDrawPile() = drawpile;
         }
         room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
     }
@@ -2058,11 +2058,11 @@ public:
 
 private:
     void moveToEndOfDrawPile(Room *room, int card_id) const{
-        QList<int> drawpile = room->getDrawPile();
         room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
         if (room->getCardPlace(card_id) == Player::DrawPile){
+            QList<int> &drawpile = room->getDrawPile();
+            drawpile.removeOne(card_id);
             drawpile.append(card_id);
-            room->getDrawPile() = drawpile;
         }
         room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
     }

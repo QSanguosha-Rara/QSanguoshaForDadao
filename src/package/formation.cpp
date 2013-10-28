@@ -703,11 +703,11 @@ public:
 
 private:
     void moveToEndOfDrawPile(Room *room, int card_id) const{
-        QList<int> drawpile = room->getDrawPile();
         room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
         if (room->getCardPlace(card_id) == Player::DrawPile){
+			QList<int> &drawpile = room->getDrawPile();
+			drawpile.removeOne(card_id);
             drawpile.append(card_id);
-            room->getDrawPile() = drawpile;
         }
         room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
     }
@@ -715,6 +715,8 @@ private:
 public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+        if (move.to_place == Player::DrawPile)
+            return false;
         int fldfid = -1;
         foreach (int id, move.card_ids)
             if (Sanguosha->getCard(id)->isKindOf("DragonPhoenix")){
@@ -726,15 +728,10 @@ public:
             return false;
 
         if (triggerEvent == CardsMoveOneTime){
-            if (move.to_place == Player::DrawPile)
-                return false;
             if (move.to_place == Player::DiscardPile || (move.to_place == Player::PlaceEquip && move.to != player))
                 player->obtainCard(Sanguosha->getCard(fldfid));
         }
         else {
-            if (move.to_place == Player::DrawPile)
-                return false;
-
             if ((move.from == player && (move.from_places[move.card_ids.indexOf(fldfid)] == Player::PlaceHand || move.from_places[move.card_ids.indexOf(fldfid)] == Player::PlaceEquip))
                     && (move.to != player || (move.to_place != Player::PlaceHand && move.to_place != Player::PlaceEquip))){
                 room->showCard(player, fldfid);
