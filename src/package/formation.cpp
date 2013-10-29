@@ -698,7 +698,6 @@ class Zhangwu: public TriggerSkill{
 public:
     Zhangwu(): TriggerSkill("zhangwu"){
         events << CardsMoveOneTime << BeforeCardsMove;
-        frequency = Compulsory;
     }
 
 private:
@@ -733,7 +732,8 @@ public:
         }
         else {
             if ((move.from == player && (move.from_places[move.card_ids.indexOf(fldfid)] == Player::PlaceHand || move.from_places[move.card_ids.indexOf(fldfid)] == Player::PlaceEquip))
-                    && (move.to != player || (move.to_place != Player::PlaceHand && move.to_place != Player::PlaceEquip))){
+                    && (move.to != player || (move.to_place != Player::PlaceHand && move.to_place != Player::PlaceEquip))
+                    && player->askForSkillInvoke(objectName())){
                 room->showCard(player, fldfid);
                 move.from_places.removeAt(move.card_ids.indexOf(fldfid));
                 move.card_ids.removeOne(fldfid);
