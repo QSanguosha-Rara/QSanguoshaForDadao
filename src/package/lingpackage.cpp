@@ -1906,6 +1906,7 @@ public:
                 move.card_ids.removeOne(id);
                 room->obtainCard(player, id);
             }
+            data = QVariant::fromValue(move);
         }
         return false;
     }
@@ -2147,6 +2148,7 @@ public:
                         room->obtainCard(to_give, selected);
                     }
                 }
+                data = QVariant::fromValue(move);
             }
         }
         else if (triggerEvent == EventPhaseStart && player->getPhase() == Player::RoundStart){

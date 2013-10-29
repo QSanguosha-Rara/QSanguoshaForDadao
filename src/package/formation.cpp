@@ -737,6 +737,7 @@ public:
                 room->showCard(player, fldfid);
                 move.from_places.removeAt(move.card_ids.indexOf(fldfid));
                 move.card_ids.removeOne(fldfid);
+                data = QVariant::fromValue(move);
                 moveToEndOfDrawPile(room, fldfid);
                 room->drawCards(player, 2);
             }
