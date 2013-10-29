@@ -689,10 +689,13 @@ public:
             room->handleAcquireDetachSkills(lvmeng, "jiang|qianxun");
             room->getThread()->addTriggerSkill(Sanguosha->getTriggerSkill("keji"));
         } else if (data.toString() == "mouduan") {
-            if (lvmeng->getMark("@wu") > 0)
-                room->handleAcquireDetachSkills(lvmeng, "jiang|qianxun");
-            else if (lvmeng->getMark("@wen") > 0)
+            if (lvmeng->getMark("@wen") > 0)
                 room->handleAcquireDetachSkills(lvmeng, "yingzi|keji");
+            else {
+                if (lvmeng->getMark("@wu") == 0)
+                    lvmeng->gainMark("@wu");
+                room->handleAcquireDetachSkills(lvmeng, "jiang|qianxun");
+            }
         }
         return false;
     }
@@ -748,11 +751,11 @@ public:
 
     virtual void onSkillDetached(Room *room, ServerPlayer *player) const{
         if (player->getMark("@wu") > 0) {
-            player->loseMark("@wu");
+            //player->loseMark("@wu");
             room->detachSkillFromPlayer(player, "jiang");
             room->detachSkillFromPlayer(player, "qianxun");
         } else if (player->getMark("@wen") > 0) {
-            player->loseMark("@wen");
+            //player->loseMark("@wen");
             room->detachSkillFromPlayer(player, "yingzi");
             room->detachSkillFromPlayer(player, "keji");
         }
