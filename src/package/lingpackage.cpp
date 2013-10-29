@@ -1822,6 +1822,8 @@ public:
             if (!player->askForSkillInvoke(objectName()))
                 return false;
 
+            player->turnOver();
+
             DummyCard dummy;
             dummy.addSubcards(player->getEquips());
             dummy.addSubcards(player->getJudgingArea());
