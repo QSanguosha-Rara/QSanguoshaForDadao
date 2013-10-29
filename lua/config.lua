@@ -107,10 +107,6 @@ config = {
 	},
 
 	roles_ban = {
-		"vs_xiahoudun",
-		"vs_guanyu",
-		"vs_zhaoyun",
-		"vs_lvbu",
 		"kof_zhangliao",
 		"kof_xuchu",
 		"kof_zhenji",
@@ -160,7 +156,9 @@ config = {
 	},
 	
 	hegemony_ban = {
-		"xiahoujuan"
+		"xiahoujuan" ,
+		"neo2013_sp_guanyu" ,
+		"weiwudi" ,
 	},
 
 	pairs_ban = {
