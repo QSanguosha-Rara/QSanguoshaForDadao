@@ -319,13 +319,10 @@ void BawangCard::onEffect(const CardEffectStruct &effect) const{
 
     CardUseStruct use;
     Slash *slash = new Slash(Card::NoSuit, 0);
-    slash->setSkillName("bawang");
+    slash->setSkillName("_bawang");
     use.card = slash;
     use.from = effect.from;
     use.to << effect.to;
-
-    room->setEmotion(effect.to, "bad");
-    room->setEmotion(effect.from, "good");
     room->useCard(use, false);
 }
 
@@ -368,7 +365,9 @@ public:
     }
 
     virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
-        return 2;
+        if (!card->isKindOf("Slash"))
+            return 2;
+        return -1;
     }
 };
 
@@ -419,7 +418,7 @@ const Card *WeidaiCard::validateInResponse(ServerPlayer *user) const {
         const Card *card = room->askForCard(liege, ".|spade|2~9|hand", prompt, tohelp, Card::MethodDiscard, user);
         if(card){
             Analeptic *ana = new Analeptic(card->getSuit(), card->getNumber());
-            ana->setSkillName("weidai");
+            ana->setSkillName("_weidai");
             ana->addSubcard(card);
             return ana;
         }
@@ -445,6 +444,10 @@ public:
 
     virtual const Card *viewAs() const{
         return new WeidaiCard;
+    }
+
+    virtual int getEffectIndex(const ServerPlayer *player, const Card *card){
+        return 0;
     }
 
 private:
@@ -749,7 +752,7 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL && target->hasSkill(objectName());
+        return target != NULL && target->hasSkill(objectName()) && !target->isAlive();
     }
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *tianfeng, QVariant &data) const{
