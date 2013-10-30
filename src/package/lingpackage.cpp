@@ -1887,11 +1887,11 @@ public:
                 int id = room->askForAG(player, ids, true, objectName());
                 room->clearAG(player);
                 if (id == -1)
-                    return false;
+                    break;
 
                 const Card *c = room->askForExchange(player, objectName(), 1, true, "@zongxuan-card", true);
                 if (c == NULL)
-                    return false;
+                    break;
 
                 bool isDrawPileTop = (room->askForChoice(player, objectName(), "zongxuanup+zongxuandown", QVariant::fromValue(c)) == "zongxuanup");
                 if (isDrawPileTop){

@@ -253,7 +253,7 @@ return {
 	["neo2013huoshui"]="祸水",
 	[":neo2013huoshui"]= "<font color=\"blue\"><b>锁定技，</b></font>装备区里的牌不比你多的其他角色的武将技能于你的回合内无效。",
 	["neo2013qingcheng"]="倾城",
-	[":neo2013qingcheng"]= "其他角色的回合开始时，你可以弃置一张牌并声明该角色的一个技能，令此技能无效，直到此回合结束。",
+	[":neo2013qingcheng"]= "其他角色的回合开始时，你可以弃置一张牌并声明该角色的一个技能，令此技能无效，直到其下一个回合开始。",
 	["designer:neo2013_zoushi"] = "凌天翼",
 	["illustrator:neo2013_zoushi"] = "Tuu.",
 	-- ["cv:yi_zoushi"] = "叔音",
