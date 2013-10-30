@@ -2077,15 +2077,19 @@ public:
                 return false;
 
             CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-            if (/*(move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_PUT &&*/ move.to_place == Player::DiscardPile){
+            if (move.to_place == Player::DiscardPile){
 
-                if (player->getMark("neo2013yanyu") >= 3 || !player->askForSkillInvoke(objectName(), data))
+                QList<int> ids = move.card_ids;
+
+                if (player->getMark("neo2013yanyu") >= 3)
                     return false;
 
-                while (!move.card_ids.isEmpty() && player->getMark("neo2013yanyu") < 3){
-                    room->fillAG(move.card_ids, player);
-                    int selected = room->askForAG(player, move.card_ids, false, objectName());
+                while (!ids.isEmpty() && player->getMark("neo2013yanyu") < 3){
+                    room->fillAG(ids, player);
+                    int selected = room->askForAG(player, ids, false, objectName());
                     room->clearAG(player);
+
+                    ids.removeOne(selected);
 
                     QStringList choices;
                     choices << "cancel";
@@ -2102,7 +2106,7 @@ public:
                             }
                     }
                     if (choices.length() == 1)
-                        break;
+                        continue;
 
                     QString choice = room->askForChoice(player, objectName(), choices.join("+"), QVariant(selected));
 
@@ -2111,7 +2115,7 @@ public:
                     }
 
                     if (choice == "cancel")
-                        break;
+                        continue;
                     else if (choice == "gain"){
                         const Card *card = room->askForExchange(player, objectName() + "-gain", 1, true, "@neo2013yanyu-gain", false);
                         int id = card->getEffectiveId();
@@ -2134,8 +2138,11 @@ public:
                                 break;
                             default:
                                 Q_ASSERT(false);
+
                         }
                         const Card *card = room->askForCard(player, pattern, "@yanyu-give", QVariant(selected), Card::MethodNone, NULL, false, objectName());
+                        if (card == NULL)
+                            continue;
                         QString choice2 = room->askForChoice(player, objectName() + "-moveplace", "up+down", QVariant(QVariantList() << selected << card->getEffectiveId()));
                         ServerPlayer *to_give = room->askForPlayerChosen(player, room->getOtherPlayers(player), objectName() + "-give", "@yanyu-giveplayer");
                         if (choice2 == "up")
