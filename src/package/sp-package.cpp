@@ -1882,6 +1882,7 @@ const Card *AocaiCard::validate(CardUseStruct &cardUse) const{
 }
 
 DuwuCard::DuwuCard() {
+    mute = true;
 }
 
 bool DuwuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -1903,7 +1904,13 @@ bool DuwuCard::targetFilter(const QList<const Player *> &targets, const Player *
 }
 
 void DuwuCard::onEffect(const CardEffectStruct &effect) const{
-    effect.from->getRoom()->damage(DamageStruct("duwu", effect.from, effect.to));
+    Room *room = effect.to->getRoom();
+    if (getSubcards().length() == 1)
+        room->broadcastSkillInvoke(objectName(), 2);
+    else
+        room->broadcastSkillInvoke(objectName(), 1);
+
+    room->damage(DamageStruct("duwu", effect.from, effect.to));
 }
 
 class DuwuViewAsSkill: public ViewAsSkill {
