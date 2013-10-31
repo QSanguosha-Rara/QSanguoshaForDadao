@@ -50,6 +50,7 @@ config = {
 		"NostalOther" ,
 		"Yitian",
 		"Wisdom",
+		"DC" ,
 		"Test"
 	},
 

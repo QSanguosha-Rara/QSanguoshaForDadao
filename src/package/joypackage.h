@@ -111,4 +111,11 @@ public:
     Q_INVOKABLE YxSword(Card::Suit suit = Club, int number = 9);
 };
 
+class DCPackage: public Package{
+    Q_OBJECT
+
+public:
+    DCPackage();
+};
+
 #endif // JOYPACKAGE_H
