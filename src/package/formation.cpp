@@ -700,6 +700,7 @@ public:
         events << CardsMoveOneTime << BeforeCardsMove;
     }
 
+/*
 private:
     void moveToEndOfDrawPile(Room *room, int card_id) const{
         room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
@@ -710,6 +711,7 @@ private:
         }
         room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
     }
+*/
 
 public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
@@ -738,7 +740,9 @@ public:
                 move.from_places.removeAt(move.card_ids.indexOf(fldfid));
                 move.card_ids.removeOne(fldfid);
                 data = QVariant::fromValue(move);
-                moveToEndOfDrawPile(room, fldfid);
+                QList<int> to_move;
+                to_move << fldfid;
+                room->moveCardsToEndOfDrawpile(to_move);
                 room->drawCards(player, 2);
             }
         }

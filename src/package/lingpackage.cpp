@@ -1862,6 +1862,7 @@ public:
         events << BeforeCardsMove;
     }
 
+/*
 private:
     void moveToEndOfDrawPile(Room *room, int card_id) const{
         room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
@@ -1872,6 +1873,7 @@ private:
         }
         room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
     }
+*/
 
 public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
@@ -1898,7 +1900,9 @@ public:
                     room->moveCardTo(c, NULL, Player::DrawPile);
                 }
                 else { // temp method for move cards to the bottom of drawpile, bugs exist probably
-                    moveToEndOfDrawPile(room, c->getEffectiveId());
+                    QList<int> to_move;
+                    to_move << c->getEffectiveId();
+                    room->moveCardsToEndOfDrawpile(to_move);
                 }
 
                 ids.removeOne(id);
@@ -2059,6 +2063,7 @@ public:
         return target != NULL && target->isAlive();
     }
 
+/*
 private:
     void moveToEndOfDrawPile(Room *room, int card_id) const{
         room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
@@ -2069,6 +2074,7 @@ private:
         }
         room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
     }
+*/
 
 public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
@@ -2118,8 +2124,9 @@ public:
                         continue;
                     else if (choice == "gain"){
                         const Card *card = room->askForExchange(player, objectName() + "-gain", 1, true, "@neo2013yanyu-gain", false);
-                        int id = card->getEffectiveId();
-                        moveToEndOfDrawPile(room, id);
+                        QList<int> to_move;
+                        to_move << card->getEffectiveId();
+                        room->moveCardsToEndOfDrawpile(to_move);
                         move.from_places.removeAt(move.card_ids.at(selected));
                         move.card_ids.removeOne(selected);
                         room->obtainCard(player, selected);
@@ -2147,9 +2154,11 @@ public:
                         ServerPlayer *to_give = room->askForPlayerChosen(player, room->getOtherPlayers(player), objectName() + "-give", "@yanyu-giveplayer");
                         if (choice2 == "up")
                             room->moveCardTo(card, NULL, Player::DrawPile);
-                        else
-                            moveToEndOfDrawPile(room, card->getEffectiveId());
-
+                        else {
+                            QList<int> to_move;
+                            to_move << card->getEffectiveId();
+                            room->moveCardsToEndOfDrawpile(to_move);
+                        }
                         move.from_places.removeAt(move.card_ids.at(selected));
                         move.card_ids.removeOne(selected);
                         room->obtainCard(to_give, selected);
