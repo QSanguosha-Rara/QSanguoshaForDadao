@@ -815,6 +815,7 @@ FormationPackage::FormationPackage()
     General *heg_dengai = new General(this, "heg_dengai", "wei"); // WEI 015 G
     heg_dengai->addSkill("tuntian");
     heg_dengai->addSkill("zaoxian");
+    heg_dengai->addRelateSkill("jixi");
     heg_dengai->addSkill(new Ziliang);
 
     General *heg_caohong = new General(this, "heg_caohong", "wei"); // WEI 018
