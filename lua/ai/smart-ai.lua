@@ -1181,7 +1181,6 @@ function SmartAI:HatredValue(player)
 				if self.lua_ai:isEnemy(player) then return 3 end
 			end	
 		else
-			local lord = self.room:getLord()
 			local player_role = player:getRole()
 		--主的策略
 			if self.role == "lord" then
@@ -1189,7 +1188,7 @@ function SmartAI:HatredValue(player)
 					return -2
 				end
 				if player_role == "renegade" then
-					if self:isWeak() then
+					if sgs.isLordInDanger() then
 						if rebel_num > 0 then
 							return -1
 						end
@@ -1206,7 +1205,7 @@ function SmartAI:HatredValue(player)
 					return -2
 				end
 				if player_role == "renegade" then
-					if self:isWeak(lord) then
+					if sgs.isLordInDanger() then
 						if rebel_num > 0 then
 							return -1
 						end
@@ -1223,7 +1222,7 @@ function SmartAI:HatredValue(player)
 					return -2
 				end
 				if player_role == "renegade" then
-					if not self:isWeak(lord) then
+					if sgs.isLordHealthy() then
 						if (loyal_num + 1) > rebel_num then
 							return -1
 						end
@@ -1236,7 +1235,7 @@ function SmartAI:HatredValue(player)
 					if rebel_num > 0 then
 						return -1
 					else
-					if self:isWeak(lord) then
+					if sgs.isLordInDanger() then
 							return -2
 						end
 					end
@@ -1247,21 +1246,21 @@ function SmartAI:HatredValue(player)
 					end
 				end
 				if player_role == "rebel" then
-					if not self:isWeak(lord) then
+					if sgs.isLordHealthy() then
 						if (loyal_num + 1) > rebel_num then
 							return -1
 						end
 					end
 				end
 				if player_role == "renegade" then
-					if self:isWeak(lord) and (loyal_num + 1) < rebel_num then
+					if sgs.isLordInDanger() and (loyal_num + 1) < rebel_num then
 						return -1
 					end
 				end
 			end
 			if player_role == "renegade" then return math.random(0, 1) else return 5 end
 		end	
-		return 0
+		return 3
 	end
 end
 
@@ -1544,7 +1543,7 @@ function SmartAI:isFriend(other, another)
 		end
 		return false
 	end
-	if (self:objectiveLevel(other)) < 0 or self.player == other then return true end
+	if (self:objectiveLevel(other)) < 0 or self.player:objectName() == other:objectName() then return true end
 	return false
 end
 
@@ -1560,8 +1559,8 @@ function SmartAI:isEnemy(other, another)
 		end
 		return true
 	end
+	if self.player:objectName() == other:objectName() then return false end
 	if self:objectiveLevel(other) > 0 then return true end
-	if self.player == other then return false end
 	local rebel_num = sgs.current_mode_players["rebel"]
 	if self:objectiveLevel(other) == 0 and rebel_num < 2 then return true end
 	return false
