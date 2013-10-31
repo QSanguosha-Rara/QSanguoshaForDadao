@@ -1891,6 +1891,9 @@ public:
                 if (id == -1)
                     break;
 
+                ServerPlayer *orig_owner = room->getCardOwner(id);
+                Player::Place orig_place = room->getCardPlace(id);
+
                 const Card *c = room->askForExchange(player, objectName(), 1, true, "@zongxuan-card", true);
                 if (c == NULL)
                     break;
@@ -1908,7 +1911,8 @@ public:
                 ids.removeOne(id);
                 move.from_places.removeAt(move.card_ids.at(id));
                 move.card_ids.removeOne(id);
-                room->obtainCard(player, id);
+                if (room->getCardOwner(id) == orig_owner && room->getCardPlace(id) == orig_place)
+                    room->obtainCard(player, id);
             }
             data = QVariant::fromValue(move);
         }
