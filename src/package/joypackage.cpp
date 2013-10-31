@@ -445,12 +445,12 @@ public:
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL && target->isAlive();
+        return target != NULL && target->hasSkill(objectName());
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         DeathStruct death = data.value<DeathStruct>();
-        if (player == death.who && death.damage && death.damage->from && player->hasSkill(objectName())){
+        if (player == death.who && death.damage && death.damage->from){
             room->broadcastSkillInvoke(objectName());
             room->notifySkillInvoked(player, objectName());
 
