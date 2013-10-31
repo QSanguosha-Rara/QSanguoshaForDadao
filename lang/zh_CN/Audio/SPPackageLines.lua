@@ -124,6 +124,8 @@ return {
 	["$shuiyong"] = "谁也伤不了我。" ,
 	["~yeshiwen"] = "怎么这样啦！" ,
 
-	["~zhangbao"] = " " ,
+	["$zhoufu"] = "违吾咒者，轻死灭亡！" ,--Fs的渣空耳
+	["$yingbing"] = "朱雀玄武，是为我征！" ,
+	["~zhangbao"] = "黄天！为何……" ,
 
 }
