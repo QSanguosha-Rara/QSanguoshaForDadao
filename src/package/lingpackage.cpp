@@ -2402,7 +2402,7 @@ public:
             judge.good = false;
             room->judge(judge);
 
-            if (judge.isBad()){
+            if (judge.isGood()){
                 QStringList choicelist;
                 choicelist << "damage";
                 if (target->getHandcardNum() > 1)
