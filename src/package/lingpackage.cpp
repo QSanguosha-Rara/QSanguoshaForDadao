@@ -2139,13 +2139,13 @@ public:
                         QString pattern;
                         switch (Sanguosha->getCard(selected)->getTypeId()){
                             case Card::TypeBasic:
-                                pattern == ".Basic";
+                                pattern = ".Basic";
                                 break;
                             case Card::TypeEquip:
-                                pattern == ".Equip";
+                                pattern = ".Equip";
                                 break;
                             case Card::TypeTrick:
-                                pattern == ".Trick";
+                                pattern = ".Trick";
                                 break;
                             default:
                                 Q_ASSERT(false);
