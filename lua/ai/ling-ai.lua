@@ -1093,7 +1093,7 @@ sgs.ai_use_priority.Neo2013XiongyiCard = sgs.ai_use_priority.XiongyiCard
 
 sgs.ai_skill_discard.neo2013qijun = function(self, discard_num, min_num, optional, include_equip)
 	local from = self.room:getCurrent()
-	if self.player:isNude() or self:needBear() or self:isWeak() or self.player:getMark("qijun") > 0 then return {} end
+	if self.player:isNude() or self:needBear() or self:isWeak() or from:getMark("qijun") > 0 then return {} end
 	local idtable = {JS_Card(self)} or self:askForDiscard("dummyreason", 1, 1, true, true)
 	if self.room:alivePlayerCount() == 2 then
 		local only_enemy = self.room:getOtherPlayers(self.player):first()
