@@ -1747,6 +1747,56 @@ public:
     }
 };
 
+class Xianiao: public TriggerSkill{
+public:
+    Xianiao(): TriggerSkill("xianiao"){
+        events << Damage;
+        frequency = Compulsory;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        ServerPlayer *xiahoujie = room->findPlayerBySkillName(objectName());
+        if (xiahoujie == NULL || xiahoujie->isDead() || !player->inMyAttackRange(xiahoujie))
+            return false;
+
+        room->broadcastSkillInvoke(objectName());
+        room->notifySkillInvoked(xiahoujie, objectName());
+
+        xiahoujie->throwAllHandCards();
+        xiahoujie->drawCards(player->getHp());
+
+        return false;
+    }
+};
+
+class Tangqiang: public TriggerSkill{
+public:
+    Tangqiang(): TriggerSkill("tangqiang"){
+        events << Death;
+        frequency = Compulsory;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->hasSkill(objectName());
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        DeathStruct death = data.value<DeathStruct>();
+        if (player == death.who && death.damage && death.damage->from){
+            room->broadcastSkillInvoke(objectName());
+            room->notifySkillInvoked(player, objectName());
+
+            room->loseMaxHp(death.damage->from, 1);
+            room->acquireSkill(death.damage->from, objectName());
+        }
+        return false;
+    }
+};
+
 TestPackage::TestPackage()
     : Package("test")
 {
@@ -1787,7 +1837,7 @@ TestPackage::TestPackage()
 
     new General(this, "anjiang", "god", 4, true, true, true);
 
-    skills << new SuperMaxCards << new SuperOffensiveDistance << new SuperDefensiveDistance;
+    skills << new SuperMaxCards << new SuperOffensiveDistance << new SuperDefensiveDistance << new Xianiao << new Tangqiang;
 }
 
 ADD_PACKAGE(Test)
