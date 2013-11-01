@@ -2716,16 +2716,17 @@ bool KnownBoth::targetsFeasible(const QList<const Player *> &targets, const Play
 
 void KnownBoth::onUse(Room *room, const CardUseStruct &card_use) const{
     if (card_use.to.isEmpty()){
-        CardMoveReason reason(CardMoveReason::S_REASON_RECAST, card_use.from->objectName());
-        reason.m_skillName = this->getSkillName();
-        room->moveCardTo(this, card_use.from, NULL, Player::DiscardPile, reason);
-        card_use.from->broadcastSkillInvoke("@recast");
 
         LogMessage log;
         log.type = "#Card_Recast";
         log.from = card_use.from;
         log.card_str = card_use.card->toString();
         room->sendLog(log);
+
+        CardMoveReason reason(CardMoveReason::S_REASON_RECAST, card_use.from->objectName());
+        reason.m_skillName = this->getSkillName();
+        room->moveCardTo(this, card_use.from, NULL, Player::DiscardPile, reason);
+        card_use.from->broadcastSkillInvoke("@recast");
 
         card_use.from->drawCards(1);
     }
