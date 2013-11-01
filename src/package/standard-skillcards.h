@@ -128,4 +128,13 @@ protected:
     int n;
 };
 
+class NosYexinCard: public SkillCard {
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE NosYexinCard();
+
+    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
+};
+
 #endif
