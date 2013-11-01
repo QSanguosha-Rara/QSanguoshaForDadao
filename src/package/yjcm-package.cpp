@@ -1138,7 +1138,7 @@ bool Shangshi::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *zhan
     if (zhangchunhua->getHandcardNum()<losthp && zhangchunhua->getPhase() != Player::Discard
         && zhangchunhua->askForSkillInvoke(objectName())) {
         zhangchunhua->drawCards(losthp - zhangchunhua->getHandcardNum());
-        room->broadcastSkillInvoke("shangshi");
+        room->broadcastSkillInvoke(objectName());
     }
 
     return false;

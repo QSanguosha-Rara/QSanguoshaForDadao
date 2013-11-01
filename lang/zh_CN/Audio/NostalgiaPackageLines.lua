@@ -4,6 +4,34 @@ return {
 	-- 旧 于吉
 	["$nosguhuo1"] = "你信吗？",
 	["$nosguhuo2"] = "猜猜看哪？",
+	
+	["cv:nos_fazheng"] = "苏遥东",
+	["$nosenyuan1"] = "得人恩果千年记。",
+	["$nosenyuan2"] = "滴水之恩，涌泉以报。",
+	["$nosenyuan3"] = "谁敢得罪我！",
+	["$nosenyuan4"] = "睚眦之怨，无不报复。",
+	["$nosxuanhuo1"] = "重用许靖，以惑远近。",
+	["$nosxuanhuo2"] = "给你的，十倍奉还给我！",
+	["~nos_fazheng"] = "蜀翼既折…蜀汉哀矣……",
+	
+	["cv:nos_xushu"] = "苏遥冬",
+	["$nosjujian1"] = "天下之任，愿君莫辞。",
+	["$nosjujian2"] = "此乃贤达之士！",
+	["$nosjujian3"] = "卧龙之才，远胜于吾。",
+	["$noswuyan1"] = "吾誓不为汝设谋。", -- 自己使用锦囊
+	["$noswuyan2"] = "汝有良策，何必问我？", -- 他人使用锦囊
+	["$noswuyan3"] = "丞相之才远胜于吾，庶何敢妄言。",
+	["~nos_xushu"] = "娘……孩儿不孝……向您……请罪……",
+	
+	["cv:nos_zhangchunhua"] = "白衣筱雅",
+	["$nosshangshi1"] = "无情者伤人，有情者自伤。",
+	["$nosshangshi2"] = "自损八百，可伤敌一千！",
+	["~nos_zhangchunhua"] = "怎能如此对我……",
+	
+	["cv:nos_lingtong"] = "猎狐",
+	["$nosxuanfeng1"] = "轻财重义，国士之风。",
+	["$nosxuanfeng2"] = "奋身护主，效以死命。",
+	["~nos_lingtong"] = "大丈夫……不惧死亡……",
 
 	-- 旧 关兴张苞
 	["cv:nos_guanxingzhangbao"] = "喵小林，风叹息",

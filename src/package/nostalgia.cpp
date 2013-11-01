@@ -81,7 +81,7 @@ public:
                 log.arg2 = objectName();
                 room->sendLog(log);
                 room->notifySkillInvoked(effect.from, objectName());
-                room->broadcastSkillInvoke("wuyan");
+                room->broadcastSkillInvoke(objectName(), 1);
                 return true;
             }
             if (effect.to->hasSkill(objectName()) && effect.from) {
@@ -93,7 +93,7 @@ public:
                 log.arg2 = objectName();
                 room->sendLog(log);
                 room->notifySkillInvoked(effect.to, objectName());
-                room->broadcastSkillInvoke("wuyan");
+                room->broadcastSkillInvoke(objectName(), qrand() % 2 + 2);
                 return true;
             }
         }
@@ -102,14 +102,12 @@ public:
 };
 
 NosJujianCard::NosJujianCard() {
-    mute = true;
 }
 
 void NosJujianCard::onEffect(const CardEffectStruct &effect) const{
     int n = subcardsLength();
     effect.to->drawCards(n);
     Room *room = effect.from->getRoom();
-    room->broadcastSkillInvoke("jujian");
 
     if (n == 3) {
         QSet<Card::CardType> types;
@@ -172,7 +170,7 @@ public:
                 log.arg = objectName();
                 room->sendLog(log);
 
-                room->broadcastSkillInvoke("enyuan", qrand() % 2 + 1);
+                room->broadcastSkillInvoke(objectName(), qrand() % 2 + 1);
                 room->notifySkillInvoked(player, objectName());
                 recover.who->drawCards(recover.recover);
             }
@@ -186,7 +184,7 @@ public:
                 log.arg = objectName();
                 room->sendLog(log);
 
-                room->broadcastSkillInvoke("enyuan", qrand() % 2 + 3);
+                room->broadcastSkillInvoke(objectName(), qrand() % 2 + 3);
                 room->notifySkillInvoked(player, objectName());
 
                 const Card *card = room->askForCard(source, ".|heart|.|hand", "@enyuanheart", data, Card::MethodNone);
@@ -204,14 +202,12 @@ public:
 NosXuanhuoCard::NosXuanhuoCard() {
     will_throw = false;
     handling_method = Card::MethodNone;
-    mute = true;
 }
 
 void NosXuanhuoCard::onEffect(const CardEffectStruct &effect) const{
     effect.to->obtainCard(this);
 
     Room *room = effect.from->getRoom();
-    room->broadcastSkillInvoke("xuanhuo");
     int card_id = room->askForCardChosen(effect.from, effect.to, "he", "nosxuanhuo");
     CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, effect.from->objectName());
     room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::PlaceHand);
@@ -274,12 +270,12 @@ public:
                 QString choice = room->askForChoice(lingtong, objectName(), choicelist.join("+"));
                 if (choice == "slash") {
                     ServerPlayer *target = room->askForPlayerChosen(lingtong, targets1, "nosxuanfeng_slash", "@dummy-slash");
-                    room->broadcastSkillInvoke("xuanfeng", 1);
+                    room->broadcastSkillInvoke(objectName(), 1);
                     Slash *slash = new Slash(Card::NoSuit, 0);
                     slash->setSkillName(objectName());
                     room->useCard(CardUseStruct(slash, lingtong, target), false);
                 } else if (choice == "damage") {
-                    room->broadcastSkillInvoke("xuanfeng", 2);
+                    room->broadcastSkillInvoke(objectName(), 2);
 
                     LogMessage log;
                     log.type = "#InvokeSkill";
