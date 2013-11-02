@@ -676,6 +676,26 @@ public:
     }
 };
 
+class ChangeToXiahoujie: public TriggerSkill{
+public:
+    ChangeToXiahoujie(): TriggerSkill("#toxiahoujie"){
+        events << GameStart;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (qrand() % 4 != 1)
+            return false;
+        QList<ServerPlayer *> players = room->getOtherPlayers(player);
+        int index = qrand() % players.length();
+        room->changeHero(players[index], "xiahoujie", true);
+        if (players[index]->getGeneral2() != NULL){
+            room->changeHero(players[index], "xiahoujie", true, true, true);
+            room->setPlayerProperty(players[index], "maxhp", 3);
+        }
+        return false;
+    }
+};
+
 TiaoxinCard::TiaoxinCard() {
 }
 
@@ -1429,6 +1449,7 @@ MountainPackage::MountainPackage()
     sunce->addSkill(new Jiang);
     sunce->addSkill(new Hunzi);
     sunce->addSkill(new Zhiba);
+    sunce->addSkill(new ChangeToXiahoujie);
 
     General *erzhang = new General(this, "erzhang", "wu", 3); // WU 015
     erzhang->addSkill(new Zhijian);

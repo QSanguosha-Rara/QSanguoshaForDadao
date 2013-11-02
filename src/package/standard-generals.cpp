@@ -2090,13 +2090,25 @@ TestPackage::TestPackage()
 
     new General(this, "anjiang", "god", 4, true, true, true);
 
+    General *xiahoujie = new General(this, "xiahoujie", "wei", 3, true, true, true);
+    xiahoujie->addSkill(new Xianiao);
+    xiahoujie->addSkill(new Tangqiang);
+
+    General *zhonghui = new General(this, "nos_zhonghui", "wei", 3, true, true, true);
+    zhonghui->addSkill(new NosZhenggong);
+    zhonghui->addSkill(new NosQuanji);
+    zhonghui->addSkill(new NosBaijiang);
+    zhonghui->addSkill(new NosZili);
+    zhonghui->addRelateSkill("nosyexin");
+    zhonghui->addRelateSkill("#nosyexin-fake-move");
+    zhonghui->addRelateSkill("nospaiyi");
+    related_skills.insertMulti("nosyexin", "#nosyexin-fake-move");
+
     addMetaObject<NosYexinCard>();
 
     skills << new SuperMaxCards << new SuperOffensiveDistance << new SuperDefensiveDistance <<
-        new Xianiao << new Tangqiang << //for xiahoujie
-        new NosZhenggong << new NosQuanji << new NosBaijiang << new NosYexin << new FakeMoveSkill("nosyexin") << new NosZili << new NosPaiyi; //for zhonghui
+        new NosYexin << new FakeMoveSkill("nosyexin") << new NosPaiyi; //for zhonghui
 
-    related_skills.insertMulti("nosyexin", "#nosyexin-fake-move");
 }
 
 ADD_PACKAGE(Test)
