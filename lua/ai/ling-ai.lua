@@ -1105,8 +1105,8 @@ end
 
 local neo2013zhoufu_skill = {} --直接根据咒缚
 neo2013zhoufu_skill.name = "neo2013zhoufu"
-table.insert(sgs.ai_skills, zhoufu_skill)
-zhoufu_skill.getTurnUseCard = function(self)
+table.insert(sgs.ai_skills, neo2013zhoufu_skill)
+neo2013zhoufu_skill.getTurnUseCard = function(self)
 	if self.player:hasUsed("Neo2013ZhoufuCard") or self.player:isKongcheng() or self:getOverflow() <= 0 then return end
 	return sgs.Card_Parse("@Neo2013ZhoufuCard=.")
 end
