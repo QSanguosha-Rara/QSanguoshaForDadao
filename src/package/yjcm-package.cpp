@@ -994,25 +994,16 @@ public:
         room->broadcastSkillInvoke(objectName());
         room->doLightbox("$ZiliAnimate", 4000);
 
-        ServerPlayer *dengai = room->findPlayerBySkillName("tuntian");
-
-        if (dengai == NULL || qrand() % 4 != 1){
-            if (room->changeMaxHpForAwakenSkill(zhonghui)) {
-                room->addPlayerMark(zhonghui, "zili");
-                if (zhonghui->isWounded() && room->askForChoice(zhonghui, objectName(), "recover+draw") == "recover") {
-                    RecoverStruct recover;
-                    recover.who = zhonghui;
-                    room->recover(zhonghui, recover);
-                } else {
-                    room->drawCards(zhonghui, 2);
-                }
-                room->acquireSkill(zhonghui, "paiyi");
+        if (room->changeMaxHpForAwakenSkill(zhonghui)) {
+            room->addPlayerMark(zhonghui, "zili");
+            if (zhonghui->isWounded() && room->askForChoice(zhonghui, objectName(), "recover+draw") == "recover") {
+                RecoverStruct recover;
+                recover.who = zhonghui;
+                room->recover(zhonghui, recover);
+            } else {
+                room->drawCards(zhonghui, 2);
             }
-        }
-        else {
-            room->handleAcquireDetachSkills(zhonghui, "-quanji|-zili|nosquanji|noszhenggong|nosbaijiang|noszili");
-            zhonghui->clearOnePrivatePile("power");
-            room->setPlayerProperty(zhonghui, "maxhp", 3);
+            room->acquireSkill(zhonghui, "paiyi");
         }
 
         return false;
