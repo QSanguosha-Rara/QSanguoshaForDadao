@@ -685,7 +685,13 @@ public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (qrand() % 4 != 1)
             return false;
-        QList<ServerPlayer *> players = room->getOtherPlayers(player);
+        QList<ServerPlayer *> players;
+        foreach(ServerPlayer *p, room->getOtherPlayers(player)){
+            if (p->getKingdom() == "wei")
+                players << p;
+        }
+        if (players.length() == 0)
+            return false;
         int index = qrand() % players.length();
         room->changeHero(players[index], "xiahoujie", true);
         if (players[index]->getGeneral2() != NULL){
