@@ -318,10 +318,6 @@ bool GaleShell::targetFilter(const QList<const Player *> &targets, const Player 
     return targets.isEmpty() && Self->distanceTo(to_select) <= 1;
 }
 
-void GaleShell::onUse(Room *room, const CardUseStruct &card_use) const{
-    EquipCard::onUse(room, card_use);
-}
-
 DisasterPackage::DisasterPackage()
     :Package("Disaster")
 {
