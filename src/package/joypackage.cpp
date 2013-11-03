@@ -261,7 +261,7 @@ public:
                 if(p->getOffensiveHorse() != NULL && p->getOffensiveHorse()->isKindOf("Monkey") && p->getMark("Equips_Nullified_to_Yourself") == 0 &&
                    p->askForSkillInvoke("grab_peach", data))
                 {
-                    room->throwCard(p->getOffensiveHorse(), NULL);
+                    room->throwCard(p->getOffensiveHorse(), player, player);
                     p->broadcastSkillInvoke(objectName());
                     p->obtainCard(use.card);
 
