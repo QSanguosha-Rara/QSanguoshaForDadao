@@ -975,7 +975,10 @@ public:
         if (move.from == luxun && move.from_places.contains(Player::PlaceHand) && move.is_last_handcard) {
             if (room->askForSkillInvoke(luxun, objectName(), data)) {
                 room->broadcastSkillInvoke(objectName());
-                luxun->drawCards(1);
+                if (luxun->getPhase() != Player::Discard)
+                    luxun->drawCards(1);
+                else
+                    luxun->setFlags("LianyingZeroMaxCards");
             }
         }
         return false;
@@ -992,10 +995,7 @@ public:
         PhaseChangeStruct change = data.value<PhaseChangeStruct>();
         if (change.from == Player::Discard && player->hasFlag("LianyingZeroMaxCards")) {
             player->setFlags("-LianyingZeroMaxCards");
-            if (player->isKongcheng() && room->askForSkillInvoke(player, "lianying")) {
-                room->broadcastSkillInvoke("lianying");
-                player->drawCards(1);
-            }
+            player->drawCards(1);
         }
         return false;
     }
