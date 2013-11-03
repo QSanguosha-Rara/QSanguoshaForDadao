@@ -3024,6 +3024,10 @@ void Room::loseHp(ServerPlayer *victim, int lose) {
     if (thread->trigger(PreHpLost, this, victim, data))
         return;
 
+    lose = data.toInt();
+    if (lose <= 0)
+        return ;
+
     LogMessage log;
     log.type = "#LoseHp";
     log.from = victim;
