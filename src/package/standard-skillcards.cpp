@@ -339,16 +339,3 @@ const Card *JijiangCard::validate(CardUseStruct &cardUse) const{
     return NULL;
 }
 
-
-NosYexinCard::NosYexinCard() {
-    target_fixed = true;
-}
-
-void NosYexinCard::onUse(Room *, const CardUseStruct &card_use) const{
-    ServerPlayer *zhonghui = card_use.from;
-
-    QList<int> powers = zhonghui->getPile("nospower");
-    if (powers.isEmpty())
-        return;
-    zhonghui->exchangeFreelyFromPrivatePile("nosyexin", "nospower");
-}

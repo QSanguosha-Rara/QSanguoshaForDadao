@@ -134,6 +134,16 @@ public:
     virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const;
 };
 
+class NosYexinCard: public SkillCard {
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE NosYexinCard();
+
+    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
+};
+
+
 
 #endif
 

@@ -428,6 +428,64 @@ JoyEquipPackage::JoyEquipPackage()
     skills << new GaleShellSkill << new YxSwordSkill;
 }
 
+class Xianiao: public TriggerSkill{
+public:
+    Xianiao(): TriggerSkill("xianiao"){
+        events << Damage;
+        frequency = Compulsory;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        ServerPlayer *xiahoujie = room->findPlayerBySkillName(objectName());
+        if (xiahoujie == NULL || xiahoujie->isDead() || !player->inMyAttackRange(xiahoujie))
+            return false;
+
+        room->broadcastSkillInvoke(objectName());
+        room->notifySkillInvoked(xiahoujie, objectName());
+
+        xiahoujie->throwAllHandCards();
+        xiahoujie->drawCards(player->getHp());
+
+        return false;
+    }
+};
+
+class Tangqiang: public TriggerSkill{
+public:
+    Tangqiang(): TriggerSkill("tangqiang"){
+        events << Death;
+        frequency = Compulsory;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->hasSkill(objectName());
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        DeathStruct death = data.value<DeathStruct>();
+        if (player == death.who && death.damage && death.damage->from){
+            room->broadcastSkillInvoke(objectName());
+            room->notifySkillInvoked(player, objectName());
+
+            room->loseMaxHp(death.damage->from, 1);
+            room->acquireSkill(death.damage->from, objectName());
+        }
+        return false;
+    }
+};
+
+DCPackage::DCPackage(): Package("DC"){
+    General *xiahoujie = new General(this, "xiahoujie", "wei", 3);
+    xiahoujie->addSkill(new Xianiao);
+    xiahoujie->addSkill(new Tangqiang);
+
+}
+
 //ADD_PACKAGE(Joy) //Fs: in fact I want to add these packs back to game
 ADD_PACKAGE(Disaster)
 ADD_PACKAGE(JoyEquip)
+ADD_PACKAGE(DC)

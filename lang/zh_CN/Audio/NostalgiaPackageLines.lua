@@ -4,7 +4,7 @@ return {
 	-- 旧 于吉
 	["$nosguhuo1"] = "你信吗？",
 	["$nosguhuo2"] = "猜猜看哪？",
-	
+
 	["cv:nos_fazheng"] = "苏遥东",
 	["$nosenyuan1"] = "得人恩果千年记。",
 	["$nosenyuan2"] = "滴水之恩，涌泉以报。",
@@ -13,7 +13,7 @@ return {
 	["$nosxuanhuo1"] = "重用许靖，以惑远近。",
 	["$nosxuanhuo2"] = "给你的，十倍奉还给我！",
 	["~nos_fazheng"] = "蜀翼既折…蜀汉哀矣……",
-	
+
 	["cv:nos_xushu"] = "苏遥冬",
 	["$nosjujian1"] = "天下之任，愿君莫辞。",
 	["$nosjujian2"] = "此乃贤达之士！",
@@ -22,12 +22,12 @@ return {
 	["$noswuyan2"] = "汝有良策，何必问我？", -- 他人使用锦囊
 	["$noswuyan3"] = "丞相之才远胜于吾，庶何敢妄言。",
 	["~nos_xushu"] = "娘……孩儿不孝……向您……请罪……",
-	
+
 	["cv:nos_zhangchunhua"] = "白衣筱雅",
 	["$nosshangshi1"] = "无情者伤人，有情者自伤。",
 	["$nosshangshi2"] = "自损八百，可伤敌一千！",
 	["~nos_zhangchunhua"] = "怎能如此对我……",
-	
+
 	["cv:nos_lingtong"] = "猎狐",
 	["$nosxuanfeng1"] = "轻财重义，国士之风。",
 	["$nosxuanfeng2"] = "奋身护主，效以死命。",
@@ -85,5 +85,18 @@ return {
 	["$noslijian2"] = "夫君，你要替妾身做主啊……" ,
 	["$nosjizhi1"] = "哼哼" ,
 	["$nosjizhi2"] = "哼" ,
+
+	["cv:nos_zhonghui"] = "极光星逝",
+	["$noszhenggong"] = "伐逆之任，何不予吾？",
+	["$nosquanji1"] = "将军请留步。", -- 发动拼点
+	["$nosquanji2"] = "将军劳苦功高，宜当暂歇。", -- 赢
+	["$nosquanji3"] = "汝执意如此，莫要后悔。", -- 没赢
+	["$nosbaijiang"] = "请兵拜将，领兵伐逆；破蜀之日，功成之时！",
+	["$nosyexin1"] = "吾今功高，主必忌之！", -- 受到伤害
+	["$nosyexin2"] = "主畏吾谋，不可不寻后路！", -- 交换牌
+	["$noszili"] = "大权在握，功高振军；自立蜀中，以图天下！",
+	["$nospaiyi1"] = "若不成，退居蜀中，亦可为王！", -- 置于自己的区域
+	["$nospaiyi2"] = "若事成，会师洛阳，天下可定！", -- 置于其他角色的区域并摸牌
+	["~nos_zhonghui"] = "天之亡吾，争有何用……",
 
 }
