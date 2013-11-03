@@ -1,13 +1,6 @@
 -- lines for Hegemony Package
 
 return {
-	-- 乐进
-	["cv:yuejin"] = "裤衩",
-	["$xiaoguo1"] = "骁勇果敢，每战必先！", -- 发动弃牌
-	["$xiaoguo2"] = "奋强突固，无坚不陷！", -- 弃置装备
-	["$xiaoguo3"] = "贼有防备，只伤皮毛，来日再战！", -- 受到伤害
-	["~yuejin"] = "戎马一生，何惧死乎！",
-
 	-- 甘夫人
 	["cv:ganfuren"] = "神马芯",
 	["$shushen1"] = "履行脩仁，淑慎其身。",
