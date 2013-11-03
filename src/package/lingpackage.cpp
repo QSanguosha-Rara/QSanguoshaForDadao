@@ -2973,7 +2973,7 @@ LingCardsPackage::LingCardsPackage(): Package("LingCards", Package::CardPack){
     cards << new KnownBoth(Card::Club, 3);
     cards << new KnownBoth(Card::Club, 4);
     cards << new NeoDrowning(Card::Club, 7);
-    cards << new SixSwords(Card::Diamond, 6); //¹¥»÷·¶Î§Ð´ÔÚPlayer::getAttackRange(bool)ÖÐ
+    cards << new SixSwords(Card::Diamond, 6);
     cards << new Triblade(Card::Diamond, 12);
     cards << new DragonPhoenix(Card::Spade, 2);
 

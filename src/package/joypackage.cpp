@@ -131,18 +131,12 @@ Typhoon::Typhoon(Card::Suit suit, int number)
 
 void Typhoon::takeEffect(ServerPlayer *target) const{
     Room *room = target->getRoom();
-
+    Sanguosha->playSystemAudioEffect("typhoon");
     QList<ServerPlayer *> players = room->getOtherPlayers(target);
     foreach(ServerPlayer *player, players){
         if(target->distanceTo(player) == 1){
             int discard_num = qMin(6, player->getHandcardNum());
-            if(discard_num == 0)
-                room->setEmotion(player, "good");
-            else{
-                room->setEmotion(player, "bad");
-                room->broadcastInvoke("animate", "typhoon:" + player->objectName());
-                room->broadcastInvoke("playSystemAudioEffect", "typhoon");
-
+            if (discard_num != 0){
                 room->askForDiscard(player, objectName(), discard_num, discard_num);
             }
 
@@ -165,15 +159,11 @@ Earthquake::Earthquake(Card::Suit suit, int number)
 
 void Earthquake::takeEffect(ServerPlayer *target) const{
     Room *room = target->getRoom();
+    Sanguosha->playSystemAudioEffect("earthquake");
     QList<ServerPlayer *> players = room->getAllPlayers();
     foreach(ServerPlayer *player, players){
-        if(target->distanceTo(player) <= 1 ||
-           (player->getDefensiveHorse() && target->distanceTo(player) <= 2)){
-            if(player->getEquips().isEmpty()){
-                room->setEmotion(player, "good");
-            }else{
-                room->setEmotion(player, "bad");
-                room->broadcastInvoke("playSystemAudioEffect", "earthquake");
+        if(target->distanceTo(player) <= 1){
+            if (!player->getEquips().isEmpty()){
                 player->throwAllEquips();
             }
 
@@ -196,21 +186,17 @@ Volcano::Volcano(Card::Suit suit, int number)
 
 void Volcano::takeEffect(ServerPlayer *target) const{
     Room *room = target->getRoom();
-
+    Sanguosha->playSystemAudioEffect("volcano");
     QList<ServerPlayer *> players = room->getAllPlayers();
 
     foreach(ServerPlayer *player, players){
-        int point = player->getDefensiveHorse() && target != player ?
-                    3 - target->distanceTo(player) :
-                    2 - target->distanceTo(player);
+        int point = 3 - target->distanceTo(player);
         if(point >= 1){
             DamageStruct damage;
             damage.card = this;
             damage.damage = point;
             damage.to = player;
-            damage.nature = DamageStruct::Fire;
-
-            room->broadcastInvoke("playSystemAudioEffect", "volcano");
+            damage.nature = DamageStruct::Fire;           
             room->damage(damage);
         }
     }
@@ -229,10 +215,11 @@ MudSlide::MudSlide(Card::Suit suit, int number)
 
 void MudSlide::takeEffect(ServerPlayer *target) const{
     Room *room = target->getRoom();
+    Sanguosha->playSystemAudioEffect("mudslide");
     QList<ServerPlayer *> players = room->getAllPlayers();
     int to_destroy = 4;
     foreach(ServerPlayer *player, players){
-        room->broadcastInvoke("playSystemAudioEffect", "mudslide");
+        
 
         QList<const Card *> equips = player->getEquips();
         if(equips.isEmpty()){
@@ -258,6 +245,7 @@ class GrabPeach: public TriggerSkill{
 public:
     GrabPeach():TriggerSkill("grab_peach"){
         events << CardUsed;
+        global = true;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -270,15 +258,15 @@ public:
             QList<ServerPlayer *> players = room->getOtherPlayers(player);
 
             foreach(ServerPlayer *p, players){
-                if(p->getOffensiveHorse() == parent() &&
+                if(p->getOffensiveHorse() != NULL && p->getOffensiveHorse()->isKindOf("Monkey") && p->getMark("Equips_Nullified_to_Yourself") == 0 &&
                    p->askForSkillInvoke("grab_peach", data))
                 {
-                    // @todo: if you wish this to trigger card discarded event, please modify this!!!
                     room->throwCard(p->getOffensiveHorse(), NULL);
                     p->broadcastSkillInvoke(objectName());
                     p->obtainCard(use.card);
 
-                    return true;
+                    use.to.clear();
+                    data = QVariant::fromValue(use);
                 }
             }
         }
@@ -291,18 +279,8 @@ Monkey::Monkey(Card::Suit suit, int number)
     :OffensiveHorse(suit, number)
 {
     setObjectName("Monkey");
-
-    grab_peach = new GrabPeach;
-    grab_peach->setParent(this);
 }
 
-void Monkey::onInstall(ServerPlayer *player) const{
-    player->getRoom()->getThread()->addTriggerSkill(grab_peach);
-}
-
-void Monkey::onUninstall(ServerPlayer *player) const{
-
-}
 
 QString Monkey::getCommonEffectName() const{
     return "Monkey";
@@ -345,7 +323,7 @@ void GaleShell::onUse(Room *room, const CardUseStruct &card_use) const{
 }
 
 DisasterPackage::DisasterPackage()
-    :Package("disaster")
+    :Package("Disaster")
 {
     QList<Card *> cards;
 
@@ -385,7 +363,7 @@ public:
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
-        if(damage.card && damage.card->isKindOf("Slash") && room->askForSkillInvoke(player, objectName(), data)){
+        if(damage.card && damage.card->isKindOf("Slash")){
             QList<ServerPlayer *> players = room->getOtherPlayers(player);
             QMutableListIterator<ServerPlayer *> itor(players);
 
@@ -400,12 +378,14 @@ public:
 
             QVariant victim = QVariant::fromValue(damage.to);
             room->setTag("YxSwordVictim", victim);
-            ServerPlayer *target = room->askForPlayerChosen(player, players, objectName());
+            ServerPlayer *target = room->askForPlayerChosen(player, players, objectName(), "@yxsword-select", true, true);
             room->removeTag("YxSwordVictim");
-            damage.from = target;
-            data = QVariant::fromValue(damage);
-            room->moveCardTo(player->getWeapon(), player, target, Player::PlaceHand,
-                CardMoveReason(CardMoveReason::S_REASON_TRANSFER, player->objectName(), objectName(), QString()));
+            if (target != NULL){
+                damage.from = target;
+                data = QVariant::fromValue(damage);
+                room->moveCardTo(player->getWeapon(), player, target, Player::PlaceHand,
+                    CardMoveReason(CardMoveReason::S_REASON_TRANSFER, player->objectName(), objectName(), QString()));
+            }
         }
         return damage.to->isDead();
     }
@@ -418,14 +398,14 @@ YxSword::YxSword(Suit suit, int number)
 }
 
 JoyEquipPackage::JoyEquipPackage()
-    :Package("joy_equip")
+    :Package("JoyEquip")
 {
     (new Monkey(Card::Diamond, 5))->setParent(this);
     (new GaleShell(Card::Heart, 1))->setParent(this);
     (new YxSword)->setParent(this);
 
     type = CardPack;
-    skills << new GaleShellSkill << new YxSwordSkill;
+    skills << new GaleShellSkill << new YxSwordSkill << new GrabPeach;
 }
 
 class Xianiao: public TriggerSkill{

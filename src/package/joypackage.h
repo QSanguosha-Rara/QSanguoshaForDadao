@@ -86,8 +86,6 @@ class Monkey: public OffensiveHorse{
 public:
     Q_INVOKABLE Monkey(Card::Suit suit, int number);
 
-    virtual void onInstall(ServerPlayer *player) const;
-    virtual void onUninstall(ServerPlayer *player) const;
     virtual QString getCommonEffectName() const;
 
 private:
