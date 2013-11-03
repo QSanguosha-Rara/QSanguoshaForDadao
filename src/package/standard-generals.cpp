@@ -1751,11 +1751,11 @@ TestPackage::TestPackage()
     : Package("test")
 {
     // for test only
-    General *zhiba_sunquan = new General(this, "zhiba_sunquan$", "wu", 4, true, true);
+    General *zhiba_sunquan = new General(this, "zhiba_sunquan$", "wu", 4, true, true, true);
     zhiba_sunquan->addSkill(new SuperZhiheng);
     zhiba_sunquan->addSkill("jiuyuan");
 
-    General *wuxing_zhuge = new General(this, "wuxing_zhugeliang", "shu", 3, true, true);
+    General *wuxing_zhuge = new General(this, "wuxing_zhugeliang", "shu", 3, true, true, true);
     wuxing_zhuge->addSkill(new SuperGuanxing);
     wuxing_zhuge->addSkill("kongcheng");
 
@@ -1770,7 +1770,7 @@ TestPackage::TestPackage()
     super_caoren->addSkill(new MarkAssignSkill("@jushou_test", 5));
     related_skills.insertMulti("super_jushou", "#@jushou_test-5");
 
-    General *gd_shenzhaoyun = new General(this, "gaodayihao", "god", 1, true, true);
+    General *gd_shenzhaoyun = new General(this, "gaodayihao", "god", 1, true, true, true);
     gd_shenzhaoyun->addSkill(new NosJuejing);
     gd_shenzhaoyun->addSkill(new NosLonghun);
     gd_shenzhaoyun->addSkill(new NosDuojian);
