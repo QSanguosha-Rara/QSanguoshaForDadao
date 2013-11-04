@@ -126,6 +126,14 @@ public:
     CardResponseStruct toCardResponse() const{
         return $self->value<CardResponseStruct>();
     }
+    
+    void setValue(MarkChangeStruct *change) {
+        $self->setValue(QVariant::fromValue(*change));
+    }
+
+    MarkChangeStruct toMarkChange() const{
+        return $self->value<MarkChangeStruct>();
+    }
 
     void setValue(QList<int> intlist) {
         QVariantList varlist;

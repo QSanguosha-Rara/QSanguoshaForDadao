@@ -788,6 +788,20 @@ bool ServerPlayer::isSkipped(Player::Phase phase) {
 }
 
 void ServerPlayer::gainMark(const QString &mark, int n) {
+    MarkChangeStruct change;
+    change.name = mark;
+    change.num = n;
+    QVariant n_data = QVariant::fromValue(change);
+    if (mark.startsWith("@")){
+        if (room->getThread()->trigger(PreMarkChange, room, this, n_data)) return;
+        n = n_data.value<MarkChangeStruct>().num;
+    }
+    if (n == 0) return;
+    if (n < 0) {
+        loseMark(mark, -n); 
+        return;
+    }
+
     int value = getMark(mark) + n;
 
     LogMessage log;
@@ -798,10 +812,30 @@ void ServerPlayer::gainMark(const QString &mark, int n) {
 
     room->sendLog(log);
     room->setPlayerMark(this, mark, value);
+
+    if (mark.startsWith("@"))
+        room->getThread()->trigger(MarkChanged, room, this, n_data);
 }
 
 void ServerPlayer::loseMark(const QString &mark, int n) {
     if (getMark(mark) == 0) return;
+    MarkChangeStruct change;
+    change.name = mark;
+    change.num = -n;
+
+    QVariant n_data = QVariant::fromValue(change);
+
+    if (mark.startsWith("@")){
+        if (room->getThread()->trigger(PreMarkChange, room, this, n_data)) return;
+        n = -(n_data.value<MarkChangeStruct>().num);
+    }
+
+    if (n == 0) return;
+    if (n < 0) {
+        gainMark(mark, -n); 
+        return;
+    }
+
     int value = getMark(mark) - n;
     if (value < 0) { value = 0; n = getMark(mark); }
 
@@ -813,6 +847,9 @@ void ServerPlayer::loseMark(const QString &mark, int n) {
 
     room->sendLog(log);
     room->setPlayerMark(this, mark, value);
+
+    if (mark.startsWith("@"))
+        room->getThread()->trigger(MarkChanged, room, this, n_data);
 }
 
 void ServerPlayer::loseAllMarks(const QString &mark_name) {

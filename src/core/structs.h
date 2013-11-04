@@ -425,6 +425,13 @@ private:
     Json::Value m_realvalue;
 };
 
+struct MarkChangeStruct{
+    MarkChangeStruct();
+
+    int num;
+    QString name;
+};
+
 enum TriggerEvent {
     NonTrigger,
 
@@ -505,6 +512,9 @@ enum TriggerEvent {
     CardFinished,
     TrickCardCanceling,
 
+    PreMarkChange ,
+    MarkChanged ,
+
     ChoiceMade,
 
     StageChange, // For hulao pass only
@@ -538,5 +548,6 @@ Q_DECLARE_METATYPE(PindianStar)
 Q_DECLARE_METATYPE(PhaseChangeStruct)
 Q_DECLARE_METATYPE(CardResponseStruct)
 Q_DECLARE_METATYPE(JsonArrayForLUA)
+Q_DECLARE_METATYPE(MarkChangeStruct)
 #endif
 

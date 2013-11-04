@@ -250,6 +250,11 @@ void CardUseStruct::parse(const QString &str, Room *room) {
     }
 }
 
+MarkChangeStruct::MarkChangeStruct()
+    :num(1) {
+
+}
+
 QString EventTriplet::toString() const{
     return QString("event[%1], room[%2], target = %3[%4]\n")
                    .arg(_m_event)

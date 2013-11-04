@@ -613,6 +613,13 @@ struct CardResponseStruct {
     bool m_isUse;
 };
 
+struct MarkChangeStruct{
+    MarkChangeStruct();
+
+    int num;
+    QString name;
+};
+
 enum TriggerEvent {
     NonTrigger,
 
@@ -691,7 +698,10 @@ enum TriggerEvent {
     PostCardEffected,
     CardFinished,
     TrickCardCanceling,
-
+    
+    PreMarkChange ,
+    MarkChanged ,
+    
     ChoiceMade,
 
     StageChange, // For hulao pass only
