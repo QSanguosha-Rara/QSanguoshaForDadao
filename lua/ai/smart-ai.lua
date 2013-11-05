@@ -2894,6 +2894,15 @@ function SmartAI:getCardRandomly(who, flags)
 			end
 		end
 	end
+	if who:hasArmorEffect("GaleShell")then
+		if self:isEnemy(who) and card == who:getArmor() then
+			if r ~= (cards:length()-1) then
+				card = cards:at(r+1)
+			else
+				card = cards:at(r-1)
+			end
+		end
+	end
 	return card:getEffectiveId()
 end
 
