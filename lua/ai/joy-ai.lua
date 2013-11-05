@@ -25,3 +25,38 @@ end
 
 sgs.ai_use_value.Shit = -10
 sgs.ai_keep_value.Shit = 6
+
+sgs.ai_skill_invoke.grab_peach = function(self, data)
+	local struct = data:toCardUse()
+	return self:isEnemy(struct.from) and (struct.to:isEmpty() or self:isEnemy(struct.to:first()))
+end
+
+function SmartAI:useCardGaleShell(card, use)
+	use.broken = true
+	for _, enemy in ipairs(self.enemies) do
+		if self.player:distanceTo(enemy) <=1 and not self:hasSkills("jijiu|wusheng|longhun", enemy) then
+			use.card = card
+			if use.to then
+				use.to:append(enemy)
+			end
+			return
+		end
+	end
+	for _, friend in ipairs(self.friends) do
+		if self.player:distanceTo(friend) <= 1 and self:hasSkills("jijiu|longhun", friend) then
+			use.card = card
+			if use.to then
+				use.to:append(friend)
+			end
+			return
+		end
+	end
+end
+
+function sgs.ai_armor_value.GaleShell()
+	return -10
+end
+
+sgs.ai_card_intention.GaleShell = 80
+sgs.ai_use_priority.GaleShell = 0.9
+sgs.dynamic_value.control_card.GaleShell = true
