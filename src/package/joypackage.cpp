@@ -5,10 +5,34 @@ Shit::Shit(Suit suit, int number):BasicCard(suit, number){
     setObjectName("shit");
 
     target_fixed = true;
+    will_throw = true;
+    handling_method = Card::MethodDiscard;
 }
 
 QString Shit::getSubtype() const{
     return "disgusting_card";
+}
+
+void Shit::onUse(Room *room, const CardUseStruct &card_use) const{
+    ServerPlayer *player = card_use.from;
+
+    QList<int> used_cards;
+    QList<CardsMoveStruct> moves;
+    if (card_use.card->isVirtualCard())
+        used_cards.append(card_use.card->getSubcards());
+    else
+        used_cards << card_use.card->getEffectiveId();
+
+    QVariant data = QVariant::fromValue(card_use);
+    RoomThread *thread = room->getThread();
+    Q_ASSERT(thread != NULL);
+    thread->trigger(PreCardUsed, room, player, data);
+
+    CardMoveReason reason(CardMoveReason::S_REASON_THROW, player->objectName(), QString(), card_use.card->getSkillName(), QString());
+    room->moveCardTo(this, player, NULL, Player::DiscardPile, reason, true);
+
+    thread->trigger(CardUsed, room, player, data);
+    thread->trigger(CardFinished, room, player, data);
 }
 
 class shitmove: public TriggerSkill{
@@ -24,7 +48,7 @@ public:
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-        if (move.from == player && (move.to_place == Player::DiscardPile || move.to_place == Player::PlaceTable || move.to_place == Player::PlaceSpecial)){
+        if (move.from == player && move.to_place == Player::DiscardPile){
             int n = move.card_ids.length();
             QList<const Card *> shits;
             for (int i = 0; i < n; i ++){
