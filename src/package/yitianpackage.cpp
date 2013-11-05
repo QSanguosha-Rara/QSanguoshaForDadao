@@ -12,41 +12,30 @@ public:
     }
 
     virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &) const{
-        if(player->getPhase() != Player::NotActive)
+        if (player->getPhase() != Player::NotActive)
            return false;
 
-        if(player->askForSkillInvoke("YitianSword"))
-            player->getRoom()->askForUseCard(player, "slash", "@askforslash");
+        room->askForUseCard(player, "slash", "@askforslash");
 
         return false;
     }
 };
 
-/*YitianSword::YitianSword(Suit suit, int number)
+YitianSword::YitianSword(Suit suit, int number)
     :Weapon(suit, number, 2)
 {
     setObjectName("YitianSword");
-    skill = new YitianSwordSkill;
 }
 
-void YitianSword::onMove(const CardMoveStruct &move) const{
-    if(move.from_place == Player::PlaceEquip && move.from->isAlive()){
-        ServerPlayer* from = (ServerPlayer*) move.from;
-        Room *room = from->getRoom();
-
-        bool invoke = from->askForSkillInvoke("yitian-lost");
-        if(!invoke)
-            return;
-
-        ServerPlayer *target = room->askForPlayerChosen(from, room->getAllPlayers(), "yitian-lost");
-        DamageStruct damage;
-        damage.from = from;
-        damage.to = target;
-        damage.card = this;
-
-        room->damage(damage);
+void YitianSword::onUninstall(ServerPlayer *player) const{
+    Room *room = player->getRoom();
+    ServerPlayer *target = room->askForPlayerChosen(player, room->getOtherPlayers(player), "yitian-lost", "@yitian-lost", true, true);
+    if (target != NULL){
+        DamageStruct yitiandamage(this, player, target);
+        yitiandamage.reason = "yitian-lost";
+        room->damage(yitiandamage);
     }
-}*/
+}
 
 YTChengxiangCard::YTChengxiangCard()
 {
@@ -1816,15 +1805,16 @@ public:
     }
 };
 
-/*YitianCardPackage::YitianCardPackage()
-    :Package("yitian_cards")
+YitianCardPackage::YitianCardPackage()
+    :Package("YitianCard")
 {
     (new YitianSword)->setParent(this);
 
     type = CardPack;
+    skills << new YitianSwordSkill;
 }
 
-ADD_PACKAGE(YitianCard)*/
+ADD_PACKAGE(YitianCard)
 
 YitianPackage::YitianPackage()
     :Package("yitian")

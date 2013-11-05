@@ -22,6 +22,7 @@ config = {
 		"Disaster" ,
 		"Joy" ,
 		"JoyEquip" ,
+		"YitianCard" ,
 
 		"Standard",
 		"Wind",
