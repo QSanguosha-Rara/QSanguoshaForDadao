@@ -953,8 +953,8 @@ function sgs.evaluatePlayerRole(player)
 	end
 	local res = pcall(test_func, player)
 	if not res then global_room:writeToConsole(debug.traceback()) return elseif res == "loyalist" then return "loyalist" end
-	--if sgs.isRolePredictable() or player:getMark("Global_TurnCount") > 1 then return player:getRole() end
-	return player:getRole()
+	if sgs.isRolePredictable() or player:getMark("Global_TurnCount") > 1 then return player:getRole() end
+	return sgs.ai_role[player:objectName()]
 end
 
 function sgs.compareRoleEvaluation(player, first, second)
@@ -1258,7 +1258,7 @@ function SmartAI:HatredValue(player)
 					end
 				end
 			end
-			if player_role == "renegade" then return math.random(0, 1) else return 5 end
+			if player_role == "renegade" then return 3 else return 5 end
 		end	
 		return 3
 	end
@@ -2522,6 +2522,13 @@ function SmartAI:askForDiscard(reason, discard_num, min_num, optional, include_e
 end
 
 sgs.ai_skill_discard.gamerule = function(self, discard_num, min_num)
+	local two_ways = false
+	for _, askill in sgs.qlist(self.player:getVisibleSkillList()) do
+		if sgs[askill:objectName() .. "_keep_value"] or sgs[askill:objectName() .. "_suit_value"] then two_ways = true break end
+	end
+	if two_ways then
+	return self:askForDiscard("dummyreason", discard_num, min_num)	
+	else
 	local cards = sgs.QList2Table(self.player:getCards("h"))
 	local to_discard = {}
 	local peaches, jinks, analeptics, nullifications, slashes = {}, {}, {}, {}, {}
@@ -2635,6 +2642,7 @@ sgs.ai_skill_discard.gamerule = function(self, discard_num, min_num)
 		if (self.player:hasSkill("qinyin") and #to_discard >= least) or #to_discard >= discard_num or self.player:isKongcheng() then break end
 	end
 	return to_discard
+	end
 end
 
 
