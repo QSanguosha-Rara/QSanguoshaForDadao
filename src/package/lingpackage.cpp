@@ -929,7 +929,7 @@ public:
                 }
         }
         else if (TriggerSkill::triggerable(player)){
-            if (player->isNude())
+            if (player->isKongcheng())
                 return false;
             ServerPlayer *target = NULL;
             DeathStruct death = data.value<DeathStruct>();
@@ -948,7 +948,7 @@ public:
                     l.arg = objectName();
                     room->sendLog(l);
                 }
-                room->askForDiscard(player, objectName(), 1, 1, false, true, "@neo2013suishi");
+                room->askForDiscard(player, objectName(), 1, 1, false, false, "@neo2013suishi");
             }
         }
         return false;
@@ -1455,7 +1455,8 @@ public:
                 else if (card_to_use->targetFixed()){
                     if (!player->askForSkillInvoke(objectName(), QVariant::fromValue(card_to_use)))
                         return false;
-                    room->useCard(CardUseStruct(card_to_use, player, QList<ServerPlayer *>()));
+                    const Card *real_use = Sanguosha->cloneCard(card_to_use->objectName(), Card::NoSuit, 0);
+                    room->useCard(CardUseStruct(real_use, player, QList<ServerPlayer *>()));
                 }
                 else {
                     room->setPlayerProperty(player, "tongwucard", card_to_use->getId());
@@ -2151,11 +2152,11 @@ public:
                                 Q_ASSERT(false);
 
                         }
-                        const Card *card = room->askForCard(player, pattern, "@yanyu-give", QVariant(selected), Card::MethodNone, NULL, false, objectName());
+                        const Card *card = room->askForCard(player, pattern, "@neo2013yanyu-give", QVariant(selected), Card::MethodNone, NULL, false, objectName());
                         if (card == NULL)
                             continue;
                         QString choice2 = room->askForChoice(player, objectName() + "-moveplace", "up+down", QVariant(QVariantList() << selected << card->getEffectiveId()));
-                        ServerPlayer *to_give = room->askForPlayerChosen(player, room->getOtherPlayers(player), objectName() + "-give", "@yanyu-giveplayer");
+                        ServerPlayer *to_give = room->askForPlayerChosen(player, room->getOtherPlayers(player), objectName() + "-give", "@neo2013yanyu-giveplayer");
                         if (choice2 == "up")
                             room->moveCardTo(card, NULL, Player::DrawPile);
                         else {
@@ -2369,7 +2370,7 @@ public:
             case (Yuan):{
                 for (int i = 0; i < triggertimes; i++){
                     if (player->askForSkillInvoke(objectName(), QVariant::fromValue(target))){
-                        const Card *red = room->askForCard(target, ".red", "@enyuanheart", QVariant::fromValue(player), Card::MethodNone);
+                        const Card *red = room->askForCard(target, ".H", "@enyuanheart", QVariant::fromValue(player), Card::MethodNone);
                         if (red == NULL)
                             room->loseHp(target);
                         else
