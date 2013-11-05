@@ -1,7 +1,7 @@
 #include "joypackage.h"
 #include "engine.h"
 
-/*Shit::Shit(Suit suit, int number):BasicCard(suit, number){
+Shit::Shit(Suit suit, int number):BasicCard(suit, number){
     setObjectName("shit");
 
     target_fixed = true;
@@ -10,6 +10,66 @@
 QString Shit::getSubtype() const{
     return "disgusting_card";
 }
+
+class shitmove: public TriggerSkill{
+public:
+    shitmove(): TriggerSkill("shitmove"){
+        global = true;
+        events << CardsMoveOneTime;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive() && target->getPhase() != Player::NotActive;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+        if (move.from == player && (move.to_place == Player::DiscardPile || move.to_place == Player::PlaceTable || move.to_place == Player::PlaceSpecial)){
+            int n = move.card_ids.length();
+            QList<const Card *> shits;
+            for (int i = 0; i < n; i ++){
+                if (Sanguosha->getCard(move.card_ids[i])->isKindOf("Shit") && move.from_places[i] == Player::PlaceHand){
+                    shits << Sanguosha->getCard(move.card_ids[i]);
+                }
+            }
+
+            LogMessage l;
+            l.from = player;
+
+            foreach (const Card *shit, shits){
+                l.card_str = QString::number(shit->getEffectiveId());
+                
+                if (shit->getSuit() == Card::Spade){
+                    l.type = "$ShitLostHp";
+                    room->sendLog(l);
+                    room->loseHp(player);
+                    continue;
+                }
+
+                DamageStruct shitdamage(shit, player, player);
+                switch (shit->getSuit()){
+                    case Card::Heart:
+                        shitdamage.nature = DamageStruct::Fire;
+                        break;
+                    case Card::Diamond:
+                        shitdamage.nature = DamageStruct::Normal;
+                        break;
+                    case Card::Club:
+                        shitdamage.nature = DamageStruct::Thunder;
+                        break;
+                }
+
+                l.type = "$ShitDamage";
+                room->sendLog(l);
+
+                room->damage(shitdamage);
+            }
+        }
+        return false;
+    }
+};
+
+/*
 
 void Shit::onMove(const CardMoveStruct &move) const{
     ServerPlayer *from = (ServerPlayer*)move.from;
@@ -53,6 +113,7 @@ void Shit::onMove(const CardMoveStruct &move) const{
         room->damage(damage);
     }
 }
+*/
 
 bool Shit::HasShit(const Card *card){
     if(card->isVirtualCard()){
@@ -66,7 +127,7 @@ bool Shit::HasShit(const Card *card){
         return false;
     }else
         return card->objectName() == "shit";
-}*/
+}
 
 // -----------  Deluge -----------------
 
@@ -335,8 +396,8 @@ DisasterPackage::DisasterPackage()
     type = CardPack;
 }
 
-/*JoyPackage::JoyPackage()
-    :Package("joy")
+JoyPackage::JoyPackage()
+    :Package("Joy")
 {
     QList<Card *> cards;
 
@@ -349,7 +410,8 @@ DisasterPackage::DisasterPackage()
         card->setParent(this);
 
     type = CardPack;
-}*/
+    skills << new shitmove;
+}
 
 class YxSwordSkill: public WeaponSkill{
 public:
@@ -461,7 +523,7 @@ DCPackage::DCPackage(): Package("DC"){
 
 }
 
-//ADD_PACKAGE(Joy) //Fs: in fact I want to add these packs back to game
+ADD_PACKAGE(Joy) 
 ADD_PACKAGE(Disaster)
 ADD_PACKAGE(JoyEquip)
 ADD_PACKAGE(DC)
