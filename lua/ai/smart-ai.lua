@@ -953,8 +953,8 @@ function sgs.evaluatePlayerRole(player)
 	end
 	local res = pcall(test_func, player)
 	if not res then global_room:writeToConsole(debug.traceback()) return elseif res == "loyalist" then return "loyalist" end
-	if sgs.isRolePredictable() or player:getMark("Global_TurnCount") > 1 then return player:getRole() end
-	return sgs.ai_role[player:objectName()]
+	--if sgs.isRolePredictable() or player:getMark("Global_TurnCount") > 1 then return player:getRole() end
+	return player:getRole()
 end
 
 function sgs.compareRoleEvaluation(player, first, second)
@@ -1001,7 +1001,7 @@ function sgs.findUnionSkills(first, second)
 end
 
 sgs.ai_card_intention.general = function(from, to, level)
-	if sgs.isRolePredictable() or from:getMark("Global_TurnCount") > 1 then return end
+	if sgs.isRolePredictable() then return end
 	if not to then global_room:writeToConsole(debug.traceback()) return end
 	if from:isLord() or level == 0 then return end
 
@@ -1533,15 +1533,12 @@ end
 
 function SmartAI:isFriend(other, another)
 	if not other then self.room:writeToConsole(debug.traceback()) return end
---	if another then return self:isFriend(other) == self:isFriend(another) end
 	if another then
 	    local mode = string.lower(self.room:getMode())
 	    if (string.sub(mode, -1) == "p" or string.sub(mode, -2) == "pd" or string.sub(mode, -2) == "pz") and not mode == "02p" then
 		    return (self:objectiveLevel(other) > 0 and self:objectiveLevel(another) > 0) or (self:objectiveLevel(other) < 0 and self:objectiveLevel(another) < 0)
-		else
-		    return self:isFriend(other) == self:isFriend(another)
 		end
-		return false
+		return self:isFriend(other) == self:isFriend(another)
 	end
 	if (self:objectiveLevel(other)) < 0 or self.player:objectName() == other:objectName() then return true end
 	return false
@@ -1549,15 +1546,12 @@ end
 
 function SmartAI:isEnemy(other, another)
 	if not other then self.room:writeToConsole(debug.traceback()) return end
---if another then return self:isFriend(other) ~= self:isFriend(another) end
 	if another then
 	    local mode = string.lower(self.room:getMode())
 	    if (string.sub(mode, -1) == "p" or string.sub(mode, -2) == "pd" or string.sub(mode, -2) == "pz") and not mode == "02p" then
 		    return not ((self:objectiveLevel(other) > 0 and self:objectiveLevel(another) > 0) or (self:objectiveLevel(other) < 0 and self:objectiveLevel(another) < 0))
-		else
-		    return self:isFriend(other) ~= self:isFriend(another)
 		end
-		return true
+		return self:isFriend(other) ~= self:isFriend(another)
 	end
 	if self.player:objectName() == other:objectName() then return false end
 	if self:objectiveLevel(other) > 0 then return true end
@@ -2890,6 +2884,15 @@ function SmartAI:getCardRandomly(who, flags)
 			if r ~= (cards:length()-1) then
 				card = cards:at(r+1)
 			elseif r > 0 then
+				card = cards:at(r-1)
+			end
+		end
+	end
+	if who:hasArmorEffect("GaleShell")then
+		if self:isEnemy(who) and card == who:getArmor() then
+			if r ~= (cards:length()-1) then
+				card = cards:at(r+1)
+			else
 				card = cards:at(r-1)
 			end
 		end
