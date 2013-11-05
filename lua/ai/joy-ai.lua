@@ -60,3 +60,36 @@ end
 sgs.ai_card_intention.GaleShell = 80
 sgs.ai_use_priority.GaleShell = 0.9
 sgs.dynamic_value.control_card.GaleShell = true
+
+sgs.weapon_range.YxSword = 3
+
+sgs.ai_skill_playerchosen.YxSword = function(self, targets)
+	local damage = self.room:getTag("YxSwordData"):toDamage()
+	local dmg = damage.damage
+	local who = damage.to
+	if not who then return end
+	if (who:hasArmorEffect("Vine") or who:hasArmorEffect("GaleShell")) and damage.nature == sgs.DamageStruct_Fire then dmg = dmg + 1 end
+	if who:hasArmorEffect("SilverLion") then dmg = 1 end
+	local invoke = "no"
+	for _, askill in sgs.qlist(who:getVisibleSkillList()) do
+		local name = askill:objectName()
+		if string.find(name, "ganglie") or string.find(name, "fankui") or string.find(name, "enyuan") then
+			invoke = "yes" 
+			break 
+		end
+	end
+	if who and ((who:hasSkill("duanchang") and who:getHp() - dmg < 1) or invoke == "yes") then
+		if sgs.evaluatePlayerRole(who) == "rebel" then
+			for _, player in sgs.qlist(targets) do
+				if self:isFriend(player) then
+					return player
+				end
+			end
+		elseif sgs.evaluatePlayerRole(who) == "loyalist" then
+			if self:isEnemy(who) then return self.room:getLord() end
+		end
+		return self.enemies[1]
+	end
+	return nil
+end
+sgs.ai_playerchosen_intention.YxSword = -10
