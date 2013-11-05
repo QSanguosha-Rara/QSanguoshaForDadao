@@ -953,8 +953,8 @@ function sgs.evaluatePlayerRole(player)
 	end
 	local res = pcall(test_func, player)
 	if not res then global_room:writeToConsole(debug.traceback()) return elseif res == "loyalist" then return "loyalist" end
-	if sgs.isRolePredictable() or player:getMark("Global_TurnCount") > 1 then return player:getRole() end
-	return sgs.ai_role[player:objectName()]
+	--if sgs.isRolePredictable() or player:getMark("Global_TurnCount") > 1 then return player:getRole() end
+	return player:getRole()
 end
 
 function sgs.compareRoleEvaluation(player, first, second)
