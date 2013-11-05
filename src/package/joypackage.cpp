@@ -458,10 +458,10 @@ public:
             if(players.isEmpty())
                 return false;
 
-            QVariant victim = QVariant::fromValue(damage.to);
-            room->setTag("YxSwordVictim", victim);
+            QVariant _data = QVariant::fromValue(damage);
+            room->setTag("YxSwordData", _data);
             ServerPlayer *target = room->askForPlayerChosen(player, players, objectName(), "@yxsword-select", true, true);
-            room->removeTag("YxSwordVictim");
+            room->removeTag("YxSwordData");
             if (target != NULL){
                 damage.from = target;
                 data = QVariant::fromValue(damage);
