@@ -375,24 +375,43 @@ public:
                             asker = player;
 
                     if (asker != NULL && asker->askForSkillInvoke(objectName(), QStringList() << jiangwei->objectName() << "gain")){
-                        room->setPlayerFlag(jiangwei, "tianfu_kanpo");
-                        room->acquireSkill(jiangwei, "kanpo");
+                        jiangwei->gainMark("@tianfu_kanpo");
                     }
                 }
             }
             else if (player->getPhase() == Player::NotActive){
                 foreach (ServerPlayer *p, room->getAllPlayers()){
-                    if ((p->isAdjacentTo(player) || p == player) && p->hasFlag("tianfu_kanpo") && !p->hasInnateSkill("kanpo")){
-                        room->setPlayerFlag(p, "-tianfu_kanpo");
-                        room->detachSkillFromPlayer(p, "kanpo");
+                    if (p->getMark("@tianfu_kanpo") > 0){
+                        p->loseAllMarks("@tianfu_kanpo");
                     }
                 }
             }
         }
         else {
-            if (data.toString() == "tianfu" && player->hasFlag("tianfu_kanpo") && !player->hasInnateSkill("kanpo")){
-                room->setPlayerFlag(player, "-tianfu_kanpo");
+            if (data.toString() == "tianfu" && player->getMark("@tianfu_kanpo") > 0 && !player->hasInnateSkill("kanpo")){
+                player->loseAllMarks("@tianfu_kanpo");
                 room->detachSkillFromPlayer(player, "kanpo");
+            }
+        }
+        return false;
+    }
+};
+class TianfuAcquireDetach: public TriggerSkill{
+public:
+    TianfuAcquireDetach(): TriggerSkill("#tianfu-acquire-detach"){
+        events << MarkChanged;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        MarkChangeStruct change = data.value<MarkChangeStruct>();
+        if (change.name == "@tianfu_kanpo"){
+            int kanpo = player->getMark("@tianfu_kanpo");
+            if (kanpo > 0 && kanpo - change.num == 0){
+                room->acquireSkill(player, "kanpo");
+            }
+            else if (kanpo == 0 && change.num < 0){
+                if (!player->hasInnateSkill("kanpo"))
+                    room->detachSkillFromPlayer(player, "kanpo");
             }
         }
         return false;
@@ -811,6 +830,8 @@ FormationPackage::FormationPackage()
     heg_jiangwei->addSkill("tiaoxin");
     heg_jiangwei->addSkill("zhiji");
     heg_jiangwei->addSkill(new Tianfu);
+    heg_jiangwei->addSkill(new TianfuAcquireDetach);
+    related_skills.insertMulti("tianfu", "#tianfu-acquire-detach");
 
     General *heg_dengai = new General(this, "heg_dengai", "wei"); // WEI 015 G
     heg_dengai->addSkill("tuntian");

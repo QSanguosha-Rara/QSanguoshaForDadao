@@ -229,7 +229,7 @@ sgs.ai_skill_playerchosen.tianfu = function(self, targets)
 	for _, p in sgs.qlist(targets) do
 		if not self:isEnemy(p) then return p end
 	end
-	return targets:at(math.random(0, 1))
+	return targets:at(math.random(0, targets:length() - 1))
 end
 
 sgs.ai_skill_invoke.tianfu = function(self, data)
