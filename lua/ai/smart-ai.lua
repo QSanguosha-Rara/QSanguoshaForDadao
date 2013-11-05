@@ -5679,7 +5679,7 @@ function SmartAI:useEquipCard(card, use)
 		if tiaoxin and self.lua_ai:useCard(card) then
 			use.card = card
 		end
-	elseif self.lua_ai:useCard(card) then
+	elseif self.lua_ai:useCard(card) or card:objectName() == "Monkey" then
 		use.card = card
 	end
 end
