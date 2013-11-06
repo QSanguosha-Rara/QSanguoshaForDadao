@@ -1906,9 +1906,9 @@ bool DuwuCard::targetFilter(const QList<const Player *> &targets, const Player *
 void DuwuCard::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.to->getRoom();
     if (getSubcards().length() == 1)
-        room->broadcastSkillInvoke(objectName(), 2);
+        room->broadcastSkillInvoke("duwu", 2);
     else
-        room->broadcastSkillInvoke(objectName(), 1);
+        room->broadcastSkillInvoke("duwu", 1);
 
     room->damage(DamageStruct("duwu", effect.from, effect.to));
 }
