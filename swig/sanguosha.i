@@ -339,9 +339,6 @@ public:
     void addToPile(const char *pile_name, QList<int> card_ids, bool open, CardMoveReason reason);
     void exchangeFreelyFromPrivatePile(const char *skill_name, const char *pile_name, int upperlimit = 1000, bool include_equip = false);
     void gainAnExtraTurn();
-
-    // @@Compatibility
-    void removePileByName(const char *pile_name);
 };
 
 %extend ServerPlayer {
