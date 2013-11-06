@@ -575,7 +575,7 @@ sgs.ai_chaofeng.nos_zhoutai = -4
 sgs.ai_skill_playerchosen.nosleiji = function(self, targets)
 	local mode = self.room:getMode()
 	if mode:find("_mini_17") or mode:find("_mini_19") or mode:find("_mini_20") or mode:find("_mini_26") then
-		local players = self.room:getAllPlayers();
+		local players = self.room:getAllPlayers()
 		for _, aplayer in sgs.qlist(players) do
 			if aplayer:getState() ~= "robot" then
 				return aplayer
@@ -942,7 +942,7 @@ sgs.ai_skill_invoke.noscangni = function(self, data)
 	if self.player:hasFlag("cangniget") then return self:isFriend(target) end
 	local hand = self.player:getHandcardNum()
 	local hp = self.player:getHp()
-	return (hand + 2) <= hp or self.player:isWounded();
+	return (hand + 2) <= hp or self.player:isWounded()
 end
 
 sgs.ai_skill_choice.noscangni = function(self, choices)

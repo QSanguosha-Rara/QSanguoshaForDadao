@@ -30,7 +30,7 @@ return {
 	["@kuiwei"] = "溃围",
 	["yanzheng"] = "严整",
 	[":yanzheng"] = "若你的手牌数大于你的体力值，你可以将一张装备区的装备牌当【无懈可击】使用。",
-	["#KuiweiDiscard"] = "%from 的“%arg2”效果被触发，须弃置 %arg 张牌";
+	["#KuiweiDiscard"] = "%from 的“%arg2”效果被触发，须弃置 %arg 张牌",
 
 	["#bgm_pangtong"] = "荆楚之高俊",
 	["bgm_pangtong"] = "☆SP庞统",

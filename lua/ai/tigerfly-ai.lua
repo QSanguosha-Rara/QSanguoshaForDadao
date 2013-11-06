@@ -30,7 +30,11 @@ shemi_skill.getTurnUseCard = function(self)
 						am:addSubcard(second_card)
 						local dummy_use = {isDummy = true}
 						self:useTrickCard(am, dummy_use)
-						if not dummy_use.card then first_card=nil;second_card=nil break end
+						if not dummy_use.card then 
+							first_card=nil
+							second_card=nil
+							break
+						end
 					end
 				end
 				if first_card and second_card then break end

@@ -1536,7 +1536,7 @@ sgs.ai_skill_invoke.cv_machao = function(self, data)
 		sgs.ai_skill_choice.cv_machao = "sp_machao"
 		return true
 	end
-	return false;
+	return false
 end
 
 sgs.ai_chaofeng.sp_machao = sgs.ai_chaofeng.machao
