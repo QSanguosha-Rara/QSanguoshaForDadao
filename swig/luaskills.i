@@ -293,12 +293,20 @@ public:
 #include "lua-wrapper.h"
 #include "clientplayer.h"
 
+#include <QMessageBox>
+
+static void Error(lua_State *L) {
+    const char *error_string = lua_tostring(L, -1);
+    lua_pop(L, 1);
+    QMessageBox::warning(NULL, "Lua script error!", error_string);
+}
+
 bool LuaTriggerSkill::triggerable(const ServerPlayer *target) const{
     if (can_trigger == 0)
         return TriggerSkill::triggerable(target);
 
-    Room *room = target->getRoom();
-    lua_State *L = room->getLuaState();
+    //Room *room = target->getRoom();
+    lua_State *L = Sanguosha->getLuaState();
 
     // the callback function
     lua_rawgeti(L, LUA_REGISTRYINDEX, can_trigger);
@@ -307,9 +315,10 @@ bool LuaTriggerSkill::triggerable(const ServerPlayer *target) const{
 
     int error = lua_pcall(L, 2, 1, 0);
     if (error) {
-        const char *error_msg = lua_tostring(L, -1);
-        lua_pop(L, 1);
-        room->output(error_msg);
+        //const char *error_msg = lua_tostring(L, -1);
+        //lua_pop(L, 1);
+        //room->output(error_msg);
+        Error(L);
         return false;
     } else {
         bool result = lua_toboolean(L, -1);
@@ -352,14 +361,6 @@ bool LuaTriggerSkill::trigger(TriggerEvent event, Room *room, ServerPlayer *play
         lua_pop(L, 1);
         return result;
     }
-}
-
-#include <QMessageBox>
-
-static void Error(lua_State *L) {
-    const char *error_string = lua_tostring(L, -1);
-    lua_pop(L, 1);
-    QMessageBox::warning(NULL, "Lua script error!", error_string);
 }
 
 bool LuaProhibitSkill::isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others) const{
