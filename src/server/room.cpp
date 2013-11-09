@@ -5025,7 +5025,7 @@ ServerPlayer *Room::askForPlayerChosen(ServerPlayer *player, const QList<ServerP
 
 void Room::_setupChooseGeneralRequestArgs(ServerPlayer *player) {
     Json::Value options = toJsonArray(player->getSelected());
-    if (!Config.EnableBasara || getLord() == NULL)
+    if (!Config.EnableBasara && getLord() != NULL)
         options.append(toJsonString(QString("%1(lord)").arg(getLord()->getGeneralName())));
     else
         options.append("anjiang(lord)");

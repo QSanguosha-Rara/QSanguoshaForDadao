@@ -20,6 +20,7 @@ public:
                 if (p->getRole() == "rebel" && p->getNext()->getRole() == "rebel")
                     room->setCurrent(p->getNext());
 */
+/*
             QList<ServerPlayer *> to_assign = room->getPlayers();
 
             room->assignGeneralsForPlayers(to_assign);
@@ -50,6 +51,7 @@ public:
                 }
             }
 
+*/
 
             room->setTag("SkipNormalDeathProcess", true);
 
@@ -113,8 +115,8 @@ void Fun2v2::onTagSet(Room *room, const QString &key) const{
 }
 
 bool Fun2v2::generalSelection() const{
-    //return true;
-    return false;
+    return true;
+    //return false;
 }
 
 AI::Relation Fun2v2::relationTo(const ServerPlayer *a, const ServerPlayer *b) const{
