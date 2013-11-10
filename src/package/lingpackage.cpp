@@ -1455,7 +1455,8 @@ public:
                 else if (card_to_use->targetFixed()){
                     if (!player->askForSkillInvoke(objectName(), QVariant::fromValue(card_to_use)))
                         return false;
-                    const Card *real_use = Sanguosha->cloneCard(card_to_use->objectName(), Card::NoSuit, 0);
+                    Card *real_use = Sanguosha->cloneCard(card_to_use->objectName(), Card::NoSuit, 0);
+                    real_use->setSkillName(objectName());
                     room->useCard(CardUseStruct(real_use, player, QList<ServerPlayer *>()));
                 }
                 else {

@@ -2344,7 +2344,7 @@ void RoomScene::updateStatus(Client::Status oldStatus, Client::Status newStatus)
             discard_button->setEnabled(false);
 
             QString pattern = Sanguosha->currentRoomState()->getCurrentCardUsePattern();
-            QRegExp rx("@@?([_A-Za-z]+)(\\d+)?!?");
+            QRegExp rx("@@?(\\w+)(-card)?(\\d+)?!?");
             if (rx.exactMatch(pattern)) {
                 QString skill_name = rx.capturedTexts().at(1);
                 const ViewAsSkill *skill = Sanguosha->getViewAsSkill(skill_name);
