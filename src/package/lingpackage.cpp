@@ -2282,17 +2282,18 @@ public:
         foreach (ServerPlayer *p, use.to){
             if (p == player)
                 continue;
-
-            room->setPlayerProperty(player, "neo2013jinan", p->objectName());
-            try {
-                room->askForUseCard(player, "@@neo2013jinan", "@neo2013jinan", -1, Card::MethodNone);
-                room->setPlayerProperty(player, "neo2013jinan", QVariant());
-            }
-            catch (TriggerEvent errorevent){
-                if (errorevent == StageChange || errorevent == TurnBroken)
+            if (use.card != NULL && (use.card->isKindOf("Slash") || use.card->isNDTrick())){
+                room->setPlayerProperty(player, "neo2013jinan", p->objectName());
+                try {
+                    room->askForUseCard(player, "@@neo2013jinan", "@neo2013jinan", -1, Card::MethodNone);
                     room->setPlayerProperty(player, "neo2013jinan", QVariant());
+                }
+                catch (TriggerEvent errorevent){
+                    if (errorevent == StageChange || errorevent == TurnBroken)
+                        room->setPlayerProperty(player, "neo2013jinan", QVariant());
 
-                throw errorevent;
+                    throw errorevent;
+                }
             }
         }
         return false;
