@@ -1277,7 +1277,7 @@ public:
         limit_mark = "@neo2013xiechan";
     }
 
-    virtual bool isEnabledAtPlay(const Player *player){
+    virtual bool isEnabledAtPlay(const Player *player) const{
         return player->getMark("@neo2013xiechan") > 0;
     }
 
