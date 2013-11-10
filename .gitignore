@@ -59,7 +59,7 @@ ai.html
 /image/system/skill-dock.png
 /image/system/small-back.png
 /image/system/to.png
-/image/heroskin
+/image/heroskin/
 /src/dialog/halldialog.*
 /Qt*.dll
 /dmp/*.dmp
