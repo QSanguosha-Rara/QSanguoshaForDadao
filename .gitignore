@@ -42,13 +42,12 @@ tags
 .cproject
 .project
 .settings
-/lua/ai/private-smart-ai.lua
+/lua/ai/private-*.lua
 /image/system/button/promptbox
 /image/system/button/back2.png
 /image/system/button/back.png
 /image/system/button/back_shade.png
 /extension-doc
-/extensions
 card_intention.txt
 ai.html
 *.sh
