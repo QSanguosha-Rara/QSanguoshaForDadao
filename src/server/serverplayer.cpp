@@ -981,8 +981,10 @@ void ServerPlayer::introduceTo(ServerPlayer *player) {
                                     .arg(QString(screen_name.toUtf8().toBase64()))
                                     .arg(avatar);
 
-    if (player)
+    if (player){
         player->invoke("addPlayer", introduce_str);
+        room->notifyProperty(player, this, "state");
+    }
     else
         room->broadcastInvoke("addPlayer", introduce_str, this);
 }
