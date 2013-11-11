@@ -90,7 +90,7 @@ public:
     bool hasShownRole() const;
     void setShownRole(bool shown);
 
-    int getMaxCards(const char *except = "") const;
+    int getMaxCards(const char *except = NULL) const;
 
     QString getKingdom() const;
     void setKingdom(const char *kingdom);
@@ -934,7 +934,7 @@ public:
 
     const ProhibitSkill *isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others = QList<const Player *>()) const;
     int correctDistance(const Player *from, const Player *to) const;
-    int correctMaxCards(const Player *target, bool fixed = false, const char *except = "") const;
+    int correctMaxCards(const Player *target, bool fixed = false, const char *except = NULL) const;
     int correctCardTarget(const TargetModSkill::ModType type, const Player *from, const Card *card) const;
     int correctAttackRange(const Player *target, bool include_weapon = true, bool fixed = false) const;
 
@@ -1009,13 +1009,15 @@ struct LogMessage {
 struct JsonArrayForLUA{
     JsonArrayForLUA();
 
-    bool getBoolAt(int n);
-    int getNumberAt(int n);
-    QString getStringAt(int n);
+    bool getBoolAt(int n) const;
+    int getNumberAt(int n) const;
+    QString getStringAt(int n) const;
+    JsonArrayForLUA getArrayAt(int n) const;
 
     void setBoolAt(int n, bool v);
     void setNumberAt(int n, int v);
     void setStringAt(int n, const char *v);
+    void setArrayAt(int n, const JsonArrayForLUA &v);
 };
 
 class RoomThread: public QThread {

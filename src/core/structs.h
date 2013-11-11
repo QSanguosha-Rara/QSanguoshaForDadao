@@ -399,13 +399,15 @@ struct CardResponseStruct {
 struct JsonArrayForLUA{
     JsonArrayForLUA();
 
-    bool getBoolAt(int n);
-    int getNumberAt(int n);
-    QString getStringAt(int n);
+    bool getBoolAt(int n) const;
+    int getNumberAt(int n) const;
+    QString getStringAt(int n) const;
+    JsonArrayForLUA getArrayAt(int n) const;
 
     void setBoolAt(int n, bool v);
     void setNumberAt(int n, int v);
     void setStringAt(int n, const QString &v);
+    void setArrayAt(int n, const JsonArrayForLUA &v);
 
     inline operator Json::Value(){
         return m_realvalue;

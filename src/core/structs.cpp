@@ -61,16 +61,22 @@ JsonArrayForLUA::JsonArrayForLUA(): m_realvalue(Json::Value(Json::arrayValue)){
 
 }
 
-bool JsonArrayForLUA::getBoolAt(int n){
+bool JsonArrayForLUA::getBoolAt(int n) const{
     return m_realvalue[n].asBool();
 }
 
-int JsonArrayForLUA::getNumberAt(int n){
+int JsonArrayForLUA::getNumberAt(int n) const{
     return m_realvalue[n].asInt();
 }
 
-QString JsonArrayForLUA::getStringAt(int n){
+QString JsonArrayForLUA::getStringAt(int n) const{
     return m_realvalue[n].asCString();
+}
+
+JsonArrayForLUA JsonArrayForLUA::getArrayAt(int n) const{
+    JsonArrayForLUA temp;
+    temp.m_realvalue = m_realvalue[n];
+    return temp;
 }
 
 void JsonArrayForLUA::setBoolAt(int n, bool v){
@@ -83,4 +89,8 @@ void JsonArrayForLUA::setNumberAt(int n, int v){
 
 void JsonArrayForLUA::setStringAt(int n, const QString &v){
     m_realvalue[n] = toJsonString(v);
+}
+
+void JsonArrayForLUA::setArrayAt(int n, const JsonArrayForLUA &v){
+    m_realvalue[n] = (Json::Value)v;
 }
