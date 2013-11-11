@@ -492,7 +492,7 @@ bool ServerPlayer::pindian(ServerPlayer *target, const QString &reason, const Ca
     if (hasSkill("qiangbian")){
         room->notifySkillInvoked(this, "qiangbian");
         room->broadcastSkillInvoke("qiangbian");
-        card2 = Sanguosha->getCard(room->askForCardChosen(this, target, "h", "qiangbian"));
+        card2 = Sanguosha->getCard(room->askForCardChosen(this, target, "h", "qiangbian", false, Card::MethodPindian));
 
         LogMessage l2;
         l2.type = "#qiangbianpd";
@@ -510,6 +510,27 @@ bool ServerPlayer::pindian(ServerPlayer *target, const QString &reason, const Ca
 
         if (card1 == NULL)
             card1 = room->askForPindian(this, this, target, reason);
+    }
+    else if (target->hasSkill("qiangbian")){
+        room->notifySkillInvoked(target, "qiangbian");
+        room->broadcastSkillInvoke("qiangbian");
+        card1 = Sanguosha->getCard(room->askForCardChosen(target, this, "h", "qiangbian", false, Card::MethodPindian));
+
+        LogMessage l2;
+        l2.type = "#qiangbianpd";
+        l2.from = target;
+        l2.to << this;
+        foreach(ServerPlayer *p, room->getOtherPlayers(this))
+            room->doNotify(p, S_COMMAND_LOG_SKILL, l2.toJsonValue());
+
+        LogMessage l;
+        l.type = "$qiangbianpd";
+        l.card_str = QString::number(card1->getId());
+        l.from = target;
+        l.to << this;
+        room->doNotify(this, S_COMMAND_LOG_SKILL, l.toJsonValue());
+
+        card2 = room->askForPindian(this, this, target, reason);
     }
     else {
         if (card1 == NULL) {
