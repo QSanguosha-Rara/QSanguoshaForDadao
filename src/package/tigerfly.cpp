@@ -945,7 +945,7 @@ public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent != CardsMoveOneTime){
             CardUseStruct use = data.value<CardUseStruct>();
-            if (use.card->isKindOf("AmazingGrace")){
+            if (use.card && use.card->isKindOf("AmazingGrace")){
                 ServerPlayer *p = room->findPlayerBySkillName(objectName());
                 if (p != NULL && p->isAlive())
                     p->setFlags((triggerEvent == CardUsed) ? "agusing": "-agusing");
