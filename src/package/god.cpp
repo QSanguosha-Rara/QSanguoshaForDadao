@@ -48,7 +48,7 @@ public:
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
 
-        if (damage.from && damage.from != player) {
+        if (damage.from) {
             damage.from->gainMark("@nightmare", damage.damage);
             damage.from->getRoom()->broadcastSkillInvoke(objectName(), 1);
             room->notifySkillInvoked(player, objectName());
