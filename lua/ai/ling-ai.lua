@@ -1199,3 +1199,31 @@ end
 sgs.ai_card_intention.Neo2013ZhoufuCard = 0
 sgs.ai_use_value.Neo2013ZhoufuCard = 2
 sgs.ai_use_priority.Neo2013ZhoufuCard = 1
+
+sgs.ai_skill_invoke.neo2013kunxiang = function(self)
+	local ts = sgs.Sanguosha:getTriggerSkill("neo2013kunxiang")
+	local yz = self.room:findPlayerBySkillName("neo2013kunxiang")
+	if ts:triggerable(self.player) then
+		if #self.enemies > 2 then return false end
+		if self:willSkipPlayPhase() then return true end
+		if self.player:getHandcardNum() > 6 then return false end
+		if self:needBear() or self:doNotDiscard() then return true end
+		return (self.player:hasSkills(sgs.lose_equip_skill) and not self.player:getEquips():isEmpty()) or self:needToThrowArmor() 
+	else	
+		if self:isFriend(yz) then return true end
+		if self:isEnemy(yz) then
+			if self:doNotDiscard(yz) then return false end
+			return true
+		end	
+	end
+	return
+end
+
+
+sgs.ai_skill_choice.neo2013kunxiang = function(self, choices)
+	local yz = self.room:findPlayerBySkillName("neo2013kunxiang")
+	if not yz or self:isEnemy(yz) then return "dismiss" end
+	if self:needKongcheng(yz, true) then return "dismiss" end
+	return "draw"
+end
+
