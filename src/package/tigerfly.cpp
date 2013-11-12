@@ -1240,7 +1240,7 @@ public:
         }
         else {
             CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-            if (move.from && move.from == player && move.from->hasFlag("choudumove")){
+            if (move.from && move.from == player && move.from->hasFlag("choudumove") && move.to){
                 if (!move.to->hasFlag("chouduselected"))
                     room->removePlayerMark(player, "choudutargets");
                 room->setPlayerFlag(room->findPlayer(move.to->getGeneralName()), "chouduselected");
