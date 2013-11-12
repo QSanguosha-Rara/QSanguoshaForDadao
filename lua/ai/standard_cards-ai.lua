@@ -363,6 +363,11 @@ function SmartAI:slashIsEffective(slash, to, ignore_armor, from)
 			return false
 		end
 	end
+	if to:hasSkill("neo2013yizhong") and to:faceUp() then
+		if slash:isBlack() then
+			return false
+		end
+	end
 	if to:getMark("@late") > 0 then return false end
 
 	local natures = {
