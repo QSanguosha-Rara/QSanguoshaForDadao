@@ -1240,10 +1240,10 @@ public:
         }
         else {
             CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-            if (move.from && move.from == player && move.from->hasFlag("choudumove") && move.to){
-                if (!move.to->hasFlag("chouduselected"))
+            if (move.from && move.from == player && move.from->hasFlag("choudumove") && move.origin_to){
+                if (!move.origin_to->hasFlag("chouduselected"))
                     room->removePlayerMark(player, "choudutargets");
-                room->setPlayerFlag(room->findPlayer(move.to->getGeneralName()), "chouduselected");
+                room->setPlayerFlag(room->findPlayer(move.origin_to->getGeneralName()), "chouduselected");
 
                 room->broadcastSkillInvoke(objectName(), qrand() % 2 + 2);
             }
@@ -1318,10 +1318,13 @@ public:
         if (selected.length() >= 2)
             return false;
 
-        if (Sanguosha->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY
-                && Self->getWeapon() && to_select->getEffectiveId() == Self->getWeapon()->getId()
-                && to_select->isKindOf("Crossbow"))
-            return Self->canSlashWithoutCrossbow();
+        if (Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY){
+            Slash *slash = new Slash(Card::SuitToBeDecided, -1);
+            slash->addSubcards(selected);
+            slash->addSubcard(to_select);
+            slash->deleteLater();
+            return slash->isAvailable(Self);
+        }
 
         return true;
     }

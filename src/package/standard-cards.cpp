@@ -178,6 +178,8 @@ void Slash::onUse(Room *room, const CardUseStruct &card_use) const{
             name = "paoxiao";
         else if (player->hasSkill("huxiao") && player->getMark("huxiao") > 0)
             name = "huxiao";
+        else if (player->hasSkill("zhuixi") && player->getMark("zhuixi_extra")  > 0)
+            name = "zhuixi";
         else if (player->hasFlag("XianzhenSuccess")){
             QStringList l = player->property("extra_slash_specific_assignee").toString().split("+");
             foreach(ServerPlayer *p, use.to)
@@ -191,8 +193,10 @@ void Slash::onUse(Room *room, const CardUseStruct &card_use) const{
             int index = qrand() % 2 + 1;
             if (name == "paoxiao" && !player->hasInnateSkill("paoxiao") && player->hasSkill("baobian"))
                 index += 2;
-            if (name == "xianzhen")
+            else if (name == "xianzhen")
                 index = 2;
+            else if (name == "zhuixi")
+                index = 4;
             room->broadcastSkillInvoke(name, index);
             room->notifySkillInvoked(player, name);
         }
