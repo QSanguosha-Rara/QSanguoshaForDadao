@@ -1008,7 +1008,7 @@ struct LogMessage {
 };
 
 struct JsonValueForLUA{
-    JsonValueForLUA();
+    JsonValueForLUA(bool isarray = true);
 
     bool getBoolAt(int n) const;
     int getNumberAt(int n) const;
