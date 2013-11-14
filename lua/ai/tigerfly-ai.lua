@@ -1248,7 +1248,7 @@ function sgs.ai_cardsview_valuable.chanyu(self, class_name, player) --使用此�
 end
 
 sgs.ai_skill_use["@@suoshi"]=function(self, prompt)
-	if self:isWeak() then return "." end
+	if self:isWeak() or self.player:isKongcheng() then return "." end
 	local list = self.player:property("suoshitarget"):toString():split("+")
 	local targets = {}
 	local stargets = {}
