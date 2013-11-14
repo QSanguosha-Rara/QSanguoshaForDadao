@@ -6,7 +6,7 @@ Open Source Sanguosha
 | API reference: | http://gaodayihao.github.com/QSanguosha/api   |
 | Documentation: | https://github.com/gaodayihao/QSanguosha/wiki (Chinese) |
 
-Introduction
+Introduction (By Moligaloo)
 ----------
 
 Sanguosha is both a popular board game and online game,
