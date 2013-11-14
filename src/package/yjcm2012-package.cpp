@@ -535,7 +535,7 @@ public:
         if (triggerEvent == Damage && TriggerSkill::triggerable(player)) {
             DamageStruct damage = data.value<DamageStruct>();
             if (damage.card && damage.card->isKindOf("Slash") && damage.card->getSkillName() == objectName()
-                && player->getPhase() == Player::Play) {
+                && player->getPhase() == Player::Play && !player->hasFlag(objectName())) {
                 room->handleAcquireDetachSkills(player, "wusheng|paoxiao");
                 room->broadcastSkillInvoke(objectName(), 2);
                 player->setFlags(objectName());
@@ -555,7 +555,6 @@ public:
 };
 
 GongqiCard::GongqiCard() {
-    mute = true;
     target_fixed = true;
 }
 
@@ -563,7 +562,6 @@ void GongqiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) 
     room->setPlayerFlag(source, "InfinityAttackRange");
     const Card *cd = Sanguosha->getCard(subcards.first());
     if (cd->isKindOf("EquipCard")) {
-        room->broadcastSkillInvoke("gongqi", 2);
         QList<ServerPlayer *> targets;
         foreach (ServerPlayer *p, room->getOtherPlayers(source))
             if (source->canDiscard(p, "he")) targets << p;
@@ -572,8 +570,6 @@ void GongqiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) 
             if (to_discard)
                 room->throwCard(room->askForCardChosen(source, to_discard, "he", "gongqi", false, Card::MethodDiscard), to_discard, source);
         }
-    } else {
-        room->broadcastSkillInvoke("gongqi", 1);
     }
 }
 
@@ -592,6 +588,15 @@ public:
         card->addSubcard(originalcard->getId());
         card->setSkillName(objectName());
         return card;
+    }
+
+    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+        const Card *cd = Sanguosha->getCard(card->getSubcards().first());
+        if (cd->isKindOf("EquipCard"))
+            return 2;
+        else
+            return 1;
+        return -1;
     }
 };
 
