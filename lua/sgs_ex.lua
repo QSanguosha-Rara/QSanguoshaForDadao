@@ -468,7 +468,7 @@ function sgs.CreateOneCardViewAsSkill(spec)
 			local pat = spec.filter_pattern
 			if string.endsWith(pat, "!") then
 				if sgs.Self:isJilei(to_select) then return false end
-				pat = string.sub(pat, 1, -1)
+				pat = string.sub(pat, 1, -2)
 			end
 			return sgs.Sanguosha:matchExpPattern(pat, sgs.Self, to_select)
 		end
