@@ -777,7 +777,7 @@ bool Room::doBroadcastNotify(QSanProtocol::CommandType command, const Json::Valu
     return doBroadcastNotify(m_players, command, arg);
 }
 
-bool Room::doNotify(ServerPlayer *player, int command, const JsonArrayForLUA &arg) {
+bool Room::doNotify(ServerPlayer *player, int command, const JsonValueForLUA &arg) {
 /*
     QSanGeneralPacket packet(S_SRC_ROOM | S_TYPE_NOTIFICATION | S_DEST_CLIENT, (QSanProtocol::CommandType)command);
     Json::Reader reader;
@@ -797,13 +797,13 @@ bool Room::doNotify(ServerPlayer *player, int command, const JsonArrayForLUA &ar
     return true;
 }
 
-bool Room::doBroadcastNotify(const QList<ServerPlayer *> &players, int command, const JsonArrayForLUA &arg) {
+bool Room::doBroadcastNotify(const QList<ServerPlayer *> &players, int command, const JsonValueForLUA &arg) {
     foreach (ServerPlayer *player, players)
         doNotify(player, command, arg);
     return true;
 }
 
-bool Room::doBroadcastNotify(int command, const JsonArrayForLUA &arg) {
+bool Room::doBroadcastNotify(int command, const JsonValueForLUA &arg) {
     return doBroadcastNotify(m_players, command, arg);
 }
 

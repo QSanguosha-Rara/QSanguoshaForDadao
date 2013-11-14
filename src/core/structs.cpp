@@ -57,40 +57,64 @@ Json::Value CardMoveReason::toJsonValue() const{
     return result;
 }
 
-JsonArrayForLUA::JsonArrayForLUA(): m_realvalue(Json::Value(Json::arrayValue)){
+JsonValueForLUA::JsonValueForLUA(bool isarray): m_realvalue(isarray ? Json::Value(Json::arrayValue) : Json::Value()){
 
 }
 
-bool JsonArrayForLUA::getBoolAt(int n) const{
-    return m_realvalue[n].asBool();
+bool JsonValueForLUA::getBoolAt(int n) const{
+    if (n < 0)
+        return m_realvalue.asBool();
+    else
+        return m_realvalue[n].asBool();
 }
 
-int JsonArrayForLUA::getNumberAt(int n) const{
-    return m_realvalue[n].asInt();
+int JsonValueForLUA::getNumberAt(int n) const{
+    if (n < 0)
+        return m_realvalue.asInt();
+    else
+        return m_realvalue[n].asInt();
 }
 
-QString JsonArrayForLUA::getStringAt(int n) const{
-    return m_realvalue[n].asCString();
+QString JsonValueForLUA::getStringAt(int n) const{
+    if (n < 0)
+        return m_realvalue.asCString();
+    else
+        return m_realvalue[n].asCString();
 }
 
-JsonArrayForLUA JsonArrayForLUA::getArrayAt(int n) const{
-    JsonArrayForLUA temp;
-    temp.m_realvalue = m_realvalue[n];
+JsonValueForLUA JsonValueForLUA::getArrayAt(int n) const{
+    JsonValueForLUA temp;
+    if (n < 0)
+        temp.m_realvalue = m_realvalue;
+    else
+        temp.m_realvalue = m_realvalue[n];
     return temp;
 }
 
-void JsonArrayForLUA::setBoolAt(int n, bool v){
-    m_realvalue[n] = v;
+void JsonValueForLUA::setBoolAt(int n, bool v){
+    if (n < 0)
+        m_realvalue = v;
+    else
+        m_realvalue[n] = v;
 }
 
-void JsonArrayForLUA::setNumberAt(int n, int v){
-    m_realvalue[n] = v;
+void JsonValueForLUA::setNumberAt(int n, int v){
+    if (n < 0)
+        m_realvalue = v;
+    else 
+        m_realvalue[n] = v;
 }
 
-void JsonArrayForLUA::setStringAt(int n, const QString &v){
-    m_realvalue[n] = toJsonString(v);
+void JsonValueForLUA::setStringAt(int n, const QString &v){
+    if (n < 0)
+        m_realvalue = toJsonString(v);
+    else
+        m_realvalue[n] = toJsonString(v);
 }
 
-void JsonArrayForLUA::setArrayAt(int n, const JsonArrayForLUA &v){
-    m_realvalue[n] = (Json::Value)v;
+void JsonValueForLUA::setArrayAt(int n, const JsonValueForLUA &v){
+    if (n < 0)
+        m_realvalue = (Json::Value)v;
+    else
+        m_realvalue[n] = (Json::Value)v;
 }

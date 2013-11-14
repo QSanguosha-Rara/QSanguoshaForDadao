@@ -538,3 +538,6 @@ function sgs.LoadTranslationTable(t)
 		sgs.AddTranslationEntry(key, value)
 	end
 end
+
+--@@ capability
+sgs.JsonArrayForLUA = sgs.JsonArrayForLUA or sgs.JsonValueForLUA

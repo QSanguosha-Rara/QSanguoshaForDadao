@@ -396,18 +396,18 @@ struct CardResponseStruct {
     bool m_isUse;
 };
 
-struct JsonArrayForLUA{
-    JsonArrayForLUA();
+struct JsonValueForLUA{
+    JsonValueForLUA(bool isarray = true);
 
     bool getBoolAt(int n) const;
     int getNumberAt(int n) const;
     QString getStringAt(int n) const;
-    JsonArrayForLUA getArrayAt(int n) const;
+    JsonValueForLUA getArrayAt(int n) const;
 
     void setBoolAt(int n, bool v);
     void setNumberAt(int n, int v);
     void setStringAt(int n, const QString &v);
-    void setArrayAt(int n, const JsonArrayForLUA &v);
+    void setArrayAt(int n, const JsonValueForLUA &v);
 
     inline operator Json::Value(){
         return m_realvalue;
@@ -549,7 +549,7 @@ Q_DECLARE_METATYPE(JudgeStar)
 Q_DECLARE_METATYPE(PindianStar)
 Q_DECLARE_METATYPE(PhaseChangeStruct)
 Q_DECLARE_METATYPE(CardResponseStruct)
-Q_DECLARE_METATYPE(JsonArrayForLUA)
+Q_DECLARE_METATYPE(JsonValueForLUA)
 Q_DECLARE_METATYPE(MarkChangeStruct)
 #endif
 

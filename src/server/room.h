@@ -170,9 +170,9 @@ public:
     bool doBroadcastNotify(int command, const QString &arg);
     bool doBroadcastNotify(const QList<ServerPlayer *> &players, int command, const QString &arg);
 */
-    bool doNotify(ServerPlayer *player, int command, const JsonArrayForLUA &arg);
-    bool doBroadcastNotify(int command, const JsonArrayForLUA &arg);
-    bool doBroadcastNotify(const QList<ServerPlayer *> &players, int command, const JsonArrayForLUA &arg);
+    bool doNotify(ServerPlayer *player, int command, const JsonValueForLUA &arg);
+    bool doBroadcastNotify(int command, const JsonValueForLUA &arg);
+    bool doBroadcastNotify(const QList<ServerPlayer *> &players, int command, const JsonValueForLUA &arg);
 
     // Ask a server player to wait for the client response. Call is blocking until client replies or server times out,
     // whichever is earlier.

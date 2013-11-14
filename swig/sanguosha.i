@@ -1007,18 +1007,18 @@ struct LogMessage {
     QString arg2;
 };
 
-struct JsonArrayForLUA{
-    JsonArrayForLUA();
+struct JsonValueForLUA{
+    JsonValueForLUA();
 
     bool getBoolAt(int n) const;
     int getNumberAt(int n) const;
     QString getStringAt(int n) const;
-    JsonArrayForLUA getArrayAt(int n) const;
+    JsonValueForLUA getArrayAt(int n) const;
 
     void setBoolAt(int n, bool v);
     void setNumberAt(int n, int v);
     void setStringAt(int n, const char *v);
-    void setArrayAt(int n, const JsonArrayForLUA &v);
+    void setArrayAt(int n, const JsonValueForLUA &v);
 };
 
 class RoomThread: public QThread {
@@ -1222,9 +1222,9 @@ public:
 
     void broadcastInvoke(const char *method, const char *arg = ".", ServerPlayer *except = NULL);
 
-    bool doNotify(ServerPlayer *player, int command, const JsonArrayForLUA &arg);
-    bool doBroadcastNotify(int command, const JsonArrayForLUA &arg);
-    bool doBroadcastNotify(const QList<ServerPlayer *> &players, int command, const JsonArrayForLUA &arg);
+    bool doNotify(ServerPlayer *player, int command, const JsonValueForLUA &arg);
+    bool doBroadcastNotify(int command, const JsonValueForLUA &arg);
+    bool doBroadcastNotify(const QList<ServerPlayer *> &players, int command, const JsonValueForLUA &arg);
 
     void updateStateItem();
     bool notifyProperty(ServerPlayer *playerToNotify, const ServerPlayer *propertyOwner, const char *propertyName, const char *value = NULL);
