@@ -7,7 +7,7 @@ config = {
 		"Fsu0413" ,
 		"Fu Nima" ,
 		"0147certainly" ,
-		"lzxqqqq" ,
+		"忧郁の月兔" ,
 	} ,
 
 	kingdoms = { "wei", "shu", "wu", "qun", "god" },
