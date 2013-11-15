@@ -123,11 +123,13 @@
 "playerGeneralIcon-nos_guanxingzhangbao-7": "image/generals/big/nos_guanxingzhangbao.png",
 "playerGeneralIcon-nos_guanxingzhangbao-8": "image/generals/kof/nos_guanxingzhangbao.png",
 
-"playerGeneralIcon-luadengaizhonghui_fendao-0": ["image/generals/big/luadengaizhonghui_fendao.png", [0, 0, 134, 134], [40, 40]],
-"playerGeneralIcon-luadengaizhonghui_fendao-2": "image/generals/big/luadengaizhonghui_fendao.png",
-"playerGeneralIcon-luadengaizhonghui_fendao-4": ["image/generals/big/luadengaizhonghui_fendao.png", [10, 0, 63, 89]],
-"playerGeneralIcon-luadengaizhonghui_fendao-5": ["image/generals/big/luadengaizhonghui_fendao.png", [0, 0, 134, 134], [70, 70]],
-"playerGeneralIcon-luadengaizhonghui_fendao-8": "image/generals/big/luadengaizhonghui_fendao.png",
+"playerGeneralIcon-jiangwanfeiyi-0": ["image/generals/big/jiangwanfeiyi.png", [0, 0, 134, 134], [40, 40]],
+"playerGeneralIcon-jiangwanfeiyi-2": "image/generals/big/jiangwanfeiyi.png",
+"playerGeneralIcon-jiangwanfeiyi-4": ["image/fullskin/generals/fulldual/jiangwanfeiyi.png", [0, 0, 124, 289], [77, 179]],
+"playerGeneralIcon-jiangwanfeiyi-5": ["image/generals/big/jiangwanfeiyi.png", [0, 0, 134, 134], [70, 70]],
+"playerGeneralIcon-jiangwanfeiyi-6": ["image/fullskin/generals/fulldual/jiangwanfeiyi.png", [0, 0, 250, 289], [155, 179]],
+"playerGeneralIcon-jiangwanfeiyi-7": "image/generals/big/jiangwanfeiyi.png",
+"playerGeneralIcon-jiangwanfeiyi-8": "image/generals/kof/jiangwanfeiyi.png",
 
 // buttons
 "dashboardButtonSetBg": "image/system/button/platter/bg.png",
