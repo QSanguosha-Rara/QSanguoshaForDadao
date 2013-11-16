@@ -241,7 +241,7 @@ end
 
 sgs.ai_skill_invoke.shoucheng = function(self, data)
 	local target = data:toPlayer()
-	return (self:isFirend(p) and not self:needKongcheng(target, true)) or (self:isEnemy(p) and self:needKongcheng(target, true))
+	return (self:isFirend(target) and not self:needKongcheng(target, true)) or (self:isEnemy(target) and self:needKongcheng(target, true))
 end
 
 local shangyi_skill = {}
