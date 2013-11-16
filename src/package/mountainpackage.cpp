@@ -1208,8 +1208,7 @@ public:
 
         static QSet<QString> banned;
         if (banned.isEmpty()) {
-            banned << "zuoci" << "guzhielai" << "dengshizai" << "caochong"
-                   << "jiangboyue" << "bgm_xiahoudun";
+            banned << "zuoci" << "guzhielai" << "dengshizai" << "yuanshu";
         }
 
         return (all - banned - huashen_set - room_set).toList();
