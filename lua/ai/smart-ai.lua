@@ -1564,7 +1564,7 @@ function SmartAI:getFriendsNoself(player)
 	player = player or self.player
 	local friends_noself = {}
 	for _, p in sgs.qlist(self.room:getAlivePlayers()) do
-		if self:isFriend(p, player) and p:objectName() ~= player:objectName() then table.insert(friends_noself, p) end
+		if self:isFriend(player, p) and p:objectName() ~= player:objectName() then table.insert(friends_noself, p) end
 	end
 	return friends_noself
 end
@@ -1573,7 +1573,7 @@ function SmartAI:getFriends(player)
 	player = player or self.player
 	local friends = {}
 	for _, p in sgs.qlist(self.room:getAlivePlayers()) do
-		if self:isFriend(p, player) then table.insert(friends, p) end
+		if self:isFriend(player, p) then table.insert(friends, p) end
 	end
 	return friends
 end
@@ -1581,7 +1581,7 @@ end
 function SmartAI:getEnemies(player)
 	local enemies = {}
 	for _, p in sgs.qlist(self.room:getAlivePlayers()) do
-		if self:isEnemy(p, player) then table.insert(enemies, p) end
+		if self:isEnemy(player, p) then table.insert(enemies, p) end
 	end
 	return enemies
 end
