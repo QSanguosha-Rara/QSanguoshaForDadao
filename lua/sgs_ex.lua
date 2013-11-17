@@ -181,26 +181,26 @@ function sgs.CreateFakeMoveSkill(spec)
 		skillname = spec.skillname
 	end
 	
-	local theskill = {
-		name = skillname .. "-fake-move" ,
-		events = {sgs.BeforeCardsMove, sgs.CardsMoveOneTime} ,
-		priority = 10 ,
-		can_trigger = function(self, player)
-			return player
-		end ,
-		on_trigger = function(self, event, player, data)
-			local room = player:getRoom()
-			local flag = skillname .. "_InTempMoving"
-			
-			for _, p in sgs.qlist(room:getAllPlayers()) do
-				if p:hasFlag(flag) then return true end
-			end
-			
-			return false
-		end ,
-	}
+	local fakemove = sgs.LuaTriggerSkill("#" .. skillname .. "-fake-move", sgs.Skill_NotFrequent, "")
+	fakemove:addEvent(sgs.BeforeCardsMove)
+	fakemove:addEvent(sgs.CardsMoveOneTime)
+	fakemove.priority = 10
+	function fakemove.can_trigger(skill, player)
+		return player
+	end
+	function fakemove.on_trigger(skill, event, player, data)
+		local room = player:getRoom()
+		local flag = skillname .. "_InTempMoving"
+		
+		for _, p in sgs.qlist(room:getAllPlayers()) do
+			if p:hasFlag(flag) then return true end
+		end
+		
+		return false
+	end
 	
-	return sgs.CreateTriggerSkill(theskill)
+	return fakemove
+	
 end
 
 --------------------------------------------
