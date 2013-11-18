@@ -1227,3 +1227,57 @@ sgs.ai_skill_choice.neo2013kunxiang = function(self, choices)
 	return "draw"
 end
 
+
+function sgs.ai_skill_invoke.neo2013zongxuan(self, data)
+	local move = data:toMoveOneTime()
+	local id = move.card_ids:at(0)
+	local card = sgs.Sanguosha:getCard(id)
+	if self:needToThrowArmor()  then return true end
+	local hcards = sgs.QList2Table(self.player:getCards("h"))
+	local ecards = sgs.QList2Table(self.player:getCards("e"))
+	self:sortByCardNeed(ecards)
+	self:sortByCardNeed(hcards)
+	if self:hasSkills(sgs.lose_equip_skill) and not self.player:getEquips():isEmpty() then
+		for _, ecard in ipairs(ecards) do
+			if ecard then return true end
+		end
+	end
+	if card:isKindOf("Slash") and not self:slashIsAvailable() then return false end
+	for _, hcard in ipairs(hcards) do
+		if self:getUseValue(hcard) < self:getUseValue(card) and not self:isValuableCard(hcard) then return true end
+	end
+	return
+end
+sgs.ai_skill_discard.neo2013zongxuan = function(self, discard_num, min_num, optional, include_equip)
+	if self:needToThrowArmor()  then return {self.player:getArmor():getEffectiveId()} end
+	local hcards = sgs.QList2Table(self.player:getCards("h"))
+	local ecards = sgs.QList2Table(self.player:getCards("e"))
+	self:sortByCardNeed(ecards)
+	self:sortByCardNeed(hcards)
+	if self:hasSkills(sgs.lose_equip_skill) and not self.player:getEquips():isEmpty() then
+		for _, ecard in ipairs(ecards) do
+			if ecard then return {ecard:getEffectiveId()} end
+		end
+	end
+	if self.player:isNude() or self:needBear() or self:isWeak() then return {} end
+	local idtable = {JS_Card(self)} or self:askForDiscard("dummyreason", 1, 1, true, true)
+	return idtable
+end
+
+sgs.ai_skill_choice.neo2013zongxuan = function(self, choices, data)
+	local card = data:toCard()
+	local from = self.room:getCurrent()
+	local near = from:getNextAlive()
+	if not near then return "zongxuanup" end
+	if self:isFriend(near) then
+		if self:getUseValue(card) > 6 or card:isKindOf("Peach") or self:isValuableCard(card) then return "zongxuanup" end
+		if near:containsTrick("indulgence") and not near:containsTrick("YanxiaoCard") 
+			and card:getSuit() == sgs.Card_Heart then return "zongxuanup" end
+		return "zongxuandown"	
+	elseif self:isEnemy(near) then
+		if self:getUseValue(card) < 6 or not self:isValuableCard(card, near) then return "zongxuanup" end
+		if near:containsTrick("indulgence") and not near:containsTrick("YanxiaoCard") 
+			and card:getSuit() == sgs.Card_Heart then return "zongxuandown" end
+		return "zongxuandown"	
+	end	
+end
