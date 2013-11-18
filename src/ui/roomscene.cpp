@@ -3502,16 +3502,15 @@ void RoomScene::onGameStart() {
         Audio::setBGMVolume(Config.BGMVolume);*/
     if (Config.EnableBgMusic) {
         // start playing background music
-		QStringList bgms;
-		QString bgmusic_path = Config.value("BackgroundMusic", "audio/system/background.ogg").toString();
-		for(int i = 1; ; i++)
-		{
-        QString effect_file = QString("audio/bgm/%1.ogg").arg(QString::number(i));
+	QStringList bgms;
+	QString bgmusic_path = Config.value("BackgroundMusic", "audio/system/background.ogg").toString();
+	for(int i = 1; ; i++){
+        QString effect_file = QString("audio/extrabgm/%1.ogg").arg(QString::number(i));
         if(QFile::exists(effect_file))
             bgms << effect_file;
         else
             break;
-		}
+	}
 		bgms << bgmusic_path;
 		QString bgmusic = bgms[qrand() % bgms.length()]
 		Audio::stopBGM();
