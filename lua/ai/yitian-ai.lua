@@ -1,3 +1,14 @@
+sgs.ai_skill_playerchosen["yitian-lost"] = function(self, targets)
+	local targetlist = sgs.QList2Table(targets)
+	self:sort(targetlist, "hp")
+	for _, target in ipairs(targetlist) do
+		if self:isEnemy(target) then return target end
+	end
+	return nil
+end
+sgs.ai_playerchosen_intention["yitian-lost"] = 80
+
+
 --[[
 	技能：归心
 	描述：回合结束阶段，你可以做以下二选一：
