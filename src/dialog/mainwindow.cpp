@@ -96,6 +96,26 @@ MainWindow::MainWindow(QWidget *parent)
             << ui->actionScenario_Overview
             << ui->actionAbout
             << ui->actionAbout_Us;
+            
+#ifdef AUDIO_SUPPORT
+
+
+    if(Config.EnableBgMusic)
+    {
+		QStringList bgms;
+        QString bgm = "audio/extrabgm/mainx.ogg";
+		QString bgm1 = "audio/extrabgm/mainy.ogg";
+        if (QFile::exists(bgm))  bgms << bgm;
+		if (QFile::exists(bgm1))  bgms << bgm1;
+		if (!bgms.isEmpty()){
+            Audio::stopBGM();
+            Audio::playBGM(bgms[qrand() % bgms.length()]);
+            Audio::setBGMVolume(Config.BGMVolume);
+        }
+    }
+
+
+#endif	       
 
     foreach (QAction *action, actions)
         start_scene->addButton(action);
