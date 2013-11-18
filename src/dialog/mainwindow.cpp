@@ -354,11 +354,11 @@ void MainWindow::gotoStartScene() {
     if(Config.EnableBgMusic)
     {
 		QStringList bgms;
-        QString bgm = "audio/system/mainx.ogg";
-		QString bgm1 = "audio/system/mainy.ogg";
+        QString bgm = "audio/extrabgm/mainx.ogg";
+	QString bgm1 = "audio/extrabgm/mainy.ogg";
         if (QFile::exists(bgm))  bgms << bgm;
-		if (QFile::exists(bgm1))  bgms << bgm1;
-		if (!bgms.isEmpty()){
+	if (QFile::exists(bgm1))  bgms << bgm1;
+	if (!bgms.isEmpty()){
             Audio::stopBGM();
             Audio::playBGM(bgms[qrand() % bgms.length()]);
             Audio::setBGMVolume(Config.BGMVolume);
