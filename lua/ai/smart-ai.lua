@@ -138,6 +138,27 @@ function setInitialTables()
 
 end
 
+--[[****************************************************************
+	身份数目计算
+	功能：获取当前身份的数目
+	参数：role
+	结果：number
+]]--****************************************************************
+function SmartAI:role_num(role)
+    if not role then self.room:writeToConsole(debug.traceback()) return end
+    local rebel_num = 0
+	local loyal_num = 0
+	local renegade_num = 0
+    for _, p in sgs.qlist(self.room:getAlivePlayers()) do
+	    if p:getRole() == "loyalist" then loyal_num = loyal_num + 1 end
+		if p:getRole() == "rebel" then rebel_num = rebel_num + 1 end
+		if p:getRole() == "renegade" then renegade_num = renegade_num + 1 end
+	end
+	if role == "loyalist" then return loyal_num end
+	if role == "rebel" then return rebel_num end
+	if role == "renegade" then return renegade_num end
+end
+
 function SmartAI:initialize(player)
 	self.player = player
 	self.room = player:getRoom()
@@ -1602,7 +1623,7 @@ function SmartAI:updateAlivePlayerRoles()
 		sgs.current_mode_players[arole] = 0
 	end
 	for _, aplayer in sgs.qlist(self.room:getAllPlayers()) do
-		sgs.current_mode_players[aplayer:getRole()] = sgs.current_mode_players[aplayer:getRole()] + 1
+		sgs.current_mode_players[aplayer:getRole()] = self:role_num(aplayer:getRole())
 	end
 	sgs.checkMisjudge()
 end
@@ -1677,7 +1698,7 @@ function SmartAI:updatePlayers(clear_flags)
 	end	
 	table.insert(self.friends,self.player)
 
-	if sgs.isRolePredictable() or self.player:getMark("Global_TurnCount") > 1 then return end
+	if sgs.isRolePredictable() then return end
 	self:updateAlivePlayerRoles()
 	sgs.evaluateAlivePlayersRole()
 end
@@ -1696,14 +1717,28 @@ function sgs.evaluateAlivePlayersRole()
 			sgs.ai_role[p:objectName()] = "renegade"
 			sgs.explicit_renegade = true
 		else
-			if (sgs.role_evaluation[p:objectName()]["loyalist"] > 0 and sgs.current_mode_players["loyalist"] > 0) or p:isLord() then
-				sgs.ai_role[p:objectName()] = "loyalist"
-			elseif sgs.role_evaluation[p:objectName()]["loyalist"] < 0 and sgs.current_mode_players["rebel"] > 0 then
-				sgs.ai_role[p:objectName()] = "rebel"
+			if p:getMark("Global_TurnCount") > 1 then
+			    if p:getRole() == "loyalist" or p:isLord() then
+				    sgs.ai_role[p:objectName()] = "loyalist"
+				elseif p:getRole() == "rebel" then
+				    sgs.ai_role[p:objectName()] = "rebel"
+				else
+				    if sgs.role_evaluation[p:objectName()]["loyalist"] == 0 then
+					    sgs.ai_role[p:objectName()] = "neutral"
+					else
+					    sgs.ai_role[p:objectName()] = "renegade"
+					end
+				end
 			else
-				if sgs.role_evaluation[p:objectName()]["loyalist"] > 0  then sgs.ai_role[p:objectName()] = "loyalist" end
-				if sgs.role_evaluation[p:objectName()]["loyalist"] < 0  then sgs.ai_role[p:objectName()] = "rebel" end
-				if sgs.role_evaluation[p:objectName()]["loyalist"] == 0 then sgs.ai_role[p:objectName()] = "neutral" end
+			    if (sgs.role_evaluation[p:objectName()]["loyalist"] > 0 and sgs.current_mode_players["loyalist"] > 0) or p:isLord() then
+				    sgs.ai_role[p:objectName()] = "loyalist"
+			    elseif sgs.role_evaluation[p:objectName()]["loyalist"] < 0 and sgs.current_mode_players["rebel"] > 0 then
+				    sgs.ai_role[p:objectName()] = "rebel"
+			    else
+				    if sgs.role_evaluation[p:objectName()]["loyalist"] > 0  then sgs.ai_role[p:objectName()] = "loyalist" end
+				    if sgs.role_evaluation[p:objectName()]["loyalist"] < 0  then sgs.ai_role[p:objectName()] = "rebel" end
+				    if sgs.role_evaluation[p:objectName()]["loyalist"] == 0 then sgs.ai_role[p:objectName()] = "neutral" end
+			    end
 			end
 		end
 		if sgs.current_mode_players["rebel"] == 0 and sgs.current_mode_players["loyalist"] == 0 and not p:isLord() then
