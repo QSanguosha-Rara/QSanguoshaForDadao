@@ -761,6 +761,10 @@ public:
         return target != NULL;
     }
 
+    virtual int getPriority() const{
+        return -1;
+    }
+
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         PindianStar pindian = data.value<PindianStar>();
         if (pindian->reason != objectName() || pindian->from_number == pindian->to_number)
@@ -1674,31 +1678,43 @@ public:
     }
 };
 
-class Kangkai: public TriggerSkill{
+class Kangkai: public TriggerSkill {
 public:
-    Kangkai(): TriggerSkill("kangkai"){
+    Kangkai(): TriggerSkill("kangkai") {
         events << TargetConfirmed;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
-        if (use.card == NULL || !use.card->isKindOf("Slash"))
-            return false;
-        foreach(ServerPlayer *p, use.to){
-            if ((player->distanceTo(p) <= 1 || player == p) && player->askForSkillInvoke(objectName(), QVariant::fromValue(p))){
-                player->drawCards(1);
-                if (player != p){
-                    const Card *c = room->askForExchange(player, objectName(), 1);
-                    const Card *realcard = Sanguosha->getCard(c->getEffectiveId());
-
-                    p->obtainCard(realcard, true);
-                    if (realcard->isKindOf("EquipCard") && (room->askForChoice(p, objectName(), "use+dismiss", QVariant::fromValue(realcard)) == "use")){
-                        room->useCard(CardUseStruct(realcard, p, p));
-                    }
+        if (use.card->isKindOf("Slash")) {
+            foreach (ServerPlayer *to, use.to) {
+                if (!player->isAlive()) break;
+                if (player->distanceTo(to) <= 1 && TriggerSkill::triggerable(player)
+                    && room->askForSkillInvoke(player, objectName(), QVariant::fromValue((PlayerStar)to))) {
+                        player->drawCards(1);
+                        if (!player->isNude() && player != to) {
+                            const Card *card = NULL;
+                            if (player->getCardCount() > 1) {
+                                card = room->askForCard(player, "..!", "@kangkai-give:" + to->objectName(), data, Card::MethodNone);
+                                if (!card)
+                                    card = player->getCards("he").at(qrand() % player->getCardCount());
+                            } else {
+                                Q_ASSERT(player->getCardCount() == 1);
+                                card = player->getCards("he").first();
+                            }
+                            to->obtainCard(card);
+                            if (card->getTypeId() == Card::TypeEquip && room->getCardOwner(card->getEffectiveId()) == to
+                                && !to->isLocked(card)) {
+                                    to->tag["KangkaiSlash"] = data;
+                                    bool will_use = room->askForSkillInvoke(to, "kangkai_use", "use");
+                                    to->tag.remove("KangkaiSlash");
+                                    if (will_use)
+                                        room->useCard(CardUseStruct(card, to, to));
+                            }
+                        }
                 }
             }
         }
-
         return false;
     }
 };
@@ -2133,7 +2149,7 @@ public:
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *, QVariant &data) const{
         DyingStruct dying = data.value<DyingStruct>();
-        if (dying.damage && dying.damage->getReason() == "duwu") {
+        if (dying.damage && dying.damage->getReason() == "duwu" && !dying.damage->chain && !dying.damage->transfer) {
             ServerPlayer *from = dying.damage->from;
             if (from && from->isAlive()) {
                 room->setPlayerFlag(from, "DuwuEnterDying");
