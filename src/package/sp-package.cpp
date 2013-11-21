@@ -7,6 +7,7 @@
 #include "maneuvering.h"
 #include "wisdompackage.h"
 #include "settings.h"
+#include "ai.h"
 
 class SPMoonSpearSkill: public WeaponSkill {
 public:
@@ -1702,6 +1703,195 @@ public:
     }
 };
 
+
+HongyuanCard::HongyuanCard() {
+    mute = true;
+}
+
+bool HongyuanCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
+    return targets.length() <= 2 && !targets.contains(Self);
+}
+
+bool HongyuanCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return to_select != Self && targets.length() < 2;
+}
+
+void HongyuanCard::onEffect(const CardEffectStruct &effect) const{
+    effect.to->setFlags("HongyuanTarget");
+}
+
+class HongyuanViewAsSkill: public ZeroCardViewAsSkill {
+public:
+    HongyuanViewAsSkill(): ZeroCardViewAsSkill("hongyuan") {
+        response_pattern = "@@hongyuan";
+    }
+
+    virtual const Card *viewAs() const{
+        return new HongyuanCard;
+    }
+};
+
+class Hongyuan: public DrawCardsSkill {
+public:
+    Hongyuan(): DrawCardsSkill("hongyuan") {
+        frequency = NotFrequent;
+        view_as_skill = new HongyuanViewAsSkill;
+    }
+
+    virtual int getDrawNum(ServerPlayer *zhugejin, int n) const{
+        Room *room = zhugejin->getRoom();
+        bool invoke = false;
+        if (room->getMode().startsWith("06_"))
+            invoke = room->askForSkillInvoke(zhugejin, objectName());
+        else
+            invoke = room->askForUseCard(zhugejin, "@@hongyuan", "@hongyuan");
+        if (invoke) {
+            room->broadcastSkillInvoke(objectName());
+            zhugejin->setFlags("hongyuan");
+            return n - 1;
+        } else
+            return n;
+    }
+};
+
+class HongyuanDraw: public TriggerSkill {
+public:
+    HongyuanDraw(): TriggerSkill("#hongyuan") {
+        events << AfterDrawNCards;
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
+        if (!player->hasFlag("hongyuan"))
+            return false;
+        player->setFlags("-hongyuan");
+
+        QList<ServerPlayer *> targets;
+        foreach (ServerPlayer *p, room->getOtherPlayers(player)) {
+            if (room->getMode().startsWith("06_")) {
+                if (AI::GetRelation3v3(player, p) == AI::Friend)
+                    targets << p;
+            } else if (p->hasFlag("HongyuanTarget")) {
+                p->setFlags("-HongyuanTarget");
+                targets << p;
+            }
+        }
+
+        if (targets.isEmpty()) return false;
+        room->drawCards(targets, 1, "hongyuan");
+        return false;
+    }
+};
+
+class Huanshi: public TriggerSkill {
+public:
+    Huanshi(): TriggerSkill("huanshi") {
+        events << AskForRetrial;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return TriggerSkill::triggerable(target) && !target->isNude();
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        JudgeStruct *judge = data.value<JudgeStruct *>();
+        const Card *retrial = NULL;
+
+        if (room->getMode().startsWith("06_")){
+            if (AI::GetRelation3v3(player, judge->who) == AI::Friend){
+                QStringList prompt_list;
+                prompt_list << "@huanshi-card" << judge->who->objectName()
+                    << objectName() << judge->reason << QString::number(judge->card->getEffectiveId());
+                QString prompt = prompt_list.join(":");
+
+                retrial = room->askForCard(player, "..", prompt, data, Card::MethodResponse, judge->who, true);
+            }
+        }
+        else {
+            if (player->askForSkillInvoke(objectName(), data)){
+                int id = room->doGongxin(judge->who, player, player->handCards(), "huanshi");
+                judge->who->tag.remove("huanshi");
+                if (id != -1)
+                    retrial = Sanguosha->getCard(id);
+            }
+        }
+       
+        if (retrial != NULL) {
+            room->broadcastSkillInvoke(objectName());
+            room->retrial(retrial, player, judge, objectName());
+        }
+
+
+        return false;
+    }
+};
+
+class Mingzhe: public TriggerSkill {
+public:
+    Mingzhe(): TriggerSkill("mingzhe") {
+        events << BeforeCardsMove << CardsMoveOneTime << CardUsed << CardResponded;
+        frequency = Frequent;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (player->getPhase() != Player::NotActive) return false;
+        if (triggerEvent == BeforeCardsMove || triggerEvent == CardsMoveOneTime) {
+            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+            if (move.from != player) return false;
+
+            if (triggerEvent == BeforeCardsMove) {
+                CardMoveReason reason = move.reason;
+                if ((reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD) {
+                    const Card *card;
+                    int i = 0;
+                    foreach (int card_id, move.card_ids) {
+                        card = Sanguosha->getCard(card_id);
+                        if (room->getCardOwner(card_id) == player && card->isRed()
+                            && (move.from_places[i] == Player::PlaceHand
+                            || move.from_places[i] == Player::PlaceEquip)) {
+                                player->addMark(objectName());
+                        }
+                        i++;
+                    }
+                }
+            } else {
+                int n = player->getMark(objectName());
+                try {
+                    for (int i = 0; i < n; i++) {
+                        player->removeMark(objectName());
+                        if (player->isAlive() && player->askForSkillInvoke(objectName(), data)) {
+                            room->broadcastSkillInvoke(objectName());
+                            player->drawCards(1);
+                        } else {
+                            break;
+                        }
+                    }
+                    player->setMark(objectName(), 0);
+                }
+                catch (TriggerEvent triggerEvent) {
+                    if (triggerEvent == TurnBroken || triggerEvent == StageChange)
+                        player->setMark(objectName(), 0);
+                    throw triggerEvent;
+                }
+            }
+        } else {
+            CardStar card = NULL;
+            if (triggerEvent == CardUsed) {
+                CardUseStruct use = data.value<CardUseStruct>();
+                card = use.card;
+            } else if (triggerEvent == CardResponded) {
+                CardResponseStruct resp = data.value<CardResponseStruct>();
+                card = resp.m_card;
+            }
+            if (card && card->isRed() && player->askForSkillInvoke(objectName(), data)) {
+                room->broadcastSkillInvoke(objectName());
+                player->drawCards(1);
+            }
+        }
+        return false;
+    }
+};
+
+
 #include "jsonutils.h"
 class AocaiViewAsSkill: public ZeroCardViewAsSkill {
 public:
@@ -2320,6 +2510,14 @@ SPPackage::SPPackage()
     General *caoang = new General(this, "caoang", "wei", 4);
     caoang->addSkill(new Kangkai);
 
+    General *zhugejin = new General(this, "zhugejin", "wu", 3); // SP 027
+    zhugejin->addSkill(new Hongyuan);
+    zhugejin->addSkill(new HongyuanDraw);
+    zhugejin->addSkill(new Huanshi);
+    zhugejin->addSkill(new Mingzhe);
+    related_skills.insertMulti("hongyuan", "#hongyuan");
+
+    addMetaObject<HongyuanCard>();
     addMetaObject<WeidiCard>();
     addMetaObject<YuanhuCard>();
     addMetaObject<XuejiCard>();

@@ -155,6 +155,25 @@ return {
 	["kangkai:use"] = "使用此装备" ,
 	["kangkai:dismiss"] = "取消" ,
 	
+	["#zhugejin"] = "联盟的维系者",
+	["zhugejin"] = "诸葛瑾",
+	["illustrator:zhugejin"] = "LiuHeng",
+	["hongyuan"] = "弘援",
+	[":hongyuan"] = "摸牌阶段，你可以少摸一张牌，令至多两名其他角色各摸一张牌。\
+3v3：摸牌阶段，你可以少摸一张牌，令其他己方角色各摸一张牌。" ,
+	["@hongyuan"] = "你可以发动“弘援”",
+	["~hongyuan"] = "选择 0-2 名其他角色→点击确定",
+	["huanshi"] = "缓释",
+	[":huanshi"] = "身份局：每当一名角色的判定牌生效前，你可以令其观看你的手牌，其可以选择其中一张，你打出此牌代替之。\
+3v3：每当己方角色的判定牌生效前，你可以打出一张牌代替之。" ,
+	["@huanshi-card"] = CommonTranslationTable["@askforretrial"],
+	["~huanshi"] = "选择一张牌→点击确定",
+	["huanshi:accept"] = "接受改判",
+	["huanshi:reject"] = "拒绝改判",
+	["mingzhe"] = "明哲",
+	[":mingzhe"] = "每当你于回合外使用、打出或因弃置而失去一张红色牌时，你可以摸一张牌。",
+
+	
 	
 	["OL"] = "OL专属",
 
