@@ -1787,6 +1787,28 @@ public:
     }
 };
 
+class ChiJiao: public TriggerSkill{
+public:
+    ChiJiao(): TriggerSkill("chijiao"){
+        events << CardsMoveOneTime << EventPhaseStart;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == CardsMoveOneTime){
+            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+            if (move.to_place == Player::DiscardPile && move.from == player
+                    && (move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD){
+                player->addToPile("jiao", move.card_ids, true);
+            }
+        }
+        else if (player->getPhase() == Player::Finish){
+            player->obtainCard(&DummyCard(player->getPile("jiao")));
+        }
+        return false;
+    }
+};
+
 TestPackage::TestPackage()
     : Package("test")
 {
@@ -1828,6 +1850,19 @@ TestPackage::TestPackage()
     new General(this, "anjiang", "god", 4, true, true, true);
 
     skills << new SuperMaxCards << new SuperOffensiveDistance << new SuperDefensiveDistance;
+
+    General *rara = new General(this, "Rara", "god", 8, false);
+    rara->addSkill(new Dashen);
+    rara->addSkill(new Qianxu);
+
+    General *nimeidashen = new General(this, "jiaoshenmeanimei", "god", 8);
+    nimeidashen->addSkill(new Nimei);
+
+    General *funima = new General(this, "funima", "god", 1);
+    funima->addSkill(new Nima);
+
+    General *lzxqqqq = new General(this, "lzxqqqq", "god", 5);
+    lzxqqqq->addSkill(new ChiJiao);
 
     addMetaObject<NimeiCard>();
     addMetaObject<NimaCard>();
