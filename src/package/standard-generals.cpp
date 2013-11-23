@@ -1733,6 +1733,60 @@ public:
     }
 };
 
+class Dashen: public DrawCardsSkill{
+public:
+    Dashen(): DrawCardsSkill("dashen"){
+
+    }
+
+    virtual int getDrawNum(ServerPlayer *player, int n) const{
+        return n * player->getMark("Global_TurnCount");
+    }
+};
+
+class Qianxu: public TriggerSkill{
+public:
+    Qianxu(): TriggerSkill("qianxu"){
+        events << Damage << Damaged;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        player->drawCards(data.value<DamageStruct>().damage * player->getMark("Global_TurnCount"));
+        return false;
+    }
+};
+
+class Nimei: public ZeroCardViewAsSkill{
+public:
+    Nimei(): ZeroCardViewAsSkill("nimei"){
+
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("NimeiCard");
+    }
+
+    virtual const Card *viewAs() const{
+        return new NimeiCard;
+    }
+};
+
+class Nima: public ZeroCardViewAsSkill{
+public:
+    Nima(): ZeroCardViewAsSkill("nima"){
+
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("NimaCard");
+    }
+
+    virtual const Card *viewAs() const{
+        return new NimaCard;
+    }
+};
+
 TestPackage::TestPackage()
     : Package("test")
 {
@@ -1774,6 +1828,9 @@ TestPackage::TestPackage()
     new General(this, "anjiang", "god", 4, true, true, true);
 
     skills << new SuperMaxCards << new SuperOffensiveDistance << new SuperDefensiveDistance;
+
+    addMetaObject<NimeiCard>();
+    addMetaObject<NimaCard>();
 }
 
 ADD_PACKAGE(Test)

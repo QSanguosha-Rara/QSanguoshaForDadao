@@ -339,3 +339,28 @@ const Card *JijiangCard::validate(CardUseStruct &cardUse) const{
     return NULL;
 }
 
+NimeiCard::NimeiCard(){
+
+}
+
+bool NimeiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return to_select != Self && !to_select->canDiscard(to_select, "he");
+}
+
+void NimeiCard::onEffect(const CardEffectStruct &effect) const{
+    int num = qMax(effect.to->getHp(), 1);
+    effect.to->getRoom()->askForDiscard(effect.to, "nimei", num, num, false, true, "@nimei-discard:" + QString::number(num));
+}
+
+NimaCard::NimaCard(){
+
+}
+
+bool NimaCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return to_select != Self;
+}
+
+void NimaCard::onEffect(const CardEffectStruct &effect) const{
+    int num = qMax(effect.to->getHp(), 1);
+    effect.to->drawCards(num);
+}
