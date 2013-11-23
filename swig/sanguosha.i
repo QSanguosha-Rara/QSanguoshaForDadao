@@ -1179,6 +1179,7 @@ public:
     void moveCardsAtomic(CardsMoveStruct cards_move, bool forceMoveVisible);
     void moveCards(CardsMoveStruct cards_move, bool forceMoveVisible, bool ignoreChanges = true);
     void moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible, bool ignoreChanges = true);
+	void moveCardsToEndOfDrawpile(QList<int> card_ids);
 
     // interactive methods
     void activate(ServerPlayer *player, CardUseStruct &card_use);
