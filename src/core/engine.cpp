@@ -585,7 +585,7 @@ QString Engine::getVersionName() const{
 }
 
 QString Engine::getMODName() const{
-    return "Rara-1130 Commemorative Version";
+    return "Rara";
 }
 
 QStringList Engine::getExtensions() const{
