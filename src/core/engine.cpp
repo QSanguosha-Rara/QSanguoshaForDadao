@@ -85,6 +85,8 @@ Engine::Engine()
     foreach (QString name, package_names)
         addPackage(name);
 
+    SurprisingGenerals = GetConfigFromLuaState(lua, "surprising_generals").toStringList();
+
     _loadMiniScenarios();
     _loadModScenarios();
     m_customScene = new CustomScenario();

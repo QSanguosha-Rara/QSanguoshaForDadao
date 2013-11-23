@@ -66,8 +66,7 @@ bool General::isTotallyHidden() const{
 }
 
 bool General::isVisible() const{
-    return !GetConfigFromLuaState(Sanguosha->getLuaState(), "surprising_generals")
-            .toStringList().contains(objectName())
+    return !Sanguosha->SurprisingGenerals.contains(objectName())
             || Config.KnownSurprisingGenerals.contains(objectName());
 }
 

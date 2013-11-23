@@ -123,6 +123,8 @@ public:
     QString findConvertFrom(const QString &general_name) const;
     bool isGeneralHidden(const QString &general_name) const;
 
+    QStringList SurprisingGenerals;
+
 private:
     void _loadMiniScenarios();
     void _loadModScenarios();
