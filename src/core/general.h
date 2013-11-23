@@ -36,6 +36,8 @@ public:
     bool isHidden() const;
     bool isTotallyHidden() const;
 
+    bool isVisible() const;
+
     enum Gender { Sexless, Male, Female, Neuter };
     Gender getGender() const;
     void setGender(Gender gender);

@@ -292,6 +292,9 @@ QWidget *ServerDialog::createAdvancedTab() {
     hegemony_maxshown_spinbox->setRange(1, 11);
     hegemony_maxshown_spinbox->setValue(Config.value("HegemonyMaxShown", 2).toInt());
 
+    enable_surprising_generals_checkbox = new QCheckBox(tr("Enable surprising generals"));
+    enable_surprising_generals_checkbox->setChecked(Config.EnableSurprisingGenerals);
+
     address_edit = new QLineEdit;
     address_edit->setText(Config.Address);
 #if QT_VERSION >= 0x040700
@@ -325,6 +328,7 @@ QWidget *ServerDialog::createAdvancedTab() {
     layout->addLayout(HLay(hegemony_maxchoice_label, hegemony_maxchoice_spinbox));
     layout->addLayout(HLay(hegemony_maxshown_label, hegemony_maxshown_spinbox));
     layout->addWidget(same_checkbox);
+    layout->addWidget(enable_surprising_generals_checkbox);
     layout->addLayout(HLay(new QLabel(tr("Address")), address_edit));
     layout->addWidget(detect_button);
     layout->addLayout(HLay(new QLabel(tr("Port")), port_edit));
@@ -1052,6 +1056,7 @@ bool ServerDialog::config() {
         Config.Scheme0Subtraction = 3;
         Config.PreventAwakenBelow3 = prevent_awaken_below3_checkbox->isChecked();
     }
+    Config.EnableSurprisingGenerals = enable_surprising_generals_checkbox->isChecked();
     Config.Address = address_edit->text();
     Config.CountDownSeconds = game_start_spinbox->value();
     Config.NullificationCountDown = nullification_spinbox->value();

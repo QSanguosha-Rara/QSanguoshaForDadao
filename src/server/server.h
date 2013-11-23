@@ -146,6 +146,8 @@ private:
     QComboBox *role_choose_xmode_ComboBox;
     QCheckBox *disable_lua_checkbox;
 
+    QCheckBox *enable_surprising_generals_checkbox;
+
     QButtonGroup *extension_group;
     QButtonGroup *mode_group;
 

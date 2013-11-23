@@ -504,6 +504,9 @@ void RoomScene::handleGameEvent(const Json::Value &arg) {
             if (newHero) {
                 foreach (const Skill *skill, newHero->getVisibleSkills())
                     attachSkill(skill->objectName(), false);
+                if (!newHero->isVisible())
+                    Config.KnownSurprisingGenerals.append(newHeroName);
+                    Config.setValue("KnownSurprisingGenerals", Config.KnownSurprisingGenerals);
             }
             break;
         }

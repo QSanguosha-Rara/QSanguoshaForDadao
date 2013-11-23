@@ -447,6 +447,7 @@ QString Engine::findConvertFrom(const QString &general_name) const{
 bool Engine::isGeneralHidden(const QString &general_name) const{
     const General *general = getGeneral(general_name);
     if (!general) return false;
+    if (!general->isVisible()) return false;
     if (!general->isHidden())
         return Config.ExtraHiddenGenerals.contains(general_name);
     else
@@ -570,16 +571,11 @@ SkillCard *Engine::cloneSkillCard(const QString &name) const{
 }
 
 QString Engine::getVersionNumber() const{
-    return "20131121";
+    return "20131130";
 }
 
 QString Engine::getVersion() const{
-    QString version_number = getVersionNumber();
-    QString mod_name = getMODName();
-    if(mod_name == "official")
-        return version_number;
-    else
-        return QString("%1:%2").arg(version_number).arg(mod_name);
+    return QString("%1:%2").arg(getVersionNumber()).arg(getMODName());
 }
 
 QString Engine::getVersionName() const{
@@ -587,7 +583,7 @@ QString Engine::getVersionName() const{
 }
 
 QString Engine::getMODName() const{
-    return "Rara";
+    return "Rara-1130 Commemorative Version";
 }
 
 QStringList Engine::getExtensions() const{

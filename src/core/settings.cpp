@@ -132,6 +132,9 @@ void Settings::init() {
     BackgroundImage = value("BackgroundImage", "backdrop/new-version.jpg").toString();
     TableBgImage = value("TableBgImage", "backdrop/default.jpg").toString();
 
+    EnableSurprisingGenerals = value("EnableSurprisingGenerals", false).toBool();
+    KnownSurprisingGenerals = value("KnownSurprisingGenerals", QStringList()).toStringList();
+
     lua_State *lua = Sanguosha->getLuaState();
     QStringList roles_ban, kof_ban, hulao_ban, xmode_ban, basara_ban, hegemony_ban, pairs_ban;
 

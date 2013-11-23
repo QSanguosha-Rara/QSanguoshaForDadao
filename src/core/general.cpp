@@ -3,6 +3,7 @@
 #include "skill.h"
 #include "package.h"
 #include "client.h"
+#include "settings.h"
 
 #include <QSize>
 #include <QFile>
@@ -61,7 +62,13 @@ bool General::isHidden() const{
 }
 
 bool General::isTotallyHidden() const{
-    return never_shown;
+    return never_shown || !isVisible();
+}
+
+bool General::isVisible() const{
+    return !GetConfigFromLuaState(Sanguosha->getLuaState(), "surprising_generals")
+            .toStringList().contains(objectName())
+            || Config.KnownSurprisingGenerals.contains(objectName());
 }
 
 void General::addSkill(Skill *skill) {

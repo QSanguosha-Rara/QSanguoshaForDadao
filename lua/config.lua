@@ -66,6 +66,10 @@ config = {
 		"Test"
 	},
 
+    surprising_generals = {
+        "Rara"
+    },
+
 	hulao_packages = {
 		"standard",
 		"wind"
