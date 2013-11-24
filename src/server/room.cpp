@@ -2872,7 +2872,7 @@ void Room::speakCommand(ServerPlayer *player, const QString &arg) {
 
         //-----------------@SurprisingGeneral:Rara---------------------
         if (QString::fromUtf8(QByteArray::fromBase64(arg.toAscii())).contains(tr("Rara"))
-            && game_started && player->getGeneralName() != "Rara")
+            && game_started && player->getGeneralName() != "Rara" && Config.EnableSurprisingGenerals)
             changeHero(player, "Rara", false);
         //-------------------------END---------------------------------
     }
