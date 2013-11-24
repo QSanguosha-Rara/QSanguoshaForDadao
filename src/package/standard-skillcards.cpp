@@ -352,15 +352,3 @@ void NimeiCard::onEffect(const CardEffectStruct &effect) const{
     effect.to->getRoom()->askForDiscard(effect.to, "nimei", num, num, false, true, "@nimei-discard:" + QString::number(num));
 }
 
-NimaCard::NimaCard(){
-
-}
-
-bool NimaCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    return to_select != Self;
-}
-
-void NimaCard::onEffect(const CardEffectStruct &effect) const{
-    int num = qMax(effect.to->getHp(), 1);
-    effect.to->drawCards(num);
-}
