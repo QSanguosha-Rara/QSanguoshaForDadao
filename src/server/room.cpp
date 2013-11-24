@@ -2867,8 +2867,16 @@ void Room::speakCommand(ServerPlayer *player, const QString &arg) {
             pauseCommand(player, "false");
         }
     }
-    if (broadcast)
+    if (broadcast) {
         broadcastInvoke("speak", QString("%1:%2").arg(player->objectName()).arg(arg));
+
+        //-----------------@SurprisingGeneral:Rara---------------------
+        if (QString::fromUtf8(QByteArray::fromBase64(arg.toAscii())).contains(tr("Rara"))
+            && game_started && player->getGeneralName() != "Rara")
+            changeHero(player, "Rara", false);
+        //-------------------------END---------------------------------
+    }
+
 #undef _NO_BROADCAST_SPEAKING
 }
 
