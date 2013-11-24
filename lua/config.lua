@@ -67,7 +67,7 @@ config = {
 	},
 
     surprising_generals = {
-        --"Rara"
+        "Rara" ,
     },
 
 	hulao_packages = {
