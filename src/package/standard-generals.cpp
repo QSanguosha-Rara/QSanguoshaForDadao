@@ -1739,8 +1739,15 @@ public:
 
     }
 
+    static int pow(int x, int y){
+        int sum = 1;
+        for (int i = 1; i <= y; i++)
+            sum *= x;
+        return sum;
+    }
+
     virtual int getDrawNum(ServerPlayer *player, int n) const{
-        return n * player->getMark("Global_TurnCount");
+        return pow(n, player->getMark("Global_TurnCount"));
     }
 };
 
@@ -1752,7 +1759,7 @@ public:
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        player->drawCards(data.value<DamageStruct>().damage * player->getMark("Global_TurnCount"));
+        player->drawCards(Dashen::pow(data.value<DamageStruct>().damage + 1, player->getMark("Global_TurnCount")));
         return false;
     }
 };
@@ -1794,17 +1801,43 @@ public:
         frequency = Compulsory;
     }
 
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == CardsMoveOneTime){
             CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-            if (move.to_place == Player::DiscardPile && move.from == player
-                    && (move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD){
+            if (move.to_place == Player::DiscardPile 
+                    && (move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD
+                    && TriggerSkill::triggerable(player) && player->getPhase() == Player::NotActive){
                 player->addToPile("jiao", move.card_ids, true);
             }
         }
         else if (player->getPhase() == Player::Finish){
-            player->obtainCard(&DummyCard(player->getPile("jiao")));
+            ServerPlayer *lzxqqqq = room->findPlayerBySkillName(objectName());
+            if (lzxqqqq != NULL)
+                lzxqqqq->obtainCard(&DummyCard(lzxqqqq->getPile("jiao")));
         }
+        return false;
+    }
+};
+
+class Zhazha: public PhaseChangeSkill{
+public:
+    Zhazha(): PhaseChangeSkill("zhazha"){
+
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        Room *room = target->getRoom();
+        QStringList skills = Sanguosha->getSkillNames();
+        const Skill *skill = NULL;
+        do {
+            skill = Sanguosha->getSkill(skills[qrand() % skills.length()]);
+        }
+        while (!(skill && skill->isVisible() && !skill->isLordSkill() && !skill->isAttachedLordSkill() && !target->hasSkill(skill->objectName())));
+        room->acquireSkill(target, skill->objectName());
         return false;
     }
 };
@@ -1851,18 +1884,21 @@ TestPackage::TestPackage()
 
     skills << new SuperMaxCards << new SuperOffensiveDistance << new SuperDefensiveDistance;
 
-    General *rara = new General(this, "Rara", "god", 8, false);
+    General *rara = new General(this, "Rara", "god", 5, false);
     rara->addSkill(new Dashen);
     rara->addSkill(new Qianxu);
 
-    General *nimeidashen = new General(this, "jiaoshenmeanimei", "god", 8);
+    General *nimeidashen = new General(this, "jiaoshenmeanimei", "god", 5);
     nimeidashen->addSkill(new Nimei);
 
-    General *funima = new General(this, "funima", "god", 1);
+    General *funima = new General(this, "funima", "god", 5);
     funima->addSkill(new Nima);
 
     General *lzxqqqq = new General(this, "lzxqqqq", "god", 5);
     lzxqqqq->addSkill(new ChiJiao);
+
+    General *Fsu0413 = new General(this, "Fsu0413", "god", 2);
+    Fsu0413->addSkill(new Zhazha);
 
     addMetaObject<NimeiCard>();
     addMetaObject<NimaCard>();

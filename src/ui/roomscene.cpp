@@ -3543,30 +3543,13 @@ void RoomScene::onGameStart() {
     connect(Self, SIGNAL(skill_state_changed(QString)), this, SLOT(skillStateChange(QString)));
     trust_button->setEnabled(true);
 #ifdef AUDIO_SUPPORT
-         // start playing background music
-       /* QString bgmusic_path = Config.value("BackgroundMusic", "audio/system/background.ogg").toString();
-
-        Audio::playBGM(bgmusic_path);
-        Audio::setBGMVolume(Config.BGMVolume);*/
     if (Config.EnableBgMusic) {
         // start playing background music
-        QStringList bgms;
         QString bgmusic_path = Config.value("BackgroundMusic", "audio/system/background.ogg").toString();
-        for(int i = 1; ; i++){
-            QString effect_file = QString("audio/extrabgm/%1.ogg").arg(QString::number(i));
-            if(QFile::exists(effect_file))
-                bgms << effect_file;
-            else
-                break;
-        }
-        bgms << bgmusic_path;
-        QString bgmusic = bgms[qrand() % bgms.length()];
-        Audio::stopBGM();
-        Audio::playBGM(bgmusic);
+
+        Audio::playBGM(bgmusic_path);
         Audio::setBGMVolume(Config.BGMVolume);
-
     }
-
 #endif
     game_started = true;
 }
