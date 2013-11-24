@@ -1794,16 +1794,21 @@ public:
         frequency = Compulsory;
     }
 
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == CardsMoveOneTime){
             CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-            if (move.to_place == Player::DiscardPile && move.from == player
-                    && (move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD){
+            if (move.to_place == Player::DiscardPile && TriggerSkill::triggerable(player) && player->getPhase() == Player::NotActive){
                 player->addToPile("jiao", move.card_ids, true);
             }
         }
         else if (player->getPhase() == Player::Finish){
-            player->obtainCard(&DummyCard(player->getPile("jiao")));
+            ServerPlayer *lzxqqqq = room->findPlayerBySkillName(objectName());
+            if (lzxqqqq != NULL)
+                lzxqqqq->obtainCard(&DummyCard(lzxqqqq->getPile("jiao")));
         }
         return false;
     }
