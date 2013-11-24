@@ -1739,8 +1739,15 @@ public:
 
     }
 
+    static int pow(int x, int y){
+        int sum = 1;
+        for (int i = 1; i <= y; i++)
+            sum *= x;
+        return sum;
+    }
+
     virtual int getDrawNum(ServerPlayer *player, int n) const{
-        return n * player->getMark("Global_TurnCount");
+        return pow(n, player->getMark("Global_TurnCount"));
     }
 };
 
@@ -1752,7 +1759,7 @@ public:
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        player->drawCards(data.value<DamageStruct>().damage * player->getMark("Global_TurnCount"));
+        player->drawCards(Dashen::pow(data.value<DamageStruct>().damage + 1, player->getMark("Global_TurnCount")));
         return false;
     }
 };
@@ -1801,7 +1808,9 @@ public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == CardsMoveOneTime){
             CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-            if (move.to_place == Player::DiscardPile && TriggerSkill::triggerable(player) && player->getPhase() == Player::NotActive){
+            if (move.to_place == Player::DiscardPile 
+                    && (move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD
+                    && TriggerSkill::triggerable(player) && player->getPhase() == Player::NotActive){
                 player->addToPile("jiao", move.card_ids, true);
             }
         }
