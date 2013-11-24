@@ -1823,6 +1823,25 @@ public:
     }
 };
 
+class Zhazha: public PhaseChangeSkill{
+public:
+    Zhazha(): PhaseChangeSkill("zhazha"){
+
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        Room *room = target->getRoom();
+        QStringList skills = Sanguosha->getSkillNames();
+        const Skill *skill = NULL;
+        do {
+            skill = Sanguosha->getSkill(skills[qrand() % skills.length()]);
+        }
+        while (!(skill && skill->isVisible() && !skill->isLordSkill() && !skill->isAttachedLordSkill() && !target->hasSkill(skill->objectName())));
+        room->acquireSkill(target, skill->objectName());
+        return false;
+    }
+};
+
 TestPackage::TestPackage()
     : Package("test")
 {
@@ -1865,18 +1884,21 @@ TestPackage::TestPackage()
 
     skills << new SuperMaxCards << new SuperOffensiveDistance << new SuperDefensiveDistance;
 
-    General *rara = new General(this, "Rara", "god", 8, false);
+    General *rara = new General(this, "Rara", "god", 5, false);
     rara->addSkill(new Dashen);
     rara->addSkill(new Qianxu);
 
-    General *nimeidashen = new General(this, "jiaoshenmeanimei", "god", 8);
+    General *nimeidashen = new General(this, "jiaoshenmeanimei", "god", 5);
     nimeidashen->addSkill(new Nimei);
 
-    General *funima = new General(this, "funima", "god", 1);
+    General *funima = new General(this, "funima", "god", 5);
     funima->addSkill(new Nima);
 
     General *lzxqqqq = new General(this, "lzxqqqq", "god", 5);
     lzxqqqq->addSkill(new ChiJiao);
+
+    General *Fsu0413 = new General(this, "Fsu0413", "god", 2);
+    Fsu0413->addSkill(new Zhazha);
 
     addMetaObject<NimeiCard>();
     addMetaObject<NimaCard>();
