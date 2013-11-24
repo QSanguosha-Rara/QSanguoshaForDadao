@@ -177,6 +177,11 @@ RoomScene::RoomScene(QMainWindow *main_window)
     connect(ClientInstance, SIGNAL(guanxing(QList<int>, bool)), guanxing_box, SLOT(doGuanxing(QList<int>, bool)));
     guanxing_box->moveBy(-120, 0);
 
+    time_label_wedgit = new TimeLabel;
+    time_label_wedgit->setObjectName("time_label");
+    addItem(time_label_wedgit);
+    time_label_wedgit->setZValue(10000);
+
     card_container = new CardContainer();
     card_container->hide();
     addItem(card_container);
@@ -504,9 +509,10 @@ void RoomScene::handleGameEvent(const Json::Value &arg) {
             if (newHero) {
                 foreach (const Skill *skill, newHero->getVisibleSkills())
                     attachSkill(skill->objectName(), false);
-                if (!newHero->isVisible())
+                if (!newHero->isVisible()) {
                     Config.KnownSurprisingGenerals.append(newHeroName);
                     Config.setValue("KnownSurprisingGenerals", Config.KnownSurprisingGenerals);
+                }
             }
             break;
         }
@@ -651,6 +657,44 @@ void ReplayerControlBar::setSpeed(qreal speed) {
 
 void ReplayerControlBar::setTime(int secs) {
     time_label->setText(QString("<b>x%1 </b> [%2/%3]").arg(speed).arg(FormatTime(secs)).arg(duration_str));
+}
+
+TimeLabel::TimeLabel() {
+    time_label = new QLabel("00:00:00");
+    time_label->setAttribute(Qt::WA_NoSystemBackground);
+    QPalette palette;
+    palette.setColor(QPalette::WindowText, Qt::yellow);
+    time_label->setPalette(palette);
+    timer = new QTimer(this);
+
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateTimerLabel()));
+
+    QGraphicsProxyWidget *widget = new QGraphicsProxyWidget(this);
+    widget->setWidget(time_label);
+    widget->setPos(0, 0);
+}
+
+QRectF TimeLabel::boundingRect() const{
+    return QRectF(0, 0, time_label->width(), time_label->height());
+}
+
+void TimeLabel::paint(QPainter *, const QStyleOptionGraphicsItem *, QWidget *) {
+
+}
+
+void TimeLabel::updateTimerLabel() {
+    QTime current = QTime::fromString(time_label->text(), "hh:mm:ss").addSecs(1);
+    time_label->setText(current.toString("hh:mm:ss"));
+    //add 1 sec each call, update time label
+}
+
+void TimeLabel::initializeLabel() {
+    time_label->setText("00:00:00");
+    timer->stop();
+}
+
+void TimeLabel::startCounting() {
+    timer->start(1000);
 }
 
 void RoomScene::createReplayControlBar() {
@@ -2664,6 +2708,7 @@ void RoomScene::hideAvatars() {
 void RoomScene::startInXs() {
     if (add_robot) add_robot->hide();
     if (fill_robots) fill_robots->hide();
+    time_label_wedgit->startCounting();
 }
 
 void RoomScene::changeTableBg() {
@@ -2761,7 +2806,7 @@ void RoomScene::onGameOver() {
 
     m_roomMutex.lock();
     freeze();
-
+    time_label_wedgit->initializeLabel();
     bool victory = Self->property("win").toBool();
 #ifdef AUDIO_SUPPORT
     QString win_effect;

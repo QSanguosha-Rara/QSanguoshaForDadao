@@ -113,6 +113,27 @@ private:
     qreal speed;
 };
 
+class TimeLabel: public QGraphicsObject{
+    Q_OBJECT
+
+public:
+    TimeLabel();
+    virtual QRectF boundingRect() const;
+    void initializeLabel();
+    void startCounting();
+
+public slots:
+    void updateTimerLabel();
+
+protected:
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+private:
+    // Widget For Timer Label
+    QLabel *time_label;
+    QTimer *timer;
+};
+
 class RoomScene: public QGraphicsScene {
     Q_OBJECT
 
@@ -248,6 +269,8 @@ private:
     QGraphicsPixmapItem *m_tableBg;
     int m_tablew;
     int m_tableh;
+
+    TimeLabel *time_label_wedgit;
 
     // for 3v3 & 1v1 mode
     QSanSelectableItem *selector_box;
