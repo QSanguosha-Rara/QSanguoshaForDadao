@@ -352,3 +352,22 @@ void NimeiCard::onEffect(const CardEffectStruct &effect) const{
     effect.to->getRoom()->askForDiscard(effect.to, "nimei", num, num, false, true, "@nimei-discard:" + QString::number(num));
 }
 
+NimaAojiaoCard::NimaAojiaoCard(){
+    target_fixed = true;
+}
+
+void NimaAojiaoCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const{
+    QString choice = room->askForChoice(source, objectName(), "BasicCard+EquipCard+TrickCard");
+    QList<int> can_recycle;
+    foreach(int id, room->getDiscardPile()){
+        const Card *c = Sanguosha->getCard(id);
+        if (c->isKindOf(choice.toStdString().c_str()))
+            can_recycle << id;
+    }
+
+    room->fillAG(can_recycle, source);
+    int id = room->askForAG(source, can_recycle, false, objectName());
+    room->clearAG(source);
+
+    room->obtainCard(source, id);
+}

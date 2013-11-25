@@ -1945,7 +1945,7 @@ public:
 
 class lzxMiShi: public TriggerSkill{
 public:
-    lzxMiShi(): TriggerSkill("lzxMishi"){
+    lzxMiShi(): TriggerSkill("lzxmishi"){
         events << BeforeCardsMove;
     }
 
@@ -1976,7 +1976,7 @@ public:
                 can_equips.removeOne(id);
                 QString suit = Sanguosha->getCard(id)->getSuitString();
                 QString pattern = "BasicCard|" + suit;
-                if (room->askForCard(player, pattern, "@lzxmishi-discard", id)){
+                if (room->askForCard(player, pattern, "@lzxmishi-discard:" + suit, id)){
                     move.from_places.removeAt(move.card_ids.indexOf(id));
                     move.card_ids.removeOne(id);
                     data = QVariant::fromValue(move);
@@ -2036,6 +2036,52 @@ public:
     }
 };
 
+class NimaAojiao: public ViewAsSkill{
+public:
+    NimaAojiao(): ViewAsSkill("nimaaojiao"){
+
+    }
+
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        return true;
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        if (cards.isEmpty()) 
+            return NULL;
+
+        NimaAojiaoCard *c = new NimaAojiaoCard;
+        c->addSubcards(cards);
+        return c;
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("NimaAojiaoCard");
+    }
+};
+
+class NimaNiNi: public TriggerSkill{
+public:
+    NimaNiNi(): TriggerSkill("nimanini"){
+        events << Damaged << HpRecover;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == Damaged){
+            if (player->getGender() == General::Male){
+                player->setGender(General::Female);
+                player->drawCards(player->getLostHp());
+            }
+        }
+        else{
+            if (player->getGender() == General::Female){
+                player->setGender(General::Male);
+                room->askForDiscard(player, objectName(), player->getLostHp(), player->getLostHp(), false, true);
+            }
+        }
+        return false;
+    }
+};
 
 
 TestPackage::TestPackage()
@@ -2088,24 +2134,34 @@ TestPackage::TestPackage()
     nimeidashen->addSkill(new Nimei);
 
     General *funima = new General(this, "funima", "god", 5);
-
+    funima->addSkill(new NimaAojiao);
+    funima->addSkill(new NimaNiNi);
 
     General *lzxqqqq1 = new General(this, "lzxqqqq1", "shu", 3);
     lzxqqqq1->addSkill(new lzxFanGun);
     lzxqqqq1->addSkill(new lzxYouYu);
     lzxqqqq1->addSkill(new lzxSanWo);
     lzxqqqq1->addSkill(new lzxShengQi);
+    lzxqqqq1->addRelateSkill("lzxtoulan");
+    lzxqqqq1->addRelateSkill("lzxmishi");
+    lzxqqqq1->addRelateSkill("lzxpudao");
+    lzxqqqq1->addRelateSkill("lzxhehao");
 
     General *lzxqqqq2 = new General(this, "lzxqqqq2", "shu", 3, true, true, true);
     lzxqqqq2->addSkill(new lzxTouLan);
     lzxqqqq2->addSkill(new lzxMiShi);
     lzxqqqq2->addSkill(new lzxPuDao);
     lzxqqqq2->addSkill(new lzxHeHao);
+    lzxqqqq2->addRelateSkill("lzxfangun");
+    lzxqqqq2->addRelateSkill("lzxyouyu");
+    lzxqqqq2->addRelateSkill("lzxsanwo");
+    lzxqqqq2->addRelateSkill("lzxshengqi");
 
     General *Fsu0413 = new General(this, "Fsu0413", "god", 5);
     Fsu0413->addSkill(new Zhazha);
 
     addMetaObject<NimeiCard>();
+    addMetaObject<NimaAojiaoCard>();
 }
 
 ADD_PACKAGE(Test)
