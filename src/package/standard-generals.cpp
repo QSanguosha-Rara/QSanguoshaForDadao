@@ -2083,6 +2083,17 @@ public:
     }
 };
 
+class ExtraRound: public ZeroCardViewAsSkill{
+public:
+    ExtraRound(): ZeroCardViewAsSkill("extra_round"){
+
+    }
+
+    virtual const Card *viewAs() const{
+        return new ExtraRoundCard;
+    }
+};
+
 
 TestPackage::TestPackage()
     : Package("test")
@@ -2124,7 +2135,8 @@ TestPackage::TestPackage()
 
     new General(this, "anjiang", "god", 4, true, true, true);
 
-    skills << new SuperMaxCards << new SuperOffensiveDistance << new SuperDefensiveDistance;
+    skills << new SuperMaxCards << new SuperOffensiveDistance << new SuperDefensiveDistance << new ExtraRound;
+    addMetaObject<ExtraRoundCard>();
 
     General *rara = new General(this, "Rara", "god", 5, false);
     rara->addSkill(new Dashen);

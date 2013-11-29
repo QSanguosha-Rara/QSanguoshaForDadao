@@ -339,6 +339,14 @@ const Card *JijiangCard::validate(CardUseStruct &cardUse) const{
     return NULL;
 }
 
+ExtraRoundCard::ExtraRoundCard(){
+    target_fixed = true;
+}
+
+void ExtraRoundCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+    source->gainAnExtraTurn();
+}
+
 NimeiCard::NimeiCard(){
 
 }

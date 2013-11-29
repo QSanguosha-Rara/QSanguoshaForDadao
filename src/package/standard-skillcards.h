@@ -128,6 +128,14 @@ protected:
     int n;
 };
 
+class ExtraRoundCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE ExtraRoundCard();
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+};
+
 class NimeiCard: public SkillCard{
     Q_OBJECT
 
