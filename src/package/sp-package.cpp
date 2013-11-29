@@ -5,7 +5,6 @@
 #include "standard-skillcards.h"
 #include "engine.h"
 #include "maneuvering.h"
-#include "wisdompackage.h"
 #include "settings.h"
 #include "ai.h"
 
@@ -222,7 +221,170 @@ bool Yongsi::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *yuansh
     return false;
 }
 
-#include "standard-skillcards.h"
+class WeidiViewAsSkill: public ZeroCardViewAsSkill {
+public:
+    WeidiViewAsSkill(): ZeroCardViewAsSkill("weidi") {
+        frequency = Compulsory;
+    }
+
+    static const ViewAsSkill *getViewAsSkill(const Skill *s){
+        const ViewAsSkill *vs;
+        if (s->inherits("ViewAsSkill"))
+            vs = qobject_cast<const ViewAsSkill *>(s);
+        else if (s->inherits("TriggerSkill")){
+            vs = qobject_cast<const TriggerSkill *>(s)->getViewAsSkill();
+        }
+
+        return vs;
+    }
+
+    static QList<const Skill *> getLordSkills(const Player *yuanshu){
+        const Player *lord;
+        foreach(const Player *p, yuanshu->getAliveSiblings())
+            if (p->isLord()){
+                lord = p;
+                break;
+            }
+            QList<const Skill *> skills = lord->getVisibleSkillList(false);
+            QList<const Skill *> lordskills;
+            foreach(const Skill *s, skills){
+                if (s->isLordSkill() && yuanshu->hasLordSkill(s->objectName()))
+                    lordskills << s;
+            }
+            return lordskills;
+    }
+
+    static QList<const ViewAsSkill *> getLordViewAsSkills(const Player *yuanshu){
+        QList<const Skill *> lordskills = getLordSkills(yuanshu);
+        QList<const ViewAsSkill *> viewasskills;
+        foreach(const Skill *s, lordskills){
+            const ViewAsSkill *vs = getViewAsSkill(s);
+            if (vs != NULL)
+                viewasskills << vs;
+        }
+        return viewasskills;
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        QList<const ViewAsSkill *> viewasskills = getLordViewAsSkills(player);
+        foreach(const ViewAsSkill *vs, viewasskills){
+            if (vs->isEnabledAtPlay(player))
+                return true;
+        }
+        return false;
+    }
+
+    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
+        QList <const ViewAsSkill *> viewasskills = getLordViewAsSkills(player);
+        foreach(const ViewAsSkill *vs, viewasskills){
+            if (vs->isEnabledAtResponse(player, pattern))
+                return true;
+        }
+        return false;
+    }
+
+    virtual bool isEnabledAtNullification(const ServerPlayer *player) const{
+        QList <const ViewAsSkill *> viewasskills = getLordViewAsSkills(player);
+        foreach(const ViewAsSkill *vs, viewasskills){
+            if (vs->isEnabledAtNullification(player))
+                return true;
+        }
+        return false;
+    }
+
+    virtual const Card *viewAs() const{
+        return new WeidiCard;
+    }
+};
+
+class WeidiResponseVS: public ViewAsSkill{
+public:
+    WeidiResponseVS(): ViewAsSkill("weidiresponse"){
+        response_pattern = "@@weidiresponse!";
+    }
+
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        const Skill *theskill = Sanguosha->getSkill(Self->property("weidi_response").toString());
+        const ViewAsSkill *vs = WeidiViewAsSkill::getViewAsSkill(theskill);
+        if (vs != NULL)
+            return vs->viewFilter(selected, to_select);
+        return false;
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        const Skill *theskill = Sanguosha->getSkill(Self->property("weidi_response").toString());
+        const ViewAsSkill *vs = WeidiViewAsSkill::getViewAsSkill(theskill);
+        if (vs != NULL)
+            return new WeidiResponseCard;
+        return NULL;
+    }
+};
+
+WeidiResponseCard::WeidiResponseCard(){
+    mute = true;
+}
+
+const QList<const Card *> WeidiResponseCard::getSubcardPointers() const{
+    QList<const Card *> c;
+    foreach(int id, subcards)
+        c << Sanguosha->getCard(id);
+
+    return c;
+}
+
+bool WeidiResponseCard::targetFixed() const{
+    const Skill *theSkill = Sanguosha->getSkill(Self->property("weidi_response").toString());
+    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
+    const Card *vsCard = Vs->viewAs(getSubcardPointers());
+    if (vsCard != NULL)
+        return vsCard->targetFixed();
+    return true;
+}
+
+bool WeidiResponseCard::willThrow() const{
+    const Skill *theSkill = Sanguosha->getSkill(Self->property("weidi_response").toString());
+    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
+    const Card *vsCard = Vs->viewAs(getSubcardPointers());
+    if (vsCard != NULL)
+        return vsCard->willThrow();
+    return false;
+}
+
+bool WeidiResponseCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    const Skill *theSkill = Sanguosha->getSkill(Self->property("weidi_response").toString());
+    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
+    const Card *vsCard = Vs->viewAs(getSubcardPointers());
+    if (vsCard != NULL)
+        return vsCard->targetFilter(targets, to_select, Self);
+    return false;
+}
+
+bool WeidiResponseCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
+    const Skill *theSkill = Sanguosha->getSkill(Self->property("weidi_response").toString());
+    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
+    const Card *vsCard = Vs->viewAs(getSubcardPointers());
+    if (vsCard != NULL)
+        return vsCard->targetsFeasible(targets, Self);
+    return false;
+}
+
+void WeidiResponseCard::onUse(Room *room, const CardUseStruct &card_use) const{
+    const Skill *theSkill = Sanguosha->getSkill(card_use.from->property("weidi_response").toString());
+    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
+    const Card *vsCard = Vs->viewAs(getSubcardPointers());
+    if (vsCard != NULL){
+        CardUseStruct new_use = card_use;
+        new_use.card = vsCard;
+        room->useCard(new_use);
+    }
+}
+
+const Card *WeidiResponseCard::validateInResponse(ServerPlayer *user) const{
+    const Skill *theSkill = Sanguosha->getSkill(user->property("weidi_response").toString());
+    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
+    return Vs->viewAs(getSubcardPointers());
+}
+
 WeidiCard::WeidiCard() {
     target_fixed = true;
     mute = true;
@@ -230,87 +392,74 @@ WeidiCard::WeidiCard() {
 
 void WeidiCard::onUse(Room *room, const CardUseStruct &card_use) const{
     ServerPlayer *yuanshu = card_use.from;
-
+    QString pattern = Sanguosha->currentRoomState()->getCurrentCardUsePattern();
+    CardUseStruct::CardUseReason reason = Sanguosha->currentRoomState()->getCurrentCardUseReason();
+    QList<const ViewAsSkill *> vss = WeidiViewAsSkill::getLordViewAsSkills(yuanshu);
     QStringList choices;
-    if (yuanshu->hasLordSkill("jijiang") && room->getLord()->hasLordSkill("jijiang") && Slash::IsAvailable(yuanshu))
-        choices << "jijiang";
-
-    if (yuanshu->hasLordSkill("weidai") && Analeptic::IsAvailable(yuanshu) && !yuanshu->hasFlag("drank"))
-        choices << "weidai";
-
+    foreach (const ViewAsSkill *vs, vss){
+        bool flag = false;
+        if (reason == CardUseStruct::CARD_USE_REASON_PLAY)
+            flag = vs->isEnabledAtPlay(yuanshu);
+        else 
+            flag = vs->isEnabledAtResponse(yuanshu, pattern);
+        if (flag)
+            choices << vs->objectName();
+    }
     if (choices.isEmpty())
         return;
 
     QString choice = room->askForChoice(yuanshu, "weidi", choices.join("+"));
 
-    if (choice == "jijiang") {
-        QList<ServerPlayer *> targets;
-        foreach (ServerPlayer* target, room->getOtherPlayers(yuanshu)){
-            if (yuanshu->canSlash(target))
-                targets << target;
+    const ViewAsSkill *selected_vs;
+    foreach (const ViewAsSkill *vs, vss)
+        if (vs->objectName() == choice){
+            selected_vs = vs;
+            break;
         }
 
-        ServerPlayer* target = room->askForPlayerChosen(yuanshu, targets, "jijiang");
-        if(target){
-            JijiangCard *jijiang = new JijiangCard;
-            jijiang->setSkillName("weidi");
-            CardUseStruct use;
-            use.card = jijiang;
-            use.from = yuanshu;
-            use.to << target;
-            room->useCard(use);
-        }
-    } else {
-        WeidaiCard *weidai = new WeidaiCard;
-        weidai->setSkillName("weidi");
-        CardUseStruct use;
-        use.card = weidai;
-        use.from = yuanshu;
-        room->useCard(use);
-    }
+    if (selected_vs == NULL)
+        return;
+
+    room->setPlayerProperty(yuanshu, "weidi_response", choice);
+    room->askForUseCard(yuanshu, "@@weidiresponse!", "@weidiresponse:" + choice);
+    room->setPlayerProperty(yuanshu, "weidi_response", QString());
 }
 
-class WeidiViewAsSkill: public ZeroCardViewAsSkill {
-public:
-    WeidiViewAsSkill(): ZeroCardViewAsSkill("weidi") {
+const Card *WeidiCard::validateInResponse(ServerPlayer *user) const{
+    QString pattern = Sanguosha->currentRoomState()->getCurrentCardUsePattern();
+    CardUseStruct::CardUseReason reason = Sanguosha->currentRoomState()->getCurrentCardUseReason();
+    QList<const ViewAsSkill *> vss = WeidiViewAsSkill::getLordViewAsSkills(user);
+    QStringList choices;
+    foreach (const ViewAsSkill *vs, vss){
+        if (vs->isEnabledAtResponse(user, pattern))
+            choices << vs->objectName();
     }
+    if (choices.isEmpty())
+        return NULL;
 
-    virtual bool isEnabledAtPlay(const Player *player) const{
-        return (player->hasLordSkill("jijiang") && Slash::IsAvailable(player))
-                ||(player->hasLordSkill("weidai") && Analeptic::IsAvailable(player) && !player->hasFlag("drank"));
-    }
+    Room *room = user->getRoom();
+    QString choice = room->askForChoice(user, "weidi", choices.join("+"));
 
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
-        if (player->hasLordSkill("weidai"))
-            return pattern == "peach+analeptic";
-        else if (player->hasLordSkill("jijiang")) {
-            JijiangViewAsSkill *jijiang = new JijiangViewAsSkill;
-            jijiang->deleteLater();
-            return jijiang->isEnabledAtResponse(player, pattern);
+    const ViewAsSkill *selected_vs;
+    foreach (const ViewAsSkill *vs, vss)
+        if (vs->objectName() == choice){
+            selected_vs = vs;
+            break;
         }
+    if (selected_vs == NULL)
+        return NULL;
 
-        return false;
-    }
+    Card::HandlingMethod method = ((reason == CardUseStruct::CARD_USE_REASON_RESPONSE_USE) ? Card::MethodUse : Card::MethodResponse);
 
-    virtual const Card *viewAs() const{
-        if (Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE)
-            return new WeidaiCard;
-        else
-            return new WeidiCard;
-    }
-};
+    room->setPlayerProperty(user, "weidi_response", choice);
+    const Card *result = room->askForCard(user, "@@weidiresponse!", "@weidiresponse:" + choice, QVariant(), method);
+    room->setPlayerProperty(user, "weidi_response", QString());
 
-class Weidi: public GameStartSkill {
-public:
-    Weidi(): GameStartSkill("weidi") {
-        frequency = Compulsory;
-        view_as_skill = new WeidiViewAsSkill;
-    }
+    return result;
+}
 
-    virtual void onGameStart(ServerPlayer *) const{
-        return;
-    }
-};
+
+
 
 class Yicong: public DistanceSkill {
 public:
@@ -2432,7 +2581,7 @@ SPPackage::SPPackage()
 
     General *yuanshu = new General(this, "yuanshu", "qun"); // SP 004
     yuanshu->addSkill(new Yongsi);
-    yuanshu->addSkill(new Weidi);
+    yuanshu->addSkill(new WeidiViewAsSkill);
 
     General *sp_sunshangxiang = new General(this, "sp_sunshangxiang", "shu", 3, false, true); // SP 005
     sp_sunshangxiang->addSkill("jieyin");
@@ -2535,12 +2684,15 @@ SPPackage::SPPackage()
 
     addMetaObject<HongyuanCard>();
     addMetaObject<WeidiCard>();
+    addMetaObject<WeidiResponseCard>();
     addMetaObject<YuanhuCard>();
     addMetaObject<XuejiCard>();
     addMetaObject<MizhaoCard>();
     addMetaObject<BifaCard>();
     addMetaObject<SongciCard>();
     addMetaObject<ZhoufuCard>();
+
+    skills << new WeidiResponseVS;
 }
 
 ADD_PACKAGE(SP)

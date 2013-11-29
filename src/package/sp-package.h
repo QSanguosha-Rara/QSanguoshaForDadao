@@ -44,6 +44,24 @@ public:
     Q_INVOKABLE WeidiCard();
 
     virtual void onUse(Room *room, const CardUseStruct &card_use) const;
+    virtual const Card *validateInResponse(ServerPlayer *user) const;
+};
+
+class WeidiResponseCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE WeidiResponseCard();
+
+    virtual bool targetFixed() const;
+    virtual bool willThrow() const;
+    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    virtual bool targetsFeasible(const QList<const Player *> &targets, const Player *Self) const;
+    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
+    virtual const Card *validateInResponse(ServerPlayer *user) const;
+
+private:
+    const QList<const Card *> getSubcardPointers() const;
 };
 
 class YuanhuCard: public SkillCard {
