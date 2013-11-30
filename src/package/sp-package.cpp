@@ -7,6 +7,10 @@
 #include "maneuvering.h"
 #include "settings.h"
 #include "ai.h"
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QCommandLinkButton>
+
 
 class SPMoonSpearSkill: public WeaponSkill {
 public:
@@ -221,245 +225,161 @@ bool Yongsi::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *yuansh
     return false;
 }
 
-class WeidiViewAsSkill: public ZeroCardViewAsSkill {
+class WeidiViewAsSkill: public ViewAsSkill {
 public:
-    WeidiViewAsSkill(): ZeroCardViewAsSkill("weidi") {
-        frequency = Compulsory;
+    WeidiViewAsSkill(): ViewAsSkill("weidi") {
     }
 
-    static const ViewAsSkill *getViewAsSkill(const Skill *s){
-        const ViewAsSkill *vs;
-        if (s->inherits("ViewAsSkill"))
-            vs = qobject_cast<const ViewAsSkill *>(s);
-        else if (s->inherits("TriggerSkill")){
-            vs = qobject_cast<const TriggerSkill *>(s)->getViewAsSkill();
-        }
-
-        return vs;
-    }
-
-    static QList<const Skill *> getLordSkills(const Player *yuanshu){
-        const Player *lord;
-        foreach(const Player *p, yuanshu->getAliveSiblings())
-            if (p->isLord()){
+    static QList<const ViewAsSkill *> getLordViewAsSkills(const Player *player) {
+        const Player *lord = NULL;
+        foreach (const Player *p, player->getAliveSiblings()) {
+            if (p->isLord()) {
                 lord = p;
                 break;
             }
-            QList<const Skill *> skills = lord->getVisibleSkillList(false);
-            QList<const Skill *> lordskills;
-            foreach(const Skill *s, skills){
-                if (s->isLordSkill() && yuanshu->hasLordSkill(s->objectName()))
-                    lordskills << s;
-            }
-            return lordskills;
-    }
-
-    static QList<const ViewAsSkill *> getLordViewAsSkills(const Player *yuanshu){
-        QList<const Skill *> lordskills = getLordSkills(yuanshu);
-        QList<const ViewAsSkill *> viewasskills;
-        foreach(const Skill *s, lordskills){
-            const ViewAsSkill *vs = getViewAsSkill(s);
-            if (vs != NULL)
-                viewasskills << vs;
         }
-        return viewasskills;
+        if (!lord) return QList<const ViewAsSkill *>();
+
+        QList<const ViewAsSkill *> vs_skills;
+        foreach (const Skill *skill, lord->getVisibleSkillList()) {
+            if (skill->isLordSkill() && player->hasLordSkill(skill->objectName())) {
+                const ViewAsSkill *vs = ViewAsSkill::parseViewAsSkill(skill);
+                if (vs)
+                    vs_skills << vs;
+            }
+        }
+        return vs_skills;
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
-        QList<const ViewAsSkill *> viewasskills = getLordViewAsSkills(player);
-        foreach(const ViewAsSkill *vs, viewasskills){
-            if (vs->isEnabledAtPlay(player))
+        QList<const ViewAsSkill *> vs_skills = getLordViewAsSkills(player);
+        foreach (const ViewAsSkill *skill, vs_skills) {
+            if (skill->isEnabledAtPlay(player))
                 return true;
         }
         return false;
     }
 
     virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
-        QList <const ViewAsSkill *> viewasskills = getLordViewAsSkills(player);
-        foreach(const ViewAsSkill *vs, viewasskills){
-            if (vs->isEnabledAtResponse(player, pattern))
+        QList<const ViewAsSkill *> vs_skills = getLordViewAsSkills(player);
+        foreach (const ViewAsSkill *skill, vs_skills) {
+            if (skill->isEnabledAtResponse(player, pattern))
                 return true;
         }
         return false;
     }
 
     virtual bool isEnabledAtNullification(const ServerPlayer *player) const{
-        QList <const ViewAsSkill *> viewasskills = getLordViewAsSkills(player);
-        foreach(const ViewAsSkill *vs, viewasskills){
-            if (vs->isEnabledAtNullification(player))
+        QList<const ViewAsSkill *> vs_skills = getLordViewAsSkills(player);
+        foreach (const ViewAsSkill *skill, vs_skills) {
+            if (skill->isEnabledAtNullification(player))
                 return true;
         }
         return false;
     }
 
-    virtual const Card *viewAs() const{
-        return new WeidiCard;
-    }
-};
-
-class WeidiResponseVS: public ViewAsSkill{
-public:
-    WeidiResponseVS(): ViewAsSkill("weidiresponse"){
-        response_pattern = "@@weidiresponse!";
-    }
-
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
-        const Skill *theskill = Sanguosha->getSkill(Self->property("weidi_response").toString());
-        const ViewAsSkill *vs = WeidiViewAsSkill::getViewAsSkill(theskill);
-        if (vs != NULL)
-            return vs->viewFilter(selected, to_select);
-        return false;
+        QString skill_name = Self->tag["weidi"].toString();
+        if (skill_name.isEmpty()) return false;
+        const ViewAsSkill *vs_skill = Sanguosha->getViewAsSkill(skill_name);
+        if (vs_skill) return vs_skill->viewFilter(selected, to_select);
+        return false;	
     }
 
     virtual const Card *viewAs(const QList<const Card *> &cards) const{
-        const Skill *theskill = Sanguosha->getSkill(Self->property("weidi_response").toString());
-        const ViewAsSkill *vs = WeidiViewAsSkill::getViewAsSkill(theskill);
-        if (vs != NULL)
-            return new WeidiResponseCard;
+        QString skill_name = Self->tag["weidi"].toString();
+        if (skill_name.isEmpty()) return NULL;
+        const ViewAsSkill *vs_skill = Sanguosha->getViewAsSkill(skill_name);
+        if (vs_skill) return vs_skill->viewAs(cards);
         return NULL;
     }
 };
 
-WeidiResponseCard::WeidiResponseCard(){
-    mute = true;
+WeidiDialog *WeidiDialog::getInstance() {
+    static WeidiDialog *instance;
+    if (instance == NULL)
+        instance = new WeidiDialog();
+
+    return instance;
 }
 
-const QList<const Card *> WeidiResponseCard::getSubcardPointers() const{
-    QList<const Card *> c;
-    foreach(int id, subcards)
-        c << Sanguosha->getCard(id);
+WeidiDialog::WeidiDialog() {
+    setObjectName("weidi");
+    setWindowTitle(Sanguosha->translate("weidi"));
+    group = new QButtonGroup(this);
 
-    return c;
+    button_layout = new QVBoxLayout;
+    setLayout(button_layout);
+    connect(group, SIGNAL(buttonClicked(QAbstractButton *)), this, SLOT(selectSkill(QAbstractButton *)));
 }
 
-bool WeidiResponseCard::targetFixed() const{
-    const Skill *theSkill = Sanguosha->getSkill(Self->property("weidi_response").toString());
-    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
-    const Card *vsCard = Vs->viewAs(getSubcardPointers());
-    if (vsCard != NULL)
-        return vsCard->targetFixed();
-    return true;
-}
-
-bool WeidiResponseCard::willThrow() const{
-    const Skill *theSkill = Sanguosha->getSkill(Self->property("weidi_response").toString());
-    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
-    const Card *vsCard = Vs->viewAs(getSubcardPointers());
-    if (vsCard != NULL)
-        return vsCard->willThrow();
-    return false;
-}
-
-bool WeidiResponseCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    const Skill *theSkill = Sanguosha->getSkill(Self->property("weidi_response").toString());
-    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
-    const Card *vsCard = Vs->viewAs(getSubcardPointers());
-    if (vsCard != NULL)
-        return vsCard->targetFilter(targets, to_select, Self);
-    return false;
-}
-
-bool WeidiResponseCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
-    const Skill *theSkill = Sanguosha->getSkill(Self->property("weidi_response").toString());
-    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
-    const Card *vsCard = Vs->viewAs(getSubcardPointers());
-    if (vsCard != NULL)
-        return vsCard->targetsFeasible(targets, Self);
-    return false;
-}
-
-void WeidiResponseCard::onUse(Room *room, const CardUseStruct &card_use) const{
-    const Skill *theSkill = Sanguosha->getSkill(card_use.from->property("weidi_response").toString());
-    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
-    const Card *vsCard = Vs->viewAs(getSubcardPointers());
-    if (vsCard != NULL){
-        CardUseStruct new_use = card_use;
-        new_use.card = vsCard;
-        room->useCard(new_use);
+void WeidiDialog::popup() {
+    Self->tag.remove(objectName());
+    foreach (QAbstractButton *button, group->buttons()) {
+        button_layout->removeWidget(button);
+        group->removeButton(button);
+        delete button;
     }
-}
 
-const Card *WeidiResponseCard::validateInResponse(ServerPlayer *user) const{
-    const Skill *theSkill = Sanguosha->getSkill(user->property("weidi_response").toString());
-    const ViewAsSkill *Vs = WeidiViewAsSkill::getViewAsSkill(theSkill);
-    return Vs->viewAs(getSubcardPointers());
-}
-
-WeidiCard::WeidiCard() {
-    target_fixed = true;
-    mute = true;
-}
-
-void WeidiCard::onUse(Room *room, const CardUseStruct &card_use) const{
-    ServerPlayer *yuanshu = card_use.from;
-    QString pattern = Sanguosha->currentRoomState()->getCurrentCardUsePattern();
-    CardUseStruct::CardUseReason reason = Sanguosha->currentRoomState()->getCurrentCardUseReason();
-    QList<const ViewAsSkill *> vss = WeidiViewAsSkill::getLordViewAsSkills(yuanshu);
-    QStringList choices;
-    foreach (const ViewAsSkill *vs, vss){
-        bool flag = false;
-        if (reason == CardUseStruct::CARD_USE_REASON_PLAY)
-            flag = vs->isEnabledAtPlay(yuanshu);
-        else 
-            flag = vs->isEnabledAtResponse(yuanshu, pattern);
-        if (flag)
-            choices << vs->objectName();
-    }
-    if (choices.isEmpty())
-        return;
-
-    QString choice = room->askForChoice(yuanshu, "weidi", choices.join("+"));
-
-    const ViewAsSkill *selected_vs;
-    foreach (const ViewAsSkill *vs, vss)
-        if (vs->objectName() == choice){
-            selected_vs = vs;
-            break;
+    QList<const ViewAsSkill *> vs_skills = WeidiViewAsSkill::getLordViewAsSkills(Self);
+    int count = 0;
+    QString name;
+    foreach (const ViewAsSkill *skill, vs_skills) {
+        QAbstractButton *button = createSkillButton(skill->objectName());
+        button->setEnabled(skill->isAvailable(Self, Sanguosha->currentRoomState()->getCurrentCardUseReason(),
+            Sanguosha->currentRoomState()->getCurrentCardUsePattern()));
+        if (button->isEnabled()) {
+            count++;
+            name = skill->objectName();
         }
-
-    if (selected_vs == NULL)
-        return;
-
-    room->setPlayerProperty(yuanshu, "weidi_response", choice);
-    room->askForUseCard(yuanshu, "@@weidiresponse!", "@weidiresponse:" + choice);
-    room->setPlayerProperty(yuanshu, "weidi_response", QString());
-}
-
-const Card *WeidiCard::validateInResponse(ServerPlayer *user) const{
-    QString pattern = Sanguosha->currentRoomState()->getCurrentCardUsePattern();
-    CardUseStruct::CardUseReason reason = Sanguosha->currentRoomState()->getCurrentCardUseReason();
-    QList<const ViewAsSkill *> vss = WeidiViewAsSkill::getLordViewAsSkills(user);
-    QStringList choices;
-    foreach (const ViewAsSkill *vs, vss){
-        if (vs->isEnabledAtResponse(user, pattern))
-            choices << vs->objectName();
+        button_layout->addWidget(button);
     }
-    if (choices.isEmpty())
-        return NULL;
 
-    Room *room = user->getRoom();
-    QString choice = room->askForChoice(user, "weidi", choices.join("+"));
+    if (count == 0) {
+        emit onButtonClick();
+        return;
+    } else if (count == 1) {
+        Self->tag[objectName()] = name;
+        emit onButtonClick();
+        return;
+    }
 
-    const ViewAsSkill *selected_vs;
-    foreach (const ViewAsSkill *vs, vss)
-        if (vs->objectName() == choice){
-            selected_vs = vs;
-            break;
-        }
-    if (selected_vs == NULL)
-        return NULL;
-
-    Card::HandlingMethod method = ((reason == CardUseStruct::CARD_USE_REASON_RESPONSE_USE) ? Card::MethodUse : Card::MethodResponse);
-
-    room->setPlayerProperty(user, "weidi_response", choice);
-    const Card *result = room->askForCard(user, "@@weidiresponse!", "@weidiresponse:" + choice, QVariant(), method);
-    room->setPlayerProperty(user, "weidi_response", QString());
-
-    return result;
+    exec();
 }
 
+void WeidiDialog::selectSkill(QAbstractButton *button) {
+    Self->tag[objectName()] = button->objectName();
+    emit onButtonClick();
+    accept();
+}
 
+QAbstractButton *WeidiDialog::createSkillButton(const QString &skill_name) {
+    const Skill *skill = Sanguosha->getSkill(skill_name);
+    if (!skill) return NULL;
 
+    QCommandLinkButton *button = new QCommandLinkButton(Sanguosha->translate(skill_name));
+    button->setObjectName(skill_name);
+    button->setToolTip(skill->getDescription());
+
+    group->addButton(button);
+    return button;
+}
+
+class Weidi: public GameStartSkill {
+public:
+    Weidi(): GameStartSkill("weidi") {
+        frequency = Compulsory;
+        view_as_skill = new WeidiViewAsSkill;
+    }
+
+    virtual void onGameStart(ServerPlayer *) const{
+        return;
+    }
+
+    virtual QDialog *getDialog() const{
+        return WeidiDialog::getInstance();
+    }
+};
 
 class Yicong: public DistanceSkill {
 public:
@@ -2581,7 +2501,7 @@ SPPackage::SPPackage()
 
     General *yuanshu = new General(this, "yuanshu", "qun"); // SP 004
     yuanshu->addSkill(new Yongsi);
-    yuanshu->addSkill(new WeidiViewAsSkill);
+    yuanshu->addSkill(new Weidi);
 
     General *sp_sunshangxiang = new General(this, "sp_sunshangxiang", "shu", 3, false, true); // SP 005
     sp_sunshangxiang->addSkill("jieyin");
@@ -2683,8 +2603,6 @@ SPPackage::SPPackage()
     related_skills.insertMulti("hongyuan", "#hongyuan");
 
     addMetaObject<HongyuanCard>();
-    addMetaObject<WeidiCard>();
-    addMetaObject<WeidiResponseCard>();
     addMetaObject<YuanhuCard>();
     addMetaObject<XuejiCard>();
     addMetaObject<MizhaoCard>();
@@ -2692,7 +2610,6 @@ SPPackage::SPPackage()
     addMetaObject<SongciCard>();
     addMetaObject<ZhoufuCard>();
 
-    skills << new WeidiResponseVS;
 }
 
 ADD_PACKAGE(SP)

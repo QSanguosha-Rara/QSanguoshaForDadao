@@ -4,6 +4,11 @@
 #include "package.h"
 #include "card.h"
 #include "standard.h"
+#include <QGroupBox>
+#include <QAbstractButton>
+#include <QButtonGroup>
+#include <QDialog>
+#include <QVBoxLayout>
 
 class SPPackage: public Package {
     Q_OBJECT
@@ -37,31 +42,25 @@ protected:
     virtual int getKingdoms(ServerPlayer *yuanshu) const;
 };
 
-class WeidiCard: public SkillCard {
+class WeidiDialog: public QDialog {
     Q_OBJECT
 
 public:
-    Q_INVOKABLE WeidiCard();
+    static WeidiDialog *getInstance();
 
-    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
-    virtual const Card *validateInResponse(ServerPlayer *user) const;
-};
-
-class WeidiResponseCard: public SkillCard{
-    Q_OBJECT
-
-public:
-    Q_INVOKABLE WeidiResponseCard();
-
-    virtual bool targetFixed() const;
-    virtual bool willThrow() const;
-    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
-    virtual bool targetsFeasible(const QList<const Player *> &targets, const Player *Self) const;
-    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
-    virtual const Card *validateInResponse(ServerPlayer *user) const;
+public slots:
+    void popup();
+    void selectSkill(QAbstractButton *button);
 
 private:
-    const QList<const Card *> getSubcardPointers() const;
+    explicit WeidiDialog();
+
+    QAbstractButton *createSkillButton(const QString &skill_name);
+    QButtonGroup *group;
+    QVBoxLayout *button_layout;
+
+signals:
+    void onButtonClick();
 };
 
 class YuanhuCard: public SkillCard {
