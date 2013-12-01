@@ -937,9 +937,9 @@ public:
                 if (targets.isEmpty())
                     return false;
 
-                if (damage.from->askForSkillInvoke(objectName(), data))    {
-                    ServerPlayer *target = room->askForPlayerChosen(damage.from, targets, objectName());
-
+                
+                ServerPlayer *target = room->askForPlayerChosen(damage.from, targets, objectName(), "@shaoying", true, true);
+                if (target != NULL){
                     LogMessage log;
                     log.type = "#Shaoying";
                     log.from = damage.from;
@@ -1005,7 +1005,7 @@ public:
             }
             fire_slash->setSkillName(objectName());
 
-            room->broadcastSkillInvoke(objectName());
+            //room->broadcastSkillInvoke(objectName());
             LogMessage log;
             log.type = "#Zonghuo";
             log.from = player;
@@ -1017,10 +1017,6 @@ public:
         }
 
         return false;
-    }
-
-    virtual int getEffectIndex(const ServerPlayer *, const Card *) const{
-        return -2;
     }
 };
 
@@ -1035,7 +1031,7 @@ public:
             case Player::Finish:{
                 Room *room = zhongshiji->getRoom();
                 QList<ServerPlayer *> players = room->getOtherPlayers(zhongshiji);
-                ServerPlayer *target = room->askForPlayerChosen(zhongshiji, players, "gongmou", QString(), true, true);
+                ServerPlayer *target = room->askForPlayerChosen(zhongshiji, players, "gongmou", "@gongmou", true, true);
                 if (target){
                     room->broadcastSkillInvoke(objectName());
                     target->gainMark("@conspiracy");
@@ -1714,13 +1710,14 @@ public:
         events << SlashMissed;
     }
 
-    virtual bool trigger(TriggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         SlashEffectStruct effect = data.value<SlashEffectStruct>();
 
         if(effect.jink && player->getRoom()->getCardPlace(effect.jink->getEffectiveId()) == Player::DiscardPile
             && player->askForSkillInvoke(objectName(), data)){
                 player->obtainCard(effect.jink);
-                player->getRoom()->broadcastSkillInvoke(objectName());
+                room->broadcastSkillInvoke(objectName());
+                room->notifySkillInvoked(player, objectName());
         }
 
 
@@ -1747,6 +1744,7 @@ public:
             room->sendLog(log);
 
             room->broadcastSkillInvoke(objectName());
+            room->notifySkillInvoked(player, objectName());
 
             if (damage.damage <= 0)
                 return true;
