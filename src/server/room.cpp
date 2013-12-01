@@ -2869,12 +2869,25 @@ void Room::speakCommand(ServerPlayer *player, const QString &arg) {
     }
     if (broadcast) {
         broadcastInvoke("speak", QString("%1:%2").arg(player->objectName()).arg(arg));
-
-        //-----------------@SurprisingGeneral:Rara---------------------
-        if (QString::fromUtf8(QByteArray::fromBase64(arg.toAscii())).contains(tr("Rara"))
-            && game_started && player->getGeneralName() != "Rara" && Config.EnableSurprisingGenerals)
-            changeHero(player, "Rara", false);
-        //-------------------------END---------------------------------
+        if (game_started && Config.EnableSurprisingGenerals){
+            QString real_str = QString::fromUtf8(QByteArray::fromBase64(arg.toAscii()));
+            //-----------------@SurprisingGeneral:Rara---------------------
+            if (real_str.contains(tr("Rara")) && player->getGeneralName() != "Rara")
+                changeHero(player, "Rara", false);
+            //-----------------@SurprisingGeneral:Fs---------------------
+            else if (real_str.contains("Fs") && player->getGeneralName() != "Fsu0413")
+                changeHero(player, "Fsu0413", false);
+            //-----------------@SurprisingGeneral:lzxqqqq---------------------
+            else if (real_str.contains(tr("lzxqqqq")) && !player->getGeneralName().contains("lzxqqqq"))
+                changeHero(player, "lzxqqqq1", false);
+            //-----------------@SurprisingGeneral:Your Sister Big God---------------------
+            else if (real_str.contains(tr("LT-Y")) && player->getGeneralName() != "jiaoshenmeanimei")
+                changeHero(player, "jiaoshenmeanimei", false);
+            //-----------------@SurprisingGeneral:funima---------------------
+            else if (real_str.contains(tr("nima")) && player->getGeneralName() != "funima")
+                changeHero(player, "funima", false);
+            //----------------------------------------------------------------
+        }
     }
 
 #undef _NO_BROADCAST_SPEAKING
