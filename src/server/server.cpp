@@ -1106,6 +1106,7 @@ bool ServerDialog::config() {
     Config.setValue("EnableSame", Config.EnableSame);
     Config.setValue("EnableBasara", Config.EnableBasara);
     Config.setValue("EnableHegemony", Config.EnableHegemony);
+    Config.setValue("EnableSurprisingGenerals", Config.EnableSurprisingGenerals);
     Config.setValue("HegemonyMaxChoice", hegemony_maxchoice_spinbox->value());
     Config.setValue("HegemonyMaxShown", hegemony_maxshown_spinbox->value());
     Config.setValue("MaxHpScheme", Config.MaxHpScheme);
