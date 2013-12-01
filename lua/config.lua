@@ -66,14 +66,14 @@ config = {
 		"Test"
 	},
 
-    surprising_generals = {
-        "Rara" ,
+	surprising_generals = {
+		"Rara" ,
 		"Fsu0413" ,
 		"lzxqqqq1" ,
 		"lzxqqqq2" ,
 		"funima" ,
 		"jiaoshenmeanimei" ,
-    },
+	},
 
 	hulao_packages = {
 		"standard",
