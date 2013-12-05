@@ -22,7 +22,9 @@ return {
 	["illustrator:heg_jiangwei"] = "木美人",
 	["tianfu"] = "天覆",
 	[":tianfu"] = "你的上家/下家的回合开始时，你可以令其选择是否令你视为拥有“看破”直到回合结束；你的回合开始时，你可以令你的上家或下家选择是否令你视为拥有“看破”直到回合结束。",
-
+	["@tianfu-select"] = "请选择可以令你拥有“看破”的角色。" ,
+	["@tianfu_kanpo"] = "天覆-看破" ,
+	
 	["heg_dengai"] = "邓艾-国",
 	["&heg_dengai"] = "邓艾",
 	["illustrator:heg_dengai"] = "Amo",
