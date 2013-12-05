@@ -96,7 +96,6 @@ class Wangxi: public TriggerSkill{
 public:
     Wangxi(): TriggerSkill("wangxi"){
         events << Damage << Damaged;
-        //frequency = Compulsory;
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
@@ -131,11 +130,85 @@ public:
     }
 };
 
+class Hengjiang: public TriggerSkill{ //temp version
+public:
+    Hengjiang(): TriggerSkill("hengjiang"){
+        events << Damaged << CardsMoveOneTime << EventPhaseStart;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        switch (triggerEvent){
+            case (Damaged):{
+                if (!TriggerSkill::triggerable(player))
+                    return false;
+
+                DamageStruct damage = data.value<DamageStruct>();
+
+                ServerPlayer *current = room->getCurrent(); //当前回合角色躺枪
+                if (current && current->isAlive() && current->getPhase() != Player::NotActive)
+                    if (player->askForSkillInvoke(objectName(), data))
+                        room->addPlayerMark(current, objectName(), damage.damage);
+                    
+
+                break;
+            }
+            case (CardsMoveOneTime):{
+                if (!TriggerSkill::triggerable(player))
+                    return false;
+
+                CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+                if (move.from && move.from->getPhase() == Player::Discard && move.from->getMark(objectName()) > 0 && 
+                        (move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD){
+                    ServerPlayer *from = (ServerPlayer *)move.from;
+                    room->setPlayerMark(from, "hengjiang_discard", 1);
+                }
+                break;
+            }
+            case (EventPhaseStart):{
+                if (player->getPhase() != Player::NotActive)
+                    return false;
+                ServerPlayer *lidian = room->findPlayerBySkillName(objectName());
+                if (lidian == NULL || lidian->isDead())
+                    return false;
+
+                if (player->getMark(objectName()) > 0){
+                    room->setPlayerMark(player, objectName(), 0);
+                    if (player->getMark("hengjiang_discard") == 0)
+                        lidian->drawCards(1);
+                    room->setPlayerMark(player, "hengjiang_discard", 0);
+                }
+
+                break;
+            }
+        }
+        return false;
+    }
+};
+class HengjiangMaxCards: public MaxCardsSkill{
+public:
+    HengjiangMaxCards(): MaxCardsSkill("#hengjiang"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        return -target->getMark("hengjiang");
+    }
+};
+
 PowerPackage::PowerPackage(): Package("Power"){
 
     General *lidian = new General(this, "lidian", "wei", 3);
     lidian->addSkill(new Xunxun);
     lidian->addSkill(new Wangxi);
+
+    General *zangba = new General(this, "zangba", "wei");
+    zangba->addSkill(new Hengjiang);
+    zangba->addSkill(new HengjiangMaxCards);
+    related_skills.insertMulti("hengjiang", "#hengjiang");
 
 }
 
