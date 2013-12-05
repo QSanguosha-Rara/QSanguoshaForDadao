@@ -409,10 +409,10 @@ void Room::sendJudgeResult(const JudgeStar judge) {
     doBroadcastNotify(QSanProtocol::S_COMMAND_LOG_EVENT, arg);
 }
 
-QList<int> Room::getNCards(int n, bool update_pile_number) {
+QList<int> Room::getNCards(int n, bool update_pile_number, bool bottom) {
     QList<int> card_ids;
     for (int i = 0; i < n; i++)
-        card_ids << drawCard();
+        card_ids << drawCard(bottom);
 
     if (update_pile_number)
         doBroadcastNotify(S_COMMAND_UPDATE_PILE, Json::Value(m_drawPile->length()));
@@ -1948,11 +1948,14 @@ const ProhibitSkill *Room::isProhibited(const Player *from, const Player *to, co
     return Sanguosha->isProhibited(from, to, card, others);
 }
 
-int Room::drawCard() {
+int Room::drawCard(bool bottom) {
     thread->trigger(FetchDrawPileCard, this, NULL);
     if (m_drawPile->isEmpty())
         swapPile();
-    return m_drawPile->takeFirst();
+    if (!bottom) 
+        return m_drawPile->takeFirst();
+    else
+        return m_drawPile->takeLast();
 }
 
 void Room::prepareForStart() {

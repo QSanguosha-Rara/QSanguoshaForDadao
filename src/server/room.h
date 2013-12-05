@@ -91,11 +91,11 @@ public:
     bool isJinkEffected(ServerPlayer *user, const Card *jink);
     void judge(JudgeStruct &judge_struct);
     void sendJudgeResult(const JudgeStar judge);
-    QList<int> getNCards(int n, bool update_pile_number = true);
+    QList<int> getNCards(int n, bool update_pile_number = true, bool bottom = false);
     ServerPlayer *getLord() const;
     void askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, bool up_only);
     int doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target, QList<int> enabled_ids = QList<int>(), QString skill_name = "gongxin");
-    int drawCard();
+    int drawCard(bool bottom = false);
     void fillAG(const QList<int> &card_ids, ServerPlayer *who = NULL, const QList<int> &disabled_ids = QList<int>());
     void takeAG(ServerPlayer *player, int card_id, bool move_cards = true);
     void clearAG(ServerPlayer *player = NULL);

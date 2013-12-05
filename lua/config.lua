@@ -52,6 +52,7 @@ config = {
 		"BGMDIY",
 		"Hegemony",
 		"Formation",
+		"Power" ,
 		"Ling",
 		"Ling2013" ,
 		"TigerFly" ,
