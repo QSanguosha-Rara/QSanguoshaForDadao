@@ -149,10 +149,12 @@ public:
                 DamageStruct damage = data.value<DamageStruct>();
 
                 ServerPlayer *current = room->getCurrent(); //当前回合角色躺枪
-                if (current && current->isAlive() && current->getPhase() != Player::NotActive)
-                    if (player->askForSkillInvoke(objectName(), data))
-                        room->addPlayerMark(current, objectName(), damage.damage);
-                    
+                if (current && current->isAlive() && current->getPhase() != Player::NotActive){
+                    player->tag["hengjiang_damage"] = data;
+                    if (player->askForSkillInvoke(objectName(), "maxcard:" + current->objectName()))
+                        current->gainMark("@hengjiangmaxcard", damage.damage);
+                    player->tag.remove("hengjiang_damage");
+                }
 
                 break;
             }
@@ -161,7 +163,7 @@ public:
                     return false;
 
                 CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-                if (move.from && move.from->getPhase() == Player::Discard && move.from->getMark(objectName()) > 0 && 
+                if (move.from && move.from->getPhase() == Player::Discard && move.from_places.contains(Player::PlaceHand) &&
                         (move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD){
                     ServerPlayer *from = (ServerPlayer *)move.from;
                     room->setPlayerMark(from, "hengjiang_discard", 1);
@@ -171,17 +173,23 @@ public:
             case (EventPhaseStart):{
                 if (player->getPhase() != Player::NotActive)
                     return false;
+                player->loseAllMarks("@hengjiangmaxcard");
                 ServerPlayer *lidian = room->findPlayerBySkillName(objectName());
                 if (lidian == NULL || lidian->isDead())
                     return false;
 
-                if (player->getMark(objectName()) > 0){
-                    room->setPlayerMark(player, objectName(), 0);
-                    if (player->getMark("hengjiang_discard") == 0)
+                if (player->getMark("hengjiang_discard") == 0){
+                    bool drawflag = false;
+                    foreach(ServerPlayer *p, room->getOtherPlayers(lidian))
+                        if (p->getHandcardNum() > lidian->getHandcardNum()){
+                            drawflag = true;
+                            break;
+                        }
+                    if (drawflag && player->askForSkillInvoke(objectName(), "drawcard"))
                         lidian->drawCards(1);
-                    room->setPlayerMark(player, "hengjiang_discard", 0);
                 }
-
+                room->setPlayerMark(player, "hengjiang_discard", 0);
+                
                 break;
             }
         }
@@ -195,7 +203,7 @@ public:
     }
 
     virtual int getExtra(const Player *target) const{
-        return -target->getMark("hengjiang");
+        return -target->getMark("@hengjiangmaxcard");
     }
 };
 
