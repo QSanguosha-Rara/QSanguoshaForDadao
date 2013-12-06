@@ -528,7 +528,10 @@ sgs.ai_skill_choice.bushi = function(self, choices, data)
 	return "bushidec"
 end
 
-
+--[[
+--choudu的AI有问题暂时注释掉，此AI会导致杨仪自杀。
+--原因分析：choudu获得牌的角色会拥有一个flag，没获得牌就不会有，最早的askForYiji是问一张给一张，换用askForRende之后选完一起给，而AI还是一张一张的问。
+--有可能AI里面判断了这个给牌的flag，而askForRende给出去之前多次询问时均没有那个给牌的flag导致问题。
 sgs.ai_skill_use["@@choudu"] = function(self, prompt)
 	local targets = {}
 	local tarnum = self.player:getMark("chouduuse")
@@ -564,6 +567,8 @@ sgs.ai_skill_askforyiji.choudu = function(self, card_ids)
 	end
 	return nil, -1
 end
+]]
+
 
 sgs.ai_skill_cardask["@xuedian"] = function(self, data)
 	local x = self.player:getLostHp()
