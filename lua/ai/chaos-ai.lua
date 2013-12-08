@@ -1,5 +1,5 @@
 sgs.ai_skill_use["@@jisu"] = function(self, prompt)
-	local card_str = sgs.ai_skill_use["@@shensu1"](self, "@shensu1")
+	local card_str = sgs.ai_skill_use["@@shensu-card1"](self, "@shensu1")
 	return string.gsub(card_str, "ShensuCard", "JisuCard")
 end
 
