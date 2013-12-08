@@ -40,11 +40,18 @@
 
 --视为技在创建时，需要以下方法|变量的定义：
 
---name,	n, view_filter, view_as, enabled_at_play和enabled_at_response
+--name, response_pattern, n, view_filter, view_as, enabled_at_play, enabled_at_response和enabled_at_nullification
 
 --name：
 --一个字符串即技能名称。
 --该字段必须定义。（无默认值）
+
+--response_pattern :
+--字符串，仅当视为技通过sgs.CreateOneCardViewAsSkill创建时有效
+--可以通过使用类似于ExpPattern格式（详见ExpPattern章节）的字符串匹配可被选中以发动技能的卡牌
+--与ExpPattern不同的是，此处可在可解析的ExpPattern末尾处加上字符"!"(无引号)
+--以"!"结尾的response_pattern表明此技能选择的牌是以弃置为目的的（如离间、青囊），需要检测卡牌是否可以弃置
+--默认值为空字符串，即不会与任何牌匹配成功。值得注意的是，当技能同时提供了response_pattern与view_filter时，前者失效，后者有效.
 
 --n：
 --整数值，每次发动技能所用牌数的最大值。绝大多数DIY用到的n可能都为1或2.
@@ -54,7 +61,7 @@
 --lua函数，返回一个布尔值，即某张卡是否可被选中以用作发动技能。
 --发动技能时，将对所有手牌、装备进行遍历，并执行view_filter方法。返回了true的牌可以被选择用作技能发动。
 --传入的参数为self(技能对象本身),selected(lua表，已经选择的所有牌), to_select(当前需判断是否可选中的牌)
---默认为"永远返回false"，即如果你没有定义，则这个技能的发动不允许你选择任何牌。
+--默认为"永远返回false"，即如果你没有定义（且在sgs.CreateOneCardViewAsSkill中未定义response_pattern），则这个技能的发动不允许你选择任何牌。
 
 --view_as：
 --lua函数，返回一个card对象，即被选中的牌应当被视为什么牌被打出或使用。
@@ -77,7 +84,7 @@
 --enabled_at_nullification
 --lua函数，返回一个布尔值，即你在询问无懈可击时是否可以使用该技能。（该按钮是否可点）
 --传入参数为self(技能对象本身)，player(玩家对象)
---默认为false，即如果你没有定义，你永远不可以在出牌阶段使用本技能。
+--默认为false，即如果你没有定义，你永远不可以在询问无懈可击时使用本技能。
 
 --** 实例
 
@@ -112,24 +119,13 @@ view_as = function(self, cards)
 
 	
 	if #cards<1 then return nil end 
-	--如果没有牌被选中，那么返回空对象
+	--如果没有牌被选中，那么返回空对象（如果注释掉上一行，在技能操作时会造成闪退）
+
 	
-	local suit,number
+	local view_as_card= sgs.Sanguosha:cloneCard("collateral", sgs.Card_SuitToBeDecided, -1)
+	--生成一张借刀杀人，并按照规则由神杀自动设置花色点数
 	
-	for _,card in ipairs(cards) do
-		if suit and (suit~=card:getSuit()) then suit=sgs.Card_NoSuit else suit=card:getSuit() end
-		if number and (number~=card:getNumber()) then number=-1 else number=card:getNumber() end
-	end
-	
-	--如果所有被选中的牌的花色一样，那么被视为的借刀杀人的花色也为该花色。否则，该借刀杀人无花色。
-	--点数同理。
-	
-	local view_as_card= sgs.Sanguosha:cloneCard("collateral", suit, number)
-	--生成一张借刀杀人
-	
-	for _,card in ipairs(cards) do
-		view_as_card:addSubcard(card:getId())
-	end
+	view_as_card:addSubcards(cards)
 	--将被用作视为借刀杀人的牌都加入到借刀杀人的subcards里
 	
 	view_as_card:setSkillName(self:objectName())
@@ -157,9 +153,7 @@ view_as = function(self, cards)
 	local view_as_card=lijian_Card:clone()
 	--lijian_Card的定义应该被包含在同一个module文件当中。我将在其他文档中讲解技能牌的定义。
 	
-	for _,card in ipairs(cards) do
-		view_as_card:addSubcard(card:getId())
-	end
+	view_as_card:addSubcards(cards)
 	
 	return view_as_card
 end,
@@ -167,23 +161,17 @@ end,
 --以下是周瑜“反间”的enable_at_play方法：
 
 enabled_at_play=function(self,player)
-		return not player:hasFlag("fanjian_used")
+		return not player:hasUsed("#fanjian_Card")
 		--反间只能每回合用一次。如果你已经使用过了，那么你不能再次使用。
 end
-		
---注意在lua中暂时不能使用player:hasUsed方法来判断是否用过你的某个LuaSkillCard
---因为LuaSkillCard并不使用在cpp里面用的类继承机制
---请暂时在你的LuaSkillCard中执行类似于room:setPlayerFlag(effect.from,"fanjian_used")
---这样的语句，然后在enabled_at_play里面使用player:hasFlag。
+
+--有时为了区分lua技能卡与cpp技能卡，给lua技能卡名称前加了"#"，cpp技能卡名称前加了"@"
+--此处的技能卡为lua技能卡，所以技能卡名称前应加"#"
 
 --以下是大乔”流离“的enabled_at_response方法：
-enabled_at_response=function()
-	return sgs.Self:getPattern()=="#liuli_effect"
+enabled_at_response=function(self, player, pattern)
+	return pattern=="@liuli_effect"
 	--仅在询问流离时可以发动此技能
-	
-	--这里的函数没有参数传入（我们不需要）
-	--我们直接调用了sgs.Self，这个对象就是本地的ClientPlayer对象。
-	--注意：只有在本地运行的代码（比如视作技）可以调用到sgs.Self。
 end
 
 --虽然看起来流离并不像是一个视作技
@@ -192,6 +180,7 @@ end
 --2、在且仅在你响应使用"流离牌"时，你可以将任意一张牌视为"流离牌"使用。用视为技实现。
 --3、流离牌的效果为：流离牌的目标成为杀的目标，该杀跳过对你的结算。用技能牌实现。
 
---注意到正常情况下pattern永远不会自己就是"#liuli_effect"
---你需要在触发技当中使用room:askForUseCard(daqiao,"#liuli_target",prompt)
+--注意到正常情况下pattern永远不会自己就是"@liuli_effect"
+--你需要在触发技当中使用room:askForUseCard(daqiao,"@liuli_effect",prompt)
+--其中第二个参数最好由1~2个"@"开头，其后为响应的视为技名称，可以在末尾加"-card"，只有这样才能自动点选视为技按钮
 --这样，就可以创造出一个专门用于流离的响应来。
