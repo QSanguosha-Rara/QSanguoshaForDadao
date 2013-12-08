@@ -63,7 +63,7 @@ RendeCard::RendeCard(){
     target_fixed = true;
 }
 
-void RendeCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+void RendeCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const{
     if (room->askForRende(source, source->handCards(), "rende", false, true, -1, QList<ServerPlayer *>(), CardMoveReason(), "@rende", false) >= 2){
         RecoverStruct rec;
         rec.who = source;
@@ -173,7 +173,7 @@ bool LijianCard::targetFilter(const QList<const Player *> &targets, const Player
     return targets.length() < 2 && to_select != Self;
 }
 
-bool LijianCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
+bool LijianCard::targetsFeasible(const QList<const Player *> &targets, const Player *) const{
     return targets.length() == 2;
 }
 
@@ -216,7 +216,7 @@ void LijianCard::use(Room *room, ServerPlayer *, QList<ServerPlayer *> &targets)
 QingnangCard::QingnangCard() {
 }
 
-bool QingnangCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool QingnangCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *) const{
     return targets.isEmpty() && to_select->isWounded();
 }
 
@@ -343,7 +343,7 @@ ExtraRoundCard::ExtraRoundCard(){
     target_fixed = true;
 }
 
-void ExtraRoundCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+void ExtraRoundCard::use(Room *, ServerPlayer *source, QList<ServerPlayer *> &) const{
     source->gainAnExtraTurn();
 }
 
@@ -351,7 +351,7 @@ NimeiCard::NimeiCard(){
 
 }
 
-bool NimeiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool NimeiCard::targetFilter(const QList<const Player *> &, const Player *to_select, const Player *Self) const{
     return to_select != Self && !to_select->canDiscard(to_select, "he");
 }
 

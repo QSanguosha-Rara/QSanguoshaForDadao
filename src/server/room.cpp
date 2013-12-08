@@ -2335,7 +2335,7 @@ ServerPlayer *Room::getOwner() const{
     return NULL;
 }
 
-void Room::toggleReadyCommand(ServerPlayer *player, const QString &) {
+void Room::toggleReadyCommand(ServerPlayer *, const QString &) {
     if (!game_started && isFull())
         start();
 }
@@ -5538,7 +5538,7 @@ void Room::retrial(const Card *card, ServerPlayer *player, JudgeStar judge, cons
 }
 
 int Room::askForRende(ServerPlayer *liubei, QList<int> &cards, const QString &skill_name,
-                      bool visible, bool optional, int max_num,
+                      bool , bool optional, int max_num,
                       QList<ServerPlayer *> players, CardMoveReason reason, const QString &prompt,
                       bool notify_skill) {
     if (max_num == -1)

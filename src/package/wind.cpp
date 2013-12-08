@@ -281,7 +281,7 @@ public:
         return false;
     }
 
-    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+    virtual int getEffectIndex(const ServerPlayer *player, const Card *) const{
         int index = qrand() % 2 + 1;
         if (!player->hasInnateSkill(objectName()) && player->hasSkill("baobian"))
             index += 2;
@@ -607,7 +607,7 @@ public:
         return false;
     }
 
-    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+    virtual int getEffectIndex(const ServerPlayer *player, const Card *) const{
         if (player->hasSkill("luoyan"))
             return qrand() % 2 + 3;
         else
@@ -1119,7 +1119,7 @@ public:
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *, QVariant &data) const{
         PhaseChangeStruct change = data.value<PhaseChangeStruct>();
         if (change.to == Player::NotActive) {
             foreach (ServerPlayer *p, room->getAlivePlayers()) {

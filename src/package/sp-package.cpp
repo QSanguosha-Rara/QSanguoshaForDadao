@@ -470,7 +470,7 @@ YuanhuCard::YuanhuCard() {
     handling_method = Card::MethodNone;
 }
 
-bool YuanhuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool YuanhuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *) const{
     if (!targets.isEmpty())
         return false;
 
@@ -834,7 +834,7 @@ public:
         return -1;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *, QVariant &data) const{
         PindianStar pindian = data.value<PindianStar>();
         if (pindian->reason != objectName() || pindian->from_number == pindian->to_number)
             return false;
@@ -1650,11 +1650,11 @@ ZhoufuCard::ZhoufuCard() {
     handling_method = Card::MethodNone;
 }
 
-bool ZhoufuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool ZhoufuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *) const{
     return targets.isEmpty() && to_select->getPile("incantation").isEmpty();
 }
 
-void ZhoufuCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+void ZhoufuCard::use(Room *, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
     ServerPlayer *target = targets.first();
     target->tag["ZhoufuSource" + QString::number(getEffectiveId())] = QVariant::fromValue((PlayerStar)source);
     target->addToPile("incantation", this);
@@ -2204,7 +2204,7 @@ public:
         return player->canDiscard(player, "he") && !player->hasFlag("DuwuEnterDying");
     }
 
-    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+    virtual bool viewFilter(const QList<const Card *> &, const Card *) const{
         return true;
     }
 
@@ -2369,7 +2369,7 @@ public:
 
     }
 
-    virtual int getExtra(const Player *target, bool include_weapon) const{
+    virtual int getExtra(const Player *target, bool ) const{
         if (target->hasSkill(objectName()))
             return target->getPile("burn").length();
 

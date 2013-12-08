@@ -46,7 +46,7 @@ public:
         return target != NULL && target->isAlive() && target->getPhase() != Player::NotActive;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
         if (move.from == player && move.to_place == Player::DiscardPile){
             int n = move.card_ids.length();
@@ -376,7 +376,7 @@ public:
         events << DamageInflicted;
     }
 
-    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room* , ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if(damage.nature == DamageStruct::Fire){
             LogMessage log;
@@ -500,7 +500,7 @@ public:
         return target != NULL && target->isAlive();
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
         ServerPlayer *xiahoujie = room->findPlayerBySkillName(objectName());
         if (xiahoujie == NULL || xiahoujie->isDead() || !player->inMyAttackRange(xiahoujie))
             return false;
@@ -526,7 +526,7 @@ public:
         return target != NULL && target->hasSkill(objectName());
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         DeathStruct death = data.value<DeathStruct>();
         if (player == death.who && death.damage && death.damage->from){
             room->broadcastSkillInvoke(objectName());

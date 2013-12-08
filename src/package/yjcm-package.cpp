@@ -570,7 +570,7 @@ public:
         return false;
     }
 
-    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+    virtual int getEffectIndex(const ServerPlayer *, const Card *) const{
         return 1;
     }
 };
@@ -779,7 +779,7 @@ void GanluCard::swapEquip(ServerPlayer *first, ServerPlayer *second) const{
     room->moveCards(exchangeMove, false);
 }
 
-bool GanluCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
+bool GanluCard::targetsFeasible(const QList<const Player *> &targets, const Player *) const{
     return targets.length() == 2;
 }
 

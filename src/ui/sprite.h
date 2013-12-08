@@ -62,7 +62,7 @@ class EmphasizeEffect: public QAnimatedEffect {
     Q_OBJECT
 
 public:
-    EmphasizeEffect(bool stay = false, QObject *parent = 0);
+    EmphasizeEffect(bool stay = false);
 
 protected:
     virtual void draw(QPainter *painter);
@@ -73,7 +73,7 @@ class SentbackEffect: public QAnimatedEffect {
     Q_OBJECT
 
 public:
-    SentbackEffect(bool stay = false, QObject *parent = 0);
+    SentbackEffect(bool stay = false);
 
 protected:
     virtual void draw(QPainter *painter);
@@ -87,7 +87,7 @@ class FadeEffect: public QAnimatedEffect {
     Q_OBJECT
 
 public:
-    FadeEffect(bool stay = false, QObject *parent = 0);
+    FadeEffect(bool stay = false);
 
 protected:
     virtual void draw(QPainter *painter);
