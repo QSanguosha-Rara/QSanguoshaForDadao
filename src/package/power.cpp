@@ -207,6 +207,124 @@ public:
     }
 };
 
+class hegzhangjiaoskill1: public PhaseChangeSkill{
+public:
+    hegzhangjiaoskill1(): PhaseChangeSkill("hegzhangjiaoskill1"){
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() == Player::Draw){
+            Room *room = target->getRoom();
+
+            int qunplayers = 0;
+            foreach(ServerPlayer *p, room->getAlivePlayers())
+                if (p->getKingdom() == "qun")
+                    qunplayers ++;
+
+            if (qunplayers <= 1)
+                return false;
+
+            if (target->askForSkillInvoke(objectName())){
+                QList<int> guanxing_cards = room->getNCards(qunplayers);
+                room->askForGuanxing(target, guanxing_cards, true);
+            }
+
+        }
+        return false;
+    }
+};
+
+class hegzhangjiaoskill2: public PhaseChangeSkill{
+public:
+    hegzhangjiaoskill2(): PhaseChangeSkill("hegzhangjiaoskill2$"){
+
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive() && target->hasLordSkill(objectName());
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() == Player::Start && target->getPile("skysoldier").length() == 0){
+            Room *room = target->getRoom();
+
+            int qunplayers = 0;
+            foreach(ServerPlayer *p, room->getAlivePlayers())
+                if (p->getKingdom() == "qun")
+                    qunplayers ++;
+
+            if (qunplayers == 0)
+                return false;
+
+            QList<int> skill2cards = room->getNCards(qunplayers);
+            CardMoveReason reason(CardMoveReason::S_REASON_TURNOVER, target->objectName(), objectName(), QString());
+            CardsMoveStruct move(skill2cards, NULL, Player::PlaceTable, reason);
+            room->moveCardsAtomic(move, true);
+            room->getThread()->delay();
+            room->getThread()->delay();
+
+            target->addToPile("skysoldier", skill2cards, true);
+
+        }
+        return false;
+    }
+};
+
+hegzhangjiaoskill3Card::hegzhangjiaoskill3Card(){
+    target_fixed = true;
+}
+
+void hegzhangjiaoskill3Card::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+    const Card *tpys = NULL;
+    foreach(ServerPlayer *p, room->getAlivePlayers()){
+        foreach(const Card *card, p->getEquips()){
+            if (Sanguosha->getEngineCard(card->getEffectiveId())->isKindOf("taipingyaoshu")){
+                tpys = Sanguosha->getCard(card->getEffectiveId());
+                break;
+            }
+        }
+        if (tpys != NULL)
+            break;
+        foreach(const Card *card, p->getJudgingArea()){
+            if (Sanguosha->getEngineCard(card->getEffectiveId())->isKindOf("taipingyaoshu")){
+                tpys = Sanguosha->getCard(card->getEffectiveId());
+                break;
+            }
+        }
+        if (tpys != NULL)
+            break;
+    }
+    if (tpys == NULL)
+        foreach(int id, room->getDiscardPile()){
+            if (Sanguosha->getEngineCard(id)->isKindOf("taipingyaoshu")){
+                tpys = Sanguosha->getCard(id);
+                break;
+            }
+        }
+        
+    if (tpys == NULL)
+        return;
+
+    source->obtainCard(tpys, true);
+}
+
+class hegzhangjiaoskill3: public OneCardViewAsSkill{
+public:
+    hegzhangjiaoskill3(): OneCardViewAsSkill("hegzhangjiaoskill3"){
+        filter_pattern = ".|red!";
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("hegzhangjiaoskill3Card");
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        hegzhangjiaoskill3Card *c = new hegzhangjiaoskill3Card;
+        c->addSubcard(originalCard);
+        return c;
+    }
+};
+
 PowerPackage::PowerPackage(): Package("Power"){
 
     General *lidian = new General(this, "lidian", "wei", 3);
@@ -218,6 +336,12 @@ PowerPackage::PowerPackage(): Package("Power"){
     zangba->addSkill(new HengjiangMaxCards);
     related_skills.insertMulti("hengjiang", "#hengjiang");
 
+    General *zhangjiao = new General(this, "heg_zhangjiao$", "qun", 3);
+    zhangjiao->addSkill(new hegzhangjiaoskill1);
+    zhangjiao->addSkill(new hegzhangjiaoskill2);
+    zhangjiao->addSkill(new hegzhangjiaoskill3);
+
+    addMetaObject<hegzhangjiaoskill3Card>();
 }
 
 ADD_PACKAGE(Power)
