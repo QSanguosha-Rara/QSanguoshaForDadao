@@ -49,7 +49,7 @@ HuyuanCard::HuyuanCard() {
     handling_method = Card::MethodNone;
 }
 
-bool HuyuanCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool HuyuanCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *) const{
     if (!targets.isEmpty())
         return false;
 
@@ -238,7 +238,7 @@ HeyiCard::HeyiCard(){
 
 }
 
-bool HeyiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool HeyiCard::targetFilter(const QList<const Player *> &, const Player *to_select, const Player *Self) const{
     return to_select->isAdjacentTo(Self);
 }
 
@@ -402,7 +402,7 @@ public:
         events << MarkChanged;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         MarkChangeStruct change = data.value<MarkChangeStruct>();
         if (change.name == "@tianfu_kanpo"){
             int kanpo = player->getMark("@tianfu_kanpo");
@@ -697,7 +697,7 @@ public:
         events << TargetConfirmed;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
         if (use.card != NULL && use.card->isKindOf("Slash") && use.from != NULL){
             QVariantList jink_list = use.from->tag["Jink_" + use.card->toString()].toList();
@@ -775,7 +775,7 @@ public:
 
     }
 
-    virtual int getExtra(const Player *target, bool include_weapon) const{
+    virtual int getExtra(const Player *target, bool ) const{
         QList<const Player *> players = target->getAliveSiblings();
         //players << target;
         foreach(const Player *p, players){
@@ -798,7 +798,7 @@ public:
         return TriggerSkill::triggerable(target) && target->getMark(limit_mark) > 0;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         DyingStruct dying = data.value<DyingStruct>();
         if (dying.who != player)
             return false;

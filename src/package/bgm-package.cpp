@@ -499,7 +499,7 @@ bool DaheCard::targetFilter(const QList<const Player *> &targets, const Player *
     return targets.isEmpty() && !to_select->isKongcheng() && to_select != Self;
 }
 
-void DaheCard::use(Room *room, ServerPlayer *zhangfei, QList<ServerPlayer *> &targets) const{
+void DaheCard::use(Room *, ServerPlayer *zhangfei, QList<ServerPlayer *> &targets) const{
     zhangfei->pindian(targets.first(), "dahe", NULL);
 }
 
@@ -1316,7 +1316,7 @@ public:
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *, QVariant &) const{
         ServerPlayer *xiahou = room->findPlayerBySkillName("fenyong");
         if (xiahou == NULL)
             return false;

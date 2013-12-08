@@ -178,7 +178,7 @@ public:
     Tannang(): DistanceSkill("tannang") {
     }
 
-    virtual int getCorrect(const Player *from, const Player *to) const{
+    virtual int getCorrect(const Player *from, const Player *) const{
         if (from->hasSkill(objectName()))
             return -from->getLostHp();
         else
@@ -607,7 +607,7 @@ public:
         return target != NULL && target->isAlive() && target->getPhase() == Player::Play;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
         if (use.card->isKindOf("Slash") || use.card->isNDTrick()){
             foreach(ServerPlayer *p, use.to){
@@ -714,7 +714,7 @@ public:
         return Slash::IsAvailable(player);
     }
 
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
+    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
         return pattern == "slash" && Sanguosha->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE_USE;
     }
 
@@ -760,7 +760,7 @@ public:
         return false;
     }
 
-    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+    virtual int getEffectIndex(const ServerPlayer *, const Card *card) const{
         if (card->isKindOf("Slash"))
             return qrand() % 2 + 1;
         return -1;
@@ -961,7 +961,7 @@ public:
         events << HpRecover;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         RecoverStruct recover_struct = data.value<RecoverStruct>();
         int recover = recover_struct.recover;
         for (int i = 1; i <= recover; i++){
@@ -1182,7 +1182,7 @@ public:
         return 6;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
         if (player->getPhase() == Player::RoundStart){
             QStringList Qingchenglist = player->tag["neo2013qingcheng"].toStringList();
             if (!Qingchenglist.isEmpty()){
@@ -1422,7 +1422,7 @@ public:
         return Slash::IsAvailable(player);
     }
 
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
+    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
         return (pattern == "slash" && Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE_USE)
             || (pattern == "@@neo2013tongwu");
     }
@@ -1519,7 +1519,7 @@ public:
         return target != NULL && target->isAlive();
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
         if (use.from == NULL || use.card == NULL || !use.card->isKindOf("Slash"))
             return false;
@@ -1538,7 +1538,7 @@ public:
 
     }
 
-    virtual int getFixed(const Player *target, bool include_weapon) const{
+    virtual int getFixed(const Player *target, bool ) const{
         const Player *current = NULL;
         foreach (const Player *p, target->getAliveSiblings())
             if (p->getPhase() != Player::NotActive){
@@ -1559,7 +1559,7 @@ public:
 
     }
 
-    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others /* = QList<const Player *> */) const{
+    virtual bool isProhibited(const Player *, const Player *to, const Card *card, const QList<const Player *> &) const{
         return to->hasSkill(objectName()) && (!card->isKindOf("SkillCard") || card->isKindOf("GuhuoCard") || card->isKindOf("QiceCard") || card->isKindOf("GudanCard"));
     }
 
@@ -1612,7 +1612,7 @@ public:
         return target != NULL && target->isAlive();
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
         ServerPlayer *mateng = room->findPlayerBySkillName(objectName());
 
         if (triggerEvent == EventPhaseStart){
@@ -1656,11 +1656,11 @@ Neo2013ZhoufuCard::Neo2013ZhoufuCard() {
     handling_method = Card::MethodNone;
 }
 
-bool Neo2013ZhoufuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool Neo2013ZhoufuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *) const{
     return targets.isEmpty() &&  to_select->getPile("incantationn").isEmpty();
 }
 
-void Neo2013ZhoufuCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+void Neo2013ZhoufuCard::use(Room *, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
     ServerPlayer *target = targets.first();
     target->tag["Neo2013ZhoufuSource" + QString::number(getEffectiveId())] = QVariant::fromValue((PlayerStar)source);
     target->addToPile("incantationn", this);
@@ -1762,7 +1762,7 @@ public:
         frequency = Compulsory;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         SlashEffectStruct effect = data.value<SlashEffectStruct>();
         if (player->faceUp() && effect.slash->isBlack()){
             LogMessage l;
@@ -1784,7 +1784,7 @@ public:
 
     }
 
-    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others) const{
+    virtual bool isProhibited(const Player *, const Player *to, const Card *card, const QList<const Player *> &) const{
         return (to->hasSkill(objectName()) && !to->faceUp() && card->isRed() && card->getSkillName() != "nosguhuo");
     }
 };
@@ -1795,7 +1795,7 @@ public:
         events << CardsMoveOneTime;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         if (!player->faceUp()){
             CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
             if ((move.from == player || move.to == player) && (move.from_places.contains(Player::PlaceHand) || move.to_place == Player::PlaceHand)){
@@ -1816,7 +1816,7 @@ public:
         return target != NULL && target->isAlive();
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
         if (player->getPhase() != Player::RoundStart)
             return false;
 
@@ -1878,7 +1878,7 @@ private:
 */
 
 public:
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
         if (((move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD)
                 && move.to_place == Player::DiscardPile){
@@ -1928,7 +1928,7 @@ Neo2013JiejiCard::Neo2013JiejiCard(){
     handling_method = Card::MethodNone;
 }
 
-void Neo2013JiejiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+void Neo2013JiejiCard::use(Room *, ServerPlayer *source, QList<ServerPlayer *> &) const{
     source->addToPile("robbery", this, false);
 }
 
@@ -2264,7 +2264,7 @@ public:
         return false;
     }
 
-    virtual const Card *viewAs(const Card *originalCard) const{
+    virtual const Card *viewAs(const Card *) const{
         Neo2013JinanCard *card = new Neo2013JinanCard;
         card->addSubcard(card);
         return card;
@@ -2278,7 +2278,7 @@ public:
         view_as_skill = new Neo2013JinanVS;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
         foreach (ServerPlayer *p, use.to){
             if (p == player)
@@ -2395,7 +2395,7 @@ public:
 
     }
 
-    virtual void onDamaged(ServerPlayer *player, const DamageStruct &damage) const{
+    virtual void onDamaged(ServerPlayer *player, const DamageStruct &) const{
         Room *room = player->getRoom();
         ServerPlayer *target = room->askForPlayerChosen(player, room->getOtherPlayers(player), objectName(), "@neo2013ganglie", true, true);
         if (target != NULL){
@@ -2633,11 +2633,11 @@ QString AwaitExhausted::getSubtype() const{
     return "await_exhausted";
 }
 
-bool AwaitExhausted::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const {
+bool AwaitExhausted::targetFilter(const QList<const Player *> &, const Player *to_select, const Player *Self) const {
     return to_select != Self;
 }
 
-bool AwaitExhausted::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
+bool AwaitExhausted::targetsFeasible(const QList<const Player *> &, const Player *) const{
     return true;
 }
 
@@ -2679,7 +2679,7 @@ bool BefriendAttacking::targetFilter(const QList<const Player *> &targets, const
     return Self->distanceTo(to_select) == distance;
 }
 
-bool BefriendAttacking::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
+bool BefriendAttacking::targetsFeasible(const QList<const Player *> &targets, const Player *) const{
     return targets.length() > 0;
 }
 
@@ -2770,7 +2770,7 @@ SixSwordsCard::SixSwordsCard(): SkillCard(){
 
 }
 
-bool SixSwordsCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool SixSwordsCard::targetFilter(const QList<const Player *> &, const Player *to_select, const Player *Self) const{
     return to_select != Self;
 }
 
@@ -2827,7 +2827,7 @@ public:
 
     }
 
-    virtual int getExtra(const Player *target, bool include_weapon) const{
+    virtual int getExtra(const Player *target, bool ) const{
         if (target->getMark("@SixSwordsBuff") > 0)
             return 1;
         return 0;
@@ -2842,7 +2842,7 @@ TribladeCard::TribladeCard(): SkillCard(){
 
 }
 
-bool TribladeCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool TribladeCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *) const{
     return targets.length() == 0 && to_select->hasFlag("TribladeFilter");
 }
 
@@ -2871,7 +2871,7 @@ public:
         view_as_skill = new TribladeSkillVS;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.to && damage.to->isAlive() && damage.card && damage.card->isKindOf("Slash")
                 && damage.by_user && !damage.chain && !damage.transfer){

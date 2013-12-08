@@ -522,7 +522,7 @@ public:
         return false;
     }
 
-    virtual int getEffectIndex(const ServerPlayer *player, const Card *) const{
+    virtual int getEffectIndex(const ServerPlayer *, const Card *) const{
         return 1;
     }
 };
@@ -1411,7 +1411,7 @@ NosFengyinCard::NosFengyinCard(){
     handling_method = Card::MethodNone;
 }
 
-void NosFengyinCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const{
+void NosFengyinCard::use(Room *room, ServerPlayer *, QList<ServerPlayer *> &) const{
     ServerPlayer *target = room->getCurrent();
     target->obtainCard(this);
     room->broadcastSkillInvoke("nosfengyin");
@@ -1423,7 +1423,7 @@ public:
     NosFengyinViewAsSkill():OneCardViewAsSkill("nosfengyin"){
     }
 
-    virtual bool isEnabledAtPlay(const Player *player) const{
+    virtual bool isEnabledAtPlay(const Player *) const{
         return false;
     }
 

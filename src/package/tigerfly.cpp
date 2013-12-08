@@ -13,7 +13,7 @@ public:
     Shemi():ViewAsSkill("shemi") {
     }
 
-    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *) const{
         int hp = Self->getHp();
         if (hp <= 2) {
             return selected.length() < 1;
@@ -537,7 +537,7 @@ public:
     JisiVS(): ZeroCardViewAsSkill("jisi"){
     }
 
-    virtual bool isEnabledAtPlay(const Player *player) const{
+    virtual bool isEnabledAtPlay(const Player *) const{
         return false;
     }
 
@@ -578,7 +578,7 @@ public:
         return false;
     }
 
-    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+    virtual int getEffectIndex(const ServerPlayer *, const Card *) const{
         return qrand() % 2 + 2;
     }
 };
@@ -790,7 +790,7 @@ public:
         events << BeforeCardsMove;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
         if (move.from == NULL || move.from == player)
             return false;
@@ -1408,7 +1408,7 @@ public:
     Tuwei(): TargetModSkill("tuwei"){
     }
 
-    virtual int getExtraTargetNum(const Player *from, const Card *card) const{
+    virtual int getExtraTargetNum(const Player *from, const Card *) const{
         if (!from->hasSkill(objectName()))
             return 0;
 
@@ -1566,7 +1566,7 @@ public:
         return !player->isKongcheng();
     }
 
-    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+    virtual int getEffectIndex(const ServerPlayer *, const Card *card) const{
         if (card->isKindOf("Slash"))
             return 1;
         else
@@ -1591,7 +1591,7 @@ public:
         response_pattern = "@@shangjian";
     }
 
-    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+    virtual bool viewFilter(const QList<const Card *> &, const Card *to_select) const{
         return !to_select->isEquipped();
     }
 
@@ -1752,7 +1752,7 @@ public:
 
     }
 
-    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others = QList<const Player *>()) const{
+    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &) const{
         return to->hasSkill(objectName()) && from->getEquips().length() < to->getEquips().length() && card->isKindOf("BasicCard");
     }
 };
@@ -1808,7 +1808,7 @@ bool JingshangCard::targetFilter(const QList<const Player *> &targets, const Pla
     return targets.length() < 2 && to_select != Self && !to_select->isKongcheng();
 }
 
-bool JingshangCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
+bool JingshangCard::targetsFeasible(const QList<const Player *> &targets, const Player *) const{
     return targets.length() == 2;
 }
 
@@ -1847,7 +1847,7 @@ public:
 
     }
 
-    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *) const{
         return selected.isEmpty();
     }
 
@@ -1873,7 +1873,7 @@ public:
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *, QVariant &data) const{
         PindianStruct *pindian = data.value<PindianStruct *>();
         if (pindian->reason != objectName())
             return false;
@@ -2034,7 +2034,7 @@ public:
         response_pattern = "@@xingsuan";
     }
 
-    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+    virtual bool viewFilter(const QList<const Card *> &, const Card *to_select) const{
         return Sanguosha->matchExpPattern("Slash,EquipCard", Self, to_select); //I use this function the first time, bugs exist probably
     }
 
@@ -2100,7 +2100,7 @@ public:
         return false;
     }
 
-    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+    virtual int getEffectIndex(const ServerPlayer *, const Card *) const{
         return 1;
     }
 };
@@ -2164,7 +2164,7 @@ public:
         return false;
     }
 
-    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+    virtual int getEffectIndex(const ServerPlayer *, const Card *card) const{
         if (card->isKindOf("Slash"))
             return 0;
 
@@ -2229,7 +2229,7 @@ public:
     ChanyuVS():ZeroCardViewAsSkill("chanyu"){
     }
 
-    virtual bool isEnabledAtPlay(const Player *target) const{
+    virtual bool isEnabledAtPlay(const Player *) const{
         return false;
     }
 
@@ -2295,7 +2295,7 @@ public:
         return target != NULL && target->isAlive() && target->getPhase() == Player::NotActive;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *, QVariant &) const{
         foreach (ServerPlayer *p, room->findPlayersBySkillName("chanyu")){
             room->setPlayerMark(p, "chanyuused", 0);
         }
@@ -2426,7 +2426,7 @@ public:
         frequency = Compulsory;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.to != player && damage.to->getHp() <= player->getHp() && damage.to->isAlive()){
             QString choice = "draw";
@@ -2647,7 +2647,7 @@ public:
 
     }
 
-    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others) const{
+    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &) const{
         return from != to && card->isKindOf("TrickCard") && to->hasSkill(objectName()) && from->inMyAttackRange(to);
     }
 };
@@ -2790,11 +2790,11 @@ FengyinCard::FengyinCard(): SkillCard(){
     handling_method = Card::MethodNone;
 }
 
-bool FengyinCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool FengyinCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *) const{
     return targets.length() == 0 && to_select->hasFlag("Neo2013FengyinTarget");
 }
 
-void FengyinCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+void FengyinCard::use(Room *, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
     ServerPlayer *target = targets[0];
     target->obtainCard(this, true);
     target->skip(Player::Play);
@@ -2828,7 +2828,7 @@ public:
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
         if (player->getPhase() != Player::RoundStart)
             return false;
 
@@ -2862,7 +2862,7 @@ public:
         events << Death;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         DeathStruct Death = data.value<DeathStruct>();
         if (Death.who != player){
             int maxhp = player->getMaxHp();

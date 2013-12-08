@@ -647,7 +647,7 @@ public:
         return target && !target->isAlive() && target->hasSkill(objectName());
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
         if (triggerEvent == BeforeGameOverJudge) {
             player->setMark(objectName(), player->getCardCount(true));
         } else {
@@ -822,7 +822,7 @@ public:
         events << EventPhaseStart;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
         if (player->getPhase() == Player::Discard) {
             int max_hp = -1000;
             foreach (ServerPlayer *p, room->getOtherPlayers(player)) {
@@ -963,7 +963,7 @@ public:
         frequency = Frequent;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *, ServerPlayer *player, QVariant &data) const{
         if (Config.GameMode == "02_1v1"){
             DeathStruct death = data.value<DeathStruct>();
             if (death.who != player && death.damage && death.damage->from == player && player->askForSkillInvoke(objectName()))
@@ -987,7 +987,7 @@ public:
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *, ServerPlayer *, QVariant &data) const{
         if (Config.GameMode != "02_1v1"){
             DeathStruct death = data.value<DeathStruct>();
             if (death.damage && death.damage->from != NULL && death.damage->from->hasSkill("liewei") 
@@ -1073,7 +1073,7 @@ public:
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent triggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == TargetConfirmed) {
             CardUseStruct use = data.value<CardUseStruct>();
             if (use.from && use.from == player && use.card->isKindOf("Slash") && use.from->getPhase() != Player::NotActive) {
