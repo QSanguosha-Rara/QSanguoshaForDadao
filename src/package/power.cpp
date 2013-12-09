@@ -207,6 +207,151 @@ public:
     }
 };
 
+
+class Guixiu: public MaxCardsSkill{
+public:
+    Guixiu(): MaxCardsSkill("guixiu"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if (target->hasSkill(objectName())){
+            return 2;
+        }
+        return 0;
+    }
+};
+
+class GuixiuInitial: public DrawCardsSkill{
+public:
+    GuixiuInitial(): DrawCardsSkill("#guixiu-initial", true){
+
+    }
+
+    virtual int getDrawNum(ServerPlayer *player, int n) const{
+        return n + 2;
+    }
+};
+
+class Cunsi: public TriggerSkill{
+public:
+    Cunsi(): TriggerSkill("cunsi"){
+        events << Dying;
+        frequency = Limited;
+        limit_mark = "@mifuren";
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return TriggerSkill::triggerable(target) && target->getMark("@mifuren") > 0;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        DyingStruct dying = data.value<DyingStruct>();
+        if (dying.who == player && player->askForSkillInvoke(objectName())){
+            player->loseAllMarks("@mifuren");
+            RecoverStruct recover;
+            recover.who = player;
+            recover.recover = 2 - player->getHp();
+            room->recover(player, recover);
+            room->handleAcquireDetachSkills(player, "yongjue|yiming");
+        }
+        return false;
+    }
+};
+
+class Yongjue: public TriggerSkill{
+public:
+    Yongjue(): TriggerSkill("yongjue"){
+        events << CardUsed << CardResponded;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (!player->hasFlag("yongjue")){
+            const Card *card = NULL;
+            if (triggerEvent == CardUsed){
+                CardUseStruct use = data.value<CardUseStruct>();
+                if (use.card != NULL && !use.card->isKindOf("SkillCard"))
+                    card = use.card;
+            }
+            else{
+                CardResponseStruct resp = data.value<CardResponseStruct>();
+                if (resp.m_isUse)
+                    card = resp.m_card;
+            }
+
+            if (card != NULL){
+                player->setFlags("yongjue");
+                if (card->isKindOf("Slash")){
+                    ServerPlayer *mifuren = room->findPlayerBySkillName(objectName());
+                    if (mifuren != NULL && mifuren->askForSkillInvoke(objectName(), QVariant::fromValue(player)))
+                        player->obtainCard(card);
+                }
+            }
+        }
+        return false;
+    }
+};
+
+YimingCard::YimingCard(){
+
+}
+
+void YimingCard::onEffect(const CardEffectStruct &effect) const{
+    QList<Player::Phase> phaselist;
+    switch (getSuit()){
+        case Card::Club:{
+            phaselist << Player::Discard;
+            break;
+        }
+        case Card::Diamond:{
+            phaselist << Player::Draw;
+            break;
+        }
+        case Card::Heart:{
+            phaselist << Player::Play;
+            break;
+        }
+        case Card::Spade:{
+            phaselist << Player::Start << Player::Finish;
+            break;
+        }
+        default:
+            Q_ASSERT(false);
+    }
+    effect.to->play(phaselist);
+}
+
+class YimingVS: public OneCardViewAsSkill{
+public:
+    YimingVS(): OneCardViewAsSkill("yiming"){
+        response_pattern = "@@yiming";
+        filter_pattern = ".!";
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        YimingCard *c = new YimingCard;
+        c->addSubcard(originalCard);
+        return c;
+    }
+};
+
+class Yiming: public PhaseChangeSkill{
+public:
+    Yiming(): PhaseChangeSkill("yiming"){
+        view_as_skill = new YimingVS;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() == Player::NotActive)
+            target->getRoom()->askForUseCard(target, "@@yiming", "@yiming-prompt", -1, Card::MethodDiscard);
+        return false;
+    }
+};
+
 class hegzhangjiaoskill1: public PhaseChangeSkill{
 public:
     hegzhangjiaoskill1(): PhaseChangeSkill("hegzhangjiaoskill1"){
@@ -336,11 +481,21 @@ PowerPackage::PowerPackage(): Package("Power"){
     zangba->addSkill(new HengjiangMaxCards);
     related_skills.insertMulti("hengjiang", "#hengjiang");
 
+    General *mifuren = new General(this, "mifuren", "shu", 2);
+    mifuren->addSkill(new Guixiu);
+    mifuren->addSkill(new GuixiuInitial);
+    mifuren->addSkill(new Cunsi);
+    skills << new Yongjue << new Yiming;
+    mifuren->addRelateSkill("yongjue");
+    mifuren->addRelateSkill("yiming");
+    related_skills.insertMulti("guixiu", "#guixiu-initial");
+
     General *zhangjiao = new General(this, "heg_zhangjiao$", "qun", 3);
     zhangjiao->addSkill(new hegzhangjiaoskill1);
     zhangjiao->addSkill(new hegzhangjiaoskill2);
     zhangjiao->addSkill(new hegzhangjiaoskill3);
 
+    addMetaObject<YimingCard>();
     addMetaObject<hegzhangjiaoskill3Card>();
 }
 

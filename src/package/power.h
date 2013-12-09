@@ -11,6 +11,14 @@ public:
     PowerPackage();
 };
 
+class YimingCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE YimingCard();
+    virtual void onEffect(const CardEffectStruct &effect) const;
+};
+
 class hegzhangjiaoskill3Card: public SkillCard{
     Q_OBJECT
 
