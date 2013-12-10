@@ -190,9 +190,9 @@ sgs.ai_skill_invoke.lieren = function(self, data)
 		local card  = self.player:getHandcards():first()
 		if card:isKindOf("Jink") or card:isKindOf("Peach") then return end
 	end
-	
-	if (self.player:getHandcardNum() >= self.player:getHp() or self:getMaxCard():getNumber() > 10 
-		or (self:needKongcheng() and self.player:getHandcardNum() == 1) or not self:hasLoseHandcardEffective()) 
+
+	if (self.player:getHandcardNum() >= self.player:getHp() or self:getMaxCard():getNumber() > 10
+		or (self:needKongcheng() and self.player:getHandcardNum() == 1) or not self:hasLoseHandcardEffective())
 		and not self:doNotDiscard(damage.to, "h", true) and not (self.player:getHandcardNum() == 1 and self:doNotDiscard(damage.to, "e", true)) then
 			return true
 	end
@@ -319,8 +319,8 @@ sgs.ai_skill_playerchosen.yinghun = function(self, targets)
 			if not wf then
 				for _, friend in ipairs(self.friends_noself) do
 					if self:isWeak(friend) then
-						wf = true 
-						break 
+						wf = true
+						break
 					end
 				end
 			end
@@ -554,7 +554,7 @@ end
 local dimeng_discard = function(self, discard_num, mycards)
 	local cards = mycards
 	local to_discard = {}
-	
+
 	local aux_func = function(card)
 		local place = self.room:getCardPlace(card:getEffectiveId())
 		if place == sgs.Player_PlaceEquip then
@@ -570,7 +570,7 @@ local dimeng_discard = function(self, discard_num, mycards)
 		end
 		return 0
 	end
-	
+
 	local compare_func = function(a, b)
 		if aux_func(a) ~= aux_func(b) then
 			return aux_func(a) < aux_func(b)
@@ -605,7 +605,7 @@ sgs.ai_skill_use_func.DimengCard = function(card,use,self)
 		end
 	end
 	for _, c in sgs.qlist(self.player:getEquips()) do
-		if not self.player:isJilei(c) then 
+		if not self.player:isJilei(c) then
 			table.insert(mycards, c)
 			table.insert(myequips, c)
 		end
@@ -621,7 +621,7 @@ sgs.ai_skill_use_func.DimengCard = function(card,use,self)
 		end
 	end
 	if #friends == 0 then return end
-	
+
 	self:sort(friends, "defense")
 	local function cmp_HandcardNum(a, b)
 		local x = a:getHandcardNum() - self:getLeastHandcardNum(a)
@@ -629,7 +629,7 @@ sgs.ai_skill_use_func.DimengCard = function(card,use,self)
 		return x < y
 	end
 	table.sort(friends, cmp_HandcardNum)
-	
+
 	self:sort(self.enemies, "defense")
 	for _,enemy in ipairs(self.enemies) do
 		if enemy:hasSkill("manjuan") then
@@ -653,7 +653,7 @@ sgs.ai_skill_use_func.DimengCard = function(card,use,self)
 			end
 		end
 	end
-	
+
 	for _, enemy in ipairs(self.enemies) do
 		local e_hand = enemy:getHandcardNum()
 		for _, friend in ipairs(friends) do
@@ -798,7 +798,7 @@ end
 
 function sgs.ai_cardneed.roulin(to, card, self)
 	for _, enemy in ipairs(self.enemies) do
-		if card:isKindOf("Slash") and to:canSlash(enemy, nil, true) and self:slashIsEffective(card, enemy) 
+		if card:isKindOf("Slash") and to:canSlash(enemy, nil, true) and self:slashIsEffective(card, enemy)
 				and not (enemy:hasSkill("kongcheng") and enemy:isKongcheng())
 				and sgs.isGoodTarget(enemy, self.enemies, self) and not self:slashProhibit(card, enemy) and enemy:isFemale() then
 			return getKnownCard(to, "Slash", true) == 0

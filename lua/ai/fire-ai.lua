@@ -24,7 +24,7 @@ sgs.ai_skill_use_func.QuhuCard = function(card, use, self)
 				allknown = allknown + 1
 			end
 			if (enemy_max_card and max_point > enemy_max_card:getNumber() and allknown > 0)
-				or (enemy_max_card and max_point > enemy_max_card:getNumber() and allknown < 1 and max_point > 10) 
+				or (enemy_max_card and max_point > enemy_max_card:getNumber() and allknown < 1 and max_point > 10)
 				or (not enemy_max_card and max_point > 10) then
 				for _, enemy2 in ipairs(self.enemies) do
 					if (enemy:objectName() ~= enemy2:objectName())
@@ -85,7 +85,7 @@ sgs.ai_skill_playerchosen.jieming = function(self, targets)
 		end
 	end
 	self:sort(friends)
-	
+
 	local max_x = 0
 	local target
 	local Shenfen_user
@@ -104,14 +104,14 @@ sgs.ai_skill_playerchosen.jieming = function(self, targets)
 				max_x = x
 				target = friend
 			end
-			
+
 			if self:playerGetRound(friend, Shenfen_user) > self:playerGetRound(self.player, Shenfen_user) and x >= y
 				and friend:getHp() == 1 and getCardsNum("Peach", friend) < 1 then
 				y = x
 				weak_friend = friend
 			end
 		end
-		
+
 		if weak_friend and ((getCardsNum("Peach", Shenfen_user) < 1) or (math.min(Shenfen_user:getMaxHp(), 5) - Shenfen_user:getHandcardNum() <= 1)) then
 			return weak_friend
 		end
@@ -120,7 +120,7 @@ sgs.ai_skill_playerchosen.jieming = function(self, targets)
 		end
 		if target then return target end
 	end
-	
+
 	local CP = self.room:getCurrent()
 	local max_x = 0
 	local AssistTarget = self:AssistTarget()
@@ -129,7 +129,7 @@ sgs.ai_skill_playerchosen.jieming = function(self, targets)
 		if friend:hasSkill("manjuan") then x = x + 1 end
 		if self:hasCrossbowEffect(CP) then x = x + 1 end
 		if AssistTarget and friend:objectName() == AssistTarget:objectName() then x = x + 0.5 end
-		
+
 		if x > max_x and friend:isAlive() then
 			max_x = x
 			target = friend
@@ -308,14 +308,14 @@ lianhuan_skill.getTurnUseCard = function(self)
 
 	local card
 	self:sortByUseValue(cards, true)
-	
+
 	local slash = self:getCard("FireSlash") or self:getCard("ThunderSlash") or self:getCard("Slash")
 	if slash then
 		local dummy_use = { isDummy = true }
 		self:useBasicCard(slash, dummy_use)
 		if not dummy_use.card then slash = nil end
 	end
-	
+
 	for _, acard in ipairs(cards) do
 		if acard:getSuit() == sgs.Card_Club then
 			local shouldUse = true
@@ -398,14 +398,14 @@ sgs.ai_skill_use_func.TianyiCard = function(card,use,self)
 	end
 	local zhugeliang = self.room:findPlayerBySkillName("kongcheng")
 
-	local slash = self:getCard("Slash")	
+	local slash = self:getCard("Slash")
 	local dummy_use = {isDummy = true}
 	self.player:setFlags("slashNoDistanceLimit")
 	if slash then self:useBasicCard(slash, dummy_use) end
 	self.player:setFlags("-slashNoDistanceLimit")
 
 	sgs.ai_use_priority.TianyiCard = (slashcount >= 1 and dummy_use.card) and 7.2 or 1.2
-	if slashcount >= 1 and slash and dummy_use.card  then		
+	if slashcount >= 1 and slash and dummy_use.card  then
 		for _, enemy in ipairs(self.enemies) do
 			if not (enemy:hasSkill("kongcheng") and enemy:getHandcardNum() == 1) and not enemy:isKongcheng() then
 				local enemy_max_card = self:getMaxCard(enemy)
@@ -569,7 +569,7 @@ luanji_skill.getTurnUseCard = function(self)
 		local card_str = ("archery_attack:luanji[%s:%s]=%d+%d"):format("to_be_decided", 0, first_id, second_id)
 		local archeryattack = sgs.Card_Parse(card_str)
 		assert(archeryattack)
-			
+
 		return archeryattack
 	end
 end
@@ -585,7 +585,7 @@ sgs.ai_skill_invoke.shuangxiong=function(self,data)
 
 	local dummy_use = {isDummy = true}
 	self:useTrickCard(duel, dummy_use)
-	
+
 	return self.player:getHandcardNum() >= 3 and dummy_use.card
 end
 
@@ -603,7 +603,7 @@ shuangxiong_skill.getTurnUseCard=function(self)
 	local cards = self.player:getCards("h")
 	cards=sgs.QList2Table(cards)
 	self:sortByUseValue(cards,true)
-	
+
 	local card
 	for _,acard in ipairs(cards)  do
 		if (acard:isRed() and mark == 2) or (acard:isBlack() and mark == 1) then
@@ -632,7 +632,7 @@ sgs.ai_skill_invoke.mengjin = function(self, data)
 			return false
 		end
 	end
-	if self:isFriend(effect.to) then 
+	if self:isFriend(effect.to) then
 		return self:needToThrowArmor(effect.to) or self:doNotDiscard(effect.to)
 	end
 	return not self:isFriend(effect.to)
