@@ -42,7 +42,7 @@ public:
 class Kuanhui: public TriggerSkill{
 public:
     Kuanhui(): TriggerSkill("kuanhui") {
-        events << TargetConfirmed << CardEffected << SlashEffected;
+        events << TargetConfirmed << CardEffected << SlashEffected << CardFinished;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -70,7 +70,7 @@ public:
                         ServerPlayer *target = room->askForPlayerChosen(selfplayer, use.to, objectName());
                         room->broadcastSkillInvoke("kuanhui", 2);
                         room->setPlayerFlag(target, "kuanhuitarget");
-                        room->setPlayerMark(target, "kuanhuiCardId", card->getId() + 1);
+                        room->setCardFlag(card, "kuanhuicard");
                         LogMessage log;
                         log.type = "#Kuanhui1";
                         log.from = selfplayer;
@@ -88,10 +88,8 @@ public:
             CardEffectStruct effect = data.value<CardEffectStruct>();
             if (effect.card->isKindOf("Slash"))
                 return false;
-            if (effect.to != NULL && effect.to->hasFlag("kuanhuitarget")
-                    && (effect.card->getId() == effect.to->getMark("kuanhuiCardId") - 1)){
+            if (effect.to != NULL && effect.to->hasFlag("kuanhuitarget") && effect.card != NULL && effect.card->hasFlag("kuanhuicard")){
                 room->setPlayerFlag(effect.to, "-kuanhuitarget");
-                room->setPlayerMark(effect.to, "kuanhuiCardId", 0);
                 LogMessage log;
                 log.type = "#DanlaoAvoid";
                 log.arg2 = objectName();
@@ -101,12 +99,10 @@ public:
                 return true;
             }
         }
-        else{
+        else if (triggerEvent == SlashEffected){
             SlashEffectStruct effect = data.value<SlashEffectStruct>();
-            if (effect.to != NULL && effect.to->hasFlag("kuanhuitarget")
-                    && (effect.slash->getId() == effect.to->getMark("kuanhuiCardId") - 1)){
+            if (effect.to != NULL && effect.to->hasFlag("kuanhuitarget") && effect.slash != NULL && effect.slash->hasFlag("kuanhuicard")){
                 room->setPlayerFlag(effect.to, "-kuanhuitarget");
-                room->setPlayerMark(effect.to, "kuanhuiCardId", 0);
                 LogMessage log;
                 log.type = "#DanlaoAvoid";
                 log.arg2 = objectName();
@@ -114,6 +110,13 @@ public:
                 log.arg = effect.slash->objectName();
                 room->sendLog(log);
                 return true;
+            }
+        }
+        else {
+            CardUseStruct use = data.value<CardUseStruct>();
+            if (use.card->hasFlag("kuanhuicard")){
+                foreach (ServerPlayer *p, room->getAlivePlayers())
+                    room->setPlayerFlag(p, "-kuanhuitarget");
             }
         }
         return false;
