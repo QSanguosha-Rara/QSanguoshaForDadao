@@ -16,7 +16,7 @@ function debugFunc(self, room, player, data)
 	local choices = {"showVisiblecards","showHandcards","objectiveLevel","getDefenseSlash"}
 	local debugmsg =function(fmt,...)
 		if type(fmt)=="boolean" then fmt = fmt and "true" or "false" end
-		local msg = string.format(fmt, ...)
+		local msg=string.format(fmt, ...)
 		player:speak(msg)
 		logmsg("ai.html","<pre>"..msg.."</pre>")
 	end
@@ -63,7 +63,7 @@ function debugFunc(self, room, player, data)
 				rel = rel .. " " .. level
 
 				debugmsg("%s[%s]: %d:%d:%d %s",
-					sgs.Sanguosha:translate(players[i]:getGeneralName()),
+					sgs.Sanguosha:translate(players[i]:getGeneralName()),					
 					sgs.Sanguosha:translate(sgs.evaluatePlayerRole(players[i])),
 					sgs.role_evaluation[players[i]:objectName()]["rebel"],
 					sgs.role_evaluation[players[i]:objectName()]["loyalist"],
@@ -77,11 +77,11 @@ function debugFunc(self, room, player, data)
 			debugmsg("===================")
 			debugmsg("查看对杀的防御; 当前AI是: %s[%s]",sgs.Sanguosha:translate(player:getGeneralName()),sgs.Sanguosha:translate(player:getRole()) )
 			for i=1, #players, 1 do
-				debugmsg("%s:%.2f",sgs.Sanguosha:translate(players[i]:getGeneralName()),sgs.getDefenseSlash(players[i]))
+				debugmsg("%s:%.2f",sgs.Sanguosha:translate(players[i]:getGeneralName()),sgs.getDefenseSlash(players[i]))				
 			end
 		end
-
-	until false
+		
+	until false  
 end
 
 
@@ -93,13 +93,13 @@ function logmsg(fname,fmt,...)
 end
 
 function endlessNiepan(who)
-	local room = who:getRoom()
+	local room = who:getRoom()	
 	if who:getGeneral2() or who:getHp() > 0 then return end
 
 	local rebel_value = sgs.role_evaluation[who:objectName()]["rebel"]
 	local renegade_value = sgs.role_evaluation[who:objectName()]["renegade"]
 	local loyalist_value = sgs.role_evaluation[who:objectName()]["loyalist"]
-
+	
 	for _,skill in sgs.qlist(who:getVisibleSkillList()) do
 		if skill:getLocation()==sgs.Skill_Right then
 			room:detachSkillFromPlayer(who, skill:objectName())
@@ -163,68 +163,6 @@ function outputPlayersEvaluation()
 	global_room:writeToConsole("================ END ================" )
 end
 
-
-function sgs.modifiedRoleTrends(role)
-	local players = global_room:getOtherPlayers(global_room:getLord())
-	local evaluated = {}
-	for _, player in sgs.qlist(players) do
-		if sgs.evaluatePlayerRole(player) == role then table.insert(evaluated, player) end
-	end
-	
-	local sort_func = 
-	{
-		rebel = function(a, b)
-			return (sgs.role_evaluation[a:objectName()]["rebel"] - math.max(sgs.role_evaluation[a:objectName()]["loyalist"], sgs.role_evaluation[a:objectName()]["renegade"])) < 
-				(sgs.role_evaluation[b:objectName()]["rebel"] -math.max(sgs.role_evaluation[b:objectName()]["loyalist"], sgs.role_evaluation[b:objectName()]["renegade"]))
-		end,
-		loyalist = function(a, b)
-			return (sgs.role_evaluation[a:objectName()]["loyalist"] - math.max(sgs.role_evaluation[a:objectName()]["renegade"], sgs.role_evaluation[a:objectName()]["rebel"])) < 
-				(sgs.role_evaluation[b:objectName()]["loyalist"] - math.max(sgs.role_evaluation[b:objectName()]["renegade"], sgs.role_evaluation[b:objectName()]["rebel"]))
-		end,
-		renegade = function(a, b)
-			return math.abs(sgs.role_evaluation[a:objectName()]["loyalist"] - sgs.role_evaluation[a:objectName()]["rebel"])
-						> math.abs(sgs.role_evaluation[b:objectName()]["loyalist"] - sgs.role_evaluation[b:objectName()]["rebel"])
-		end
-	}
-	local clearance = #evaluated - sgs.current_mode_players[role]
-	local min_trends = {}
-	if clearance <= 0 then global_room:writeToConsole("Modified Role Trends Failed!") return end
-	
-	table.sort(evaluated, sort_func[role])
-	for _, p in ipairs(evaluated) do
-		table.insert(min_trends, p)
-		clearance = clearance - 1
-		if clearance <= 0 then break end
-	end
-	
-	for _, modifier in ipairs(min_trends) do
-		local name = modifier:objectName()
-		if role == "renegade" then
-			if sgs.role_evaluation[name]["rebel"] > sgs.role_evaluation[name]["loyalist"] then
-				sgs.role_evaluation[name]["rebel"] = sgs.role_evaluation[name][role] + 15
-			else
-				sgs.role_evaluation[name]["loyalist"] = sgs.role_evaluation[name][role] + 15
-			end
-		elseif role == "rebel" then
-			if sgs.role_evaluation[name]["renegade"] >= sgs.role_evaluation[name]["loyalist"] then
-				sgs.role_evaluation[name]["renegade"] = sgs.role_evaluation[name][role] + 15
-			else
-				sgs.role_evaluation[name]["loyalist"] = sgs.role_evaluation[name][role] + 15	
-			end
-		elseif role == "loyalist" then
-			if sgs.role_evaluation[name]["renegade"] >= sgs.role_evaluation[name]["rebel"] then
-				sgs.role_evaluation[name]["renegade"] = sgs.role_evaluation[name][role] + 15
-			else
-				sgs.role_evaluation[name]["rebel"] = sgs.role_evaluation[name][role] + 15	
-			end
-		end
-		global_room:writeToConsole("The evaluation role of " .. modifier:getGeneralName() ..  " is " .. sgs.evaluatePlayerRole(modifier))
-	end
-	
-	global_room:writeToConsole("Modified Role Trends Success!")
-end
-
-
 function sgs.checkMisjudge(player)
 	if not global_room:getLord() then return end
 
@@ -251,8 +189,8 @@ function sgs.checkMisjudge(player)
 			elseif sgs.evaluatePlayerRole(p) == "renegade" and renegade_num > 0 then evaluate_renegade = evaluate_renegade + 1
 			end
 		end
-
-		if evaluate_renegade < 1 then
+		
+		if evaluate_renegade < 1 then 
 			if (evaluate_rebel >= rebel_num + renegade_num and evaluate_rebel > rebel_num)
 				or (evaluate_loyalist >= loyalist_num + renegade_num and evaluate_loyalist > loyalist_num)
 				or (evaluate_rebel == rebel_num + 1 and evaluate_loyalist == loyalist_num + 1) then
