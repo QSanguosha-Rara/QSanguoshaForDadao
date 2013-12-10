@@ -514,7 +514,7 @@ public:
         room->sendLog(log);
         room->notifySkillInvoked(player, objectName());
 
-        player->gainMark("@wrath", damage.damage);
+        player->gainMark("@wrath", damage.damage); //different:gainMark can trigger PreMarkChange && MarkChanged event
         room->broadcastSkillInvoke(objectName());
         return false;
     }
