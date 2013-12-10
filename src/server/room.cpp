@@ -1147,8 +1147,9 @@ int Room::askForCardChosen(ServerPlayer *player, ServerPlayer *who, const QStrin
     while (isPaused()) {}
     notifyMoveFocus(player, S_COMMAND_CHOOSE_CARD);
 
-    if (getTag("Dongchaee").toString() == who->objectName()
-            && getTag("Dongchaer").toString() == player->objectName())
+    // process dongcha
+    if (who->objectName() == tag.value("Dongchaee").toString()
+            && player->objectName() == tag.value("Dongchaer").toString())
         handcard_visible = true;
 
     if (who->hasSkill("neo2013canhui") && !who->faceUp())
