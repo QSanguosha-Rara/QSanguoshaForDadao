@@ -2463,6 +2463,26 @@ public:
     }
 };
 
+class Neo2013Qixi: public OneCardViewAsSkill{
+public:
+    Neo2013Qixi(): OneCardViewAsSkill("neo2013qixi"){
+        filter_pattern = ".|black";
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        Dismantlement *dis = new Dismantlement(Card::NoSuit, 0);
+        dis->deleteLater();
+        return dis->isAvailable(player);
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        Dismantlement *dis = new Dismantlement(Card::SuitToBeDecided, -1);
+        dis->addSubcard(originalCard);
+        dis->setSkillName(objectName()); //Dismantlement::onEffect();
+        return dis;
+    }
+};
+
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
     neo2013_masu->addSkill(new Neo2013Xinzhan);
@@ -2606,6 +2626,9 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
 
     General *neo2013_panfeng = new General(this, "neo2013_panfeng", "qun", 4);
     neo2013_panfeng->addSkill(new Neo2013Kuangfu);
+
+    General *neo2013_ganning = new General(this, "neo2013_ganning", "wu", 4);
+    neo2013_ganning->addSkill(new Neo2013Qixi);
 
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();

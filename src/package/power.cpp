@@ -253,7 +253,7 @@ public:
             recover.who = player;
             recover.recover = 2 - player->getHp();
             room->recover(player, recover);
-            room->handleAcquireDetachSkills(player, "yongjue|yiming");
+            room->handleAcquireDetachSkills(player, "yiming");
         }
         return false;
     }
@@ -283,13 +283,10 @@ public:
                     card = resp.m_card;
             }
 
-            if (card != NULL){
-                player->setFlags("yongjue");
-                if (card->isKindOf("Slash")){
-                    ServerPlayer *mifuren = room->findPlayerBySkillName(objectName());
-                    if (mifuren != NULL && mifuren->askForSkillInvoke(objectName(), QVariant::fromValue(player)))
-                        player->obtainCard(card);
-                }
+            if (card != NULL && card->isKindOf("Slash")){
+                ServerPlayer *mifuren = room->findPlayerBySkillName(objectName());
+                if (mifuren != NULL && mifuren->askForSkillInvoke(objectName(), QVariant::fromValue(player)))
+                    player->obtainCard(card);
             }
         }
         return false;
@@ -484,9 +481,9 @@ PowerPackage::PowerPackage(): Package("Power"){
     General *mifuren = new General(this, "mifuren", "shu", 2);
     mifuren->addSkill(new Guixiu);
     mifuren->addSkill(new GuixiuInitial);
+    mifuren->addSkill(new Yongjue);
     mifuren->addSkill(new Cunsi);
-    skills << new Yongjue << new Yiming;
-    mifuren->addRelateSkill("yongjue");
+    skills << new Yiming;
     mifuren->addRelateSkill("yiming");
     related_skills.insertMulti("guixiu", "#guixiu-initial");
 

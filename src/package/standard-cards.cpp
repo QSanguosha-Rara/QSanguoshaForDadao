@@ -1116,14 +1116,16 @@ void Dismantlement::onEffect(const CardEffectStruct &effect) const{
     QString flag = using_2013 ? "he" : "hej";
     if (!effect.from->canDiscard(effect.to, flag))
         return;
+    
+    bool isNeoqixi = (getSkillName() == "neo2013qixi");
 
     int card_id = -1;
     AI *ai = effect.from->getAI();
-    if (!using_2013 || ai)
+    if (!using_2013 || !isNeoqixi || ai)
         card_id = room->askForCardChosen(effect.from, effect.to, flag, objectName(), false, Card::MethodDiscard);
     else {
         if (!effect.to->getEquips().isEmpty())
-            card_id = room->askForCardChosen(effect.from, effect.to, "he", objectName(), false, Card::MethodDiscard);
+            card_id = room->askForCardChosen(effect.from, effect.to, flag, objectName(), false, Card::MethodDiscard);
         if (card_id == -1 || (!effect.to->isKongcheng() && effect.to->handCards().contains(card_id))) {
             LogMessage log;
             log.type = "$ViewAllCards";
