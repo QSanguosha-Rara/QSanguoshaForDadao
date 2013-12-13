@@ -19,6 +19,14 @@ public:
     virtual void onEffect(const CardEffectStruct &effect) const;
 };
 
+class DuanxieCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE DuanxieCard();
+    virtual void onEffect(const CardEffectStruct &effect) const;
+};
+
 class hegzhangjiaoskill3Card: public SkillCard{
     Q_OBJECT
 
