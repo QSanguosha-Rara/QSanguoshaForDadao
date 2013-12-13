@@ -882,3 +882,81 @@ sgs.ai_skill_choice.nosguhuo_slash = sgs.ai_skill_choice.guhuo_slash
 function sgs.ai_cardneed.nosguhuo(to, card)
 	return card:getSuit() == sgs.Card_Heart and (card:isKindOf("BasicCard") or card:isNDTrick())
 end
+
+
+sgs.ai_skill_playerchosen.nosmixin = sgs.ai_skill_playerchosen.zero_card_as_slash
+
+sgs.ai_skill_cardask["#mixin"] = function(self, data, pattern, target)
+	if target then
+		for _, slash in ipairs(self:getCards("Slash")) do
+			if self:isFriend(target) and self:slashIsEffective(slash, target) then
+				if self:needLeiji(target, self.player) then return slash:toString() end
+				if self:getDamagedEffects(target, self.player) then return slash:toString() end
+				if self:needToLoseHp(target, self.player, nil, true) then return slash:toString() end
+			end
+
+			if not self:isFriend(target) and self:slashIsEffective(slash, target)
+				and not self:getDamagedEffects(target, self.player, true) and not self:needLeiji(target, self.player) then
+					return slash:toString()
+			end
+		end
+		for _, slash in ipairs(self:getCards("Slash")) do
+			if not self:isFriend(target) then
+				if not self:needLeiji(target, self.player) then return slash:toString() end
+				if not self:slashIsEffective(slash, target) then return slash:toString() end
+			end
+		end
+	end
+	return "."
+end
+
+sgs.ai_use_priority.NosMixinCard = 0
+sgs.ai_card_intention.NosMixinCard = -20
+
+sgs.ai_skill_invoke.noscangni = function(self, data)
+	local target = self.room:getCurrent()
+	if self.player:hasFlag("cangnilose") then return self:isEnemy(target) end
+	if self.player:hasFlag("cangniget") then return self:isFriend(target) end
+	local hand = self.player:getHandcardNum()
+	local hp = self.player:getHp()
+	return (hand + 2) <= hp or self.player:isWounded();
+end
+
+sgs.ai_skill_choice.noscangni = function(self, choices)
+	local hand = self.player:getHandcardNum()
+	local hp = self.player:getHp()
+	if (hand + 2) <= hp then
+		return "draw"
+	else
+		return "recover"
+	end
+end
+
+sgs.ai_skill_use["@@nosfengyin"] = function(self, data)
+	if self:needBear() then return "." end
+	local cards = self.player:getHandcards()
+	local card
+	cards = sgs.QList2Table(cards)
+
+	for _,acard in ipairs(cards)  do
+		if acard:isKindOf("Slash") then
+			card = acard
+			break
+		end
+	end
+
+	if not card then
+		return "."
+	end
+
+	local card_id = card:getEffectiveId()
+
+	local target = self.room:getCurrent()
+	if self:isFriend(target) and self:willSkipPlayPhase(target) and target:getHandcardNum() + 2 > target:getHp() and target:getHp() >= self.player:getHp() then
+		return "@NosFengyinCard="..card_id
+	end
+	if self:isEnemy(target) and not self:willSkipPlayPhase(target) and target:getHandcardNum() >= target:getHp() and target:getHp() >= self.player:getHp() then
+		return "@NosFengyinCard="..card_id
+	end
+	return "."
+end

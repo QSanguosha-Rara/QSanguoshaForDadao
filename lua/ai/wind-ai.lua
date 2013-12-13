@@ -1,4 +1,4 @@
-sgs.ai_skill_use["@@shensu1"]=function(self,prompt)
+sgs.ai_skill_use["@@shensu-card1"]=function(self,prompt)
 	self:updatePlayers()
 	self:sort(self.enemies,"defense")
 	if self.player:containsTrick("lightning") and self.player:getCards("j"):length()==1
@@ -44,7 +44,7 @@ sgs.ai_get_cardType = function(card)
 	if card:isKindOf("OffensiveHorse")then return 4 end
 end
 
-sgs.ai_skill_use["@@shensu2"] = function(self, prompt, method)
+sgs.ai_skill_use["@@shensu-card2"] = function(self, prompt, method)
 	self:updatePlayers()
 	self:sort(self.enemies, "defenseSlash")
 

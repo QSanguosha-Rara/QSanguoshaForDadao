@@ -156,61 +156,40 @@ sgs.huyuan_keep_value = {
 	EquipCard = 4.8
 }
 
-sgs.ai_skill_use["@@heyi"] = function(self, prompt)
-	local players = sgs.QList2Table(self.room:getOtherPlayers(self.player))
-	local first, last = self.player, self.player
-	for i = 1, #players do
-		if self:isFriend(players[i]) then last = players[i] else break end
+sgs.ai_skill_use["@@heyi"] = function(self)
+	local playernames = {}
+	for _, p in sgs.qlist(room:getOtherPlayers(self.player)) do
+		if p:isAdjacentTo(self.player) and self.player:isFriend(p) then
+			table.insert(playernames, p:objectName())
+		end
 	end
-	for i = #players, 1, -1 do
-		if self:isFriend(players[i]) then first = players[i] else break end
+	if not #playernames == 0 then
+		return ("@HeyiCard=.->" .. table.concat(playernames, "+"))
+	else
+		return "."
 	end
-	if first:objectName() == self.player:objectName() and last:objectName() == self.player:objectName() then return "." end
-	return ("@HeyiCard=.->%s+%s"):format(first:objectName(), last:objectName())
 end
 
-sgs.ai_card_intention.HeyiCard = function(self, card, from, tos)
-	local players = sgs.QList2Table(self.room:getOtherPlayers(from))
-	local first, last = tos[1], tos[2]
-	if first:objectName() == from:objectName() then
-		for i = 1, #players do
-			if players[i]:objectName() ~= last:objectName() then sgs.updateIntention(from, players[i], -60) else break end
-		end
-		sgs.updateIntention(from, last, -60)
-	elseif last:objectName() == from:objectName() then
-		for i = #players, 1, -1 do
-			if players[i]:objectName() ~= first:objectName() then sgs.updateIntention(from, players[i], -60) else break end
-		end
-		sgs.updateIntention(from, first, -60)
-	else
-		if table.indexOf(players, first) < table.index(player, last) then
-			first = tos[2]
-			last = tos[1]
-		end
-		for i = 1, #players do
-			if players[i]:objectName() ~= last:objectName() then sgs.updateIntention(from, players[i], -60) else break end
-		end
-		for i = #players, 1, -1 do
-			if players[i]:objectName() ~= first:objectName() then sgs.updateIntention(from, players[i], -60) else break end
-		end
-		sgs.updateIntention(from, last, -60)
-		sgs.updateIntention(from, first, -60)
+sgs.ai_skill_playerchosen.tianfu = function(self, targets)
+	for _, p in sgs.qlist(targets) do
+		if self:isFriend(p) then return p end
 	end
+	for _, p in sgs.qlist(targets) do
+		if not self:isEnemy(p) then return p end
+	end
+	return targets:at(math.random(0, targets:length() - 1))
 end
 
 sgs.ai_skill_invoke.tianfu = function(self, data)
-	local jiangwei = data:toPlayer()
-	return jiangwei and self:isFriend(jiangwei)
+	local d = data:toStringList()
+	if d[2] == "invoke" then return true end
+	local p = findPlayerByObjectName(self.room, d[1])
+	return not self:isEnemy(p)
 end
 
 sgs.ai_skill_invoke.shoucheng = function(self, data)
-	local move = data:toMoveOneTime()
-	return move.from and self:isFriend(move.from)
-			and not (move.from:getPhase() == sgs.Player_NotActive and (move.from:hasSkill("manjuan") or self:needKongcheng(move.from, true)))
-end
-
-sgs.ai_skill_choice.shoucheng = function(self, choices)
-	return (self.player:getPhase() == sgs.Player_NotActive and self:needKongcheng(self.player, true)) and "reject" or "accept"
+	local target = data:toPlayer()
+	return (self:isFirend(target) and not self:needKongcheng(target, true)) or (self:isEnemy(target) and self:needKongcheng(target, true))
 end
 
 local shangyi_skill = {}
@@ -236,10 +215,6 @@ sgs.ai_skill_use_func.ShangyiCard = function(card, use, self)
 			return
 		end
 	end
-end
-
-sgs.ai_skill_choice.shangyi = function(self, choices)
-	return "handcards"
 end
 
 sgs.ai_use_value.ShangyiCard = 4
@@ -311,27 +286,25 @@ sgs.ai_skill_discard.yicheng = function(self, discard_num, min_num, optional, in
 end
 
 sgs.ai_skill_invoke.qianhuan = function(self, data)
+	local promptlist = data:toString():split(":")
+	local effect = promptlist[1]
+	local yuji = findPlayerByObjectName(self.room, promptlist[2])
 	local use = data:toCardUse()
-	if not use.card then
-		local yuji = self.room:findPlayerBySkillName("qianhuan")
-		return yuji and self:isFriend(yuji) and yuji:getPile("sorcery"):length() < 4
-	else
-		local to = use.to:first()
-		if to:objectName() == self.player:objectName() then
-			return not (use.from and (use.from:objectName() == to:objectName()
-										or (use.card:isKindOf("Slash") and self:isPriorFriendOfSlash(self.player, use.card, use.from))))
-		else
-			return self:isFriend(to) and not (use.from and use.from:objectName() == to:objectName())
-		end
-	end
-end
-
-sgs.ai_skill_choice.qianhuan = function(self, choices, data)
-	local use = data:toCardUse()
-	if use.card:isKindOf("Peach") or use.card:isKindOf("Analeptic") or use.card:isKindOf("ExNihilo") then return "reject" end
-	if use.from and use.from:objectName() == self.player:objectName() then return "reject" end
-	if use.from and use.card:isKindOf("Slash") and self:isPriorFriendOfSlash(self.player, use.card, use.from) then return "reject" end
-	return "accept"
+    local to = use.to:first()
+	if effect and effect == "choice" then return yuji and self:isFriend(yuji) end
+    if use and to then
+        if to:objectName() == self.player:objectName() then
+            return not (use.from and (use.from:objectName() == to:objectName())
+                    or (use.card:isKindOf("Slash") and self:isPriorFriendOfSlash(self.player, use.card, use.from)))
+        else
+            if self:isFriend(to) and not (use.from and use.from:objectName() == to:objectName()) then
+				return true
+			elseif self:isEnemy(to) and (use.card:isKindOf("Peach") or (use.card:isKindOf("Analeptic") and use.from and use.from:getHp() < 1) or use.card:isKindOf("ExNihilo")) then
+				return true
+			end
+        end
+	end	
+	return
 end
 
 local function will_discard_zhendu(self)
@@ -371,4 +344,11 @@ sgs.ai_skill_cardask["@zhendu-discard"] = function(self, data)
 		end
 	end
 	return "."
+end
+
+sgs.ai_skill_invoke.jizhao = function(self, data)
+	local dying = data:toDying()
+	local peaches = 1 - dying.who:getHp()
+
+	return self:getCardsNum("Peach") + self:getCardsNum("Analeptic") < peaches
 end
