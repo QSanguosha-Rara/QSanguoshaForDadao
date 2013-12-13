@@ -5866,6 +5866,8 @@ dofile "lua/ai/hulaoguan-ai.lua"
 local loaded = "standard|standard_cards|maneuvering|sp|special3v3|special1v1"
 
 local files = table.concat(sgs.GetFileNames("lua/ai"), " ")
+local LUAExtensions = string.split(string.lower(sgs.GetConfig("LuaPackages", "")), "+")
+local LUAExtensionFiles = table.concat(sgs.GetFileNames("extensions/ai"), " ")
 
 for _, aextension in ipairs(sgs.Sanguosha:getExtensions()) do
 	if table.contains(LUAExtensions, string.lower(aextension)) then
