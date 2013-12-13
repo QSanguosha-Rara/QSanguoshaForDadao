@@ -2604,7 +2604,18 @@ void RoomScene::onSkillActivated() {
 
         const Card *card = dashboard->pendingCard();
         if (card && card->targetFixed() && card->isAvailable(Self)) {
-            useSelectedCard();
+            bool instance_use = skill->inherits("ZeroCardViewAsSkill");
+            if (!instance_use){
+                QList<const Card *> cards;
+                cards << Self->getHandcards() << Self->getEquips();
+                foreach(const Card *c, cards){
+                    if (skill->viewFilter(QList<const Card *>(), c))
+                        return;
+                }
+                instance_use = true;
+            }
+            if (instance_use)
+                useSelectedCard();
         } else if (skill->inherits("OneCardViewAsSkill") && !skill->getDialog() && Config.EnableIntellectualSelection)
             dashboard->selectOnlyCard(ClientInstance->getStatus() == Client::Playing);
     }
