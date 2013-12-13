@@ -242,7 +242,7 @@ config = {
 		"caoren+caizhaoji", "nos_caoren+caizhaoji", "bgm_caoren+caizhaoji", "neo_caoren+caizhaoji", "dengshizai+caizhaoji",
 		"zhugejin+caizhaoji", "simayi+caizhaoji", "shensimayi+caizhaoji", "caozhi+caizhaoji", "shenlvbu+caizhaoji", "bgm_diaochan+caizhaoji",
 		"wis_jiangwei+zhanggongqi", "luxun+zhanggongqi", "wis_jiangwei+xunyou", "kongrong+caozhi", "heg_dengai+guojia", "luji+erzhang", "luji+caozhi",
-		"tadun+yuanshao", "tadun+shenlvbu"
+		"tadun+yuanshao", "tadun+shenlvbu", "zhuran+hetaihou", "liru+shenlvbu", "zhugejin+zhangjiao", "zhugejin+nos_zhangjiao"
 	},
 	
 	couple_lord = "caocao",

@@ -9,60 +9,9 @@
 class Xunxun: public PhaseChangeSkill{
 public:
     Xunxun(): PhaseChangeSkill("xunxun"){
-        //frequency = Compulsory;
+        //frequency = Frequent;
     }
 
-private:
-    static void askForXunxun(ServerPlayer *lidian, const QList<int> &cards){
-        Room *room = lidian->getRoom();
-        QList<int> top_cards, bottom_cards;
-        room->notifyMoveFocus(lidian, QSanProtocol::S_COMMAND_SKILL_GUANXING);
-
-        AI *ai = lidian->getAI();
-        if (ai) {
-            ai->askForGuanxing(cards, top_cards, bottom_cards, true);
-        } else if (cards.length() == 1) {
-            top_cards = cards;
-        } else {
-            Json::Value guanxingArgs(Json::arrayValue);
-            guanxingArgs[0] = QSanProtocol::Utils::toJsonArray(cards);
-            guanxingArgs[1] = true;
-            bool success = room->doRequest(lidian, QSanProtocol::S_COMMAND_SKILL_GUANXING, guanxingArgs, true);
-            if (!success) {
-                foreach (int card_id, cards)
-                    room->getDrawPile().append(card_id);
-                return;
-            }
-            Json::Value clientReply = lidian->getClientReply();
-            if (clientReply.isArray() && clientReply.size() == 2) {
-                success &= QSanProtocol::Utils::tryParse(clientReply[0], top_cards);
-                success &= QSanProtocol::Utils::tryParse(clientReply[1], bottom_cards);
-            }
-        }
-
-        bool length_equal = top_cards.length() == cards.length();
-        bool result_equal = top_cards.toSet() == cards.toSet();
-        if (!length_equal || !result_equal) {
-            top_cards = cards;
-            bottom_cards.clear();
-        }
-        if (!top_cards.isEmpty()) {
-            LogMessage log;
-            log.type = "$GuanxingBottom";
-            log.from = lidian;
-            log.card_str = IntList2StringList(top_cards).join("+");
-            room->doNotify(lidian, QSanProtocol::S_COMMAND_LOG_SKILL, log.toJsonValue());
-        }
-
-        QListIterator<int> i(top_cards);
-        while (i.hasNext())
-            room->getDrawPile().append(i.next());
-
-
-        room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
-    }
-
-public:
     virtual bool onPhaseChange(ServerPlayer *target) const{
         if (target->getPhase() == Player::Draw && target->askForSkillInvoke(objectName())){
             Room *room = target->getRoom();
@@ -84,7 +33,7 @@ public:
             DummyCard gaindummy(gained);
             room->obtainCard(target, &gaindummy, false);
 
-            askForXunxun(target, getcards);  //temp method for this skill, waiting for Para's update
+            room->askForGuanxing(target, getcards, Room::GuanxingDownOnly);
 
             return true;
         }
@@ -253,7 +202,7 @@ public:
             recover.who = player;
             recover.recover = 2 - player->getHp();
             room->recover(player, recover);
-            room->handleAcquireDetachSkills(player, "yongjue|yiming");
+            room->handleAcquireDetachSkills(player, "yiming");
         }
         return false;
     }
@@ -283,13 +232,10 @@ public:
                     card = resp.m_card;
             }
 
-            if (card != NULL){
-                player->setFlags("yongjue");
-                if (card->isKindOf("Slash")){
-                    ServerPlayer *mifuren = room->findPlayerBySkillName(objectName());
-                    if (mifuren != NULL && mifuren->askForSkillInvoke(objectName(), QVariant::fromValue(player)))
-                        player->obtainCard(card);
-                }
+            if (card != NULL && card->isKindOf("Slash")){
+                ServerPlayer *mifuren = room->findPlayerBySkillName(objectName());
+                if (mifuren != NULL && mifuren->askForSkillInvoke(objectName(), QVariant::fromValue(player)))
+                    player->obtainCard(card);
             }
         }
         return false;
@@ -352,6 +298,51 @@ public:
     }
 };
 
+DuanxieCard::DuanxieCard(){
+
+}
+
+void DuanxieCard::onEffect(const CardEffectStruct &effect) const{
+    Room *room = effect.to->getRoom();
+    room->setPlayerProperty(effect.to, "chained", true);
+    room->setPlayerProperty(effect.from, "chained", true);
+}
+
+class Duanxie: public ZeroCardViewAsSkill{
+public:
+    Duanxie(): ZeroCardViewAsSkill("duanxue"){
+
+    }
+
+    virtual const Card *viewAs() const{
+        return new DuanxieCard;
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("DuanxueCard");
+    }
+};
+
+class Fenming: public PhaseChangeSkill{
+public:
+    Fenming(): PhaseChangeSkill("fenming"){
+
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() == Player::Finish && target->isChained() && target->askForSkillInvoke(objectName())){
+            Room *room = target->getRoom();
+            foreach(ServerPlayer *p, room->getAlivePlayers()){
+                if (p->isChained() && target->canDiscard(p, "he")){
+                    int to_discard = room->askForCardChosen(target, p, "he", objectName(), p == target, Card::MethodDiscard);
+                    room->throwCard(to_discard, p, target);
+                }
+            }
+        }
+        return false;
+    }
+};
+
 class hegzhangjiaoskill1: public PhaseChangeSkill{
 public:
     hegzhangjiaoskill1(): PhaseChangeSkill("hegzhangjiaoskill1"){
@@ -371,7 +362,7 @@ public:
 
             if (target->askForSkillInvoke(objectName())){
                 QList<int> guanxing_cards = room->getNCards(qunplayers);
-                room->askForGuanxing(target, guanxing_cards, true);
+                room->askForGuanxing(target, guanxing_cards, Room::GuanxingUpOnly);
             }
 
         }
@@ -484,11 +475,15 @@ PowerPackage::PowerPackage(): Package("Power"){
     General *mifuren = new General(this, "mifuren", "shu", 2);
     mifuren->addSkill(new Guixiu);
     mifuren->addSkill(new GuixiuInitial);
+    mifuren->addSkill(new Yongjue);
     mifuren->addSkill(new Cunsi);
-    skills << new Yongjue << new Yiming;
-    mifuren->addRelateSkill("yongjue");
+    skills << new Yiming;
     mifuren->addRelateSkill("yiming");
     related_skills.insertMulti("guixiu", "#guixiu-initial");
+
+    General *chenwudongxi = new General(this, "chenwudongxi", "wu", 4);
+    chenwudongxi->addSkill(new Duanxie);
+    chenwudongxi->addSkill(new Fenming);
 
     General *zhangjiao = new General(this, "heg_zhangjiao$", "qun", 3);
     zhangjiao->addSkill(new hegzhangjiaoskill1);
@@ -496,6 +491,7 @@ PowerPackage::PowerPackage(): Package("Power"){
     zhangjiao->addSkill(new hegzhangjiaoskill3);
 
     addMetaObject<YimingCard>();
+    addMetaObject<DuanxieCard>();
     addMetaObject<hegzhangjiaoskill3Card>();
 }
 

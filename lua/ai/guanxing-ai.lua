@@ -379,13 +379,10 @@ local function XinZhan(self, cards)
 	return up, {}
 end
 
-function SmartAI:askForGuanxing(cards, up_only)
-	--KOF模式--
-	local func = Tactic("guanxing", self, up_only)
-	if func then return func(self, cards) end
-	--身份局--
-	if not up_only then return GuanXing(self,cards)
-	else return XinZhan(self, cards)
+function SmartAI:askForGuanxing(cards, guanxing_type)
+	if guanxing_type == sgs.Room_GuanxingBothSides then return GuanXing(self, cards)
+	elseif guanxing_type == sgs.Room_GuanxingUpOnly then return XinZhan(self, cards)
+	elseif guanxing_type == sgs.Room_GuanxingDownOnly then return {}, cards
 	end
 	return cards, {}
-end
+ end

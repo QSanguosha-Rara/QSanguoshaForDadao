@@ -245,7 +245,7 @@ void JuejiCard::onEffect(const CardEffectStruct &effect) const{
     ServerPlayer *to = effect.to;
     QVariant data = QVariant::fromValue(to);
     while (effect.from->pindian(effect.to, "jueji", NULL)){
-        if (!(effect.from->isKongcheng() || effect.to->isKongcheng()) || !effect.from->askForSkillInvoke("jueji", data))
+        if (effect.from->isKongcheng() || effect.to->isKongcheng() || !effect.from->askForSkillInvoke("jueji", data))
             break;
     }
 }
@@ -1302,8 +1302,16 @@ public:
                 Room *room = player->getRoom();
                 QList<ServerPlayer *> players = room->getOtherPlayers(player);
                 ServerPlayer *dongchaee;
-                if (dongchaee = room->askForPlayerChosen(player, players, objectName(), "@dongcha", true, true)){
+                if (dongchaee = room->askForPlayerChosen(player, players, objectName(), "@dongcha", true)){
+                    room->notifySkillInvoked(player, objectName());
                     room->broadcastSkillInvoke(objectName());
+
+                    LogMessage log;
+                    log.type = "#ChoosePlayerWithSkill";
+                    log.from = player;
+                    log.to << dongchaee;
+                    log.arg = objectName();
+                    room->doNotify(player, QSanProtocol::S_COMMAND_LOG_SKILL, log.toJsonValue());
 
                     room->setPlayerFlag(dongchaee, "dongchaee");
                     room->setTag("Dongchaee", dongchaee->objectName());
@@ -1314,7 +1322,7 @@ public:
                 break;
             }
 
-            case Player::Finish:{
+            case Player::NotActive:{
                 Room *room = player->getRoom();
                 QString dongchaee_name = room->getTag("Dongchaee").toString();
                 if(!dongchaee_name.isEmpty()){
