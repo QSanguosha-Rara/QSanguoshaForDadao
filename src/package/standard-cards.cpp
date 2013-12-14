@@ -1121,7 +1121,7 @@ void Dismantlement::onEffect(const CardEffectStruct &effect) const{
 
     int card_id = -1;
     AI *ai = effect.from->getAI();
-    if (!using_2013 || !isNeoqixi || ai)
+    if (!isNeoqixi && !using_2013 || ai)
         card_id = room->askForCardChosen(effect.from, effect.to, flag, objectName(), false, Card::MethodDiscard);
     else {
         if (!effect.to->getEquips().isEmpty())
