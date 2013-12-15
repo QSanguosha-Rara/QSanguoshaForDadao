@@ -2,6 +2,8 @@
 
 %{
 
+#define toAscii toLatin1
+
 #include "structs.h"
 #include "engine.h"
 #include "client.h"

@@ -274,7 +274,7 @@ hegzhangjiaoskill3Card::hegzhangjiaoskill3Card(){
     target_fixed = true;
 }
 
-void hegzhangjiaoskill3Card::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+void hegzhangjiaoskill3Card::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const{
     const Card *tpys = NULL;
     foreach(ServerPlayer *p, room->getAlivePlayers()){
         foreach(const Card *card, p->getEquips()){

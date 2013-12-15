@@ -5,12 +5,14 @@
 #include <QPixmapCache>
 #include <QDir>
 #include <QTimer>
+#include <QGraphicsScene>
 
 const int PixmapAnimation::S_DEFAULT_INTERVAL = 50;
 
 PixmapAnimation::PixmapAnimation(QGraphicsScene *scene)
-    : QGraphicsItem(0, scene)
+    : QGraphicsObject(NULL)
 {
+    scene->addItem(this);
 }
 
 void PixmapAnimation::advance(int phase) {

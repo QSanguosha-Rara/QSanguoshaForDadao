@@ -3,9 +3,8 @@
 
 #include <QGraphicsPixmapItem>
 
-class PixmapAnimation: public QObject, public QGraphicsItem {
+class PixmapAnimation: public QGraphicsObject {
     Q_OBJECT
-    Q_INTERFACES(QGraphicsItem)
 
 public:
     PixmapAnimation(QGraphicsScene *scene = 0);

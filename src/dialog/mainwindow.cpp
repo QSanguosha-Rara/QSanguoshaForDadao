@@ -220,7 +220,12 @@ void MainWindow::startConnection() {
 }
 
 void MainWindow::on_actionReplay_triggered() {
+#if QT_VERSION >= 0x050000
+    QString location;
+#else
     QString location = QDesktopServices::storageLocation(QDesktopServices::HomeLocation);
+#endif
+
     QString last_dir = Config.value("LastReplayDir").toString();
     if (!last_dir.isEmpty())
         location = last_dir;
@@ -682,7 +687,12 @@ void MainWindow::on_actionReplay_file_convert_triggered() {
 }
 
 void MainWindow::on_actionRecord_analysis_triggered() {
+#if QT_VERSION >= 0x050000
+    QString location;
+#else
     QString location = QDesktopServices::storageLocation(QDesktopServices::HomeLocation);
+#endif
+
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Load replay record"),
                                                     location,

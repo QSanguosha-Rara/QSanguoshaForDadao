@@ -15,6 +15,7 @@ typedef int LuaFunction;
 
 #include <QString>
 #include <QObject>
+#include <serverplayer.h>
 
 class AI: public QObject {
     Q_OBJECT

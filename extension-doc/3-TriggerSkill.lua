@@ -6,7 +6,7 @@
 
 --CreateTriggerSkill需要以下参数：
 
---name, frequency, events, on_trigger, can_trigger, priority
+--name, frequency, limit_mark, events, global, on_trigger, can_trigger, view_as_skill, priority
 
 --name：
 --技能名称字符串
@@ -17,17 +17,27 @@
 --执行askForSkillInvoke（询问技能发动）时，frequency会影响玩家做决定的方式。
 --frequency也起到了技能分类以及用于增加技能提示显示的作用。
 	--frequency可能的值有：
-	--sgs.Skill_Frequent（频繁发动：该技能会有一个可以打钩的按钮，如果勾选上，askForSkillInvoke就不会弹出提示而是直接返回true）
+	--sgs.Skill_Frequent（频繁发动：该技能会有一个可以按下去的按钮，如果按下去，askForSkillInvoke就不会弹出提示而是直接返回true）
 	--sgs.Skill_NotFrequent（不频繁发动：该技能的askForSkillInvoke总是会弹出提示询问玩家是否发动）
-	--sgs.Skill_Compulsory （锁定技：该技能的默认优先度为2而不是1；该技能会在显示上提示玩家这是一个锁定技能）
+	--sgs.Skill_Compulsory （锁定技：该技能的默认优先度为3而不是2；该技能会在显示上提示玩家这是一个锁定技能）
 	--sgs.Skill_Limited （限定技：该技能会在显示上提示玩家这是一个限定技能）
-	--ssg.Skill_Wake（觉醒技：该技能的默认优先度为2而不是1；该技能会在显示上提示玩家这是一个觉醒技）
+	--ssg.Skill_Wake（觉醒技：该技能会在显示上提示玩家这是一个觉醒技）
 --frequency的默认值为sgs.Skill_NotFrequent
+
+--limit_mark ：
+--字符串，表示限定技作为计数用的Mark名称。
+--当获得此限定技时，会自动给角色增加1个limit_mark，失去时也会同时失去limit_mark
+--默认为空字符，即不获得Mark
 
 --events：
 --Event枚举类型，或者一个包含Event枚举类型的lua表。代表该技能的触发时机。
 --可用的Event列表请参考游戏代码中的struct.h文件。
 --无默认值。
+
+--global :
+--布尔类型。表示此触发技是否像游戏规则那样，无论场上有无拥有技能的角色，始终向线程添加。
+--你可以将这种触发技理解为对游戏规则的补充，使用时一般需要向Engine添加此技能，而不是给武将添加。
+--默认值为false，即若场上无拥有此技能的角色，则不在线程中添加此技能。
 
 --on_trigger:
 --lua函数，无返回值，执行事件触发时的技能效果。
@@ -42,11 +52,16 @@
 --默认条件为“具有本技能并且存活”
 --在这里个人只建议写简单的条件，许多判断都放在on_trigger里面做return其实都是可以的
 
+--view_as_skill:
+--ViewAsSkill类型，表示该触发技附带的视为技（如流离这类包含触发技与视为技的技能）
+--该技能在显示上会表示为视为技。
+--默认为空，即不附带视为技。
+
 --priority:
 --整数值，代表本技能的优先度。
 --如果本技能与其他技能（或规则）在同一个时机都触发，那么优先度影响这些技能或规则的执行顺序。
---优先度更大的技能（或规则）优先执行。游戏规则的优先度为0，典型的技能优先度为1，而受到伤害发动的技能优先度通常为-1.
---锁定技和觉醒技的优先度默认为2，其他情况下默认为1
+--优先度更大的技能（或规则）优先执行。游戏规则的优先度为0，典型的技能优先度为2.
+--锁定技的优先度默认为3，其他情况下默认为2
 
 -- **实例：
 

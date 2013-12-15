@@ -95,7 +95,9 @@ public:
     static const int S_JUDGE_LONG_DELAY;
 };
 
-extern Settings Config;
+extern Settings *GlobalConfig;
+
+#define Config (*GlobalConfig)
 
 #endif
 
