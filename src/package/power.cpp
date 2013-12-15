@@ -526,6 +526,7 @@ public:
                     room->setPlayerFlag(p, "-powerZhibaInvoked");
             }
         }
+		return false;
     }
 };
 
