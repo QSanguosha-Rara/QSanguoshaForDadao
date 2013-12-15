@@ -343,6 +343,192 @@ public:
     }
 };
 
+class Yingyang: public TriggerSkill{
+public:
+    Yingyang(): TriggerSkill("yingyang"){
+        events << PindianVerifying;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        PindianStruct *pindian = data.value<PindianStruct *>();
+        
+        ServerPlayer *invoker = NULL;
+        int *number_tochange;
+
+        if (TriggerSkill::triggerable(pindian->from)){
+            invoker = pindian->from;
+            number_tochange = &pindian->from_number;
+        }
+        else if (TriggerSkill::triggerable(pindian->to)){
+            invoker = pindian->to;
+            number_tochange = &pindian->to_number;
+        }
+
+        if (invoker == NULL)
+            return false;
+
+        if (invoker->askForSkillInvoke(objectName(), data)){
+            QString choice = room->askForChoice(invoker, objectName(), "add3+minus3", data);
+            int &c = (*number_tochange);
+            if (choice == "add3"){
+                c += 3;
+                if (c > 13)
+                    c = 13;
+            }
+            else{
+                c -= 3;
+                if (c < 1)
+                    c = 1;
+            }
+            data = QVariant::fromValue(pindian);
+        }
+        
+        return false;
+    }
+};
+
+PowerZhibaCard::PowerZhibaCard(){
+    mute = true;
+    m_skillName = "powerzhiba_pindian";
+}
+
+bool PowerZhibaCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return targets.isEmpty() && to_select->hasLordSkill("powerzhiba") && to_select != Self
+           && !to_select->isKongcheng() && !to_select->hasFlag("powerZhibaInvoked");
+}
+
+void PowerZhibaCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+    ServerPlayer *sunce = targets.first();
+    room->setPlayerFlag(sunce, "powerZhibaInvoked");
+    room->notifySkillInvoked(sunce, "powerZhiba");
+    if (sunce->getMark("hunzi") > 0 && room->askForChoice(sunce, "powerzhiba_pindian", "accept+reject") == "reject"){
+        LogMessage log;
+        log.type = "#ZhibaReject";
+        log.from = sunce;
+        log.to << source;
+        log.arg = "powerzhiba_pindian";
+        room->sendLog(log);
+
+        room->broadcastSkillInvoke("zhiba", 3);
+        return;
+    }
+
+    if (!sunce->isLord() && sunce->hasSkill("weidi"))
+        room->broadcastSkillInvoke("weidi", 2);
+    else
+        room->broadcastSkillInvoke("zhiba", 1);
+
+    source->pindian(sunce, "powerzhiba_pindian", NULL);
+
+    QList<ServerPlayer *> sunces;
+    QList<ServerPlayer *> players = room->getOtherPlayers(source);
+    foreach (ServerPlayer *p, players) {
+        if (p->hasLordSkill("powerzhiba") && !p->hasFlag("powerZhibaInvoked"))
+            sunces << p;
+    }
+    if (sunces.empty())
+        room->setPlayerFlag(source, "ForbidPowerZhiba");
+}
+
+class PowerZhibaPindian: public ZeroCardViewAsSkill{
+public:
+    PowerZhibaPindian(): ZeroCardViewAsSkill("powerzhiba_pindian"){
+        attached_lord_skill = true;
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return player->getKingdom() == "wu" && !player->isKongcheng() && !player->hasFlag("ForbidPowerZhiba");
+    }
+
+    virtual const Card *viewAs() const{
+        return new PowerZhibaCard;
+    }
+};
+
+class PowerZhiba: public TriggerSkill{
+public:
+    PowerZhiba(): TriggerSkill("powerzhiba$"){
+        events << GameStart << EventAcquireSkill << EventLoseSkill << Pindian << EventPhaseChanging;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if ((triggerEvent == GameStart && player->isLord()) 
+                || (triggerEvent == EventAcquireSkill && data.toString() == "powerzhiba")) {
+            QList<ServerPlayer *> lords;
+            foreach (ServerPlayer *p, room->getAlivePlayers()) {
+                if (p->hasLordSkill(objectName()))
+                    lords << p;
+            }
+            if (lords.isEmpty()) return false;
+
+            QList<ServerPlayer *> players;
+            if (lords.length() > 1)
+                players = room->getAlivePlayers();
+            else
+                players = room->getOtherPlayers(lords.first());
+            foreach (ServerPlayer *p, players) {
+                if (!p->hasSkill("powerzhiba_pindian"))
+                    room->attachSkillToPlayer(p, "powerzhiba_pindian");
+            }
+        } else if (triggerEvent == EventLoseSkill && data.toString() == "powerzhiba") {
+            QList<ServerPlayer *> lords;
+            foreach (ServerPlayer *p, room->getAlivePlayers()) {
+                if (p->hasLordSkill(objectName()))
+                    lords << p;
+            }
+            if (lords.length() > 2) return false;
+
+            QList<ServerPlayer *> players;
+            if (lords.isEmpty())
+                players = room->getAlivePlayers();
+            else
+                players << lords.first();
+            foreach (ServerPlayer *p, players) {
+                if (p->hasSkill("powerzhiba_pindian"))
+                    room->detachSkillFromPlayer(p, "powerzhiba_pindian", true);
+            }
+        } else if (triggerEvent == Pindian) {
+            PindianStar pindian = data.value<PindianStar>();
+            if (pindian->reason != "powerzhiba_pindian" || !pindian->to->hasLordSkill(objectName()))
+                return false;
+            if (!pindian->isSuccess()) {
+                if (!pindian->to->isLord() && pindian->to->hasSkill("weidi"))
+                    room->broadcastSkillInvoke("weidi", 1);
+                else
+                    room->broadcastSkillInvoke("zhiba", 2);
+                DummyCard dummy;
+                dummy.addSubcard(pindian->from_card);
+                dummy.addSubcard(pindian->to_card);
+                if (room->askForChoice(pindian->to, objectName(), "obtain+give", data) == "obtain"){
+                    pindian->to->obtainCard(&dummy);
+                }
+                else{
+                    pindian->from->obtainCard(&dummy);
+                }
+            }
+        } else if (triggerEvent == EventPhaseChanging) {
+            PhaseChangeStruct phase_change = data.value<PhaseChangeStruct>();
+            if (phase_change.from != Player::Play)
+                return false;
+            if (player->hasFlag("ForbidPowerZhiba"))
+                room->setPlayerFlag(player, "-ForbidPowerZhiba");
+            QList<ServerPlayer *> players = room->getOtherPlayers(player);
+            foreach (ServerPlayer *p, players) {
+                if (p->hasFlag("powerZhibaInvoked"))
+                    room->setPlayerFlag(p, "-powerZhibaInvoked");
+            }
+        }
+    }
+};
+
 class hegzhangjiaoskill1: public PhaseChangeSkill{
 public:
     hegzhangjiaoskill1(): PhaseChangeSkill("hegzhangjiaoskill1"){
@@ -485,6 +671,13 @@ PowerPackage::PowerPackage(): Package("Power"){
     chenwudongxi->addSkill(new Duanxie);
     chenwudongxi->addSkill(new Fenming);
 
+    General *sunce = new General(this, "heg_sunce$", "wu", 4);
+    sunce->addSkill("jiang");
+    sunce->addSkill("hunzi");
+    sunce->addSkill(new Yingyang);
+    sunce->addSkill(new PowerZhiba);
+    skills << new PowerZhibaPindian;
+
     General *zhangjiao = new General(this, "heg_zhangjiao$", "qun", 3);
     zhangjiao->addSkill(new hegzhangjiaoskill1);
     zhangjiao->addSkill(new hegzhangjiaoskill2);
@@ -492,6 +685,7 @@ PowerPackage::PowerPackage(): Package("Power"){
 
     addMetaObject<YimingCard>();
     addMetaObject<DuanxieCard>();
+    addMetaObject<PowerZhibaCard>();
     addMetaObject<hegzhangjiaoskill3Card>();
 }
 
