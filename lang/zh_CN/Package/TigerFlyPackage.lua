@@ -33,7 +33,7 @@ return {
 	["changehero"] = "实在是hold不住了",
 
 	["#tf_sp_madai"] = "一骑当先",
-	["tf_sp_madai"]="马岱",
+	["tf_sp_madai"]="TF马岱",
 	["zhuixi"]="追袭",
 	[":zhuixi"]= "每当你于出牌阶段内使用【杀】对距离为1的目标角色造成伤害后，你可以进行判定，当判定牌生效后，你获得此牌，若此牌为黑色，你于此阶段内能额外使用一张【杀】。",
 	["designer:tf_sp_madai"] = "凌天翼",
@@ -41,7 +41,7 @@ return {
 	["cv:tf_sp_madai"] = "Aimer彩三",
 
 	["#neo_zhugeke"] = "矜己陵人",
-	["neo_zhugeke"]="诸葛恪",
+	["neo_zhugeke"]="TF诸葛恪",
 	["jisi"]="急思",
 	[":jisi"]= "每当你需要使用【无懈可击】时，你可以与当前回合角色拼点，若你赢，你视为使用一张【无懈可击】。每回合限一次。",
 	["qiangbian"] = "强辩" ,
@@ -198,10 +198,10 @@ return {
 	["#xingsuan-discard"] = "%from 触发“星算”，须弃置 %arg 张牌" ,
 	["#xingsuan-draw"] = "%from 触发“星算”，须摸 %arg 张牌" ,
 
-	["zhangren"] = "张任" ,
-	["#zhangren"] = "魂断金雁桥" ,
-	["designer:zhangren"] = "凌天翼" ,
-	["illustrator:zhangren"] = "LH" ,
+	["tf_zhangren"] = "TF张任" ,
+	["#tf_zhangren"] = "魂断金雁桥" ,
+	["designer:tf_zhangren"] = "凌天翼" ,
+	["illustrator:tf_zhangren"] = "LH" ,
 	["fuji"] = "伏击" ,
 	[":fuji"] = "每名角色的回合限一次，每当一名其他角色回复体力时或于摸牌阶段外获得牌时，若所有角色当前的体力值都大于0，你可以弃置一张牌，视为对其使用一张【杀】。" ,
 	["@fuji-discard"] = "你可以弃置一张牌发动“伏击”。" ,
@@ -239,7 +239,7 @@ return {
 	["@zongjiu-give"] = "请将一张【桃】交给主公。" ,
 
 	["#neo_fuhuanghou"] = "与世不侵" ,
-	["neo_fuhuanghou"] = "伏皇后" ,
+	["neo_fuhuanghou"] = "TF伏皇后" ,
 	["designer:neo_fuhuanghou"] = "凌天翼" ,
 	["cangni"] = "藏匿" ,
 	[":cangni"] = "锁定技，你不是攻击范围内含有你的其他角色使用锦囊牌的合法目标。" ,
@@ -249,7 +249,7 @@ return {
 	["@mixin-slash"] = "请选择【杀】的目标" ,
 
 	["#neo_fuwan"] = "沉毅的国丈" ,
-	["neo_fuwan"] = "伏完" ,
+	["neo_fuwan"] = "TF伏完" ,
 	["fengyin"] = "奉印" ,
 	[":fengyin"] = "其他角色的回合开始时，若该角色当前的体力值不比你小，你可以将一张装备牌或【杀】 交给其，令其跳过其出牌阶段和弃牌阶段，然后你摸一张牌。" ,
 	["chizhong"] = "持重" ,
