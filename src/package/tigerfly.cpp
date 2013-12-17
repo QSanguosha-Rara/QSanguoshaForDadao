@@ -2958,7 +2958,7 @@ TigerFlyPackage::TigerFlyPackage(): Package("tigerfly") {
     luji->addSkill(new Huaiju);
     luji->addSkill(new Xingsuan);
 
-    General *zhangren = new General(this, "zhangren", "qun", 4);
+    General *zhangren = new General(this, "tf_zhangren", "qun", 4);
     zhangren->addSkill(new Yongjie);
     zhangren->addSkill(new Fuji);
 
