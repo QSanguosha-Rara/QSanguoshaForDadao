@@ -2825,11 +2825,11 @@ public:
             CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
             if (move.from != NULL && move.from == player && move.from_places.contains(Player::PlaceEquip))
                 foreach(int id, move.card_ids){
-                    const Card *card = Sanguosha->getCard(id);
+                    const Card *card = Sanguosha->getEngineCard(id);
                     if (card->getClassName() == "SixSwords"){
                         foreach(ServerPlayer *p, players)
                             if (p->getMark("@SixSwordsBuff") > 0)
-                                p->loseMark("@SixSwordsBuff");
+                                p->loseAllMarks("@SixSwordsBuff");
                         break;
                     }
                 }
@@ -2837,7 +2837,7 @@ public:
         else if (player->getPhase() == Player::NotActive){
             foreach(ServerPlayer *p, players)
                 if (p->getMark("@SixSwordsBuff") > 0)
-                    p->loseMark("@SixSwordsBuff");
+                    p->loseAllMarks("@SixSwordsBuff");
             room->askForUseCard(player, "@@SixSwords", "@six_swords");
         }
         return false;
@@ -2911,7 +2911,7 @@ public:
 
         foreach(ServerPlayer *p, room->getAllPlayers())
             if (p->hasFlag("TribladeFilter"))
-                room->setPlayerFlag(p, "TribladeFilter");
+                room->setPlayerFlag(p, "-TribladeFilter");
 
         return false;
     }
@@ -2989,6 +2989,129 @@ public:
     }
 };
 
+PeaceSpell::PeaceSpell(Card::Suit suit, int number): Armor(suit, number){
+    setObjectName("PeaceSpell");
+}
+
+void PeaceSpell::onUninstall(ServerPlayer *player) const{
+    if (player->isAlive() && player->hasArmorEffect(objectName()))
+        player->setFlags("peacespell_throwing");
+}
+
+PeaceSpellCard::PeaceSpellCard(){
+    
+}
+
+bool PeaceSpellCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return true;
+}
+
+void PeaceSpellCard::onEffect(const CardEffectStruct &effect) const{
+    effect.to->gainMark("@PeaceSpellBuff");
+}
+
+class PeaceSpellVS: public ZeroCardViewAsSkill{
+public:
+    PeaceSpellVS(): ZeroCardViewAsSkill("PeaceSpell"){
+        response_pattern = "@@PeaceSpell";
+    }
+
+    virtual const Card *viewAs() const{
+        return new PeaceSpellCard;
+    }
+};
+
+class PeaceSpellSkill: public ArmorSkill{
+public:
+    PeaceSpellSkill(): ArmorSkill("PeaceSpell"){
+        events << EventPhaseStart << DamageInflicted << BeforeCardsMove << CardsMoveOneTime;
+        view_as_skill = new PeaceSpellVS;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent != CardsMoveOneTime && !ArmorSkill::triggerable(player))
+            return false;
+
+        switch(triggerEvent){
+            case (EventPhaseStart):{
+                if (player->getPhase() == Player::Finish){
+                    foreach(ServerPlayer *p, room->getAlivePlayers()){
+                        if (p->getMark("@PeaceSpellBuff") > 0)
+                            p->loseAllMarks("@PeaceSpellBuff");
+                    }
+                    room->askForUseCard(player, "@@PeaceSpell", "@peacespell");
+                }
+                break;
+            }
+            case (DamageInflicted):{
+                DamageStruct damage = data.value<DamageStruct>();
+                if (damage.nature != DamageStruct::Normal)
+                    return true;
+                break;
+            }
+            case (BeforeCardsMove):{
+                CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+                if (move.from != NULL && move.from == player && move.from_places.contains(Player::PlaceEquip))
+                    foreach(int id, move.card_ids){
+                        const Card *card = Sanguosha->getEngineCard(id);
+                        if (card->getClassName() == "PeaceSpell"){
+                            foreach(ServerPlayer *p, room->getAlivePlayers())
+                                if (p->getMark("@PeaceSpellBuff") > 0)
+                                    p->loseAllMarks("@SixSwordsBuff");
+                            break;
+                        }
+                    }
+                break;
+            }
+            case (CardsMoveOneTime):{
+                if (player->hasFlag("peacespell_throwing")){
+                    CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+                    if (move.from != NULL && move.from == player && move.from_places.contains(Player::PlaceEquip))
+                        foreach(int id, move.card_ids){
+                            const Card *card = Sanguosha->getEngineCard(id);
+                            if (card->getClassName() == "SixSwords"){
+                                room->loseHp(player);
+                                if (player->isAlive())
+                                    player->drawCards(2);
+                                break;
+                            }
+                        }
+                }
+                break;
+            }
+            default:
+                Q_ASSERT(false);
+        }
+        return false;
+    }
+};
+
+class PeaceSpellMaxCards: public MaxCardsSkill{
+public:
+    PeaceSpellMaxCards(): MaxCardsSkill("#PeaceSpell"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if (target->getMark("@PeaceSpellBuff") > 0){
+            QList<const Player *> players = target->getAliveSiblings();
+            players << target;
+            int ext = 0;
+            foreach(const Player *p, players){
+                if (p->getKingdom() == target->getKingdom())
+                    ext++;
+            }
+            return ext;
+        }
+        return 0;
+    }
+};
+
+
 
 LingCardsPackage::LingCardsPackage(): Package("LingCards", Package::CardPack){
 
@@ -3003,16 +3126,19 @@ LingCardsPackage::LingCardsPackage(): Package("LingCards", Package::CardPack){
     cards << new SixSwords(Card::Diamond, 6);
     cards << new Triblade(Card::Diamond, 12);
     cards << new DragonPhoenix(Card::Spade, 2);
+    cards << new PeaceSpell(Card::Heart, 3);
 
     foreach(Card *c, cards)
         c->setParent(this);
 
 
-    skills << new SixSwordsSkill << new SixSwordsSkillRange << new TribladeSkill << new DragonPhoenixSkill;
+    skills << new SixSwordsSkill << new SixSwordsSkillRange << new TribladeSkill << new DragonPhoenixSkill << new PeaceSpellSkill << new PeaceSpellMaxCards;
     related_skills.insertMulti("SixSwords", "#SixSwords");
+    related_skills.insertMulti("PeaceSpell", "#PeaceSpell");
 
     addMetaObject<SixSwordsCard>();
     addMetaObject<TribladeCard>();
+    addMetaObject<PeaceSpellCard>();
 }
 
 ADD_PACKAGE(LingCards)

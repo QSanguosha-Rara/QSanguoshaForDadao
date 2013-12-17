@@ -530,9 +530,129 @@ public:
     }
 };
 
-class hegzhangjiaoskill1: public PhaseChangeSkill{
+//摸牌阶段，若你仅有1点体力或没有手牌，你可以放弃摸牌，改为从其他每名角色区域内各获得一张牌。
+
+class Hengzheng: public PhaseChangeSkill{
 public:
-    hegzhangjiaoskill1(): PhaseChangeSkill("hegzhangjiaoskill1"){
+    Hengzheng(): PhaseChangeSkill("hengzheng"){
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() == Player::Draw && (target->getHp() == 1 || target->isKongcheng())){
+            Room *room = target->getRoom();
+            bool invoke = false;
+            foreach(ServerPlayer *p, room->getOtherPlayers(target))
+                if (!p->isAllNude()){
+                    invoke = true;
+                    break;
+                }
+
+            if (invoke && target->askForSkillInvoke(objectName())){
+                foreach(ServerPlayer *p, room->getOtherPlayers(target))
+                    if (!p->isAllNude()){
+                        int id = room->askForCardChosen(target, p, "hej", objectName());
+                        room->obtainCard(target, id);
+                    }
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+//临时修改：锁定技，当你处于濒死状态时，你失去技能“暴凌”，增加3点体力上限，回复3点体力，并获得技能“崩坏”。
+
+class Baoling: public TriggerSkill{
+public:
+    Baoling(): TriggerSkill("baoling"){
+        events << AskForPeaches;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        DyingStruct dying = data.value<DyingStruct>();
+        if (dying.who == player){
+            room->handleAcquireDetachSkills(player, "-baoling");
+            room->setPlayerProperty(player, "maxhp", player->getMaxHp() + 3);
+            RecoverStruct recover;
+            recover.recover = 3;
+            recover.who = player;
+            room->recover(player, recover);
+            room->handleAcquireDetachSkills(player, "benghuai");
+        }
+        return false;
+    }
+};
+
+//当你使用杀或决斗对目标造成伤害时，若该角色有技能，你可以防止此伤害，并令其选择一项：
+//1.弃置装备区内的所有牌（至少一张），然后失去1点体力
+//2.令其失去由你选择的一项武将技能。
+
+class Chuanxin: public TriggerSkill{
+public:
+    Chuanxin(): TriggerSkill("chuanxin"){
+        events << DamageCaused;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        DamageStruct damage = data.value<DamageStruct>();
+        if (damage.card != NULL && (damage.card->isKindOf("Duel") || damage.card->isKindOf("Slash")) 
+                && damage.by_user && !damage.chain && damage.transfer){
+            QList<const Skill *> skills = damage.to->getVisibleSkillList();
+            QList<const Skill *> fix_skills;
+            foreach(const Skill *skill, skills){
+                if (skill->getLocation() == Skill::Right && !skill->isAttachedLordSkill())
+                    fix_skills << skill;
+            }
+            if (!fix_skills.isEmpty() && player->askForSkillInvoke(objectName())){
+                QString choice = "loseskill";
+                if (damage.to->hasEquip())
+                    choice = room->askForChoice(damage.to, objectName() + "_select", "discardequip+loseskill");
+                if (choice == "loseskill"){
+                    QStringList skillnames;
+                    foreach(const Skill *skill, skills)
+                        skillnames << skill->objectName();
+                    
+                    QString selectedskill = room->askForChoice(player, objectName() + "_loseskill", skillnames.join("+"), QVariant::fromValue(damage.to));
+                    room->handleAcquireDetachSkills(damage.to, QString("-") + selectedskill);
+                }
+                else if (choice == "discardequip"){
+                    DummyCard dummy;
+                    dummy.addSubcards(damage.to->getEquips());
+                    room->throwCard(&dummy, damage.to, player);
+                    room->loseHp(damage.to);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+//每当一名角色使用【杀】指定你的上家/下家为目标后，你可以令你的上家/下家弃置一张装备区里的牌。 
+
+class Fengshi: public TriggerSkill{
+public:
+    Fengshi(): TriggerSkill("fengshi"){
+        events << TargetConfirmed;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        CardUseStruct use = data.value<CardUseStruct>();
+        if (use.card != NULL && use.card->isKindOf("Slash") && use.from != NULL){
+            foreach(ServerPlayer *p, use.to){
+                if (player->isAdjacentTo(p) && player->hasEquip() && player->askForSkillInvoke(objectName(), QVariant::fromValue(p))){
+                    room->askForCard(p, ".|.|.|equipped!", "@fengshi-discard");
+                }
+            }
+        }
+        return false;
+    }
+};
+
+class Wuxin: public PhaseChangeSkill{
+public:
+    Wuxin(): PhaseChangeSkill("wuxin"){
     }
 
     virtual bool onPhaseChange(ServerPlayer *target) const{
@@ -547,7 +667,7 @@ public:
             if (qunplayers <= 1)
                 return false;
 
-            if (target->askForSkillInvoke(objectName())){
+            if (qunplayers > 0 && target->askForSkillInvoke(objectName())){
                 QList<int> guanxing_cards = room->getNCards(qunplayers);
                 room->askForGuanxing(target, guanxing_cards, Room::GuanxingUpOnly);
             }
@@ -557,7 +677,7 @@ public:
     }
 };
 
-class hegzhangjiaoskill2: public PhaseChangeSkill{
+class hegzhangjiaoskill2: public PhaseChangeSkill{ //不知道如何处理
 public:
     hegzhangjiaoskill2(): PhaseChangeSkill("hegzhangjiaoskill2$"){
 
@@ -593,15 +713,15 @@ public:
     }
 };
 
-hegzhangjiaoskill3Card::hegzhangjiaoskill3Card(){
+WendaoCard::WendaoCard(){
     target_fixed = true;
 }
 
-void hegzhangjiaoskill3Card::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+void WendaoCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
     const Card *tpys = NULL;
     foreach(ServerPlayer *p, room->getAlivePlayers()){
         foreach(const Card *card, p->getEquips()){
-            if (Sanguosha->getEngineCard(card->getEffectiveId())->isKindOf("taipingyaoshu")){
+            if (Sanguosha->getEngineCard(card->getEffectiveId())->isKindOf("PeaceSpell")){
                 tpys = Sanguosha->getCard(card->getEffectiveId());
                 break;
             }
@@ -609,7 +729,7 @@ void hegzhangjiaoskill3Card::use(Room *room, ServerPlayer *source, QList<ServerP
         if (tpys != NULL)
             break;
         foreach(const Card *card, p->getJudgingArea()){
-            if (Sanguosha->getEngineCard(card->getEffectiveId())->isKindOf("taipingyaoshu")){
+            if (Sanguosha->getEngineCard(card->getEffectiveId())->isKindOf("PeaceSpell")){
                 tpys = Sanguosha->getCard(card->getEffectiveId());
                 break;
             }
@@ -619,7 +739,7 @@ void hegzhangjiaoskill3Card::use(Room *room, ServerPlayer *source, QList<ServerP
     }
     if (tpys == NULL)
         foreach(int id, room->getDiscardPile()){
-            if (Sanguosha->getEngineCard(id)->isKindOf("taipingyaoshu")){
+            if (Sanguosha->getEngineCard(id)->isKindOf("PeaceSpell")){
                 tpys = Sanguosha->getCard(id);
                 break;
             }
@@ -631,18 +751,18 @@ void hegzhangjiaoskill3Card::use(Room *room, ServerPlayer *source, QList<ServerP
     source->obtainCard(tpys, true);
 }
 
-class hegzhangjiaoskill3: public OneCardViewAsSkill{
+class Wendao: public OneCardViewAsSkill{
 public:
-    hegzhangjiaoskill3(): OneCardViewAsSkill("hegzhangjiaoskill3"){
+    Wendao(): OneCardViewAsSkill("wendao"){
         filter_pattern = ".|red!";
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
-        return !player->hasUsed("hegzhangjiaoskill3Card");
+        return !player->hasUsed("WendaoCard");
     }
 
     virtual const Card *viewAs(const Card *originalCard) const{
-        hegzhangjiaoskill3Card *c = new hegzhangjiaoskill3Card;
+        WendaoCard *c = new WendaoCard;
         c->addSubcard(originalCard);
         return c;
     }
@@ -679,15 +799,24 @@ PowerPackage::PowerPackage(): Package("Power"){
     sunce->addSkill(new PowerZhiba);
     skills << new PowerZhibaPindian;
 
+    General *dongzhuo = new General(this, "heg_dongzhuo$", "qun", 4);
+    dongzhuo->addSkill(new Hengzheng);
+    dongzhuo->addSkill(new Baoling);
+    dongzhuo->addSkill("baonue");
+
+    General *zhangren = new General(this, "zhangren", "qun", 4);
+    zhangren->addSkill(new Chuanxin);
+    zhangren->addSkill(new Fengshi);
+
     General *zhangjiao = new General(this, "heg_zhangjiao$", "qun", 3);
-    zhangjiao->addSkill(new hegzhangjiaoskill1);
+    zhangjiao->addSkill(new Wuxin);
     zhangjiao->addSkill(new hegzhangjiaoskill2);
-    zhangjiao->addSkill(new hegzhangjiaoskill3);
+    zhangjiao->addSkill(new Wendao);
 
     addMetaObject<YimingCard>();
     addMetaObject<DuanxieCard>();
     addMetaObject<PowerZhibaCard>();
-    addMetaObject<hegzhangjiaoskill3Card>();
+    addMetaObject<WendaoCard>();
 }
 
 ADD_PACKAGE(Power)
