@@ -243,7 +243,8 @@ public:
         } else if (triggerEvent == FinishJudge) {
             JudgeStar judge = data.value<JudgeStar>();
             if (judge->reason == "shuangxiong"){
-                shuangxiong->obtainCard(judge->card);
+                if (room->getCardPlace(judge->card->getEffectiveId()) == Player::PlaceJudge)
+                    shuangxiong->obtainCard(judge->card);
                 judge->pattern = judge->card->isRed() ? "red" : "black";
             }
         } else if (triggerEvent == EventPhaseChanging) {

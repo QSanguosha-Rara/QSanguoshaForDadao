@@ -309,6 +309,7 @@ void MainWindow::enterRoom() {
 }
 
 void MainWindow::gotoStartScene() {
+    ServerInfo.DuringGame = false;
     QList<Server *> servers = findChildren<Server *>();
     if (!servers.isEmpty())
         servers.first()->deleteLater();
@@ -345,8 +346,13 @@ void MainWindow::gotoStartScene() {
 
     delete systray;
     systray = NULL;
-    if (ClientInstance)
+    if (ClientInstance) {
+        if (Self) {
+            delete Self;
+            Self = NULL;
+        }
         delete ClientInstance;
+    }
 }
 
 void MainWindow::startGameInAnotherInstance() {
