@@ -123,6 +123,17 @@ return {
 	["$duyi"] = "藏毒于药，此贼合休！",
 	["$duanzhi"] = "断指明志，誓杀国贼！",
 	["~jiben"] = "臣不能为国家除贼，乃天数也……",
+	
+	["cv:lingtianyi"] = "凌天翼" ,
+	["$dadaopic"] = "image=image/animate/dadaopic.png",
+	["$xuanying1"] = "咻～" ,
+	["$xuanying2"] = "这个应该归纳为规则。" ,
+	["$xuanying3"] = "这属于赘述，应该删除。" ,
+	["$xuanying4"] = "原来设计本意是酱紫的呀。" ,
+	["$xuanying5"] = "那牌面应该这么写才对。" ,
+	["$xingyun1"] = "竟有如此坑爹的牌面？" ,
+	["$xingyun2"] = "容我按照设计本意重写牌面。" ,
+	["~lingtianyi"] = "官方规则集已经发布，我要去更新了，掰掰。" ,
 
 	["~neo_mushun"] = "我宁死不屈！" ,
 }

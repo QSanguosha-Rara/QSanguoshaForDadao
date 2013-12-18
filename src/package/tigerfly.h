@@ -14,7 +14,7 @@ public:
     virtual void onEffect(const CardEffectStruct &) const;
 
 private:
-    QString suittb(Card::Suit s) const;
+    static QString suittb(Card::Suit s);
 };
 
 class TushouGiveCard: public SkillCard{
