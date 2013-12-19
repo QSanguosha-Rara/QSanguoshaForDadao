@@ -2962,7 +2962,7 @@ public:
 
                 room->broadcastSkillInvoke(objectName(), 2);
 
-                ServerPlayer *target1 = room->askForPlayerChosen(player, players, objectName() + "_movefield_target1", "@xuanying-movefield1", false, true);
+                ServerPlayer *target1 = room->askForPlayerChosen(player, players, objectName() + "_movefield_target1", "@xuanying-movefield1");
                 int id = room->askForCardChosen(player, target1, "ej", objectName() + "_movefield");
 
                 const Card *card = Sanguosha->getCard(id);

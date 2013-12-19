@@ -22,7 +22,6 @@ return {
 	["illustrator:heg_jiangwei"] = "木美人",
 	["tianfu"] = "天覆",
 	[":tianfu"] = "锁定技，你于你上家/下家/自己的回合内视为拥有“看破”。",
-	["@tianfu-select"] = "请选择可以令你拥有“看破”的角色。" ,
 	["@tianfu_kanpo"] = "天覆-看破" ,
 	
 	["heg_dengai"] = "邓艾-国",
@@ -43,9 +42,6 @@ return {
 	["illustrator:heg_yuji"] = "G.G.G.",
 	["qianhuan"] = "千幻",
 	[":qianhuan"] = "每当一名角色受到伤害后，该角色可以将牌堆顶的一张牌置于你的武将牌上，称为“幻”，若此“幻”与另一张“幻”花色相同，其将此“幻”置入弃牌堆；每当一名角色成为基本牌或锦囊牌唯一的目标时，若有“幻”，你可以将一张“幻”置入弃牌堆，取消之。",
-	["qianhuan:choice"] = "你想发动 %src 的“千幻”吗？",
-	--["qianhuan:accept"] = "同意取消目标",
-	--["qianhuan:reject"] = "拒绝取消目标",
 	["sorcery"] = "幻",
 
 	["#hetaihou"] = "弄权之蛇蝎",
@@ -65,8 +61,6 @@ return {
 	[":shengxi"] = "结束阶段开始时，若你于出牌阶段未造成伤害，你可以摸两张牌。",
 	["shoucheng"] = "守成",
 	[":shoucheng"] = "每当一名角色于其回合外失去最后的手牌时，你可以令该角色摸一张牌。",
-	--["shoucheng:accept"] = "摸一张牌",
-	--["shoucheng:reject"] = "不摸牌",
 	
 	["#jiangqin"] = "祁奚之器" ,
 	["jiangqin"] = "蒋钦" ,

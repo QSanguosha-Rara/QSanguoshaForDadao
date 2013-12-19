@@ -1135,6 +1135,7 @@ void Dismantlement::onEffect(const CardEffectStruct &effect) const{
             room->doNotify(effect.from, QSanProtocol::S_COMMAND_LOG_SKILL, log.toJsonValue());
 
             card_id = room->askForCardChosen(effect.from, effect.to, "h", objectName(), true, Card::MethodDiscard);
+            //Fs: I want to use room->doGongxin here
         }
     }
     room->throwCard(card_id, room->getCardPlace(card_id) == Player::PlaceDelayedTrick ? NULL : effect.to, effect.from);
