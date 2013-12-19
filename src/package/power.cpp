@@ -156,7 +156,26 @@ public:
     }
 };
 
+class Guixiu: public TriggerSkill{
+public:
+    Guixiu(): TriggerSkill("guixiu"){
+        events << TurnStart;
+        frequency = Frequent;
+    }
 
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        foreach(ServerPlayer *p, room->getOtherPlayers(player)){
+            if (p->getHandcardNum() < player->getHandcardNum())
+                return false;
+        }
+        if (player->askForSkillInvoke(objectName()))
+            player->drawCards(1);
+
+        return false;
+    }
+};
+
+/*
 class Guixiu: public MaxCardsSkill{
 public:
     Guixiu(): MaxCardsSkill("guixiu"){
@@ -181,7 +200,7 @@ public:
         return n + 2;
     }
 };
-
+*/
 class Cunsi: public TriggerSkill{
 public:
     Cunsi(): TriggerSkill("cunsi"){
@@ -211,31 +230,45 @@ public:
 class Yongjue: public TriggerSkill{
 public:
     Yongjue(): TriggerSkill("yongjue"){
-        events << CardUsed << CardResponded;
+        events << CardUsed << CardResponded << Death;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL && target->isAlive();
+        return target != NULL;
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        if (!player->hasFlag("yongjue")){
-            const Card *card = NULL;
-            if (triggerEvent == CardUsed){
-                CardUseStruct use = data.value<CardUseStruct>();
-                if (use.card != NULL && !use.card->isKindOf("SkillCard"))
-                    card = use.card;
-            }
-            else{
-                CardResponseStruct resp = data.value<CardResponseStruct>();
-                if (resp.m_isUse)
-                    card = resp.m_card;
-            }
+        if (triggerEvent != Death){
+            if (!player->hasFlag("yongjue")){
+                const Card *card = NULL;
+                if (triggerEvent == CardUsed){
+                    CardUseStruct use = data.value<CardUseStruct>();
+                    if (use.card != NULL)
+                        card = use.card;
+                }
+                else {
+                    CardResponseStruct resp = data.value<CardResponseStruct>();
+                    if (resp.m_isUse)
+                        card = resp.m_card;
+                }
 
-            if (card != NULL && card->isKindOf("Slash")){
-                ServerPlayer *mifuren = room->findPlayerBySkillName(objectName());
-                if (mifuren != NULL && mifuren->askForSkillInvoke(objectName(), QVariant::fromValue(player)))
-                    player->obtainCard(card);
+                if (card != NULL && card->isKindOf("Slash")){
+                    ServerPlayer *mifuren = room->findPlayerBySkillName(objectName());
+                    if (mifuren != NULL && mifuren->askForSkillInvoke(objectName(), QVariant::fromValue(player))){
+                        player->obtainCard(card);
+                        player->setFlags("yongjue");
+                    }
+                }
+            }
+        }
+        else {
+            DeathStruct death = data.value<DeathStruct>();
+            if (death.who == player && player->hasSkill(objectName())){
+                ServerPlayer *target = room->askForPlayerChosen(player, room->getAlivePlayers(), objectName(), "@yongjue-select", true, true);
+                if (target != NULL){
+                    room->handleAcquireDetachSkills(target, "yongjue");
+                    target->drawCards(2);
+                }
             }
         }
         return false;
@@ -584,45 +617,82 @@ public:
     }
 };
 
-//当你使用杀或决斗对目标造成伤害时，若该角色有技能，你可以防止此伤害，并令其选择一项：
+//当你使用杀或决斗对目标造成伤害时，你可以防止此伤害，并令其选择一项：
 //1.弃置装备区内的所有牌（至少一张），然后失去1点体力
-//2.令其失去由你选择的一项武将技能。
+//2.你选择的其一项技能无效，直到你下回合开始。
 
 class Chuanxin: public TriggerSkill{
 public:
     Chuanxin(): TriggerSkill("chuanxin"){
-        events << DamageCaused;
+        events << DamageCaused << EventPhaseStart;
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        DamageStruct damage = data.value<DamageStruct>();
-        if (damage.card != NULL && (damage.card->isKindOf("Duel") || damage.card->isKindOf("Slash")) 
-                && damage.by_user && !damage.chain && damage.transfer){
-            QList<const Skill *> skills = damage.to->getVisibleSkillList();
-            QList<const Skill *> fix_skills;
-            foreach(const Skill *skill, skills){
-                if (skill->getLocation() == Skill::Right && !skill->isAttachedLordSkill())
-                    fix_skills << skill;
+        if (triggerEvent == DamageCaused){
+            DamageStruct damage = data.value<DamageStruct>();
+            if (damage.card != NULL && (damage.card->isKindOf("Duel") || damage.card->isKindOf("Slash")) 
+                    && damage.by_user && !damage.chain && damage.transfer){
+                QList<const Skill *> skills = damage.to->getVisibleSkillList();
+                QList<const Skill *> fix_skills;
+                foreach(const Skill *skill, skills){
+                    if (skill->getLocation() == Skill::Right && !skill->isAttachedLordSkill())
+                        fix_skills << skill;
+                }
+                if (!fix_skills.isEmpty() && player->askForSkillInvoke(objectName())){
+                    QString choice = "loseskill";
+                    if (damage.to->hasEquip())
+                        choice = room->askForChoice(damage.to, objectName() + "_select", "discardequip+loseskill");
+                    if (choice == "loseskill"){
+                        QStringList skillnames;
+                        foreach(const Skill *skill, skills)
+                            skillnames << skill->objectName();
+                        QStringList chuanxinskill = damage.to->tag["chuanxinskill"].toStringList();
+                        foreach(QString s, chuanxinskill){
+                            if (skillnames.contains(s))
+                                skillnames.removeOne(s);
+                        }
+
+                        QString selectedskill = room->askForChoice(player, objectName() + "_loseskill", skillnames.join("+"), QVariant::fromValue(damage.to));
+                        chuanxinskill << selectedskill;
+                        damage.to->tag["chuanxinskill"] = chuanxinskill;
+
+                        //log
+
+                        room->addPlayerMark(damage.to, "Qingcheng" + selectedskill);
+
+                        foreach (ServerPlayer *p, room->getAllPlayers())
+                            room->filterCards(p, p->getCards("he"), true);
+
+                        Json::Value args;
+                        args[0] = QSanProtocol::S_GAME_EVENT_UPDATE_SKILL;
+                        room->doBroadcastNotify(QSanProtocol::S_COMMAND_LOG_EVENT, args);
+                    }
+                    else if (choice == "discardequip"){
+                        DummyCard dummy;
+                        dummy.addSubcards(damage.to->getEquips());
+                        room->throwCard(&dummy, damage.to, player);
+                        room->loseHp(damage.to);
+                    }
+                    return true;
+                }
             }
-            if (!fix_skills.isEmpty() && player->askForSkillInvoke(objectName())){
-                QString choice = "loseskill";
-                if (damage.to->hasEquip())
-                    choice = room->askForChoice(damage.to, objectName() + "_select", "discardequip+loseskill");
-                if (choice == "loseskill"){
-                    QStringList skillnames;
-                    foreach(const Skill *skill, skills)
-                        skillnames << skill->objectName();
-                    
-                    QString selectedskill = room->askForChoice(player, objectName() + "_loseskill", skillnames.join("+"), QVariant::fromValue(damage.to));
-                    room->handleAcquireDetachSkills(damage.to, QString("-") + selectedskill);
+            else if (triggerEvent == EventPhaseStart){
+                if (player->getPhase() == Player::RoundStart){
+                    foreach (ServerPlayer *p, room->getAlivePlayers()){
+                        QStringList chuanxinskill = p->tag["chuanxinskill"].toStringList();
+                        foreach(QString skill, chuanxinskill)
+                            room->setPlayerMark(p, "Qingcheng" + skill, 0);
+                        //log
+                        p->tag.remove("chuanxinskill");
+                    }
+
+                    foreach (ServerPlayer *p, room->getAllPlayers())
+                        room->filterCards(p, p->getCards("he"), true);
+
+                    Json::Value args;
+                    args[0] = QSanProtocol::S_GAME_EVENT_UPDATE_SKILL;
+                    room->doBroadcastNotify(QSanProtocol::S_COMMAND_LOG_EVENT, args);
                 }
-                else if (choice == "discardequip"){
-                    DummyCard dummy;
-                    dummy.addSubcards(damage.to->getEquips());
-                    room->throwCard(&dummy, damage.to, player);
-                    room->loseHp(damage.to);
-                }
-                return true;
             }
         }
         return false;
@@ -779,9 +849,9 @@ PowerPackage::PowerPackage(): Package("Power"){
     zangba->addSkill(new HengjiangMaxCards);
     related_skills.insertMulti("hengjiang", "#hengjiang");
 
-    General *mifuren = new General(this, "mifuren", "shu", 2);
+    General *mifuren = new General(this, "mifuren", "shu", 3);
     mifuren->addSkill(new Guixiu);
-    mifuren->addSkill(new GuixiuInitial);
+    //mifuren->addSkill(new GuixiuInitial);
     mifuren->addSkill(new Yongjue);
     mifuren->addSkill(new Cunsi);
     skills << new Yiming;
@@ -801,7 +871,8 @@ PowerPackage::PowerPackage(): Package("Power"){
 
     General *dongzhuo = new General(this, "heg_dongzhuo$", "qun", 4);
     dongzhuo->addSkill(new Hengzheng);
-    dongzhuo->addSkill(new Baoling);
+    //dongzhuo->addSkill(new Baoling);
+    dongzhuo->addSkill("roulin");
     dongzhuo->addSkill("baonue");
 
     General *zhangren = new General(this, "zhangren", "qun", 4);
@@ -812,6 +883,8 @@ PowerPackage::PowerPackage(): Package("Power"){
     zhangjiao->addSkill(new Wuxin);
     zhangjiao->addSkill(new hegzhangjiaoskill2);
     zhangjiao->addSkill(new Wendao);
+
+    skills << new Baoling; //for future use
 
     addMetaObject<YimingCard>();
     addMetaObject<DuanxieCard>();
