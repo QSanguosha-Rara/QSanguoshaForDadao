@@ -351,6 +351,7 @@ class Tianfu: public TriggerSkill {
 public:
     Tianfu(): TriggerSkill("tianfu") {
         events << EventPhaseStart << EventLoseSkill;
+        frequency = Compulsory;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -362,21 +363,8 @@ public:
             if (player->getPhase() == Player::RoundStart){
                 QList<ServerPlayer *> jiangweis = room->findPlayersBySkillName(objectName());
                 foreach (ServerPlayer *jiangwei, jiangweis){
-                    ServerPlayer *asker = NULL;
-                    if (player == jiangwei){
-                        QList<ServerPlayer *> to_select;
-                        foreach(ServerPlayer *p, room->getOtherPlayers(jiangwei))
-                            if (p->isAdjacentTo(jiangwei))
-                                to_select << p;
-                        asker = room->askForPlayerChosen(jiangwei, to_select, objectName(), "@tianfu-select", true, false);
-                    }
-                    else if (player->isAdjacentTo(jiangwei))
-                        if (jiangwei->askForSkillInvoke(objectName(), QStringList() << player->objectName() << "invoke"))
-                            asker = player;
-
-                    if (asker != NULL && asker->askForSkillInvoke(objectName(), QStringList() << jiangwei->objectName() << "gain")){
+                    if (jiangwei->isAdjacentTo(player) || jiangwei == player)
                         jiangwei->gainMark("@tianfu_kanpo");
-                    }
                 }
             }
             else if (player->getPhase() == Player::NotActive){
@@ -544,7 +532,9 @@ public:
                 analeptic->setSkillName("_zhendu");
                 room->useCard(CardUseStruct(analeptic, player, QList<ServerPlayer *>(), true));
                 if (player->isAlive())
-                    room->damage(DamageStruct(objectName(), hetaihou, player));
+                    room->loseHp(player);
+                if (player->getHp() < hetaihou->getHp())
+                    hetaihou->drawCards(1);
             }
         }
         return false;
@@ -574,7 +564,6 @@ public:
                     if (TriggerSkill::triggerable(p))
                         room->setPlayerMark(p, objectName(), 1);
             }
-
         } else {
             if (player->getPhase() == Player::NotActive) {
                 QList<ServerPlayer *> hetaihous;
@@ -605,7 +594,7 @@ public:
 class Shengxi: public TriggerSkill {
 public:
     Shengxi(): TriggerSkill("shengxi") {
-        events << DamageDone << EventPhaseEnd;
+        events << DamageDone << EventPhaseStart;
         frequency = Frequent;
     }
 
@@ -614,8 +603,8 @@ public:
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
-        if (triggerEvent == EventPhaseEnd) {
-            if (TriggerSkill::triggerable(player) && player->getPhase() == Player::Play) {
+        if (triggerEvent == EventPhaseStart) {
+            if (TriggerSkill::triggerable(player) && player->getPhase() == Player::Finish) {
                 if (!player->hasFlag("ShengxiDamageInPlayPhase") && player->askForSkillInvoke(objectName()))
                     player->drawCards(2);
             }
@@ -672,8 +661,19 @@ void ShangyiCard::onEffect(const CardEffectStruct &effect) const{
 
     if (to_throw != -1)
         room->throwCard(to_throw, effect.to, effect.from);
-    else
-        effect.from->drawCards(1);
+    else {
+        const Card *card1 = room->askForExchange(effect.from, "shangyi", 1, false, "@shangyi-swap");
+        const Card *card2 = room->askForExchange(effect.to, "shangyi", 1, false, "@shangyi-swap");
+        CardsMoveStruct move1(card1->getEffectiveId(), effect.to, Player::PlaceHand, 
+            CardMoveReason(CardMoveReason::S_REASON_SWAP, effect.from->objectName(), effect.to->objectName(), "shangyi", QString()));
+        CardsMoveStruct move2(card2->getEffectiveId(), effect.from, Player::PlaceHand, 
+            CardMoveReason(CardMoveReason::S_REASON_SWAP, effect.to->objectName(), effect.from->objectName(), "shangyi", QString()));
+
+        QList<CardsMoveStruct> exchangeMove;
+        exchangeMove << move1 << move2;
+
+        room->moveCards(exchangeMove, false);
+    }
 }
 
 class Shangyi: public ZeroCardViewAsSkill{
