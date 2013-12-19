@@ -999,6 +999,22 @@ public:
             recover.who = player;
             recover.recover = 1;
             room->recover(player, recover);
+            
+            QList<ServerPlayer *> DelayedTricks;
+            foreach(ServerPlayer *p, room->getAlivePlayers()){
+                if (!p->getJudgingArea().isEmpty())
+                    DelayedTricks << p;
+            }
+            if (!DelayedTricks.isEmpty()){
+                ServerPlayer *to_throw = room->askForPlayerChosen(player, DelayedTricks, objectName(), "@neo2013shenzhi-throwjudge", true, true);
+                if (to_throw != NULL){
+                    DummyCard dummy;
+                    dummy.addSubcards(to_throw->getJudgingArea());
+                    CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLE, player->objectName(), objectName(), QString());
+                    room->moveCardTo(&dummy, NULL, Player::DiscardPile, reason, true);
+                }
+            }
+
         }
         return false;
     }
@@ -1182,62 +1198,21 @@ public:
         return 6;
     }
 
-    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
         if (player->getPhase() == Player::RoundStart){
-            QStringList Qingchenglist = player->tag["neo2013qingcheng"].toStringList();
-            if (!Qingchenglist.isEmpty()){
-                foreach (QString skill_name, Qingchenglist) {
-                    room->setPlayerMark(player, "Qingcheng" + skill_name, 0);
-                    if (player->hasSkill(skill_name)) {
-                        LogMessage log;
-                        log.type = "$QingchengReset";
-                        log.from = player;
-                        log.arg = skill_name;
-                        room->sendLog(log);
-                    }
-                }
-                player->tag.remove("neo2013qingcheng");
-                room->broadcastSkillInvoke(objectName(), 2);
-
-                foreach (ServerPlayer *p, room->getAllPlayers())
-                    room->filterCards(p, p->getCards("he"), true);
-
-                Json::Value args;
-                args[0] = QSanProtocol::S_GAME_EVENT_UPDATE_SKILL;
-                room->doBroadcastNotify(QSanProtocol::S_COMMAND_LOG_EVENT, args);
-
-            }
             ServerPlayer *zou = room->findPlayerBySkillName(objectName());
             if (zou == NULL || zou->isNude() || zou == player)
                 return false;
 
             if (room->askForDiscard(zou, "neo2013qingcheng", 1, 1, true, true, "@neo2013qingcheng-discard")){
-                QStringList skill_list;
-                foreach (const Skill *skill, player->getVisibleSkillList()){
-                    if (!skill_list.contains(skill->objectName()) && !skill->inherits("SPConvertSkill") && !skill->isAttachedLordSkill()) {
-                        skill_list << skill->objectName();
-                    }
-                }
-                QString skill_qc;
-                if (!skill_list.isEmpty()) {
-                    QVariant data_for_ai = QVariant::fromValue(player);
-                    skill_qc = room->askForChoice(zou, "neo2013qingcheng", skill_list.join("+"), data_for_ai);
-                }
-
-                if (!skill_qc.isEmpty()) {
-                    LogMessage log;
-                    log.type = "$QingchengNullify";
-                    log.from = zou;
-                    log.to << player;
-                    log.arg = skill_qc;
-                    room->sendLog(log);
-
-                    QStringList Qingchenglist = player->tag["neo2013qingcheng"].toStringList();
-                    Qingchenglist << skill_qc;
-                    player->tag["neo2013qingcheng"] = QVariant::fromValue(Qingchenglist);
-                    room->addPlayerMark(player, "Qingcheng" + skill_qc);
-                    room->broadcastSkillInvoke(objectName(), 1);
-                }
+                room->setPlayerFlag(player, "neo2013qingcheng");
+                room->broadcastSkillInvoke(objectName(), 1);
+            }
+        }
+        else if (player->getPhase() == Player::NotActive){
+            if (player->hasFlag("neo2013qingcheng")){
+                room->setPlayerFlag(player, "-neo2013qingcheng");
+                room->broadcastSkillInvoke(objectName(), 2);
             }
         }
 
@@ -1657,7 +1632,7 @@ Neo2013ZhoufuCard::Neo2013ZhoufuCard() {
 }
 
 bool Neo2013ZhoufuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *) const{
-    return targets.isEmpty() &&  to_select->getPile("incantationn").isEmpty();
+    return targets.isEmpty() && to_select->getPile("incantationn").isEmpty();
 }
 
 void Neo2013ZhoufuCard::use(Room *, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
@@ -2226,7 +2201,22 @@ Neo2013JinanCard::Neo2013JinanCard(){
 }
 
 bool Neo2013JinanCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    return targets.length() == 0 && to_select->objectName() == Self->property("neo2013jinan").toString();
+    if (!targets.isEmpty())
+        return false;
+
+    QStringList tonames = Self->property("neo2013jinan").toStringList();
+    if (!tonames.contains(to_select->objectName()))
+        return false;
+
+    const Card *realcard = Sanguosha->getCard(getEffectiveId())->getRealCard();
+    if (!realcard->isEquipped())
+        return true;
+
+    const EquipCard *equip = qobject_cast<const EquipCard *>(realcard->getRealCard());
+    if (to_select->getEquip(equip->location()))
+        return false;
+
+    return true;
 }
 
 void Neo2013JinanCard::onEffect(const CardEffectStruct &effect) const{
@@ -2243,25 +2233,7 @@ public:
     }
 
     virtual bool viewFilter(const Card *to_select) const{
-        const Player *target = NULL;
-        foreach (const Player *p, Self->getAliveSiblings())
-            if (p->objectName() == Self->property("neo2013jinan").toString()){
-                target = p;
-                break;
-            }
-        if (target == NULL)
-            return false;
-
-        if (!to_select->isEquipped())
-            return true;
-        else {
-            const EquipCard *equip = qobject_cast<const EquipCard *>(to_select->getRealCard());
-            if (target->getEquip((int)(equip->location())))
-                return false;
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     virtual const Card *viewAs(const Card *) const{
@@ -2280,21 +2252,20 @@ public:
 
     virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
-        foreach (ServerPlayer *p, use.to){
-            if (p == player)
-                continue;
-            if (use.card != NULL && (use.card->isKindOf("Slash") || use.card->isNDTrick())){
-                room->setPlayerProperty(player, "neo2013jinan", p->objectName());
-                try {
-                    room->askForUseCard(player, "@@neo2013jinan", "@neo2013jinan", -1, Card::MethodNone);
+        if (use.card != NULL && (use.card->isKindOf("Slash") || use.card->isNDTrick())){
+            QStringList tonames;
+            foreach(ServerPlayer *p, use.to)
+                tonames << p->objectName();
+            room->setPlayerProperty(player, "neo2013jinan", tonames);
+            try {
+                room->askForUseCard(player, "@@neo2013jinan", "@neo2013jinan", -1, Card::MethodNone);
+                room->setPlayerProperty(player, "neo2013jinan", QVariant());
+            }
+            catch (TriggerEvent errorevent){
+                if (errorevent == StageChange || errorevent == TurnBroken)
                     room->setPlayerProperty(player, "neo2013jinan", QVariant());
-                }
-                catch (TriggerEvent errorevent){
-                    if (errorevent == StageChange || errorevent == TurnBroken)
-                        room->setPlayerProperty(player, "neo2013jinan", QVariant());
 
-                    throw errorevent;
-                }
+                throw errorevent;
             }
         }
         return false;
