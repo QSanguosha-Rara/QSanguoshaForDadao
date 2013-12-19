@@ -626,7 +626,7 @@ public:
     }
 };
 
-Neo2013YongyiCard::Neo2013YongyiCard(): SkillCard(){
+Neo2013YongyiCard::Neo2013YongyiCard(){
     mute = true;
 }
 
@@ -825,7 +825,7 @@ public:
     }
 };
 
-Neo2013PujiCard::Neo2013PujiCard(): SkillCard(){
+Neo2013PujiCard::Neo2013PujiCard(){
 }
 
 bool Neo2013PujiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -2573,15 +2573,15 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_caochong->addSkill(new Neo2013Chengxiang);
     neo2013_caochong->addSkill("renxin");
 
-    General *neo2013_lvmeng = new General(this, "neo2013_lvmeng", "wu", 5);
-    neo2013_lvmeng->addSkill("keji");
-    neo2013_lvmeng->addSkill(new Neo2013Xiangxue);
-    neo2013_lvmeng->addRelateSkill("neo2013tongwu");
-    neo2013_lvmeng->addRelateSkill("neo2013bingyin");
-    neo2013_lvmeng->addRelateSkill("neo2013touxi");
-    neo2013_lvmeng->addRelateSkill("#neo2013touxi");
-    neo2013_lvmeng->addRelateSkill("neo2013muhui");
-    neo2013_lvmeng->addRelateSkill("#neo2013muhui");
+    General *neo2013_sp_lvmeng = new General(this, "neo2013_sp_lvmeng", "wu", 5);
+    neo2013_sp_lvmeng->addSkill("keji");
+    neo2013_sp_lvmeng->addSkill(new Neo2013Xiangxue);
+    neo2013_sp_lvmeng->addRelateSkill("neo2013tongwu");
+    neo2013_sp_lvmeng->addRelateSkill("neo2013bingyin");
+    neo2013_sp_lvmeng->addRelateSkill("neo2013touxi");
+    neo2013_sp_lvmeng->addRelateSkill("#neo2013touxi");
+    neo2013_sp_lvmeng->addRelateSkill("neo2013muhui");
+    neo2013_sp_lvmeng->addRelateSkill("#neo2013muhui");
     related_skills.insertMulti("neo2013touxi", "#neo2013touxi");
     related_skills.insertMulti("neo2013muhui", "#neo2013muhui");
 
@@ -2789,7 +2789,7 @@ SixSwords::SixSwords(Card::Suit suit, int number): Weapon(suit, number, 2){
     setObjectName("SixSwords");
 }
 
-SixSwordsCard::SixSwordsCard(): SkillCard(){
+SixSwordsCard::SixSwordsCard(){
 
 }
 
@@ -2861,7 +2861,7 @@ Triblade::Triblade(Card::Suit suit, int number): Weapon(suit, number, 3){
     setObjectName("Triblade");
 }
 
-TribladeCard::TribladeCard(): SkillCard(){
+TribladeCard::TribladeCard(){
 
 }
 

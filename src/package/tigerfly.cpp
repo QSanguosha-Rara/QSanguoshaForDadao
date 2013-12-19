@@ -510,7 +510,7 @@ public:
 };
 
 
-JisiCard::JisiCard(): SkillCard(){
+JisiCard::JisiCard(){
     target_fixed = true;
     mute = true;
 }
@@ -1579,7 +1579,7 @@ public:
     }
 };
 
-ShangjianCard::ShangjianCard(): SkillCard(){
+ShangjianCard::ShangjianCard(){
     will_throw = false;
     handling_method = Card::MethodNone;
 }
@@ -1809,7 +1809,7 @@ public:
     }
 };
 
-JingshangCard::JingshangCard(): SkillCard(){
+JingshangCard::JingshangCard(){
     will_throw = false;
     handling_method = Card::MethodNone;
 }
@@ -2223,7 +2223,7 @@ public:
     }
 };
 
-ChanyuCard::ChanyuCard(): SkillCard(){
+ChanyuCard::ChanyuCard(){
     target_fixed = true;
     mute = true;
 }
@@ -2319,7 +2319,7 @@ public:
     }
 };
 
-SuoshiCard::SuoshiCard(): SkillCard(){
+SuoshiCard::SuoshiCard(){
     will_throw = false;
     handling_method = Card::MethodNone;
 }
@@ -2531,7 +2531,7 @@ public:
     }
 };
 
-ZongjiuCard::ZongjiuCard(): SkillCard(){
+ZongjiuCard::ZongjiuCard(){
     target_fixed = true;
 }
 
@@ -2808,7 +2808,7 @@ public:
 };
 
 
-FengyinCard::FengyinCard(): SkillCard(){
+FengyinCard::FengyinCard(){
     will_throw = false;
     handling_method = Card::MethodNone;
 }
