@@ -2714,16 +2714,6 @@ public:
     }
 };
 
-/*
-翼魏延
-狂骨—每当你造成1点伤害后，你可以进行判定，若结果为黑色，你回复1点体力。
-
-翼吕蒙
-克己
-慎拒——锁定技，你的手牌上限+X（X为与你距离为1的所有角色的体力值之和）。
-博图——回合结束后，若你于出牌阶段内使用过四种花色的牌至少各一张，你可以获得一个额外的回合。
-*/
-
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
     neo2013_masu->addSkill(new Neo2013Xinzhan);
