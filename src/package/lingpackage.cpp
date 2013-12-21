@@ -2565,7 +2565,7 @@ public:
             return n;
 
         int num = 1;
-        foreach(ServerPlayer *p, room->getOtherPlayers(lord)){
+        foreach (ServerPlayer *p, room->getOtherPlayers(lord)){
             if (p->getKingdom() == lord->getKingdom())
                 num++;
         }
@@ -2586,6 +2586,134 @@ public:
     }
 };
 
+class Neo2013Kuanggu: public TriggerSkill{
+public:
+    Neo2013Kuanggu(): TriggerSkill("neo2013kuanggu"){
+        events << Damage;
+        frequency = Frequent;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        DamageStruct damage = data.value<DamageStruct>();
+        for (int i = 0; i < damage.damage; i++){
+            if (!player->askForSkillInvoke(objectName()))
+                return false;
+            JudgeStruct judge;
+            judge.who = player;
+            judge.pattern = ".|black";
+            judge.good = true;
+            judge.reason = objectName();
+            room->judge(judge);
+
+            if (judge.isGood()){
+                RecoverStruct recover;
+                recover.who = player;
+                room->recover(player, recover);
+            }
+        }
+        return false;
+    }
+};
+
+class Neo2013Shenju: public MaxCardsSkill{
+public:
+    Neo2013Shenju(): MaxCardsSkill("neo2013shenju"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if (target->hasSkill(objectName())){
+            QList<const Player *> sib = target->getAliveSiblings();
+            sib << target;
+            int extra = 0;
+            foreach (const Player *p, sib){
+                if (target->distanceTo(p) == 1)
+                    extra += p->getHp();
+            }
+            return extra;
+        }
+        return 0;
+    }
+};
+
+class Neo2013BotuCount: public TriggerSkill{
+public:
+    Neo2013BotuCount(): TriggerSkill("#neo2013botu-count"){
+        events << CardUsed << CardResponded << EventPhaseStart;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+private:
+    const static int USED_SPADE = 1;
+    const static int USED_CLUB = 2;
+    const static int USED_HEART = 4;
+    const static int USED_DIAMOND = 8;
+
+public:
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == EventPhaseStart && player->getPhase() == Player::RoundStart){
+            foreach (ServerPlayer *p, room->getAlivePlayers()){
+                p->setMark("neo2013botu", 0);
+            }
+        }
+        else if (triggerEvent != EventPhaseStart && player->getPhase() == Player::Play){
+            const Card *c = NULL;
+            if (triggerEvent == CardUsed)
+                c = data.value<CardUseStruct>().card;
+            else{
+                CardResponseStruct resp = data.value<CardResponseStruct>();
+                if (resp.m_isUse)
+                    c = resp.m_card;
+            }
+            if (c == NULL || c->isKindOf("SkillCard"))
+                return false;
+              
+            int to_add = 0;
+            switch (c->getSuit()){
+                case Card::Spade:
+                    to_add = USED_SPADE;
+                    break;
+                case Card::Club:
+                    to_add = USED_CLUB;
+                    break;
+                case Card::Heart:
+                    to_add = USED_HEART;
+                    break;
+                case Card::Diamond:
+                    to_add = USED_DIAMOND;
+                    break;
+                default:
+                    to_add = 0;
+            }
+
+            int botu = player->getMark("neo2013botu");
+            botu = botu | to_add;
+            player->setMark("neo2013botu", botu);
+        }
+        return false;
+    }
+};
+class Neo2013Botu: public PhaseChangeSkill{
+public:
+    Neo2013Botu(): PhaseChangeSkill("neo2013botu"){
+        frequency = Frequent;
+    }
+
+    virtual int getPriority() const{
+        return 1;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() == Player::NotActive && target->getMark("neo2013botu") == 15 && target->askForSkillInvoke(objectName())){
+            target->gainAnExtraTurn();
+        }
+        return false;
+    }
+};
+
 /*
 翼魏延
 狂骨—每当你造成1点伤害后，你可以进行判定，若结果为黑色，你回复1点体力。
@@ -2594,7 +2722,6 @@ public:
 克己
 慎拒——锁定技，你的手牌上限+X（X为与你距离为1的所有角色的体力值之和）。
 博图——回合结束后，若你于出牌阶段内使用过四种花色的牌至少各一张，你可以获得一个额外的回合。
-
 */
 
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
@@ -2756,6 +2883,16 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_yuanshu->addSkill("weidi");
     related_skills.insertMulti("neo2013wangzun", "#neo2013wangzun");
     related_skills.insertMulti("neo2013yongsi", "#neo2013yongsi");
+
+    General *neo2013_weiyan = new General(this, "neo2013_weiyan", "shu", 4);
+    neo2013_weiyan->addSkill(new Neo2013Kuanggu);
+
+    General *neo2013_lvmeng = new General(this, "neo2013_lvmeng", "wu", 4);
+    neo2013_lvmeng->addSkill(new Neo2013Shenju);
+    neo2013_lvmeng->addSkill(new Neo2013BotuCount);
+    neo2013_lvmeng->addSkill(new Neo2013Botu);
+    neo2013_lvmeng->addSkill("keji");
+    related_skills.insertMulti("neo2013botu", "#neo2013botu-count");
 
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();
