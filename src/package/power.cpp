@@ -202,11 +202,14 @@ public:
                         card = resp.m_card;
                 }
 
-                if (card != NULL && card->isKindOf("Slash")){
-                    ServerPlayer *mifuren = room->findPlayerBySkillName(objectName());
-                    if (mifuren != NULL && mifuren->askForSkillInvoke(objectName(), QVariant::fromValue(player))){
-                        player->obtainCard(card);
-                        player->setFlags("yongjue");
+                if (card != NULL){
+                    player->setFlags("yongjue");
+                    if (card->isKindOf("Slash")){
+                        ServerPlayer *mifuren = room->findPlayerBySkillName(objectName());
+                        if (mifuren != NULL && mifuren->askForSkillInvoke(objectName(), QVariant::fromValue(player))){
+                            player->obtainCard(card);
+
+                        }
                     }
                 }
             }
