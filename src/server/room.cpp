@@ -3389,6 +3389,9 @@ void Room::marshal(ServerPlayer *player) {
 
     notifyProperty(player, player, "flags", "-marshalling");
     doNotify(player, S_COMMAND_UPDATE_PILE, Json::Value(m_drawPile->length()));
+
+    Json::Value discard = toJsonArray(*m_discardPile);
+    doNotify(player, S_COMMAND_SYNCHRONIZE_DISCARD_PILE, discard);
 }
 
 void Room::startGame() {
@@ -5329,7 +5332,9 @@ void Room::fillAG(const QList<int> &card_ids, ServerPlayer *who, const QList<int
         doBroadcastNotify(S_COMMAND_FILL_AMAZING_GRACE, arg);
 }
 
-void Room::takeAG(ServerPlayer *player, int card_id, bool move_cards) {
+void Room::takeAG(ServerPlayer *player, int card_id, bool move_cards, QList<ServerPlayer *> to_notify) {
+    if (to_notify.isEmpty()) to_notify = getAllPlayers();
+
     Json::Value arg(Json::arrayValue);
     arg[0] = player ? toJsonString(player->objectName()) : Json::Value::null;
     arg[1] = card_id;
@@ -5361,14 +5366,14 @@ void Room::takeAG(ServerPlayer *player, int card_id, bool move_cards) {
                 arg[2] = false;
             }
         }
-        doBroadcastNotify(S_COMMAND_TAKE_AMAZING_GRACE, arg);
+        doBroadcastNotify(to_notify, S_COMMAND_TAKE_AMAZING_GRACE, arg);
         if (move_cards && moveOneTime.card_ids.length() > 0) {
             QVariant data = QVariant::fromValue(moveOneTime);
             foreach (ServerPlayer *p, getAllPlayers())
                 thread->trigger(CardsMoveOneTime, this, p, data);
         }
     } else {
-        doBroadcastNotify(S_COMMAND_TAKE_AMAZING_GRACE, arg);
+        doBroadcastNotify(to_notify, S_COMMAND_TAKE_AMAZING_GRACE, arg);
         if (!move_cards) return;
         LogMessage log;
         log.type = "$EnterDiscardPile";

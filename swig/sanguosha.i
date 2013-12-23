@@ -294,8 +294,7 @@ public:
     bool changePhase(Player::Phase from, Player::Phase to);
 
     QList<Player::Phase> &getPhases();
-    void skip(bool sendLog = true);
-    void skip(Player::Phase phase, bool sendLog = true);
+    void skip(Player::Phase phase, bool isCost = false, bool sendLog = true);
     void insertPhase(Player::Phase phase);
     bool isSkipped(Player::Phase phase);
 
@@ -1098,7 +1097,7 @@ public:
     int doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target, QList<int> enabled_ids = QList<int>(), const char *skill_name = "gongxin");
     int drawCard();
     void fillAG(const QList<int> &card_ids, ServerPlayer *who = NULL, const QList<int> &disabled_ids = QList<int>());
-    void takeAG(ServerPlayer *player, int card_id, bool move_cards = true);
+    void takeAG(ServerPlayer *player, int card_id, bool move_cards = true, QList<ServerPlayer *> to_notify = QList<ServerPlayer *>());
     void clearAG(ServerPlayer *player = NULL);
     void provide(const Card *card);
     QList<ServerPlayer *> getLieges(const char *kingdom, ServerPlayer *lord) const;

@@ -1632,8 +1632,8 @@ public:
             PhaseChangeStruct change = data.value<PhaseChangeStruct>();
             if (change.to == Player::Judge && !player->isSkipped(Player::Judge) && !player->isSkipped(Player::Play)
                     && player->askForSkillInvoke(objectName())){
-                player->skip(Player::Judge);
-                player->skip(Player::Play);
+                player->skip(Player::Judge, true);
+                player->skip(Player::Play, true);
 
                 JudgeStruct judge;
                 judge.reason = objectName();

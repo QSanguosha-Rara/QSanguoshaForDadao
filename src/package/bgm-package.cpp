@@ -1457,10 +1457,8 @@ BGMPackage::BGMPackage(): Package("BGM") {
 
     General *bgm_ganning = new General(this, "bgm_ganning", "qun"); // *SP 009
     bgm_ganning->addSkill(new Yinling);
-    bgm_ganning->addSkill(new DetachEffectSkill("yinling", "brocade"));
     bgm_ganning->addSkill(new Junwei);
     bgm_ganning->addSkill(new JunweiGot);
-    related_skills.insertMulti("yinling", "#yinling-clear");
     related_skills.insertMulti("junwei", "#junwei-got");
 
     General *bgm_xiahoudun = new General(this, "bgm_xiahoudun", "wei"); // *SP 010
@@ -2279,18 +2277,14 @@ BGMDIYPackage::BGMDIYPackage(): Package("BGMDIY") {
     diy_liuxie->addSkill(new Hantong);
     diy_liuxie->addSkill(new HantongAcquire);
     diy_liuxie->addSkill(new HantongDetach);
-    diy_liuxie->addSkill(new DetachEffectSkill("hantong", "edict"));
     related_skills.insertMulti("hantong", "#hantong-acquire");
     related_skills.insertMulti("hantong", "#hantong-detach");
-    related_skills.insertMulti("hantong", "#hantong-clear");
 
     General *diy_gongsunzan = new General(this, "diy_gongsunzan", "qun"); // DIY 004
     diy_gongsunzan->addSkill(new DIYYicong);
     diy_gongsunzan->addSkill(new DIYYicongDistance);
-    diy_gongsunzan->addSkill(new DetachEffectSkill("diyyicong", "retinue"));
     diy_gongsunzan->addSkill(new Tuqi);
     diy_gongsunzan->addSkill(new TuqiDistance);
-    related_skills.insertMulti("diyyicong", "#diyyicong-clear");
     related_skills.insertMulti("diyyicong", "#diyyicong-dist");
     related_skills.insertMulti("tuqi", "#tuqi-dist");
 

@@ -141,7 +141,7 @@ public:
             if (!zhanghe->isAlive()) return false;
             if (!zhanghe->isSkipped(change.to) && (index == 2 || index == 3))
                 room->askForUseCard(zhanghe, "@@qiaobian", use_prompt, index);
-            zhanghe->skip(change.to);
+            zhanghe->skip(change.to, false);
         }
         return false;
     }
@@ -1010,7 +1010,7 @@ public:
                 invoked = liushan->askForSkillInvoke(objectName());
                 if (invoked) {
                     liushan->setFlags(objectName());
-                    liushan->skip(Player::Play);
+                    liushan->skip(Player::Play, true);
                 }
                 break;
             }

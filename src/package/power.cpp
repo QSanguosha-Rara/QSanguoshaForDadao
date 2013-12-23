@@ -326,7 +326,7 @@ public:
             room->setPlayerProperty(player, "cunsi_phase", static_cast<int>(change.to));
             if (room->askForUseCard(player, "@@cunsi", 
                     "@cunsi:::" + Card::Suit2String(CunsiVS::getCorrespondingSuit(change.to)) + ":" + getPhaseString(change.to)))
-                player->skip(change.to);
+                player->skip(change.to, true);
         }
         return false;
     }
