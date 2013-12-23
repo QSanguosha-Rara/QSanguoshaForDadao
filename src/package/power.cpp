@@ -202,7 +202,7 @@ public:
                         card = resp.m_card;
                 }
 
-                if (card != NULL){
+                if (card != NULL && !card->isKindOf("SkillCard")){
                     player->setFlags("yongjue");
                     if (card->isKindOf("Slash")){
                         ServerPlayer *mifuren = room->findPlayerBySkillName(objectName());
