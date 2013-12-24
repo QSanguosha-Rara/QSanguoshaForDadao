@@ -1199,6 +1199,7 @@ function sgs.gameProcess(room, arg)
 	local loyal_value, rebel_value = 0, 0, 0
 	local health = sgs.isLordHealthy()
 	local danger = sgs.isLordInDanger()
+	local lord = room:getLord()
 	local currentplayer = room:getCurrent()
 	for _, aplayer in sgs.qlist(room:getAlivePlayers()) do
 		local role=aplayer:getRole()
@@ -1209,7 +1210,10 @@ function sgs.gameProcess(room, arg)
 			if aplayer:getMaxHp() == 3 then rebel_value = rebel_value + 0.5 end
 			rebel_value = rebel_value + rebel_hp + math.max(sgs.getDefense(aplayer, true) - rebel_hp * 2, 0) * 0.7
 			if aplayer:getDefensiveHorse() then
-				rebel_value = rebel_value + 0.5
+				rebel_value = rebel_value + 0.3
+			end
+			if lord and aplayer:inMyAttackRange(lord) then
+				rebel_value = rebel_value + 0.4
 			end
 			if aplayer:getMark("@duanchang") > 0 and aplayer:getMaxHp() <= 3 then rebel_value = rebel_value - 1 end
 		elseif role == "loyalist" or role == "lord" then
@@ -1335,32 +1339,39 @@ function SmartAI:objectiveLevel(player)
 				end
 			end
 		end
-		local gameProcess = sgs.gameProcess(self.room)
-		if gameProcess == "neutral" or (sgs.turncount <= 1 and sgs.isLordHealthy()) then
+		local process = sgs.gameProcess(self.room)
+		if process == "neutral" or (sgs.turncount <= 1 and sgs.isLordHealthy()) then
 			if sgs.turncount <= 1 and sgs.isLordHealthy() then
 				if self:getOverflow() <= 0 then return 0 end
-				local rebelish = (loyal_num + 1 < rebel_num)
+				local rebelish = (sgs.current_mode_players["loyalist"] + 1 < sgs.current_mode_players["rebel"])
 				if player:isLord() then return rebelish and -1 or 0 end
-				if sgs.ai_role[player:objectName()] == "loyalist" then return rebelish and 0 or 3.5
-				elseif sgs.ai_role[player:objectName()] == "rebel" then return rebelish and 3.5 or 0
-				else return 0
+				if target_role == "loyalist" then return rebelish and 0 or 3.5
+				elseif target_role == "rebel" then return rebelish and 3.5 or 0
+				else return 5
 				end
 			end
 			if player:isLord() then return -1 end
 
-			local renegade_attack_skill = string.format("buqu|%s|%s|%s|%s",sgs.priority_skill,sgs.save_skill,sgs.recover_skill,sgs.drawpeach_skill)
-			for i=1, #players, 1 do
-				if not players[i]:isLord() and players[i]:hasSkills(renegade_attack_skill) then return 5 end
-				if not players[i]:isLord() and math.abs(sgs.ai_chaofeng[players[i]:getGeneralName()] or 0) >3 then return 5 end
+			local renegade_attack_skill = string.format("buqu|nosbuqu|%s|%s|%s|%s", sgs.priority_skill, sgs.save_skill, sgs.recover_skill, sgs.drawpeach_skill)
+			for i = 1, #players, 1 do
+				if not players[i]:isLord() and self:hasSkills(renegade_attack_skill, players[i]) then return 5 end
+				if not players[i]:isLord() and math.abs(sgs.ai_chaofeng[players[i]:getGeneralName()] or 0) > 3 then return 5 end
 			end
 			return 3
-		elseif gameProcess:match("rebel") then
+		elseif process:match("rebel") then
 			return target_role == "rebel" and 5 or -1
-		elseif gameProcess:match("dilemma") then
+		elseif process:match("dilemma") then
 			if target_role == "rebel" then return 5
+			elseif target_role == "loyalist" or target_role == "renegade" then return 0
 			elseif player:isLord() then return -2
-			elseif target_role == "renegade" then return 0
 			else return 5 end
+		elseif process == "loyalish" then
+			if player:isLord() or target_role == "renegade" then return 0 end
+			local rebelish = (sgs.current_mode_players["loyalist"] + 1 < sgs.current_mode_players["rebel"])
+			if target_role == "loyalist" then return rebelish and 0 or 3.5
+			elseif target_role == "rebel" then return rebelish and 3.5 or 0
+			else return 0
+			end
 		else
 			if player:isLord() or target_role == "renegade" then return 0 end
 			return target_role == "rebel" and -2 or 5
