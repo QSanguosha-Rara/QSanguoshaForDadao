@@ -83,6 +83,7 @@ sgs.ai_chat_func =			{}
 sgs.ai_event_callback =		{}
 sgs.explicit_renegade =     false
 sgs.ai_NeedPeach =			{}
+sgs.ai_defense = 			{}
 
 
 for i=sgs.NonTrigger, sgs.NumOfEvents, 1 do
@@ -235,6 +236,9 @@ function sgs.getValue(player)
 end
 
 function sgs.getDefense(player, gameProcess)
+	if not sgs.ai_updateDefense and global_room:getCurrent() then
+		return sgs.ai_defense[player:objectName()]
+	end
 	if not player then return 0 end
 	local defense = math.min(sgs.getValue(player), player:getHp() * 3)
 	local attacker = global_room:getCurrent()
@@ -314,6 +318,8 @@ function sgs.getDefense(player, gameProcess)
 		if player:hasSkill("xiliang") and getKnownCard(player, "Jink", true) == 0 then defense = defense - 2 end
 		if player:hasSkill("shouye") then defense = defense - 2 end
 	end
+	
+	sgs.ai_defense[player:objectName()] = defense
 	return defense
 end
 
@@ -1387,8 +1393,8 @@ function SmartAI:objectiveLevel(player)
 					return -1
 				end
 			elseif sgs.explicit_renegade and renegade_num == 1 then return -1
+			else return 0
 			end
-			return 0
 		end
 
 		if rebel_num == 0 then
@@ -1576,6 +1582,12 @@ function SmartAI:updatePlayers(clear_flags)
 		end
 	end
 
+	sgs.ai_updateDefense = true
+	for _, p in sgs.qlist(self.room:getAlivePlayers()) do
+		sgs.getDefense(p, true)
+	end
+	sgs.ai_updateDefense = false
+	
 	if sgs.isRolePredictable(true) then
 		self.friends = {}
 		self.friends_noself = {}
@@ -2383,41 +2395,22 @@ function SmartAI:askForDiscard(reason, discard_num, min_num, optional, include_e
 end
 
 sgs.ai_skill_discard.gamerule = function(self, discard_num, min_num)
-	local test2 = false
-	if test2 then
-		local cards = sgs.QList2Table(self.player:getHandcards())
-		self:sortByKeepValue(cards)
-		local to_discard = {}
-		local debugprint = true
-		if debugprint then
-			logmsg("discard.html", "<meta charset='utf-8'/><pre>")
-			logmsg("discard.html", "================="..self.player:getGeneralName() .. sgs.turncount .."====================")
+	local cards = sgs.QList2Table(self.player:getHandcards())
+	self:sortByKeepValue(cards)
+	local to_discard = {}
+
+	local least = min_num
+	if discard_num - min_num > 1 then least = discard_num - 1 end
+	for _, card in ipairs(cards) do
+		if not self.player:isCardLimited(card, sgs.Card_MethodDiscard, true) then
+			table.insert(to_discard, card:getId())
 		end
-		
-		for i, card in ipairs(cards) do
-			if i <= discard_num then
-				if debugprint then logmsg("discard.html", "dis :  " .. card:getLogName().. self:getKeepValue(card)) end
-			else
-				if debugprint then logmsg("discard.html", "keep :  " .. card:getLogName()..self:getKeepValue(card)) end
-			end
-		end
-		
-		local least = min_num
-		if discard_num - min_num > 1 then least = discard_num - 1 end
-		
-		logmsg("discard.html", "::::")
-		
-		for _, card in ipairs(cards) do
-			if not self.player:isCardLimited(card, sgs.Card_MethodDiscard, true) then
-				table.insert(to_discard, card:getId())
-				if debugprint then logmsg("discard.html", "discard :  "  .. card:getLogName()) end
-			end
-			if (self.player:hasSkill("qinyin") and #to_discard >= least) or #to_discard >= discard_num or self.player:isKongcheng() then break end
-		end
-		
-		return to_discard
+		if (self.player:hasSkill("qinyin") and #to_discard >= least) or #to_discard >= discard_num or self.player:isKongcheng() then break end
 	end
 
+	return to_discard
+	
+--[[
 	local cards = sgs.QList2Table(self.player:getCards("h"))
 	local to_discard = {}
 	local peaches, jinks, analeptics, nullifications, slashes = {}, {}, {}, {}, {}
@@ -2531,6 +2524,7 @@ sgs.ai_skill_discard.gamerule = function(self, discard_num, min_num)
 		if (self.player:hasSkill("qinyin") and #to_discard >= least) or #to_discard >= discard_num or self.player:isKongcheng() then break end
 	end
 	return to_discard
+]]
 end
 
 
