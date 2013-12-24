@@ -1816,7 +1816,7 @@ function SmartAI:filterEvent(event, player, data)
 		end
 	end
 
-	if event ==sgs.AskForPeaches then endlessNiepan(data:toDying().who) end
+	-- if event ==sgs.AskForPeaches then endlessNiepan(data:toDying().who) end
 
 	sgs.lastevent = event
 	sgs.lasteventdata = eventdata
@@ -2383,7 +2383,7 @@ function SmartAI:askForDiscard(reason, discard_num, min_num, optional, include_e
 end
 
 sgs.ai_skill_discard.gamerule = function(self, discard_num, min_num)
-	local test2 = true
+	local test2 = false
 	if test2 then
 		local cards = sgs.QList2Table(self.player:getHandcards())
 		self:sortByKeepValue(cards)
