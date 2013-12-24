@@ -318,7 +318,7 @@ function sgs.getDefense(player, gameProcess)
 end
 
 function SmartAI:assignKeep(num, start)
-	num = math.min(self.player:getHandcardNum(), 20)
+	num = self.player:getHandcardNum()
 	if num <= 0 then return end
 	if start then
 		self.keepValue = {}
@@ -329,7 +329,7 @@ function SmartAI:assignKeep(num, start)
 			"peach-2" = 5.8, "jink-1" = 5.2,
 			"peach-3" = 4.5, "analeptic-1" = 4.1,
 			"jink-2" = 4.0, "ExNihilo-1" = 3.9, "nullification-1" = 3.8, "thunderslash-1" = 3.66 "fireslash-1" = 3.63
-			"slash-1" = 3.6 indulgence-1 = 3.5 SupplyShortage-1 = 3.48 sntach-1 = 3.46 Dismantlement-1 = 3.44 Duel-1 = 3.42
+			"slash-1" = 3.6 indulgence-1 = 3.5 SupplyShortage-1 = 3.48 snatch-1 = 3.46 Dismantlement-1 = 3.44 Duel-1 = 3.42
 			Collateral-1 = 3.40 ArcheryAttack-1 = 3.38 SavageAssault-1 = 3.36 IronChain = 3.34 GodSalvation-1 = 3.32, Fireattack-1 = 3.3 "peach-4" = 3.1
 			"analeptic-2" = 2.9, "jink-3" = 2.7 ExNihilo-2 = 2.7 nullification-2 = 2.6 thunderslash-2 = 2.46 fireslash-2 = 2.43 slash-2 = 2.4
 			...
@@ -359,7 +359,7 @@ function SmartAI:assignKeep(num, start)
 		end
 
 		for _, enemy in ipairs(self.enemies) do
-			if enemy:hasSkill("nosqianxi") and madai:distanceTo(self.player) == 1 then
+			if enemy:hasSkill("nosqianxi") and enemy:distanceTo(self.player) == 1 then
 				self.keepdata.Jink = 6
 			end
 		end
@@ -373,12 +373,11 @@ function SmartAI:assignKeep(num, start)
 			end
 		end
 		
-		local change
 		for _, askill in sgs.qlist(self.player:getVisibleSkillList()) do
 			if sgs[askill:objectName() .. "_keep_value"] then
 				for k, v in pairs(self.keepdata) do
 					local value = sgs[askill:objectName() .. "_keep_value"][k]
-					if value then self.keepdata[k] = value change = false end
+					if value then self.keepdata[k] = value end
 				end
 			end
 		end
@@ -403,14 +402,12 @@ function SmartAI:assignKeep(num, start)
 		return result
 	end
 	
-	while num > 0 do
+	for i = 1 , num do
 		for _, card in ipairs(cards) do
 			self.keepValue[card:getId()] = self:getKeepValue(card, self.kept)
 			table.insert(self.kept, card)
-			num = num - 1
 			break
 		end
-		if num == 0 then break end
 		cards = resetCards(cards)
 	end
 end
@@ -449,7 +446,7 @@ function SmartAI:getKeepValue(card, kept, Write)
 		end
 		if i > 0 then value_number = value_number / i end
 	end
-	local maxvalue, mostvaluable_class = -100, card:getClassName()
+	local maxvalue, mostvaluable_class = -10, card:getClassName()
 	for k, v in pairs(self.keepdata) do
 		if isCard(k, card, self.player) and v > maxvalue then
 			maxvalue = v
@@ -677,7 +674,7 @@ function SmartAI:getDynamicUsePriority(card)
 		end
 	end
 
-	local value = 0
+	local value = self:getUsePriority(card) or 0
 	if card:getTypeId() == sgs.Card_TypeEquip then
 		if self:hasSkills(sgs.lose_equip_skill) then value = value + 12 end
 	end
@@ -1819,7 +1816,7 @@ function SmartAI:filterEvent(event, player, data)
 		end
 	end
 
-	-- if event ==sgs.AskForPeaches then endlessNiepan(data:toDying().who) end
+	if event ==sgs.AskForPeaches then endlessNiepan(data:toDying().who) end
 
 	sgs.lastevent = event
 	sgs.lasteventdata = eventdata
@@ -2328,7 +2325,7 @@ function SmartAI:askForDiscard(reason, discard_num, min_num, optional, include_e
 	min_num = min_num or discard_num
 	local exchange = self.player:hasFlag("Global_AIDiscardExchanging")
 	local callback = sgs.ai_skill_discard[reason]
-	self:assignKeep(self:assignKeepNum(), true)
+	self:assignKeep(nil, true)
 	if type(callback) == "function" then
 		local cb = callback(self, discard_num, min_num, optional, include_equip)
 		if cb then
@@ -2394,7 +2391,7 @@ sgs.ai_skill_discard.gamerule = function(self, discard_num, min_num)
 		local debugprint = true
 		if debugprint then
 			logmsg("discard.html", "<meta charset='utf-8'/><pre>")
-			logmsg("discard.html", "================="..self.player:getGeneralName() .. "====================")
+			logmsg("discard.html", "================="..self.player:getGeneralName() .. sgs.turncount .."====================")
 		end
 		
 		for i, card in ipairs(cards) do
@@ -2977,7 +2974,7 @@ function sgs.ai_skill_cardask.nullfilter(self, data, pattern, target)
 	if self.player:hasSkill("wumou") and self.player:getMark("@wrath") < 7 and self.player:getHp() > 2 then return "." end
 	if self.player:hasSkill("tianxiang") then
 		local dmgStr = {damage = 1, nature = damage_nature or sgs.DamageStruct_Normal}
-		local willTianxiang = sgs.ai_skill_use["@@tianxiang"](self, dmgStr)
+		local willTianxiang = sgs.ai_skill_use["@@tianxiang"](self, dmgStr, sgs.Card_MethodDiscard)
 		if willTianxiang ~= "." then return "." end
 	elseif self.player:hasSkill("longhun") and self.player:getHp() > 1 then
 		return "."
@@ -3855,7 +3852,7 @@ end
 
 function SmartAI:activate(use)
 	self:updatePlayers()
-	self:assignKeep(self:assignKeepNum(), true)
+	self:assignKeep(nil, true)
 	self.toUse = self:getTurnUse()
 	self:sortByDynamicUsePriority(self.toUse)
 	for _, card in ipairs(self.toUse) do

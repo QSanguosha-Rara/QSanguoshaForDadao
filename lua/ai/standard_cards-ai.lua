@@ -107,7 +107,6 @@ function sgs.getDefenseSlash(player, self)
 	if not player then return 0 end
 	local attacker = global_room:getCurrent()
 	local defense = getCardsNum("Jink", player)
-	defense = defense + math.min(player:getHp() * 0.45, 10)
 
 	local knownJink = getKnownCard(player, "Jink", true)
 
@@ -201,6 +200,8 @@ function sgs.getDefenseSlash(player, self)
 		end
 	end
 
+	defense = defense + math.min(player:getHp() * 0.45, 10)
+	
 	if attacker and not attacker:hasSkill("jueqing") then
 		local m = sgs.masochism_skill:split("|")
 		for _, masochism in ipairs(m) do
@@ -1030,6 +1031,10 @@ sgs.ai_keep_value.Jink = 5.2
 
 sgs.dynamic_value.benefit.Peach = true
 
+sgs.ai_keep_value.Weapon = 2.08
+sgs.ai_keep_value.Armor = 2.06
+sgs.ai_keep_value.Horse = 2.04
+
 sgs.weapon_range.Weapon = 1
 sgs.weapon_range.Crossbow = 1
 sgs.weapon_range.DoubleSword = 2
@@ -1539,7 +1544,7 @@ sgs.ai_use_priority.ArcheryAttack = 3.5
 sgs.ai_keep_value.ArcheryAttack = 3.38
 sgs.ai_use_value.SavageAssault = 3.9
 sgs.ai_use_priority.SavageAssault = 3.5
-sgs.ai_keep_value.SavageAssault = 3.13
+sgs.ai_keep_value.SavageAssault = 3.36
 
 sgs.ai_skill_cardask.aoe = function(self, data, pattern, target, name)
 	if self.room:getMode():find("_mini_35") and self.player:getLostHp() == 1 and name == "archery_attack" then return "." end
@@ -2318,7 +2323,7 @@ SmartAI.useCardSnatch = SmartAI.useCardSnatchOrDismantlement
 
 sgs.ai_use_value.Snatch = 9
 sgs.ai_use_priority.Snatch = 4.3
-sgs.ai_keep_value.Snatch = 3.18
+sgs.ai_keep_value.Snatch = 3.46
 
 sgs.dynamic_value.control_card.Snatch = true
 
@@ -2326,6 +2331,7 @@ SmartAI.useCardDismantlement = SmartAI.useCardSnatchOrDismantlement
 
 sgs.ai_use_value.Dismantlement = 5.6
 sgs.ai_use_priority.Dismantlement = 4.4
+sgs.ai_keep_value.Dismantlement = 3.44
 
 sgs.dynamic_value.control_card.Dismantlement = true
 
@@ -2803,7 +2809,7 @@ end
 sgs.ai_use_priority.Lightning = 0
 sgs.dynamic_value.lucky_chance.Lightning = true
 
-sgs.ai_keep_value.Lightning = -10
+sgs.ai_keep_value.Lightning = -1
 
 sgs.ai_skill_askforag.amazing_grace = function(self, card_ids)
 
