@@ -47,7 +47,7 @@ end
 	备注：为了解决场上有古锭刀时弃白银狮子的问题而重写此弃牌方案。
 ]]--
 sgs.ai_skill_discard.yongsi = function(self, discard_num, min_num, optional, include_equip)
-	self:assignKeep(self:assignKeepNum(), true)
+	self:assignKeep(nil, true)
 	if optional then
 		return {}
 	end
