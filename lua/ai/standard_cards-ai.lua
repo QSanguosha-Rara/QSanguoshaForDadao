@@ -848,7 +848,7 @@ end
 sgs.dynamic_value.damage_card.Slash = true
 
 sgs.ai_use_value.Slash = 4.5
-sgs.ai_keep_value.Slash = 2
+sgs.ai_keep_value.Slash = 3.6
 sgs.ai_use_priority.Slash = 2.6
 
 function SmartAI:canHit(to, from, conservative)
@@ -1022,11 +1022,11 @@ sgs.ai_card_intention.Peach = function(self, card, from, tos)
 end
 
 sgs.ai_use_value.Peach = 6
-sgs.ai_keep_value.Peach = 5
+sgs.ai_keep_value.Peach = 7
 sgs.ai_use_priority.Peach = 0.9
 
 sgs.ai_use_value.Jink = 8.9
-sgs.ai_keep_value.Jink = 4
+sgs.ai_keep_value.Jink = 5.2
 
 sgs.dynamic_value.benefit.Peach = true
 
@@ -1138,7 +1138,7 @@ end
 function sgs.ai_weapon_value.GudingBlade(self, enemy)
 	if not enemy then return end
 	local value = 2
-	if enemy:getHandcardNum() < 1 then value = 4 end
+	if enemy:getHandcardNum() < 1 and not enemy:hasArmorEffect("SilverLion") then value = 4 end
 	return value
 end
 
@@ -1536,8 +1536,10 @@ sgs.dynamic_value.damage_card.SavageAssault = true
 
 sgs.ai_use_value.ArcheryAttack = 3.8
 sgs.ai_use_priority.ArcheryAttack = 3.5
+sgs.ai_keep_value.ArcheryAttack = 3.38
 sgs.ai_use_value.SavageAssault = 3.9
 sgs.ai_use_priority.SavageAssault = 3.5
+sgs.ai_keep_value.SavageAssault = 3.13
 
 sgs.ai_skill_cardask.aoe = function(self, data, pattern, target, name)
 	if self.room:getMode():find("_mini_35") and self.player:getLostHp() == 1 and name == "archery_attack" then return "." end
@@ -1592,7 +1594,7 @@ sgs.ai_skill_cardask["archery-attack-jink"] = function(self, data, pattern, targ
 	return sgs.ai_skill_cardask.aoe(self, data, pattern, target, "archery_attack")
 end
 
-sgs.ai_keep_value.Nullification = 3
+sgs.ai_keep_value.Nullification = 3.8
 sgs.ai_use_value.Nullification = 8
 
 function SmartAI:useCardAmazingGrace(card, use)
@@ -1854,7 +1856,7 @@ end
 
 sgs.ai_use_value.Duel = 3.7
 sgs.ai_use_priority.Duel = 2.9
-sgs.ai_keep_value.Duel = 1.7
+sgs.ai_keep_value.Duel = 3.42
 
 sgs.dynamic_value.damage_card.Duel = true
 
@@ -1902,7 +1904,7 @@ end
 
 sgs.ai_card_intention.ExNihilo = -80
 
-sgs.ai_keep_value.ExNihilo = 3.6
+sgs.ai_keep_value.ExNihilo = 3.9
 sgs.ai_use_value.ExNihilo = 10
 sgs.ai_use_priority.ExNihilo = 9.3
 
@@ -2316,6 +2318,7 @@ SmartAI.useCardSnatch = SmartAI.useCardSnatchOrDismantlement
 
 sgs.ai_use_value.Snatch = 9
 sgs.ai_use_priority.Snatch = 4.3
+sgs.ai_keep_value.Snatch = 3.18
 
 sgs.dynamic_value.control_card.Snatch = true
 
@@ -2522,6 +2525,7 @@ end
 
 sgs.ai_use_value.Collateral = 5.8
 sgs.ai_use_priority.Collateral = 2.75
+sgs.ai_keep_value.Collateral = 3.40
 
 sgs.ai_card_intention.Collateral = function(self,card, from, tos)
 	assert(#tos == 1)
@@ -2733,7 +2737,7 @@ end
 sgs.ai_use_value.Indulgence = 8
 sgs.ai_use_priority.Indulgence = 0.5
 sgs.ai_card_intention.Indulgence = 120
-sgs.ai_keep_value.Indulgence = 1.5
+sgs.ai_keep_value.Indulgence = 3.5
 
 sgs.dynamic_value.control_usecard.Indulgence = true
 
@@ -2799,7 +2803,7 @@ end
 sgs.ai_use_priority.Lightning = 0
 sgs.dynamic_value.lucky_chance.Lightning = true
 
-sgs.ai_keep_value.Lightning = -1
+sgs.ai_keep_value.Lightning = -10
 
 sgs.ai_skill_askforag.amazing_grace = function(self, card_ids)
 

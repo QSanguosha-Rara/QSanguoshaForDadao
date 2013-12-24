@@ -1,4 +1,5 @@
 if sgs.GetConfig("GameMode", ""):match("zombie") then
+--[[
 	function sgs.ai_filterskill_filter.ganran(card, card_place)
 		if card:getTypeId() == sgs.Card_Equip then
 			local str = string.format("iron_chain:ganran[%s:%s]=%d",
@@ -9,7 +10,7 @@ if sgs.GetConfig("GameMode", ""):match("zombie") then
 			return str
 		end
 	end
-
+]]
 	local ganran_skill = {}
 	ganran_skill.name = "ganran"
 	table.insert(sgs.ai_skills, ganran_skill)

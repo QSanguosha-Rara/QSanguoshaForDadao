@@ -1,3 +1,5 @@
+sgs.ai_skill_playerchosen["yitian-lost"] = sgs.ai_skill_playerchosen.damage
+
 --[[
 	技能：归心
 	描述：回合结束阶段，你可以做以下二选一：
@@ -1013,6 +1015,8 @@ end
 	描述：你可将其他角色弃牌阶段弃置的红牌收为“米”或加入手牌。
 ]]--
 sgs.ai_skill_invoke.xiliang = true
+
+sgs.ai_skill_askforag.xiliang = -1
 
 sgs.ai_skill_choice.xiliang = function(self, choices)
 	if self.player:hasSkill("manjuan") or self:needKongcheng(self.player) then return "put" end
