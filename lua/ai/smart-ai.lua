@@ -4228,7 +4228,7 @@ function SmartAI:getDamagedEffects(to, from, slash)
 		return sgs.ai_need_damaged.shichou(self, from, to) == 1
 	end
 
-	if from:objectName() ~= to:objectName() and self:hasHeavySlashDamage(from) then return false end
+	if from:objectName() ~= to:objectName() and self:hasHeavySlashDamage(from, nil, to) then return false end
 
 	if sgs.isGoodHp(to) then
 		for _, askill in sgs.qlist(to:getVisibleSkillList()) do
