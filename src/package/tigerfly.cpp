@@ -2781,6 +2781,10 @@ public:
             DummyCard *dummy = new DummyCard;
             QList<int> card_ids;
             QList<Player::Place> original_places;
+
+            int aidelay = Config.AIDelay;
+            Config.AIDelay = 0;
+
             for (int i = 0; i < 2; i++) {
                 if (!player->canDiscard(target, "he"))
                     break;
@@ -2791,6 +2795,8 @@ public:
                 dummy->addSubcard(card_ids[i]);
                 target->addToPile("#duanzhi", card_ids[i], false);
             }
+
+            Config.AIDelay = aidelay;
 
             if (dummy->subcardsLength() > 0)
                 for (int i = 0; i < dummy->subcardsLength(); i++)
