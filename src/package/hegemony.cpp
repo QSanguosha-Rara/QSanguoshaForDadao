@@ -5,6 +5,7 @@
 #include "general.h"
 #include "room.h"
 #include "standard-skillcards.h"
+#include "lingpackage.h"
 
 class Shushen: public TriggerSkill {
 public:
@@ -57,45 +58,20 @@ public:
     }
 };
 
-DuoshiCard::DuoshiCard() {
-    mute = true;
-}
-
-bool DuoshiCard::targetFilter(const QList<const Player *> &, const Player *, const Player *) const{
-    return true;
-}
-
-bool DuoshiCard::targetsFeasible(const QList<const Player *> &, const Player *) const{
-    return true;
-}
-
-void DuoshiCard::onUse(Room *room, const CardUseStruct &card_use) const{
-    CardUseStruct use = card_use;
-    if (!use.to.contains(use.from))
-        use.to << use.from;
-    use.from->getRoom()->broadcastSkillInvoke("duoshi", qMin(2, use.to.length()));
-    SkillCard::onUse(room, use);
-}
-
-void DuoshiCard::onEffect(const CardEffectStruct &effect) const{
-    Room *room = effect.from->getRoom();
-    effect.to->drawCards(2);
-    room->askForDiscard(effect.to, "duoshi", 2, 2, false, true);
-}
-
 class Duoshi: public OneCardViewAsSkill {
 public:
     Duoshi(): OneCardViewAsSkill("duoshi") {
-        filter_pattern = ".|red|.|hand!";
+        filter_pattern = ".|red|.|hand";
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
-        return player->usedTimes("DuoshiCard") < 4;
+        return !player->hasUsed("DuoshiAE");
     }
 
     virtual const Card *viewAs(const Card *originalcard) const{
-        DuoshiCard *await = new DuoshiCard;
-        await->addSubcard(originalcard->getId());
+        AwaitExhausted *await = new AwaitExhausted(Card::NoSuit, 0);
+        await->setSkillName(objectName());
+        await->addSubcard(originalcard);
         return await;
     }
 };
@@ -166,13 +142,13 @@ class Mingshi: public TriggerSkill {
 public:
     Mingshi(): TriggerSkill("mingshi") {
         events << DamageInflicted;
-        frequency = Compulsory;
     }
 
     virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.from) {
-            if (damage.from->getEquips().length() <= player->getEquips().length()) {
+            if (damage.from->getCards("he").length() <= player->getCards("he").length() 
+                    && room->askForDiscard(player, objectName(), 1, 1, true, true, "@mingshi-discard")) {
                 room->notifySkillInvoked(player, objectName());
                 room->broadcastSkillInvoke(objectName());
 
@@ -345,7 +321,7 @@ void ShuangrenCard::onEffect(const CardEffectStruct &effect) const{
         room->useCard(CardUseStruct(slash, effect.from, target), false);
     } else {
         room->broadcastSkillInvoke("shuangren", 3);
-        room->setPlayerFlag(effect.from, "ShuangrenSkipPlay");
+        room->setPlayerCardLimitation(effect.from, "use", "Slash", true);
     }
 }
 
@@ -380,8 +356,6 @@ public:
 
             if (can_invoke)
                 room->askForUseCard(jiling, "@@shuangren", "@shuangren-card");
-            if (jiling->hasFlag("ShuangrenSkipPlay"))
-                return true;
         }
 
         return false;
@@ -672,6 +646,7 @@ HegemonyPackage::HegemonyPackage()
 
     General *heg_luxun = new General(this, "heg_luxun", "wu", 3); // WU 007 G
     heg_luxun->addSkill("qianxun");
+    heg_luxun->addSkill("lianying");
     heg_luxun->addSkill(new Duoshi);
 
     General *dingfeng = new General(this, "dingfeng", "wu"); // WU 016
@@ -702,7 +677,6 @@ HegemonyPackage::HegemonyPackage()
     zoushi->addSkill(new Huoshui);
     zoushi->addSkill(new Qingcheng);
 
-    addMetaObject<DuoshiCard>();
     addMetaObject<FenxunCard>();
     addMetaObject<ShuangrenCard>();
     addMetaObject<XiongyiCard>();

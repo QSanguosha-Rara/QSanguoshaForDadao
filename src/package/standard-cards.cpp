@@ -1121,7 +1121,7 @@ void Dismantlement::onEffect(const CardEffectStruct &effect) const{
 
     int card_id = -1;
     AI *ai = effect.from->getAI();
-    if (!using_2013 || !isNeoqixi || ai)
+    if (!isNeoqixi && !using_2013 || ai)
         card_id = room->askForCardChosen(effect.from, effect.to, flag, objectName(), false, Card::MethodDiscard);
     else {
         if (!effect.to->getEquips().isEmpty())
@@ -1135,6 +1135,7 @@ void Dismantlement::onEffect(const CardEffectStruct &effect) const{
             room->doNotify(effect.from, QSanProtocol::S_COMMAND_LOG_SKILL, log.toJsonValue());
 
             card_id = room->askForCardChosen(effect.from, effect.to, "h", objectName(), true, Card::MethodDiscard);
+            //Fs: I want to use room->doGongxin here
         }
     }
     room->throwCard(card_id, room->getCardPlace(card_id) == Player::PlaceDelayedTrick ? NULL : effect.to, effect.from);

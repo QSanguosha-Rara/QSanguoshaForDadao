@@ -150,6 +150,7 @@ public:
     void changeTableBg();
 
     inline bool isCancelButtonEnabled() const{ return cancel_button != NULL && cancel_button->isEnabled(); }
+    inline void setGuhuoLog(const QString &log) { guhuo_log = log; }
 
     bool m_skillButtonSank;
 
@@ -237,6 +238,8 @@ private:
 
     QGraphicsRectItem *pausing_item;
     QGraphicsSimpleTextItem *pausing_text;
+
+    QString guhuo_log;
 
     QList<QGraphicsPixmapItem *> role_items;
     CardContainer *card_container;

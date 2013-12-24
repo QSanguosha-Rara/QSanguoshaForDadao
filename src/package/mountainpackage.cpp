@@ -141,7 +141,7 @@ public:
             if (!zhanghe->isAlive()) return false;
             if (!zhanghe->isSkipped(change.to) && (index == 2 || index == 3))
                 room->askForUseCard(zhanghe, "@@qiaobian", use_prompt, index);
-            zhanghe->skip(change.to);
+            zhanghe->skip(change.to, false);
         }
         return false;
     }
@@ -284,7 +284,7 @@ public:
             }
         } else if (triggerEvent == FinishJudge) {
             JudgeStar judge = data.value<JudgeStar>();
-            if (judge->reason == "tuntian" && judge->isGood())
+            if (judge->reason == "tuntian" && judge->isGood() && room->getCardPlace(judge->card->getEffectiveId()) == Player::PlaceJudge)
                 player->addToPile("field", judge->card->getEffectiveId());
         }
 
@@ -807,15 +807,15 @@ public:
         ServerPlayer *current = room->getCurrent();
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
 
-        if (erzhang == current)
+        if (current == NULL || erzhang == current)
             return false;
 
         if (current->getPhase() == Player::Discard) {
             QVariantList guzhengToGet = erzhang->tag["GuzhengToGet"].toList();
             QVariantList guzhengOther = erzhang->tag["GuzhengOther"].toList();
 
-            foreach (int card_id, move.card_ids) {
-                if ((move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD) {
+            if ((move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD) {
+                foreach (int card_id, move.card_ids) {
                     if (move.from == current)
                         guzhengToGet << card_id;
                     else if (!guzhengToGet.contains(card_id))
@@ -1010,7 +1010,7 @@ public:
                 invoked = liushan->askForSkillInvoke(objectName());
                 if (invoked) {
                     liushan->setFlags(objectName());
-                    liushan->skip(Player::Play);
+                    liushan->skip(Player::Play, true);
                 }
                 break;
             }

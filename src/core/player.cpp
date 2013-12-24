@@ -313,25 +313,31 @@ bool Player::isLord() const{
 bool Player::hasSkill(const QString &skill_name, bool include_lose) const{
     if (!include_lose) {
         if (!hasEquipSkill(skill_name)) {
+            if (getMark("Qingcheng" + skill_name) > 0) //perform Qingcheng
+                return false;
+
             const Skill *skill = Sanguosha->getSkill(skill_name);
-            if (phase == Player::NotActive) {
-                const Player *current = NULL;
-                foreach (const Player *p, getAliveSiblings()) {
-                    if (p->getPhase() != Player::NotActive) {
-                        current = p;
-                        break;
+            if (!skill || !skill->isAttachedLordSkill()){
+                if (phase == NotActive) {
+                    const Player *current = NULL;
+                    foreach (const Player *p, getAliveSiblings()) {
+                        if (p->phase != NotActive) {
+                            current = p;
+                            break;
+                        }
+                    }
+                    if (current){
+                        if (current->hasSkill("huoshui") && hp >= (max_hp + 1) / 2) //huoshui
+                            return false;
+                        if (current->hasSkill("neo2013huoshui") && current->getEquips().length() == 0) //neo2013huoshui
+                            return false;
                     }
                 }
-                if (current && current->hasSkill("huoshui") && hp >= (max_hp + 1) / 2 && (!skill || !skill->isAttachedLordSkill()))
+                if (hasFlag("neo2013qingcheng") && phase != NotActive) //neo2013qingcheng
                     return false;
-                if (current && current->hasSkill("neo2013huoshui") && current->getEquips().length() >= getEquips().length()
-                    && (!skill || !skill->isAttachedLordSkill()))
+                if (skill_name != "chanyuan" && hasSkill("chanyuan") && hp == 1) //chanyuan
                     return false;
             }
-            if (getMark("Qingcheng" + skill_name) > 0)
-                return false;
-            if (skill_name != "chanyuan" && hasSkill("chanyuan") && hp == 1 && (!skill || !skill->isAttachedLordSkill()))
-                return false;
         }
     }
     return skills.contains(skill_name)
@@ -362,12 +368,20 @@ bool Player::hasInnateSkill(const QString &skill_name) const{
     return false;
 }
 
-bool Player::hasLordSkill(const QString &skill_name, bool include_lose) const{
-    if (!include_lose) {
-        if (!hasEquipSkill(skill_name) && ((hasFlag("huoshui") && getHp() >= (getMaxHp() + 1) / 2)
-                                           || getMark("Qingcheng" + skill_name) > 0))
-            return false;
+bool Player::hasLordSkill(const QString &skill_name, bool include_lose) const{ 
+    if (!isLord() && hasSkill("weidi")) {
+        foreach (const Player *player, getAliveSiblings()) {
+            if (player->isLord()) {
+                if (player->hasLordSkill(skill_name, true))
+                    return true;
+                break;
+            }
+        }
     }
+
+    if (!hasSkill(skill_name, include_lose))
+        return false;
+
     if (acquired_skills.contains(skill_name))
         return true;
 
@@ -380,13 +394,6 @@ bool Player::hasLordSkill(const QString &skill_name, bool include_lose) const{
 
     if (isLord())
         return skills.contains(skill_name);
-
-    if (hasSkill("weidi")) {
-        foreach (const Player *player, getAliveSiblings()) {
-            if (player->isLord())
-                return player->hasLordSkill(skill_name, true);
-        }
-    }
 
     return false;
 }

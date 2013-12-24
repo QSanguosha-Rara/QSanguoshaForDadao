@@ -31,7 +31,6 @@ class Shit:public BasicCard{
 public:
     Q_INVOKABLE Shit(Card::Suit suit, int number);
     virtual QString getSubtype() const;
-    //virtual void onMove(const CardMoveStruct &move) const;
     virtual void onUse(Room *room, const CardUseStruct &card_use) const;
 
     static bool HasShit(const Card *card);
@@ -106,7 +105,7 @@ class YxSword: public Weapon{
     Q_OBJECT
 
 public:
-    Q_INVOKABLE YxSword(Card::Suit suit = Club, int number = 9);
+    Q_INVOKABLE YxSword(Card::Suit suit, int number);
 };
 
 

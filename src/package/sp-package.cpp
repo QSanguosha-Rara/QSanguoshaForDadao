@@ -1557,12 +1557,10 @@ public:
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *, QVariant &) const{
         ServerPlayer *xiahoushi = room->findPlayerBySkillName(objectName());
         if (!xiahoushi || !xiahoushi->tag["XiaodeSkill"].toString().isEmpty()) return false;
-        QStringList skill_list;
-        skill_list.append(addSkillList(player->getGeneral()));
-        skill_list.append(addSkillList(player->getGeneral2()));
+        QStringList skill_list = xiahoushi->tag["XiaodeVictimSkills"].toStringList();
         if (skill_list.isEmpty()) return false;
         if (!room->askForSkillInvoke(xiahoushi, objectName(), QVariant::fromValue(skill_list))) return false;
         QString skill_name = room->askForChoice(xiahoushi, objectName(), skill_list.join("+"));
@@ -1570,23 +1568,12 @@ public:
         room->acquireSkill(xiahoushi, skill_name);
         return false;
     }
-
-private:
-    QStringList addSkillList(const General *general) const{
-        if (!general) return QStringList();
-        QStringList skill_list;
-        foreach (const Skill *skill, general->getSkillList()) {
-            if (skill->isVisible() && !skill->isLordSkill() && skill->getFrequency() != Skill::Wake)
-                skill_list.append(skill->objectName());
-        }
-        return skill_list;
-    }
 };
 
 class XiaodeEx: public TriggerSkill {
 public:
     XiaodeEx(): TriggerSkill("#xiaode") {
-        events << EventPhaseChanging << EventLoseSkill;
+        events << EventPhaseChanging << EventLoseSkill << Death;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -1609,8 +1596,25 @@ public:
                 room->detachSkillFromPlayer(player, skill_name, false, true);
                 player->tag.remove("XiaodeSkill");
             }
+        } else if (triggerEvent == Death && TriggerSkill::triggerable(player)) {
+            DeathStruct death = data.value<DeathStruct>();
+            QStringList skill_list;
+            skill_list.append(addSkillList(death.who->getGeneral()));
+            skill_list.append(addSkillList(death.who->getGeneral2()));
+            player->tag["XiaodeVictimSkills"] = QVariant::fromValue(skill_list);
         }
         return false;
+    }
+
+private:
+    QStringList addSkillList(const General *general) const{
+        if (!general) return QStringList();
+        QStringList skill_list;
+        foreach (const Skill *skill, general->getSkillList()) {
+            if (skill->isVisible() && !skill->isLordSkill() && skill->getFrequency() != Skill::Wake)
+                skill_list.append(skill->objectName());
+        }
+        return skill_list;
     }
 };
 
@@ -2303,8 +2307,8 @@ public:
         if (change.to == Player::Judge && !player->isSkipped(Player::Judge)
             && !player->isSkipped(Player::Draw)) {
             if (Slash::IsAvailable(player) && room->askForUseCard(player, "@@jisu", "@jisu-slash")) {
-                player->skip(Player::Judge);
-                player->skip(Player::Draw);
+                player->skip(Player::Judge, true);
+                player->skip(Player::Draw, true);
             }
         }
         return false;

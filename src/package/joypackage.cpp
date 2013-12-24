@@ -93,52 +93,6 @@ public:
     }
 };
 
-/*
-
-void Shit::onMove(const CardMoveStruct &move) const{
-    ServerPlayer *from = (ServerPlayer*)move.from;
-    if(from && move.from_place == Player::PlaceHand &&
-       from->getRoom()->getCurrent() == move.from
-       && (move.to_place == Player::DiscardPile
-           || move.to_place == Player::PlaceSpecial
-           || move.to_place == Player::PlaceTable)
-       && move.to == NULL
-       && from->isAlive()){
-
-        LogMessage log;
-        log.card_str = getEffectIdString();
-        log.from = from;
-
-        Room *room = from->getRoom();
-
-        if(getSuit() == Spade){
-            log.type = "$ShitLostHp";
-            room->sendLog(log);
-
-            room->loseHp(from);
-
-            return;
-        }
-
-        DamageStruct damage;
-        damage.from = damage.to = from;
-        damage.card = this;
-
-        switch(getSuit()){
-        case Club: damage.nature = DamageStruct::Thunder; break;
-        case Heart: damage.nature = DamageStruct::Fire; break;
-        default:
-            damage.nature = DamageStruct::Normal;
-        }
-
-        log.type = "$ShitDamage";
-        room->sendLog(log);
-
-        room->damage(damage);
-    }
-}
-*/
-
 bool Shit::HasShit(const Card *card){
     if(card->isVirtualCard()){
         QList<int> card_ids = card->getSubcards();
@@ -376,15 +330,15 @@ public:
         events << DamageInflicted;
     }
 
-    virtual bool trigger(TriggerEvent, Room* , ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if(damage.nature == DamageStruct::Fire){
             LogMessage log;
             log.type = "#GaleShellDamage";
             log.from = player;
             log.arg = QString::number(damage.damage);
-            log.arg2 = QString::number(++ damage.damage);
-            player->getRoom()->sendLog(log);
+            log.arg2 = QString::number(++damage.damage);
+            room->sendLog(log);
 
             data = QVariant::fromValue(damage);
         }
@@ -442,7 +396,7 @@ public:
         events << DamageCaused;
     }
 
-    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if(damage.card && damage.card->isKindOf("Slash")){
             QList<ServerPlayer *> players = room->getOtherPlayers(player);
@@ -483,7 +437,7 @@ JoyEquipPackage::JoyEquipPackage()
 {
     (new Monkey(Card::Diamond, 5))->setParent(this);
     (new GaleShell(Card::Heart, 1))->setParent(this);
-    (new YxSword)->setParent(this);
+    (new YxSword(Card::Club, 9))->setParent(this);
 
     type = CardPack;
     skills << new GaleShellSkill << new YxSwordSkill << new GrabPeach;

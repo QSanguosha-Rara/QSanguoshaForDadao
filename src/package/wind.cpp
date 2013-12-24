@@ -51,33 +51,40 @@ public:
 class Leiji: public TriggerSkill {
 public:
     Leiji(): TriggerSkill("leiji") {
-        events << CardResponded;
+        events << CardResponded << DamageCaused;
     }
 
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *zhangjiao, QVariant &data) const{
-        CardStar card_star = data.value<CardResponseStruct>().m_card;
-        if (card_star->isKindOf("Jink")) {
-            ServerPlayer *target = room->askForPlayerChosen(zhangjiao, room->getAlivePlayers(), objectName(), "leiji-invoke", true, true);
-            if (target) {
-                room->broadcastSkillInvoke(objectName());
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
 
-                JudgeStruct judge;
-                judge.pattern = ".|black";
-                judge.good = false;
-                judge.negative = true;
-                judge.reason = objectName();
-                judge.who = target;
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *zhangjiao, QVariant &data) const{
+        if (triggerEvent == CardResponded && TriggerSkill::triggerable(zhangjiao)) {
+            CardStar card_star = data.value<CardResponseStruct>().m_card;
+            if (card_star->isKindOf("Jink")) {
+                ServerPlayer *target = room->askForPlayerChosen(zhangjiao, room->getAlivePlayers(), objectName(), "leiji-invoke", true, true);
+                if (target) {
+                    room->broadcastSkillInvoke(objectName());
 
-                room->judge(judge);
+                    JudgeStruct judge;
+                    judge.pattern = ".|black";
+                    judge.good = false;
+                    judge.negative = true;
+                    judge.reason = objectName();
+                    judge.who = target;
 
-                if (judge.isBad()) {
-                    room->damage(DamageStruct(objectName(), zhangjiao, target, 1, DamageStruct::Thunder));
-                    if (zhangjiao->isAlive()) {
-                        RecoverStruct recover;
-                        recover.who = zhangjiao;
-                        room->recover(zhangjiao, recover);
-                    }
+                    room->judge(judge);
+
+                    if (judge.isBad())
+                        room->damage(DamageStruct(objectName(), zhangjiao, target, 1, DamageStruct::Thunder));
                 }
+            }
+        } else if (triggerEvent == DamageCaused && zhangjiao->isAlive() && zhangjiao->isWounded()) {
+            DamageStruct damage = data.value<DamageStruct>();
+            if (damage.reason == objectName()) {
+                RecoverStruct recover;
+                recover.who = zhangjiao;
+                room->recover(zhangjiao, recover);
             }
         }
         return false;
@@ -271,12 +278,12 @@ public:
         if (change.to == Player::Judge && !xiahouyuan->isSkipped(Player::Judge)
             && !xiahouyuan->isSkipped(Player::Draw)) {
             if (Slash::IsAvailable(xiahouyuan) && room->askForUseCard(xiahouyuan, "@@shensu-card1", "@shensu1", 1)) {
-                xiahouyuan->skip(Player::Judge);
-                xiahouyuan->skip(Player::Draw);
+                xiahouyuan->skip(Player::Judge, true);
+                xiahouyuan->skip(Player::Draw, true);
             }
         } else if (Slash::IsAvailable(xiahouyuan) && change.to == Player::Play && !xiahouyuan->isSkipped(Player::Play)) {
             if (xiahouyuan->canDiscard(xiahouyuan, "he") && room->askForUseCard(xiahouyuan, "@@shensu-card2", "@shensu2", 2, Card::MethodDiscard))
-                xiahouyuan->skip(Player::Play);
+                xiahouyuan->skip(Player::Play, true);
         }
         return false;
     }
@@ -802,6 +809,7 @@ bool GuhuoCard::guhuo(ServerPlayer *yuji) const{
             room->sendLog(log);
 
             room->notifySkillInvoked(player, "chanyuan");
+            room->broadcastSkillInvoke("chanyuan");
             room->setEmotion(player, "no-question");
             continue;
         }
@@ -1209,6 +1217,7 @@ WindPackage::WindPackage()
     yuji->addSkill(new Guhuo);
     yuji->addSkill(new GuhuoClear);
     related_skills.insertMulti("guhuo", "#guhuo-clear");
+    yuji->addRelateSkill("chanyuan");
 
     addMetaObject<ShensuCard>();
     addMetaObject<TianxiangCard>();

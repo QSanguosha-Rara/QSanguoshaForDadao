@@ -118,7 +118,7 @@ public:
         CardStar card = judge->card;
 
         QVariant data_card = QVariant::fromValue(card);
-        if (guojia->askForSkillInvoke(objectName(), data_card)) {
+        if (room->getCardPlace(card->getEffectiveId()) == Player::PlaceJudge && guojia->askForSkillInvoke(objectName(), data_card)) {
             room->broadcastSkillInvoke(objectName());
             guojia->obtainCard(judge->card);
             return false;
@@ -341,15 +341,17 @@ public:
             JudgeStar judge = data.value<JudgeStar>();
             if (judge->reason == objectName()) {
                 if (judge->card->isBlack()) {
-                    if (Config.EnableHegemony) {
-                        CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, zhenji->objectName(), QString(), judge->reason);
-                        room->moveCardTo(judge->card, zhenji, NULL, Player::PlaceTable, reason, true);
-                        QVariantList luoshen_list = zhenji->tag[objectName()].toList();
-                        luoshen_list << judge->card->getEffectiveId();
-                        zhenji->tag[objectName()] = luoshen_list;
-                    } else {
-                        zhenji->obtainCard(judge->card);
-                    }
+                    if (room->getCardPlace(judge->card->getEffectiveId()) == Player::PlaceJudge)
+                        if (Config.EnableHegemony) {
+                            CardMoveReason reason(CardMoveReason::S_REASON_JUDGEDONE, zhenji->objectName(), QString(), judge->reason);
+                            room->moveCardTo(judge->card, zhenji, NULL, Player::PlaceTable, reason, true);
+                            QVariantList luoshen_list = zhenji->tag[objectName()].toList();
+                            luoshen_list << judge->card->getEffectiveId();
+                            zhenji->tag[objectName()] = luoshen_list;
+                        }
+                        else {
+                            zhenji->obtainCard(judge->card);
+                        }
                 }
                 else if (Config.EnableHegemony) {
                     DummyCard *dummy = new DummyCard(VariantList2IntList(zhenji->tag[objectName()].toList()));

@@ -35,7 +35,7 @@ class YitianSword:public Weapon{
     Q_OBJECT
 
 public:
-    Q_INVOKABLE YitianSword(Card::Suit suit = Spade, int number = 6);
+    Q_INVOKABLE YitianSword(Card::Suit suit, int number);
 
     virtual void onUninstall(ServerPlayer *player) const;
 };

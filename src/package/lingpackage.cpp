@@ -626,7 +626,7 @@ public:
     }
 };
 
-Neo2013YongyiCard::Neo2013YongyiCard(): SkillCard(){
+Neo2013YongyiCard::Neo2013YongyiCard(){
     mute = true;
 }
 
@@ -825,7 +825,7 @@ public:
     }
 };
 
-Neo2013PujiCard::Neo2013PujiCard(): SkillCard(){
+Neo2013PujiCard::Neo2013PujiCard(){
 }
 
 bool Neo2013PujiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
@@ -999,6 +999,22 @@ public:
             recover.who = player;
             recover.recover = 1;
             room->recover(player, recover);
+            
+            QList<ServerPlayer *> DelayedTricks;
+            foreach(ServerPlayer *p, room->getAlivePlayers()){
+                if (!p->getJudgingArea().isEmpty())
+                    DelayedTricks << p;
+            }
+            if (!DelayedTricks.isEmpty()){
+                ServerPlayer *to_throw = room->askForPlayerChosen(player, DelayedTricks, objectName(), "@neo2013shenzhi-throwjudge", true, true);
+                if (to_throw != NULL){
+                    DummyCard dummy;
+                    dummy.addSubcards(to_throw->getJudgingArea());
+                    CardMoveReason reason(CardMoveReason::S_REASON_DISMANTLE, player->objectName(), objectName(), QString());
+                    room->moveCardTo(&dummy, NULL, Player::DiscardPile, reason, true);
+                }
+            }
+
         }
         return false;
     }
@@ -1182,62 +1198,21 @@ public:
         return 6;
     }
 
-    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
         if (player->getPhase() == Player::RoundStart){
-            QStringList Qingchenglist = player->tag["neo2013qingcheng"].toStringList();
-            if (!Qingchenglist.isEmpty()){
-                foreach (QString skill_name, Qingchenglist) {
-                    room->setPlayerMark(player, "Qingcheng" + skill_name, 0);
-                    if (player->hasSkill(skill_name)) {
-                        LogMessage log;
-                        log.type = "$QingchengReset";
-                        log.from = player;
-                        log.arg = skill_name;
-                        room->sendLog(log);
-                    }
-                }
-                player->tag.remove("neo2013qingcheng");
-                room->broadcastSkillInvoke(objectName(), 2);
-
-                foreach (ServerPlayer *p, room->getAllPlayers())
-                    room->filterCards(p, p->getCards("he"), true);
-
-                Json::Value args;
-                args[0] = QSanProtocol::S_GAME_EVENT_UPDATE_SKILL;
-                room->doBroadcastNotify(QSanProtocol::S_COMMAND_LOG_EVENT, args);
-
-            }
             ServerPlayer *zou = room->findPlayerBySkillName(objectName());
             if (zou == NULL || zou->isNude() || zou == player)
                 return false;
 
             if (room->askForDiscard(zou, "neo2013qingcheng", 1, 1, true, true, "@neo2013qingcheng-discard")){
-                QStringList skill_list;
-                foreach (const Skill *skill, player->getVisibleSkillList()){
-                    if (!skill_list.contains(skill->objectName()) && !skill->inherits("SPConvertSkill") && !skill->isAttachedLordSkill()) {
-                        skill_list << skill->objectName();
-                    }
-                }
-                QString skill_qc;
-                if (!skill_list.isEmpty()) {
-                    QVariant data_for_ai = QVariant::fromValue(player);
-                    skill_qc = room->askForChoice(zou, "neo2013qingcheng", skill_list.join("+"), data_for_ai);
-                }
-
-                if (!skill_qc.isEmpty()) {
-                    LogMessage log;
-                    log.type = "$QingchengNullify";
-                    log.from = zou;
-                    log.to << player;
-                    log.arg = skill_qc;
-                    room->sendLog(log);
-
-                    QStringList Qingchenglist = player->tag["neo2013qingcheng"].toStringList();
-                    Qingchenglist << skill_qc;
-                    player->tag["neo2013qingcheng"] = QVariant::fromValue(Qingchenglist);
-                    room->addPlayerMark(player, "Qingcheng" + skill_qc);
-                    room->broadcastSkillInvoke(objectName(), 1);
-                }
+                room->setPlayerFlag(player, "neo2013qingcheng");
+                room->broadcastSkillInvoke(objectName(), 1);
+            }
+        }
+        else if (player->getPhase() == Player::NotActive){
+            if (player->hasFlag("neo2013qingcheng")){
+                room->setPlayerFlag(player, "-neo2013qingcheng");
+                room->broadcastSkillInvoke(objectName(), 2);
             }
         }
 
@@ -1657,7 +1632,7 @@ Neo2013ZhoufuCard::Neo2013ZhoufuCard() {
 }
 
 bool Neo2013ZhoufuCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *) const{
-    return targets.isEmpty() &&  to_select->getPile("incantationn").isEmpty();
+    return targets.isEmpty() && to_select->getPile("incantationn").isEmpty();
 }
 
 void Neo2013ZhoufuCard::use(Room *, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
@@ -2226,7 +2201,22 @@ Neo2013JinanCard::Neo2013JinanCard(){
 }
 
 bool Neo2013JinanCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    return targets.length() == 0 && to_select->objectName() == Self->property("neo2013jinan").toString();
+    if (!targets.isEmpty())
+        return false;
+
+    QStringList tonames = Self->property("neo2013jinan").toStringList();
+    if (!tonames.contains(to_select->objectName()))
+        return false;
+
+    const Card *realcard = Sanguosha->getCard(getEffectiveId())->getRealCard();
+    if (!realcard->isEquipped())
+        return true;
+
+    const EquipCard *equip = qobject_cast<const EquipCard *>(realcard->getRealCard());
+    if (to_select->getEquip(equip->location()))
+        return false;
+
+    return true;
 }
 
 void Neo2013JinanCard::onEffect(const CardEffectStruct &effect) const{
@@ -2243,25 +2233,7 @@ public:
     }
 
     virtual bool viewFilter(const Card *to_select) const{
-        const Player *target = NULL;
-        foreach (const Player *p, Self->getAliveSiblings())
-            if (p->objectName() == Self->property("neo2013jinan").toString()){
-                target = p;
-                break;
-            }
-        if (target == NULL)
-            return false;
-
-        if (!to_select->isEquipped())
-            return true;
-        else {
-            const EquipCard *equip = qobject_cast<const EquipCard *>(to_select->getRealCard());
-            if (target->getEquip((int)(equip->location())))
-                return false;
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     virtual const Card *viewAs(const Card *) const{
@@ -2280,21 +2252,20 @@ public:
 
     virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
-        foreach (ServerPlayer *p, use.to){
-            if (p == player)
-                continue;
-            if (use.card != NULL && (use.card->isKindOf("Slash") || use.card->isNDTrick())){
-                room->setPlayerProperty(player, "neo2013jinan", p->objectName());
-                try {
-                    room->askForUseCard(player, "@@neo2013jinan", "@neo2013jinan", -1, Card::MethodNone);
+        if (use.card != NULL && (use.card->isKindOf("Slash") || use.card->isNDTrick())){
+            QStringList tonames;
+            foreach(ServerPlayer *p, use.to)
+                tonames << p->objectName();
+            room->setPlayerProperty(player, "neo2013jinan", tonames);
+            try {
+                room->askForUseCard(player, "@@neo2013jinan", "@neo2013jinan", -1, Card::MethodNone);
+                room->setPlayerProperty(player, "neo2013jinan", QVariant());
+            }
+            catch (TriggerEvent errorevent){
+                if (errorevent == StageChange || errorevent == TurnBroken)
                     room->setPlayerProperty(player, "neo2013jinan", QVariant());
-                }
-                catch (TriggerEvent errorevent){
-                    if (errorevent == StageChange || errorevent == TurnBroken)
-                        room->setPlayerProperty(player, "neo2013jinan", QVariant());
 
-                    throw errorevent;
-                }
+                throw errorevent;
             }
         }
         return false;
@@ -2483,6 +2454,266 @@ public:
     }
 };
 
+class Neo2013Jiewei: public TriggerSkill{
+public:
+    Neo2013Jiewei(): TriggerSkill("neo2013jiewei"){
+        events << TurnedOver;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (player->askForSkillInvoke(objectName())){
+            player->drawCards(1);
+            if (room->askForCard(player, "^BasicCard", "@neo2013jiewei-discard") != NULL){
+                bool invokable = false;
+                foreach(ServerPlayer *p, room->getAlivePlayers()){
+                    if (!p->getCards("ej").isEmpty()){
+                        invokable = true;
+                        break;
+                    }
+                }
+                if (invokable){
+                    QString choice = room->askForChoice(player, objectName(), "move+obtain");
+                    QList<ServerPlayer *> players;
+                    foreach(ServerPlayer *p, room->getAlivePlayers()){
+                        if (!p->getCards("ej").isEmpty())
+                            players << p;
+                    }
+                    ServerPlayer *target1 = room->askForPlayerChosen(player, players, objectName() + "_" + choice + "1", "@neo2013jiewei-" + choice + "1", true);
+                    if (target1 != NULL){
+                        int id = room->askForCardChosen(player, target1, "ej", objectName() + "_" + choice + "1");
+                        if (choice == "obtain")
+                            room->obtainCard(player, id);
+                        else {
+                            const Card *card = Sanguosha->getCard(id);
+                            Player::Place place = room->getCardPlace(id);
+
+                            int equip_index = -1;
+                            if (place == Player::PlaceEquip) {
+                                const EquipCard *equip = qobject_cast<const EquipCard *>(card->getRealCard());
+                                equip_index = static_cast<int>(equip->location());
+                            }
+
+                            QList<ServerPlayer *> tos;
+                            foreach (ServerPlayer *p, room->getAlivePlayers()) {
+                                if (equip_index != -1) {
+                                    if (p->getEquip(equip_index) == NULL)
+                                        tos << p;
+                                } else {
+                                    if (!player->isProhibited(p, card) && !p->containsTrick(card->objectName()))
+                                        tos << p;
+                                }
+                            }
+
+                            room->setTag("QiaobianTarget", QVariant::fromValue(target1));
+                            ServerPlayer *to = room->askForPlayerChosen(player, tos, objectName() + "_move2", "@neo2013jiewei-move2:::" + card->objectName());
+                            if (to)
+                                room->moveCardTo(card, target1, to, place, 
+                                CardMoveReason(CardMoveReason::S_REASON_TRANSFER, player->objectName(), objectName(), QString()));
+                            room->removeTag("QiaobianTarget");
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+};
+
+class Neo2013Wangzun: public TriggerSkill{
+public:
+    Neo2013Wangzun(): TriggerSkill("neo2013wangzun"){
+        events << EventPhaseStart;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive() && target->getPhase() == Player::Start;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        ServerPlayer *yuanshu = room->findPlayerBySkillName(objectName());
+        if (yuanshu != NULL && yuanshu != player && player->getHandcardNum() > yuanshu->getHandcardNum() 
+                && yuanshu->askForSkillInvoke(objectName(), QVariant::fromValue(player))){
+            yuanshu->drawCards(1);
+            room->setPlayerFlag(player, "neo2013yongsidec");
+        }
+        return false;
+    }
+};
+class Neo2013WangzunMaxCards: public MaxCardsSkill{
+public:
+    Neo2013WangzunMaxCards(): MaxCardsSkill("#neo2013wangzun"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if (target->hasFlag("neo2013yongsidec"))
+            return -1;
+        return 0;
+    }
+};
+
+class Neo2013Yongsi: public DrawCardsSkill{
+public:
+    Neo2013Yongsi(): DrawCardsSkill("neo2013yongsi"){
+
+    }
+
+    virtual int getDrawNum(ServerPlayer *player, int n) const{
+        Room *room = player->getRoom();
+        ServerPlayer *lord = room->getLord();
+        if (lord == NULL)
+            return n;
+
+        int num = 1;
+        foreach (ServerPlayer *p, room->getOtherPlayers(lord)){
+            if (p->getKingdom() == lord->getKingdom())
+                num++;
+        }
+        
+        return num;
+    }
+};
+class Neo2013YongsiMaxCards: public MaxCardsSkill{
+public:
+    Neo2013YongsiMaxCards(): MaxCardsSkill("#neo2013yongsi"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if (target->hasSkill("neo2013yongsi"))
+            return -1;
+        return 0;
+    }
+};
+
+class Neo2013Kuanggu: public TriggerSkill{
+public:
+    Neo2013Kuanggu(): TriggerSkill("neo2013kuanggu"){
+        events << Damage;
+        frequency = Frequent;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        DamageStruct damage = data.value<DamageStruct>();
+        for (int i = 0; i < damage.damage; i++){
+            if (!player->askForSkillInvoke(objectName()))
+                return false;
+            JudgeStruct judge;
+            judge.who = player;
+            judge.pattern = ".|black";
+            judge.good = true;
+            judge.reason = objectName();
+            room->judge(judge);
+
+            if (judge.isGood()){
+                RecoverStruct recover;
+                recover.who = player;
+                room->recover(player, recover);
+            }
+        }
+        return false;
+    }
+};
+
+class Neo2013Shenju: public MaxCardsSkill{
+public:
+    Neo2013Shenju(): MaxCardsSkill("neo2013shenju"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if (target->hasSkill(objectName())){
+            QList<const Player *> sib = target->getAliveSiblings();
+            sib << target;
+            int extra = 0;
+            foreach (const Player *p, sib){
+                if (target->distanceTo(p) == 1)
+                    extra += p->getHp();
+            }
+            return extra;
+        }
+        return 0;
+    }
+};
+
+class Neo2013BotuCount: public TriggerSkill{
+public:
+    Neo2013BotuCount(): TriggerSkill("#neo2013botu-count"){
+        events << CardUsed << CardResponded << EventPhaseStart;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+private:
+    const static int USED_SPADE = 1;
+    const static int USED_CLUB = 2;
+    const static int USED_HEART = 4;
+    const static int USED_DIAMOND = 8;
+
+public:
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == EventPhaseStart && player->getPhase() == Player::RoundStart){
+            foreach (ServerPlayer *p, room->getAlivePlayers()){
+                p->setMark("neo2013botu", 0);
+            }
+        }
+        else if (triggerEvent != EventPhaseStart && player->getPhase() == Player::Play){
+            const Card *c = NULL;
+            if (triggerEvent == CardUsed)
+                c = data.value<CardUseStruct>().card;
+            else{
+                CardResponseStruct resp = data.value<CardResponseStruct>();
+                if (resp.m_isUse)
+                    c = resp.m_card;
+            }
+            if (c == NULL || c->isKindOf("SkillCard"))
+                return false;
+              
+            int to_add = 0;
+            switch (c->getSuit()){
+                case Card::Spade:
+                    to_add = USED_SPADE;
+                    break;
+                case Card::Club:
+                    to_add = USED_CLUB;
+                    break;
+                case Card::Heart:
+                    to_add = USED_HEART;
+                    break;
+                case Card::Diamond:
+                    to_add = USED_DIAMOND;
+                    break;
+                default:
+                    to_add = 0;
+            }
+
+            int botu = player->getMark("neo2013botu");
+            botu = botu | to_add;
+            player->setMark("neo2013botu", botu);
+        }
+        return false;
+    }
+};
+class Neo2013Botu: public PhaseChangeSkill{
+public:
+    Neo2013Botu(): PhaseChangeSkill("neo2013botu"){
+        frequency = Frequent;
+    }
+
+    virtual int getPriority() const{
+        return 1;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() == Player::NotActive && target->getMark("neo2013botu") == 15 && target->askForSkillInvoke(objectName())){
+            target->gainAnExtraTurn();
+        }
+        return false;
+    }
+};
+
 Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_masu = new General(this, "neo2013_masu", "shu", 3);
     neo2013_masu->addSkill(new Neo2013Xinzhan);
@@ -2573,15 +2804,15 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_caochong->addSkill(new Neo2013Chengxiang);
     neo2013_caochong->addSkill("renxin");
 
-    General *neo2013_lvmeng = new General(this, "neo2013_lvmeng", "wu", 5);
-    neo2013_lvmeng->addSkill("keji");
-    neo2013_lvmeng->addSkill(new Neo2013Xiangxue);
-    neo2013_lvmeng->addRelateSkill("neo2013tongwu");
-    neo2013_lvmeng->addRelateSkill("neo2013bingyin");
-    neo2013_lvmeng->addRelateSkill("neo2013touxi");
-    neo2013_lvmeng->addRelateSkill("#neo2013touxi");
-    neo2013_lvmeng->addRelateSkill("neo2013muhui");
-    neo2013_lvmeng->addRelateSkill("#neo2013muhui");
+    General *neo2013_sp_lvmeng = new General(this, "neo2013_sp_lvmeng", "wu", 5);
+    neo2013_sp_lvmeng->addSkill("keji");
+    neo2013_sp_lvmeng->addSkill(new Neo2013Xiangxue);
+    neo2013_sp_lvmeng->addRelateSkill("neo2013tongwu");
+    neo2013_sp_lvmeng->addRelateSkill("neo2013bingyin");
+    neo2013_sp_lvmeng->addRelateSkill("neo2013touxi");
+    neo2013_sp_lvmeng->addRelateSkill("#neo2013touxi");
+    neo2013_sp_lvmeng->addRelateSkill("neo2013muhui");
+    neo2013_sp_lvmeng->addRelateSkill("#neo2013muhui");
     related_skills.insertMulti("neo2013touxi", "#neo2013touxi");
     related_skills.insertMulti("neo2013muhui", "#neo2013muhui");
 
@@ -2630,6 +2861,29 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_ganning = new General(this, "neo2013_ganning", "wu", 4);
     neo2013_ganning->addSkill(new Neo2013Qixi);
 
+    General *neo2013_caoren = new General(this, "neo2013_caoren", "wei", 4);
+    neo2013_caoren->addSkill(new Neo2013Jiewei);
+    neo2013_caoren->addSkill("jushou");
+
+    General *neo2013_yuanshu = new General(this, "neo2013_yuanshu", "qun", 4);
+    neo2013_yuanshu->addSkill(new Neo2013Wangzun);
+    neo2013_yuanshu->addSkill(new Neo2013WangzunMaxCards);
+    neo2013_yuanshu->addSkill(new Neo2013Yongsi);
+    neo2013_yuanshu->addSkill(new Neo2013YongsiMaxCards);
+    neo2013_yuanshu->addSkill("weidi");
+    related_skills.insertMulti("neo2013wangzun", "#neo2013wangzun");
+    related_skills.insertMulti("neo2013yongsi", "#neo2013yongsi");
+
+    General *neo2013_weiyan = new General(this, "neo2013_weiyan", "shu", 4);
+    neo2013_weiyan->addSkill(new Neo2013Kuanggu);
+
+    General *neo2013_lvmeng = new General(this, "neo2013_lvmeng", "wu", 4);
+    neo2013_lvmeng->addSkill(new Neo2013Shenju);
+    neo2013_lvmeng->addSkill(new Neo2013BotuCount);
+    neo2013_lvmeng->addSkill(new Neo2013Botu);
+    neo2013_lvmeng->addSkill("keji");
+    related_skills.insertMulti("neo2013botu", "#neo2013botu-count");
+
     addMetaObject<Neo2013XinzhanCard>();
     addMetaObject<Neo2013FanjianCard>();
     addMetaObject<Neo2013YongyiCard>();
@@ -2668,6 +2922,9 @@ void AwaitExhausted::onUse(Room *room, const CardUseStruct &card_use) const{
     CardUseStruct new_use = card_use;
     if (!card_use.to.contains(card_use.from))
         new_use.to << card_use.from;
+
+    if (getSkillName() == "duoshi")
+        room->addPlayerHistory(card_use.from, "DuoshiAE", 1);
 
     if (getSkillName() == "neo2013duoshi")
         room->addPlayerHistory(card_use.from, "NeoDuoshiAE", 1);
@@ -2789,7 +3046,7 @@ SixSwords::SixSwords(Card::Suit suit, int number): Weapon(suit, number, 2){
     setObjectName("SixSwords");
 }
 
-SixSwordsCard::SixSwordsCard(): SkillCard(){
+SixSwordsCard::SixSwordsCard(){
 
 }
 
@@ -2825,11 +3082,11 @@ public:
             CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
             if (move.from != NULL && move.from == player && move.from_places.contains(Player::PlaceEquip))
                 foreach(int id, move.card_ids){
-                    const Card *card = Sanguosha->getCard(id);
+                    const Card *card = Sanguosha->getEngineCard(id);
                     if (card->getClassName() == "SixSwords"){
                         foreach(ServerPlayer *p, players)
                             if (p->getMark("@SixSwordsBuff") > 0)
-                                p->loseMark("@SixSwordsBuff");
+                                p->loseAllMarks("@SixSwordsBuff");
                         break;
                     }
                 }
@@ -2837,7 +3094,7 @@ public:
         else if (player->getPhase() == Player::NotActive){
             foreach(ServerPlayer *p, players)
                 if (p->getMark("@SixSwordsBuff") > 0)
-                    p->loseMark("@SixSwordsBuff");
+                    p->loseAllMarks("@SixSwordsBuff");
             room->askForUseCard(player, "@@SixSwords", "@six_swords");
         }
         return false;
@@ -2861,7 +3118,7 @@ Triblade::Triblade(Card::Suit suit, int number): Weapon(suit, number, 3){
     setObjectName("Triblade");
 }
 
-TribladeCard::TribladeCard(): SkillCard(){
+TribladeCard::TribladeCard(){
 
 }
 
@@ -2911,7 +3168,7 @@ public:
 
         foreach(ServerPlayer *p, room->getAllPlayers())
             if (p->hasFlag("TribladeFilter"))
-                room->setPlayerFlag(p, "TribladeFilter");
+                room->setPlayerFlag(p, "-TribladeFilter");
 
         return false;
     }
@@ -2989,6 +3246,131 @@ public:
     }
 };
 
+PeaceSpell::PeaceSpell(Card::Suit suit, int number): Armor(suit, number){
+    setObjectName("PeaceSpell");
+}
+
+void PeaceSpell::onUninstall(ServerPlayer *player) const{
+    if (player->isAlive() && player->hasArmorEffect(objectName()))
+        player->setFlags("peacespell_throwing");
+}
+
+PeaceSpellCard::PeaceSpellCard(){
+    
+}
+
+bool PeaceSpellCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return true;
+}
+
+void PeaceSpellCard::onEffect(const CardEffectStruct &effect) const{
+    effect.to->gainMark("@PeaceSpellBuff");
+}
+
+class PeaceSpellVS: public ZeroCardViewAsSkill{
+public:
+    PeaceSpellVS(): ZeroCardViewAsSkill("PeaceSpell"){
+        response_pattern = "@@PeaceSpell";
+    }
+
+    virtual const Card *viewAs() const{
+        return new PeaceSpellCard;
+    }
+};
+
+class PeaceSpellSkill: public ArmorSkill{
+public:
+    PeaceSpellSkill(): ArmorSkill("PeaceSpell"){
+        events << EventPhaseStart << DamageInflicted << BeforeCardsMove << CardsMoveOneTime;
+        view_as_skill = new PeaceSpellVS;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent != CardsMoveOneTime && !ArmorSkill::triggerable(player))
+            return false;
+
+        switch(triggerEvent){
+            case (EventPhaseStart):{
+                if (player->getPhase() == Player::Discard){
+                     room->askForUseCard(player, "@@PeaceSpell", "@peacespell");
+                }
+                else if (player->getPhase() == Player::RoundStart){
+                    foreach(ServerPlayer *p, room->getAlivePlayers()){
+                        if (p->getMark("@PeaceSpellBuff") > 0)
+                            p->loseAllMarks("@PeaceSpellBuff");
+                    }
+                }
+                break;
+            }
+            case (DamageInflicted):{
+                DamageStruct damage = data.value<DamageStruct>();
+                if (damage.nature != DamageStruct::Normal)
+                    return true;
+                break;
+            }
+            case (BeforeCardsMove):{
+                CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+                if (move.from != NULL && move.from == player && move.from_places.contains(Player::PlaceEquip))
+                    foreach(int id, move.card_ids){
+                        const Card *card = Sanguosha->getEngineCard(id);
+                        if (card->getClassName() == "PeaceSpell"){
+                            foreach(ServerPlayer *p, room->getAlivePlayers())
+                                if (p->getMark("@PeaceSpellBuff") > 0)
+                                    p->loseAllMarks("@PeaceSpellBuff");
+                            break;
+                        }
+                    }
+                break;
+            }
+            case (CardsMoveOneTime):{
+                if (player->hasFlag("peacespell_throwing")){
+                    CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+                    if (move.from != NULL && move.from == player && move.from_places.contains(Player::PlaceEquip))
+                        foreach(int id, move.card_ids){
+                            const Card *card = Sanguosha->getEngineCard(id);
+                            if (card->getClassName() == "PeaceSpell"){
+                                room->loseHp(player);
+                                if (player->isAlive())
+                                    player->drawCards(2);
+                                break;
+                            }
+                        }
+                }
+                break;
+            }
+            default:
+                Q_ASSERT(false);
+        }
+        return false;
+    }
+};
+
+class PeaceSpellMaxCards: public MaxCardsSkill{
+public:
+    PeaceSpellMaxCards(): MaxCardsSkill("#PeaceSpell"){
+
+    }
+
+    virtual int getExtra(const Player *target) const{
+        if (target->getMark("@PeaceSpellBuff") > 0){
+            QList<const Player *> players = target->getAliveSiblings();
+            players << target;
+            int ext = 0;
+            foreach(const Player *p, players){
+                if (p->getKingdom() == target->getKingdom())
+                    ext++;
+            }
+            return ext;
+        }
+        return 0;
+    }
+};
+
+
 
 LingCardsPackage::LingCardsPackage(): Package("LingCards", Package::CardPack){
 
@@ -3003,16 +3385,19 @@ LingCardsPackage::LingCardsPackage(): Package("LingCards", Package::CardPack){
     cards << new SixSwords(Card::Diamond, 6);
     cards << new Triblade(Card::Diamond, 12);
     cards << new DragonPhoenix(Card::Spade, 2);
+    cards << new PeaceSpell(Card::Heart, 3);
 
     foreach(Card *c, cards)
         c->setParent(this);
 
 
-    skills << new SixSwordsSkill << new SixSwordsSkillRange << new TribladeSkill << new DragonPhoenixSkill;
+    skills << new SixSwordsSkill << new SixSwordsSkillRange << new TribladeSkill << new DragonPhoenixSkill << new PeaceSpellSkill << new PeaceSpellMaxCards;
     related_skills.insertMulti("SixSwords", "#SixSwords");
+    related_skills.insertMulti("PeaceSpell", "#PeaceSpell");
 
     addMetaObject<SixSwordsCard>();
     addMetaObject<TribladeCard>();
+    addMetaObject<PeaceSpellCard>();
 }
 
 ADD_PACKAGE(LingCards)

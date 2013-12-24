@@ -80,6 +80,7 @@ Client::Client(QObject *parent, const QString &filename)
     m_callbacks[S_COMMAND_SET_PROPERTY] = &Client::updateProperty;
     m_callbacks[S_COMMAND_RESET_PILE] = &Client::resetPiles;
     m_callbacks[S_COMMAND_UPDATE_PILE] = &Client::setPileNumber;
+    m_callbacks[S_COMMAND_SYNCHRONIZE_DISCARD_PILE] = &Client::synchronizeDiscardPile;
     m_callbacks[S_COMMAND_CARD_FLAG] = &Client::setCardFlag;
 
     // interactive methods
@@ -367,7 +368,6 @@ bool Client::_loseSingleCard(int card_id, CardsMoveStruct move) {
     if (move.from)
         move.from->removeCard(card, move.from_place);
     else {
-        // @todo: synchronize discard pile when "marshal"
         if (move.from_place == Player::DiscardPile)
             discarded_list.removeOne(card);
         else if (move.from_place == Player::DrawPile && !Self->hasFlag("marshalling"))
@@ -383,7 +383,6 @@ bool Client::_getSingleCard(int card_id, CardsMoveStruct move) {
     else {
         if (move.to_place == Player::DrawPile)
             pile_num++;
-        // @todo: synchronize discard pile when "marshal"
         else if (move.to_place == Player::DiscardPile)
             discarded_list.prepend(card);
     }
@@ -1041,6 +1040,18 @@ void Client::setPileNumber(const Json::Value &pile_str) {
     if (!pile_str.isInt()) return;
     pile_num = pile_str.asInt();
     updatePileNum();
+}
+
+void Client::synchronizeDiscardPile(const Json::Value &discard_pile) {
+    if (!discard_pile.isArray()) return;
+    QList<int> discard;
+    if (tryParse(discard_pile, discard)) {
+        foreach (int id, discard) {
+            const Card *card = Sanguosha->getCard(id);
+            discarded_list.append(card);
+        }
+        updatePileNum();
+    }
 }
 
 void Client::setCardFlag(const Json::Value &pattern_str) {

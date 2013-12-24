@@ -1129,7 +1129,7 @@ public:
                     room->sendLog(log);
                 }
             }
-        } else if (player->getPhase() == Player::NotActive) {
+        } else if (player->getPhase() == Player::RoundStart) {
             foreach (ServerPlayer *p, room->getAlivePlayers())
                 p->setMark("lianpo", 0);
         }
@@ -1137,6 +1137,47 @@ public:
     }
 };
 
+class Lianpo: public PhaseChangeSkill{
+public:
+    Lianpo(): PhaseChangeSkill("lianpo"){
+        frequency = Frequent;
+    }
+
+    virtual int getPriority() const{
+        return 1;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->getPhase() == Player::NotActive;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        Room *room = target->getRoom();
+        ServerPlayer *shensimayi = room->findPlayerBySkillName("lianpo");
+        if (shensimayi == NULL || shensimayi->isDead() || shensimayi->getMark("lianpo") <= 0)
+            return false;
+
+        int n = shensimayi->getMark("lianpo");
+        shensimayi->setMark("lianpo", 0);
+
+        if (!shensimayi->askForSkillInvoke("lianpo"))
+            return false;
+
+        LogMessage log;
+        log.type = "#LianpoCanInvoke";
+        log.from = shensimayi;
+        log.arg = QString::number(n);
+        log.arg2 = objectName();
+        room->sendLog(log);
+        room->broadcastSkillInvoke(objectName());
+
+        shensimayi->gainAnExtraTurn();
+
+        return false;
+    }
+};
+
+/*
 class Lianpo: public TriggerSkill {
 public:
     Lianpo(): TriggerSkill("lianpo") {
@@ -1207,7 +1248,7 @@ public:
         return false;
     }
 };
-
+*/
 class Juejing: public DrawCardsSkill {
 public:
     Juejing(): DrawCardsSkill("#juejing-draw") {
@@ -1405,9 +1446,9 @@ GodPackage::GodPackage()
     related_skills.insertMulti("jilve", "#jilve-clear");
     shensimayi->addSkill(new Lianpo);
     shensimayi->addSkill(new LianpoCount);
-    shensimayi->addSkill(new LianpoDo);
+    //shensimayi->addSkill(new LianpoDo);
     related_skills.insertMulti("lianpo", "#lianpo-count");
-    related_skills.insertMulti("lianpo", "#lianpo-do");
+    //related_skills.insertMulti("lianpo", "#lianpo-do");
 
     addMetaObject<GongxinCard>();
     addMetaObject<YeyanCard>();

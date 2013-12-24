@@ -100,7 +100,7 @@ public:
     int doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target, QList<int> enabled_ids = QList<int>(), QString skill_name = "gongxin");
     int drawCard(bool bottom = false);
     void fillAG(const QList<int> &card_ids, ServerPlayer *who = NULL, const QList<int> &disabled_ids = QList<int>());
-    void takeAG(ServerPlayer *player, int card_id, bool move_cards = true);
+    void takeAG(ServerPlayer *player, int card_id, bool move_cards = true, QList<ServerPlayer *> to_notify = QList<ServerPlayer *>());
     void clearAG(ServerPlayer *player = NULL);
     void provide(const Card *card);
     QList<ServerPlayer *> getLieges(const QString &kingdom, ServerPlayer *lord) const;
@@ -521,7 +521,7 @@ private:
     AI *cloneAI(ServerPlayer *player);
     void broadcast(const QString &message, ServerPlayer *except = NULL);
     void initCallbacks();
-    QString askForOrder(ServerPlayer *player);
+    QString askForOrder(ServerPlayer *player, const QString &default_choice);
     QString askForRole(ServerPlayer *player, const QStringList &roles, const QString &scheme);
 
     //process client requests

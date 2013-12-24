@@ -305,7 +305,12 @@ ServerPlayer *RoomThread::find3v3Next(QList<ServerPlayer *> &first, QList<Server
         }
 
         qSwap(first, second);
-        return room->askForPlayerChosen(first.first(), first, "3v3-action", "@3v3-action");
+        QList<ServerPlayer *> first_alive;
+        foreach (ServerPlayer *p, first) {
+            if (p->isAlive())
+                first_alive << p;
+        }
+        return room->askForPlayerChosen(first.first(), first_alive, "3v3-action", "@3v3-action");
     }
 
     ServerPlayer *current = room->getCurrent();
@@ -567,7 +572,7 @@ void RoomThread::run() {
                 case Player::Rebel: cool.append(player); break;
                 }
             }
-            order = room->askForOrder(cool.first());
+            order = room->askForOrder(cool.first(), "cool");
             if (order == "warm") {
                 first = warm;
                 second = cool;
@@ -631,7 +636,7 @@ bool RoomThread::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *ta
             double priority = skill->getPriority();
             int len = room->getPlayers().length();
             foreach (ServerPlayer *p, room->getAllPlayers(true)) {
-                if (p->hasSkill(skill->objectName())) {
+                if (p->hasSkill(skill->objectName()) || p->hasEquipSkill(skill->objectName())) {
                     priority += (double)len / 100;
                     break;
                 }
@@ -644,12 +649,14 @@ bool RoomThread::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *ta
 
         for (int i = 0; i < skills.size(); i++) {
             const TriggerSkill *skill = skills[i];
-            if (!triggered.contains(skill) && skill->triggerable(target)) {
-                while (room->isPaused()) {}
+            if (!triggered.contains(skill)) {
                 triggered.append(skill);
-                broken = skill->trigger(triggerEvent, room, target, data);
-                if (broken) break;
-                i = 0;
+                if (skill->triggerable(target)) {
+                    while (room->isPaused()) {}
+                    broken = skill->trigger(triggerEvent, room, target, data);
+                    if (broken) break;
+                    i = 0;
+                }
             }
         }
 

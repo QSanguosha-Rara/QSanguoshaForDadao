@@ -112,6 +112,15 @@ public:
     virtual void onEffect(const CardEffectStruct &effect) const;
 };
 
+class Neo2013YongyiCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE Neo2013YongyiCard();
+    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    virtual const Card *validate(CardUseStruct &cardUse) const;
+};
+
 class AwaitExhausted: public TrickCard{
     Q_OBJECT
 
@@ -197,13 +206,21 @@ public:
     Q_INVOKABLE DragonPhoenix(Card::Suit suit, int number);
 };
 
-class Neo2013YongyiCard: public SkillCard{
+class PeaceSpell: public Armor{
     Q_OBJECT
 
 public:
-    Q_INVOKABLE Neo2013YongyiCard();
+    Q_INVOKABLE PeaceSpell(Card::Suit suit, int number);
+    virtual void onUninstall(ServerPlayer *player) const;
+};
+
+class PeaceSpellCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE PeaceSpellCard();
     virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
-    virtual const Card *validate(CardUseStruct &cardUse) const;
+    virtual void onEffect(const CardEffectStruct &effect) const;
 };
 
 #endif
