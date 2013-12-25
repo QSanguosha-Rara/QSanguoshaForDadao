@@ -25,10 +25,10 @@ function SmartAI:useCardBefriendAttacking(card, use)
 	self:sort(self.enemies, "threat")
 	local distance = 0
 	local siblings = self.room:getOtherPlayers(self.player)
-    for _, p in sgs.list(siblings) do
-        local dist = self.player:distanceTo(p)
-        if (dist > distance) then distance = dist end
-    end
+	for _, p in sgs.list(siblings) do
+		local dist = self.player:distanceTo(p)
+		if (dist > distance) then distance = dist end
+	end
 	for _, friend in ipairs(self.friends_noself) do
 		if not self.room:isProhibited(self.player, friend, card) and self:hasTrickEffective(card, friend) and
 			self.player:distanceTo(friend) == distance then target:append(friend) end

@@ -10,6 +10,7 @@ function sgs.ai_cardsview_valuable.renxin(self, class_name, player)
 	if class_name == "Peach" and not player:isKongcheng() then
 		local dying = player:getRoom():getCurrentDyingPlayer()
 		if not dying or self:isEnemy(dying, player) or dying:objectName() == player:objectName() then return nil end
+		if dying:isLord() and self:isFriend(dying, player) then return "@RenxinCard=." end
 		if hasManjuanEffect(dying) then
 			local peach_num = 0
 			if not player:hasFlag("Global_PreventPeach") then
@@ -21,7 +22,7 @@ function sgs.ai_cardsview_valuable.renxin(self, class_name, player)
 		end
 		if self:playerGetRound(dying) < self:playerGetRound(self.player) and dying:getHp() < 0 then return nil end
 		if not player:faceUp() then
-			if player:getHp() < 2 and (getCardsNum("Jink", player) > 0 or getCardsNum("Analeptic", player) > 0) then return nil end
+			if player:getHp() < 2 and (getCardsNum("Jink", player, self.player) > 0 or getCardsNum("Analeptic", player, self.player) > 0) then return nil end
 			return "@RenxinCard=."
 		else
 			if not dying:hasFlag("Global_PreventPeach") then
@@ -39,7 +40,8 @@ function sgs.ai_cardsview.renxin(self, class_name, player)
 	if class_name == "Peach" and not player:isKongcheng() then
 		local dying = player:getRoom():getCurrentDyingPlayer()
 		if not dying or self:isEnemy(dying, player) or dying:objectName() == player:objectName() then return nil end
-		if player:getHp() < 2 and (getCardsNum("Jink", player) > 0 or getCardsNum("Analeptic", player) > 0) then return nil end
+		if dying:isLord() and self:isFriend(lord, player) then return "@RenxinCard=." end
+		if player:getHp() < 2 and (getCardsNum("Jink", player, self.player) > 0 or getCardsNum("Analeptic", player, self.player) > 0) then return nil end
 		if not self:isWeak(player) then return "@RenxinCard=." end
 		return nil
 	end
@@ -143,9 +145,9 @@ sgs.ai_skill_use_func.JunxingCard = function(card, use, self)
 	for _, enemy in ipairs(self.enemies) do
 		local id = nil
 		if self:toTurnOver(enemy, 1) then
-			if getKnownCard(enemy, "BasicCard") == 0 then id = equip or trick end
-			if not id and getKnownCard(enemy, "TrickCard") == 0 then id = equip or basic end
-			if not id and getKnownCard(enemy, "EquipCard") == 0 then id = trick or basic end
+			if getKnownCard(enemy, self.player, "BasicCard") == 0 then id = equip or trick end
+			if not id and getKnownCard(enemy, self.player, "TrickCard") == 0 then id = equip or basic end
+			if not id and getKnownCard(enemy, self.player, "EquipCard") == 0 then id = trick or basic end
 			if id then
 				use.card = sgs.Card_Parse("@JunxingCard=" .. id)
 				if use.to then use.to:append(enemy) end
@@ -233,7 +235,7 @@ sgs.ai_skill_use["@@xiansi"] = function(self, prompt)
 	local crossbow_effect
 	if not self.player:getTag("HuashenSkill"):toString() == "xiansi" then
 		for _, enemy in ipairs(self.enemies) do
-			if enemy:inMyAttackRange(self.player) and (self:hasCrossbowEffect(enemy) or getKnownCard(enemy, "Crossbow") > 0) then
+			if enemy:inMyAttackRange(self.player) and (self:hasCrossbowEffect(enemy) or getKnownCard(enemy, self.player, "Crossbow") > 0) then
 				crossbow_effect = true
 				break
 			end
@@ -465,10 +467,11 @@ sgs.ai_skill_cardask["@longyin"] = function(self, data)
 	local use = data:toCardUse()
 	local slash = use.card
 	local slash_num = 0
-	if use.from:objectName() == self.player:objectName() then slash_num = self:getCardsNum("Slash") else slash_num = getCardsNum("Slash", use.from) end
+	if use.from:objectName() == self.player:objectName() then slash_num = self:getCardsNum("Slash") else slash_num = getCardsNum("Slash", use.from, self.player) end
 	if self:isEnemy(use.from) and use.m_addHistory and not self:hasCrossbowEffect(use.from) and slash_num > 0 then return "." end
 	if (slash:isRed() and not hasManjuanEffect(self.player))
-		or (use.m_reason == sgs.CardUseStruct_CARD_USE_REASON_PLAY and use.m_addHistory and self:isFriend(use.from) and slash_num >= 1) then
+		or (use.m_reason == sgs.CardUseStruct_CARD_USE_REASON_PLAY and use.m_addHistory and self:isFriend(use.from) and slash_num >= 1
+			and (not self:hasCrossbowEffect(use.from) or slash:isRed())) then
 		local str = getLeastValueCard(slash:isRed())
 		if str then return str end
 	end
@@ -747,8 +750,11 @@ sgs.ai_skill_invoke.danshou = function(self, data)
 	if phase < sgs.Player_Play then
 		return self:willSkipPlayPhase()
 	elseif phase == sgs.Player_Play then
-		if self.player:isChained() and (damage.chain or self.room:getTag("is_chained"):toInt() > 0) and self:isGoodChainTarget(self.player) then
-			return false
+		if damage.chain or self.room:getTag("is_chained"):toInt() > 0 then
+			for _, ap in self.room:getAllPlayers() do
+				if ap:isChained() and self:isGoodChainTarget(ap, self.player, damage.nature, damage.damage, damage.card) then return false end
+			end
+			return true
 		elseif self:getOverflow() >= 2 then
 			return true
 		else
@@ -799,8 +805,8 @@ sgs.ai_skill_invoke.danshou = function(self, data)
 			if self:getOverflow(current) <= 2 then
 				return true
 			else
-				local threat = getCardsNum("Duel", current) + getCardsNum("AOE", current)
-				if self:slashIsAvailable(current) and getCardsNum("Slash", current) > 0 then threat = threat + math.min(1, getCardsNum("Slash", current)) end
+				local threat = getCardsNum("Duel", current, self.player) + getCardsNum("AOE", current, self.player)
+				if self:slashIsAvailable(current) and getCardsNum("Slash", current, self.player) > 0 then threat = threat + math.min(1, getCardsNum("Slash", current, self.player)) end
 				return threat >= 1
 			end
 		end
@@ -877,7 +883,7 @@ sgs.ai_skill_invoke.juece = function(self, data)
 	local move = data:toMoveOneTime()
 	if not move.from then return false end
 	local from = findPlayerByObjectName(self.room, move.from:objectName())
-	return from and ((self:isFriend(from) and self:getDamagedEffects(from, self.player)) or self:canAttack(from))
+	return from and ((self:isFriend(from) and self:getDamagedEffects(from, self.player)) or (not self:isFriend(from) and self:canAttack(from)))
 end
 
 sgs.ai_skill_playerchosen.mieji = function(self, targets) -- extra target for Ex Nihilo
@@ -1041,7 +1047,7 @@ sgs.ai_skill_playerchosen.qiuyuan = function(self, targets)
 	for _, p in ipairs(targetlist) do
 		if self:isFriend(p) then
 			if (p:hasSkill("kongcheng") and p:getHandcardNum() == 1) or (p:getCardCount() >= 2 and self:canLiuli(p, self.enemies)) then return p
-			elseif not friend and getCardsNum("Jink", p) >= 1 then friend = p end
+			elseif not friend and getCardsNum("Jink", p, self.player) >= 1 then friend = p end
 		end
 	end
 	return friend

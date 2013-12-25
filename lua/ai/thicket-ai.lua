@@ -162,8 +162,8 @@ duanliang_skill.getTurnUseCard=function(self)
 	return skillcard
 end
 
-sgs.ai_cardneed.duanliang = function(to, card)
-	return card:isBlack() and card:getTypeId() ~= sgs.Card_TypeTrick and getKnownCard(to, "black", false) < 2
+sgs.ai_cardneed.duanliang = function(to, card, self)
+	return card:isBlack() and card:getTypeId() ~= sgs.Card_TypeTrick and getKnownCard(to, self.player, "black", false) < 2
 end
 
 sgs.duanliang_suit_value = {
@@ -174,11 +174,12 @@ sgs.duanliang_suit_value = {
 sgs.ai_chaofeng.xuhuang = 4
 
 sgs.ai_skill_invoke.zaiqi = function(self, data)
-	return self.player:getLostHp() >= 2
+	local lostHp = self.player:hasSkills("rende|nosrende") and 3 or 2
+	return self.player:getLostHp() >= lostHp
 end
 
-sgs.ai_cardneed.lieren = function(to, card)
-	return isCard("Slash", card, to) and getKnownCard(to, "Slash", true) == 0
+sgs.ai_cardneed.lieren = function(to, card, self)
+	return isCard("Slash", card, to) and getKnownCard(to, self.player, "Slash", true) == 0
 end
 
 sgs.ai_skill_invoke.lieren = function(self, data)
@@ -793,7 +794,7 @@ sgs.ai_view_as.jiuchi = function(card, player, card_place)
 end
 
 function sgs.ai_cardneed.jiuchi(to, card, self)
-	return card:getSuit() == sgs.Card_Spade and (getKnownCard(to, "club", false) + getKnownCard(to, "spade", false)) == 0
+	return card:getSuit() == sgs.Card_Spade and (getKnownCard(to, self.player, "club", false) + getKnownCard(to, self.player, "spade", false)) == 0
 end
 
 function sgs.ai_cardneed.roulin(to, card, self)
@@ -801,7 +802,7 @@ function sgs.ai_cardneed.roulin(to, card, self)
 		if card:isKindOf("Slash") and to:canSlash(enemy, nil, true) and self:slashIsEffective(card, enemy)
 				and not (enemy:hasSkill("kongcheng") and enemy:isKongcheng())
 				and sgs.isGoodTarget(enemy, self.enemies, self) and not self:slashProhibit(card, enemy) and enemy:isFemale() then
-			return getKnownCard(to, "Slash", true) == 0
+			return getKnownCard(to, self.player, "Slash", true) == 0
 		end
 	end
 end

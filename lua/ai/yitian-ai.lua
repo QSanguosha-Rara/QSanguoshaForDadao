@@ -1,5 +1,3 @@
-sgs.ai_skill_playerchosen["yitian-lost"] = sgs.ai_skill_playerchosen.damage
-
 --[[
 	技能：归心
 	描述：回合结束阶段，你可以做以下二选一：
@@ -296,8 +294,8 @@ sgs.ai_skill_invoke.lukang_weiyan = function(self, data)
 	end
 end
 
-function sgs.ai_cardneed.lukang_weiyan(to, card)
-	return isCard("Slash", card, to) and getKnownCard(to, "Slash", true) < 2
+function sgs.ai_cardneed.lukang_weiyan(to, card, self)
+	return isCard("Slash", card, to) and getKnownCard(to, self.player, "Slash", true) < 2
 end
 --[[
 	技能：五灵
@@ -378,7 +376,7 @@ sgs.ai_skill_playerchosen.lianli = function(self, targets)
 	self:sort(self.friends, "defense")
 
 	local AssistTarget = self:AssistTarget()
-	if AssistTarget and AssistTarget:isMale() and not AssistTarget:hasSkill("manjuan") then return "@LianliCard=.->" .. AssistTarget:objectName() end
+	if AssistTarget and AssistTarget:isMale() and not AssistTarget:hasSkill("manjuan") then return AssistTarget end
 
 	for _, friend in ipairs(self.friends_noself) do --优先考虑与队友连理
 		if friend:isMale() and not friend:hasSkill("manjuan") then
@@ -403,6 +401,7 @@ sgs.ai_skill_playerchosen.lianli = function(self, targets)
 	return nil
 end
 
+sgs.ai_playerchosen_intention.lianli = -10
 sgs.ai_card_intention.LianliCard = -80
 
 table.insert(sgs.ai_global_flags, "lianlisource")
@@ -626,7 +625,7 @@ sgs.ai_use_priority.GuihanCard = 8
 ]]--
 sgs.ai_skill_invoke.caizhaoji_hujia = function(self, data)
 	local zhangjiao = self.room:findPlayerBySkillName("guidao")
-	if zhangjiao and self:isEnemy(zhangjiao) and getKnownCard(zhangjiao, "black", false, "he") > 1 then return false end
+	if zhangjiao and self:isEnemy(zhangjiao) and getKnownCard(zhangjiao, self.player, "black", false, "he") > 1 then return false end
 	if not self.player:faceUp() then
 		return true
 	end
@@ -699,7 +698,7 @@ function sgs.ai_skill_invoke.shaoying(self, data)
 	end
 	if enemynum < 1 then return false end
 	local zhangjiao = self.room:findPlayerBySkillName("guidao")
-	if zhangjiao and self:isEnemy(zhangjiao) and getKnownCard(zhangjiao, "black", false, "he") > 1 then return false end
+	if zhangjiao and self:isEnemy(zhangjiao) and getKnownCard(zhangjiao, self.player, "black", false, "he") > 1 then return false end
 	return true
 end
 
@@ -928,7 +927,7 @@ sgs.ai_need_damaged.toudu = function(self, attacker, player)
 		local slash = sgs.Sanguosha:cloneCard("Slash", sgs.Card_NoSuit, 0)
 		for _, target in ipairs(self.enemies) do
 			if self:isEnemy(target) and self:slashIsEffective(slash, target) and not self:getDamagedEffects(target, self.player, true)
-				and getCardsNum("Jink", target) < 1 and (target:getHp() == 1 or self:hasHeavySlashDamage(player, nil, target) and target:getHp() == 2) then
+				and getCardsNum("Jink", target, self.player) < 1 and (target:getHp() == 1 or self:hasHeavySlashDamage(player, nil, target) and target:getHp() == 2) then
 				return true
 			end
 		end

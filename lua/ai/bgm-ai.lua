@@ -131,7 +131,7 @@ sgs.ai_skill_use_func.LihunCard = function(card,use,self)
 			for _, enemy in ipairs(self.enemies) do
 				if enemy:isMale() and self:slashIsEffective(slash, enemy) and self.player:distanceTo(enemy) == 1
 					and not enemy:hasSkills("fenyong|zhichi|fankui|vsganglie|ganglie|neoganglie|enyuan|nosenyuan|langgu|guixin|kongcheng")
-					and self:getCardsNum("Slash") + getKnownCard(enemy, "Slash") >= 3 then
+					and self:getCardsNum("Slash") + getKnownCard(enemy, self.player, "Slash") >= 3 then
 					target = enemy
 					break
 				end
@@ -1041,7 +1041,7 @@ sgs.ai_card_intention.ZhaoxinCard = 80
 
 sgs.ai_skill_invoke.langgu = function(self, data)
 	local damage = data:toDamage()
-	return not self:isFriend(damage.from)
+	return damage.from and not self:isFriend(damage.from)
 end
 
 sgs.ai_choicemade_filter.skillInvoke.langgu = function(self, player, promptlist)
@@ -1060,7 +1060,7 @@ sgs.ai_skill_cardask["@langgu-card"] = function(self, data)
 	local retrialForHongyan
 	local damage = self.room:getTag("CurrentDamageStruct"):toDamage()
 	if damage.from and damage.from:isAlive() and not damage.from:isKongcheng() and damage.from:hasSkill("hongyan")
-		and getKnownCard(damage.from, "diamond", false) + getKnownCard(damage.from, "club", false) < damage.from:getHandcardNum() then
+		and getKnownCard(damage.from, self.player, "diamond", false) + getKnownCard(damage.from, self.player, "club", false) < damage.from:getHandcardNum() then
 		retrialForHongyan = true
 	end
 	if retrialForHongyan then
@@ -1276,7 +1276,7 @@ sgs.ai_skill_invoke.hantong_acquire = function(self, data)
 	if skill == "hujia" and not self.player:hasSkill("hujia") then
 		local can_invoke = false
 		for _, friend in ipairs(self.friends_noself) do
-			if friend:getKingdom() == "wei" and getCardsNum("Jink", friend) > 0 then can_invoke = true end
+			if friend:getKingdom() == "wei" and getCardsNum("Jink", friend, self.player) > 0 then can_invoke = true end
 		end
 		if can_invoke then
 			local origin_data = self.player:getTag("HantongOriginData")
@@ -1285,7 +1285,7 @@ sgs.ai_skill_invoke.hantong_acquire = function(self, data)
 	elseif skill == "jijiang" and not self.player:hasSkill("jijiang") then
 		local can_invoke = false
 		for _, friend in ipairs(self.friends_noself) do
-			if friend:getKingdom() == "shu" and getCardsNum("Slash", friend) > 0 then can_invoke = true end
+			if friend:getKingdom() == "shu" and getCardsNum("Slash", friend, self.player) > 0 then can_invoke = true end
 		end
 		if can_invoke then
 			local origin_data = self.player:getTag("HantongOriginData")

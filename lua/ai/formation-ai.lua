@@ -169,7 +169,7 @@ sgs.ai_skill_use["@@heyi"] = function(self)
 		return "."
 	end
 end
-
+--[[
 sgs.ai_skill_playerchosen.tianfu = function(self, targets)
 	for _, p in sgs.qlist(targets) do
 		if self:isFriend(p) then return p end
@@ -186,10 +186,11 @@ sgs.ai_skill_invoke.tianfu = function(self, data)
 	local p = findPlayerByObjectName(self.room, d[1])
 	return not self:isEnemy(p)
 end
-
+]]
 sgs.ai_skill_invoke.shoucheng = function(self, data)
-	local target = data:toPlayer()
-	return (self:isFirend(target) and not self:needKongcheng(target, true)) or (self:isEnemy(target) and self:needKongcheng(target, true))
+	local from = data:toPlayer()
+	return from and self:isFriend(from)
+			and not (from:getPhase() == sgs.Player_NotActive and (from:hasSkill("manjuan") or self:needKongcheng(from, true)))
 end
 
 local shangyi_skill = {}
@@ -290,20 +291,20 @@ sgs.ai_skill_invoke.qianhuan = function(self, data)
 	local effect = promptlist[1]
 	local yuji = findPlayerByObjectName(self.room, promptlist[2])
 	local use = data:toCardUse()
-    local to = use.to:first()
+	local to = use.to:first()
 	if effect and effect == "choice" then return yuji and self:isFriend(yuji) end
-    if use and to then
-        if to:objectName() == self.player:objectName() then
-            return not (use.from and (use.from:objectName() == to:objectName())
-                    or (use.card:isKindOf("Slash") and self:isPriorFriendOfSlash(self.player, use.card, use.from)))
-        else
-            if self:isFriend(to) and not (use.from and use.from:objectName() == to:objectName()) then
+	if use and to then
+		if to:objectName() == self.player:objectName() then
+			return not (use.from and (use.from:objectName() == to:objectName())
+					or (use.card:isKindOf("Slash") and self:isPriorFriendOfSlash(self.player, use.card, use.from)))
+		else
+			if self:isFriend(to) and not (use.from and use.from:objectName() == to:objectName()) then
 				return true
 			elseif self:isEnemy(to) and (use.card:isKindOf("Peach") or (use.card:isKindOf("Analeptic") and use.from and use.from:getHp() < 1) or use.card:isKindOf("ExNihilo")) then
 				return true
 			end
-        end
-	end	
+		end
+	end
 	return
 end
 

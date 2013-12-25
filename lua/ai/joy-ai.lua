@@ -74,8 +74,8 @@ sgs.ai_skill_playerchosen.YxSword = function(self, targets)
 	for _, askill in sgs.qlist(who:getVisibleSkillList()) do
 		local name = askill:objectName()
 		if string.find(name, "ganglie") or string.find(name, "fankui") or string.find(name, "enyuan") then
-			invoke = "yes" 
-			break 
+			invoke = "yes"
+			break
 		end
 	end
 	if who and ((who:hasSkill("duanchang") and who:getHp() - dmg < 1) or invoke == "yes") then

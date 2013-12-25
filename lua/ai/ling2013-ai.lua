@@ -163,7 +163,7 @@ end
 
 
 function PujiCard(self) --选择一张黑色牌
-	local card_id 
+	local card_id
 	local cards = self.player:getHandcards()
 	cards = sgs.QList2Table(cards)
 	self:sortByCardNeed(cards)
@@ -171,15 +171,15 @@ function PujiCard(self) --选择一张黑色牌
 	if lightning and lightning:isBlack() and not self:willUseLightning(lightning) then card_id = lightning:getEffectiveId() end
 	if not card_id then
 		if self:needToThrowArmor() and self.player:getArmor():isBlack() then card_id = self.player:getArmor():getId()
-		elseif self.player:getHandcardNum() >= self.player:getHp() then			
+		elseif self.player:getHandcardNum() >= self.player:getHp() then
 			for _, acard in ipairs(cards) do
 				if not acard:isBlack() then continue end
 				if (acard:isKindOf("EquipCard") or acard:isKindOf("AmazingGrace") or acard:isKindOf("BasicCard"))
-					and self:cardNeed(acard) < 7 and not acard:isKindOf("Peach") then card_id = acard:getEffectiveId() break 
+					and self:cardNeed(acard) < 7 and not acard:isKindOf("Peach") then card_id = acard:getEffectiveId() break
 				elseif acard:getTypeId() == sgs.Card_TypeTrick then
 					local dummy_use = { isDummy = true }
 					self:useTrickCard(acard, dummy_use)
-					if not dummy_use.card then card_id = acard:getEffectiveId() break end	
+					if not dummy_use.card then card_id = acard:getEffectiveId() break end
 				end
 			end
 		elseif not self.player:getEquips():isEmpty() then
@@ -187,8 +187,8 @@ function PujiCard(self) --选择一张黑色牌
 			self:sortByCardNeed(equips)
 			for _, card in ipairs(equips) do
 				if not card:isBlack() then continue end
-				if card:getId() ~= self:getValuableCard(self.player) and not card:isKindOf("Armor") then 
-					card_id = card:getEffectiveId() break end 
+				if card:getId() ~= self:getValuableCard(self.player) and not card:isKindOf("Armor") then
+					card_id = card:getEffectiveId() break end
 			end
 		end
 	end
@@ -219,7 +219,7 @@ sgs.ai_skill_use_func.Neo2013PujiCard = function(card, use, self)
 			return
 		end
 	end
-	
+
 	for _, friend in ipairs(self.friends_noself) do
 		if friend and not friend:getEquips():isEmpty() and friend:hasSkills(sgs.lose_equip_skill) then
 			for _, card in sgs.list(friend:getEquips()) do
@@ -231,7 +231,7 @@ sgs.ai_skill_use_func.Neo2013PujiCard = function(card, use, self)
 			end
 		end
 	end
-		
+
 	for _, friend in ipairs(self.friends_noself) do
 		local rednum = self:getSuitNum("diamond|heart", true, friend)
 		local blacknum = self:getSuitNum("club|spade", true, friend)
@@ -241,7 +241,7 @@ sgs.ai_skill_use_func.Neo2013PujiCard = function(card, use, self)
 			return
 		end
 	end
-		
+
 	for _, friend in ipairs(self.friends_noself) do
 		local blacknum = self:getSuitNum("club|spade", true, friend)
 		if blacknum > 0 and not friend:isNude() and (friend:isWounded() or self:getOverflow(friend) > 0) then
@@ -250,7 +250,7 @@ sgs.ai_skill_use_func.Neo2013PujiCard = function(card, use, self)
 			return
 		end
 	end
-	
+
 	for _, enemy in ipairs(self.enemies) do
 		local rednum = self:getSuitNum("diamond|heart", true, enemy)
 		if (rednum > 0 or self:getOverflow(enemy) > 0) and not enemy:isNude() then
@@ -258,7 +258,7 @@ sgs.ai_skill_use_func.Neo2013PujiCard = function(card, use, self)
 			if use.to then use.to:append(enemy) end
 			return
 		end
-	end	
+	end
 	for _, enemy in ipairs(self.enemies) do
 		local rednum = self:getSuitNum("diamond|heart", true, enemy)
 		if rednum > 0 and not enemy:getEquips():isEmpty() then
@@ -266,7 +266,7 @@ sgs.ai_skill_use_func.Neo2013PujiCard = function(card, use, self)
 			if use.to then use.to:append(enemy) end
 			return
 		end
-	end	
+	end
 	for _, enemy in ipairs(self.enemies) do
 		local rednum = self:getSuitNum("diamond|heart", true, enemy)
 		local cards = sgs.QList2Table(enemy:getCards("he"))
@@ -275,7 +275,7 @@ sgs.ai_skill_use_func.Neo2013PujiCard = function(card, use, self)
 			if use.to then use.to:append(enemy) end
 			return
 		end
-	end	
+	end
 end
 sgs.ai_use_priority.Neo2013PujiCard = 4.3
 sgs.ai_use_value.Neo2013PujiCard = 7
@@ -340,7 +340,7 @@ sgs.ai_skill_invoke.neo2013suishi = function(self, data)
 		if tf and self:isFriend(tf) and player == tf then return true end
 		return self:isEnemy(tf) and not self:doNotDiscard(tf)
 	end
-    return	
+	return
 end
 
 sgs.ai_skill_playerchosen.neo2013shushen = function(self)
@@ -361,7 +361,7 @@ end
 sgs.ai_skill_cardask["@neo2013longyin"] = function(self, data, pattern)
 	local function SameCard(cd)
 		if pattern == ".|red" then return cd:isRed() end
-		return cd:isBlack() 
+		return cd:isBlack()
 	end
 	local function getLeastValueCard()
 		local offhorse_avail, weapon_avail
@@ -391,14 +391,14 @@ sgs.ai_skill_cardask["@neo2013longyin"] = function(self, data, pattern)
 			self:sortByUseValue(cards, true)
 			for _, c in ipairs(cards) do
 				if self:getUseValue(c) < 6 and not self:isValuableCard(c) and not self.player:isJilei(c) and SameCard(c) --[[and]] then
-					if self:getCardsNum("Slash") < 3 then 
+					if self:getCardsNum("Slash") < 3 then
 						if not isCard("Slash", c, self.player) then return "$" .. c:getEffectiveId() end
-					else	
+					else
 						return "$" .. c:getEffectiveId()
 					end
 					return "."
-				end	
-			end	
+				end
+			end
 			if offhorse_avail and not self.player:isJilei(self.player:getOffensiveHorse()) and SameCard(self.player:getOffensiveHorse()) then return "$" .. self.player:getOffensiveHorse():getEffectiveId() end
 		end
 	end
@@ -419,11 +419,11 @@ local neo2013duoshi_skill = {}
 neo2013duoshi_skill.name = "neo2013duoshi"
 table.insert(sgs.ai_skills, neo2013duoshi_skill)
 neo2013duoshi_skill.getTurnUseCard = function(self, inclusive)
-	if self.player:usedTimes("NeoDuoshiAE") >= 4 or sgs.turncount <= 1 then return nil end 
+	if self.player:usedTimes("NeoDuoshiAE") >= 4 or sgs.turncount <= 1 then return nil end
 	local cards = sgs.QList2Table(self.player:getCards("h"))
 	local red_card
 	self:sortByUseValue(cards, true)
-	
+
 	for _, card in ipairs(cards) do
 		if card:isRed() then
 			local shouldUse = true
@@ -455,7 +455,7 @@ neo2013duoshi_skill.getTurnUseCard = function(self, inclusive)
 		local card_id = red_card:getEffectiveId()
 		local card_str = ("await_exhausted:neo2013duoshi[%s:%s]=%d"):format(suit, number, card_id)
 		local await = sgs.Card_Parse(card_str)
-		
+
 		assert(await)
 
 		return await
@@ -484,22 +484,22 @@ sgs.ai_skill_discard.neo2013qingcheng = function(self, discard_num, min_num, opt
 	local from = self.room:getCurrent()
 	if self:isFriend(from) then
 		if from:hasSkills("shiyong|benghuai") then invoke = true end
-	end	
+	end
 	if self:isEnemy(from) then
 		local skills = from:getVisibleSkillList()
 		if from:hasSkill("shiyong") and skills:length() == 1 then invoke = false end
 		if skills:length() > 0 then invoke = true end
-	end	
+	end
 	if invoke then
 		if self:needKongcheng(self.player, true) and self.player:getHandcardNum() == 1 then return {self.player:handCards():first()} end
-		local id = JS_Card(self) 
+		local id = JS_Card(self)
 		if id then return {id}  end
 		return self:askForDiscard("dummyreason", 1, 1, true, true)
 	end
 	return {}
 end
 sgs.ai_skill_choice.neo2013qingcheng = sgs.ai_skill_choice.qingcheng
-sgs.ai_choicemade_filter.skillChoice.neo2013qingcheng = sgs.ai_choicemade_filter.skillChoice.qingcheng 
+sgs.ai_choicemade_filter.skillChoice.neo2013qingcheng = sgs.ai_choicemade_filter.skillChoice.qingcheng
 
 
 local neo2013xiechan_skill = {}
@@ -514,7 +514,7 @@ sgs.ai_skill_use_func.Neo2013XiechanCard = function(card,use,self)
 	if sgs.turncount == 0 then return nil end
 	self:sort(self.enemies, "hp")
 	local max_card = self:getMaxCard()
-	if self:isWeak() and max_card and not max_card:isKindOf("Peach") then 
+	if self:isWeak() and max_card and not max_card:isKindOf("Peach") then
 		for _, enemy in ipairs(self.enemies) do
 			local emaxcard = self:getMaxCard(enemy)
 			if not enemy:isKongcheng() and not self:doNotDiscard(enemy, "h") and not emaxcard and self:canAttack(enemy) then
@@ -653,7 +653,7 @@ table.insert(sgs.ai_skills, neo2013xiongyi_skill)
 neo2013xiongyi_skill.getTurnUseCard = function(self)
 	if self.player:getMark("@arise") < 1 then return end
 	if (#self.friends <= #self.enemies and sgs.turncount > 2 and self.player:getLostHp() > 0) or (sgs.turncount > 1 and self:isWeak()) then
-		return sgs.Card_Parse("Neo2013XiongyiCard=.") 
+		return sgs.Card_Parse("Neo2013XiongyiCard=.")
 	end
 end
 sgs.ai_skill_use_func.Neo2013XiongyiCard = sgs.ai_skill_use_func.XiongyiCard
@@ -669,7 +669,7 @@ sgs.ai_skill_discard.neo2013qijun = function(self, discard_num, min_num, optiona
 		local only_enemy = self.room:getOtherPlayers(self.player):first()
 		if only_enemy:canSlash(self.player) then return idtable end
 	end
-	if self:isFriend(from) then return idtable end	
+	if self:isFriend(from) then return idtable end
 	return {}
 end
 
@@ -778,13 +778,13 @@ sgs.ai_skill_invoke.neo2013kunxiang = function(self)
 		if self:willSkipPlayPhase() then return true end
 		if self.player:getHandcardNum() > 6 then return false end
 		if self:needBear() or self:doNotDiscard() then return true end
-		return (self.player:hasSkills(sgs.lose_equip_skill) and not self.player:getEquips():isEmpty()) or self:needToThrowArmor() 
-	else	
+		return (self.player:hasSkills(sgs.lose_equip_skill) and not self.player:getEquips():isEmpty()) or self:needToThrowArmor()
+	else
 		if self:isFriend(yz) then return true end
 		if self:isEnemy(yz) then
 			if self:doNotDiscard(yz) then return false end
 			return true
-		end	
+		end
 	end
 	return
 end
@@ -841,13 +841,13 @@ sgs.ai_skill_choice.neo2013zongxuan = function(self, choices, data)
 	if not near then return "zongxuanup" end
 	if self:isFriend(near) then
 		if self:getUseValue(card) > 6 or card:isKindOf("Peach") or self:isValuableCard(card) then return "zongxuanup" end
-		if near:containsTrick("indulgence") and not near:containsTrick("YanxiaoCard") 
+		if near:containsTrick("indulgence") and not near:containsTrick("YanxiaoCard")
 			and card:getSuit() == sgs.Card_Heart then return "zongxuanup" end
-		return "zongxuandown"	
+		return "zongxuandown"
 	elseif self:isEnemy(near) then
 		if self:getUseValue(card) < 6 or not self:isValuableCard(card, near) then return "zongxuanup" end
-		if near:containsTrick("indulgence") and not near:containsTrick("YanxiaoCard") 
+		if near:containsTrick("indulgence") and not near:containsTrick("YanxiaoCard")
 			and card:getSuit() == sgs.Card_Heart then return "zongxuandown" end
-		return "zongxuandown"	
-	end	
+		return "zongxuandown"
+	end
 end

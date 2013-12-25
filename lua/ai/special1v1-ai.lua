@@ -165,8 +165,8 @@ end
 
 sgs.ai_skill_invoke.kofliegong = sgs.ai_skill_invoke.liegong
 
-function sgs.ai_cardneed.kofliegong(to, card)
-	return isCard("Slash", card, to) and getKnownCard(to, "Slash", true) == 0
+function sgs.ai_cardneed.kofliegong(to, card, self)
+	return isCard("Slash", card, to) and getKnownCard(to, self.player, "Slash", true) == 0
 end
 
 sgs.ai_skill_invoke.yinli = function(self)
@@ -194,7 +194,7 @@ sgs.ai_skill_use["@@cangji"] = function(self, prompt)
 		if i == 0 then
 			if equip:isKindOf("Crossbow") or equip:isKindOf("Blade") then
 				for _, friend in ipairs(self.friends_noself) do
-					if not self:getSameEquip(equip) and not self:hasCrossbowEffect(friend) and getCardsNum("Slash", friend) > 1 then
+					if not self:getSameEquip(equip) and not self:hasCrossbowEffect(friend) and getCardsNum("Slash", friend, self.player) > 1 then
 						return "@CangjiCard=" .. equip:getEffectiveId() .. "->" .. friend:objectName()
 					end
 				end
@@ -387,10 +387,10 @@ sgs.ai_skill_choice.mouzhu = function(self, choices)
 
 	if self:isFriend(target) then
 		if (target:hasSkills("leiji|nosleiji") or not self:slashIsEffective(slash, target)) and choices:match("slash") then return "slash" end
-		if self:getDamagedEffects(self.player, target) and getCardsNum("Slash", target) >= 1 and choices:match("duel") then return "duel" end
+		if self:getDamagedEffects(self.player, target) and getCardsNum("Slash", target, self.player) >= 1 and choices:match("duel") then return "duel" end
 	else
 		if target:hasSkills("leiji|nosleiji") and choices:match("duel") then return "duel" end
-		if self:getCardsNum("Slash") > getCardsNum("Slash", target) and choices:match("duel") then return "duel" end
+		if self:getCardsNum("Slash") > getCardsNum("Slash", target, self.player) and choices:match("duel") then return "duel" end
 	end
 
 	if choices:match("slash") then return "slash" else return "duel" end
@@ -450,7 +450,9 @@ sgs.ai_skill_use_func.PujiCard = function(card, use, self)
 	local players = self:findPlayerToDiscard("he", false, true, nil, true)
 	for _, p in ipairs(players) do
 		local id = self:askForCardChosen(p, "he", "dummyreason", sgs.Card_MethodDiscard)
-		if id and (self:isFriend(p) or not p:hasEquip(sgs.Sanguosha:getCard(id)) or sgs.Sanguosha:getCard(id):getSuit() ~= sgs.Card_Spade) then
+		local chosen_card
+		if id then chosen_card = sgs.Sanguosha:getCard(id) end
+		if id and chosen_card and (self:isFriend(p) or not p:hasEquip(chosen_card) or sgs.Sanguosha:getCard(id):getSuit() ~= sgs.Card_Spade) then
 			self.puji_id_choice = id
 			use.card = card
 			if use.to then use.to:append(p) end

@@ -72,8 +72,8 @@ sgs.ai_skill_use_func.JuaoCard = function(card, use, self)
 					table.insert(givecard, hcard:getId())
 				elseif #givecard == 2 then
 					use.card = sgs.Card_Parse("@JuaoCard=" .. table.concat(givecard, "+"))
-					if use.to then 
-						use.to:append(friend) 
+					if use.to then
+						use.to:append(friend)
 						self:speak("我知道你有什么牌，哼哼。")
 					end
 					return
@@ -100,7 +100,7 @@ sgs.ai_skill_use_func.JuaoCard = function(card, use, self)
 		end
 		if friend:hasSkill("xiaoji") or friend:hasSkill("xuanfeng") then --队友有枭姬（旋风）
 			for _, hcard in sgs.qlist(cards) do
-				if if hcard:isKindOf("EquipCard") and not table.contains(givecard, hcard:getId()) then
+				if hcard:isKindOf("EquipCard") and not table.contains(givecard, hcard:getId()) then
 					table.insert(givecard, hcard:getId())
 				end
 				if #givecard == 1 and givecard[1] ~= hcard:getId() then
@@ -513,9 +513,9 @@ sgs.ai_skill_use["@@fuzuo"] = function(self, prompt, method)
 		end
 
 	elseif reason == "tianyi" or reason == "xianzhen" then
-		if self:isFriend(from) and from_num < to_num and getCardsNum("Slash", from) >= 1 then
+		if self:isFriend(from) and from_num < to_num and getCardsNum("Slash", from, self.player) >= 1 then
 			return "@FuzuoCard="..card:getEffectiveId().."->"..from:objectName()
-		elseif not self:isFriend(from) and self:isFriend(to) and from_num > to_num and getCardsNum("Slash", from) >= 1 then
+		elseif not self:isFriend(from) and self:isFriend(to) and from_num > to_num and getCardsNum("Slash", from, self.player) >= 1 then
 			return "@FuzuoCard="..card:getEffectiveId().."->"..to:objectName()
 		end
 
@@ -600,7 +600,7 @@ sgs.ai_slash_prohibit.wenjiu = function(self, from, to, card)
 	if self:isFriend(to) then
 		return card:isRed() and (has_black_slash or self:isWeak(to))
 	else
-		if has_red_slash and getCardsNum("Jink", to) > 0 then return not card:isRed() end
+		if has_red_slash and getCardsNum("Jink", to, self.player) > 0 then return not card:isRed() end
 	end
 end
 

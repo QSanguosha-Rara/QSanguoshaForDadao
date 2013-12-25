@@ -10,7 +10,7 @@ if sgs.GetConfig("GameMode", ""):match("zombie") then
 			return str
 		end
 	end
-]]
+
 	local ganran_skill = {}
 	ganran_skill.name = "ganran"
 	table.insert(sgs.ai_skills, ganran_skill)
@@ -34,7 +34,7 @@ if sgs.GetConfig("GameMode", ""):match("zombie") then
 			return acard
 		end
 	end
-
+]]
 	local useTrickCard = SmartAI.useTrickCard
 	function SmartAI:useTrickCard(card, use)
 		if #self.enemies == 0 then

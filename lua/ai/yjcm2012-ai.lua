@@ -45,13 +45,13 @@ sgs.ai_skill_playerchosen.qianxi = function(self, targets)
 			end
 		else
 			for _, enemy in ipairs(enemies) do
-				if getKnownCard(enemy, "Jink", false, "h") > 0 and self:slashIsEffective(slash, enemy) and sgs.isGoodTarget(enemy, self.enemies, self) then return enemy end
+				if getKnownCard(enemy, self.player, "Jink", false, "h") > 0 and self:slashIsEffective(slash, enemy) and sgs.isGoodTarget(enemy, self.enemies, self) then return enemy end
 			end
 			for _, enemy in ipairs(enemies) do
-				if getKnownCard(enemy, "Peach", true, "h") > 0 or enemy:hasSkill("jijiu") then return enemy end
+				if getKnownCard(enemy, self.player, "Peach", true, "h") > 0 or enemy:hasSkill("jijiu") then return enemy end
 			end
 			for _, enemy in ipairs(enemies) do
-				if getKnownCard(enemy, "Jink", false, "h") > 0 and self:slashIsEffective(slash, enemy) then return enemy end
+				if getKnownCard(enemy, self.player, "Jink", false, "h") > 0 and self:slashIsEffective(slash, enemy) then return enemy end
 			end
 		end
 		for _, enemy in ipairs(enemies) do
@@ -64,8 +64,8 @@ end
 
 sgs.ai_playerchosen_intention.qianxi = 80
 
-function sgs.ai_cardneed.dangxian(to, card)
-	return isCard("Slash", card, to) and getKnownCard(to, "Slash", true) == 0
+function sgs.ai_cardneed.dangxian(to, card, self)
+	return isCard("Slash", card, to) and getKnownCard(to, self.player, "Slash", true) == 0
 end
 
 sgs.ai_skill_invoke.zishou = function(self, data)
@@ -134,7 +134,7 @@ function sgs.ai_skill_invoke.zhenlie(self, data)
 				if use.card:isKindOf("NatureSlash") and self.player:isChained() and not self:isGoodChainTarget(self.player, nil, nil, nil, use.card) then return true end
 				if use.from:hasSkill("nosqianxi") and use.from:distanceTo(self.player) == 1 then return true end
 				if self:isFriend(use.from) and self.role == "loyalist" and not use.from:hasSkill("jueqing") and use.from:isLord() and self.player:getHp() == 1 then return true end
-				if (not (self:hasSkills(sgs.masochism_skill) or (self.player:hasSkill("tianxiang") and getKnownCard(self.player, "heart") > 0)) or use.from:hasSkill("jueqing"))
+				if (not (self:hasSkills(sgs.masochism_skill) or (self.player:hasSkill("tianxiang") and getKnownCard(self.player, self.player, "heart") > 0)) or use.from:hasSkill("jueqing"))
 					and not self:doNotDiscard(use.from) then
 					return true
 				end
@@ -148,8 +148,8 @@ function sgs.ai_skill_invoke.zhenlie(self, data)
 
 			local friend_null = 0
 			for _, p in sgs.qlist(self.room:getOtherPlayers(self.player)) do
-				if self:isFriend(p) then friend_null = friend_null + getCardsNum("Nullification", p) end
-				if self:isEnemy(p) then friend_null = friend_null - getCardsNum("Nullification", p) end
+				if self:isFriend(p) then friend_null = friend_null + getCardsNum("Nullification", p, self.player) end
+				if self:isEnemy(p) then friend_null = friend_null - getCardsNum("Nullification", p, self.player) end
 			end
 			friend_null = friend_null + self:getCardsNum("Nullification")
 			local sj_num = self:getCardsNum(use.card:isKindOf("SavageAssault") and "Slash" or "Jink")
@@ -160,17 +160,17 @@ function sgs.ai_skill_invoke.zhenlie(self, data)
 			if sj_num == 0 and friend_null <= 0 then
 				if self:isEnemy(from) and from:hasSkill("jueqing") then return not self:doNotDiscard(from) end
 				if self:isFriend(from) and self.role == "loyalist" and from:isLord() and self.player:getHp() == 1 and not from:hasSkill("jueqing") then return true end
-				if (not (self:hasSkills(sgs.masochism_skill) or (self.player:hasSkill("tianxiang") and getKnownCard(self.player, "heart") > 0)) or use.from:hasSkill("jueqing"))
+				if (not (self:hasSkills(sgs.masochism_skill) or (self.player:hasSkill("tianxiang") and getKnownCard(self.player, self.player, "heart") > 0)) or use.from:hasSkill("jueqing"))
 					and not self:doNotDiscard(use.from) then
 					return true
 				end
 			end
 		elseif self:isEnemy(use.from) then
-			if use.card:isKindOf("FireAttack") then
-				if not self:hasTrickEffective(use.card, self.player) then return false end
+			if use.card:isKindOf("FireAttack") and use.from:getHandcardNum() > 0 then
+					if not self:hasTrickEffective(use.card, self.player) then return false end
 				if not self:damageIsEffective(self.player, sgs.DamageStruct_Fire, use.from) then return false end
 				if (self.player:hasArmorEffect("Vine") or self.player:getMark("@gale") > 0) and use.from:getHandcardNum() > 3
-					and not (use.from:hasSkill("hongyan") and getKnownCard(self.player, "spade") > 0) then
+					and not (use.from:hasSkill("hongyan") and getKnownCard(self.player, self.player, "spade") > 0) then
 					return not self:doNotDiscard(use.from)
 				elseif self.player:isChained() and not self:isGoodChainTarget(self.player) then
 					return not self:doNotDiscard(use.from)
@@ -180,7 +180,7 @@ function sgs.ai_skill_invoke.zhenlie(self, data)
 				if not self:hasTrickEffective(use.card, self.player) then return false end
 				return not self:doNotDiscard(use.from)
 			elseif use.card:isKindOf("Duel") then
-				if self:getCardsNum("Slash") == 0 or self:getCardsNum("Slash") < getCardsNum("Slash", use.from) then
+				if self:getCardsNum("Slash") == 0 or self:getCardsNum("Slash") < getCardsNum("Slash", use.from, self.player) then
 					if not self:hasTrickEffective(use.card, self.player) then return false end
 					if not self:damageIsEffective(self.player, sgs.DamageStruct_Normal, use.from) then return false end
 					return not self:doNotDiscard(use.from)
@@ -245,8 +245,8 @@ sgs.ai_skill_askforyiji.miji = function(self, card_ids)
 	return nil, -1
 end
 
-function sgs.ai_cardneed.jiangchi(to, card)
-	return isCard("Slash", card, to) and getKnownCard(to, "Slash", true) < 2
+function sgs.ai_cardneed.jiangchi(to, card, self)
+	return isCard("Slash", card, to) and getKnownCard(to, self.player, "Slash", true) < 2
 end
 
 sgs.ai_skill_choice.jiangchi = function(self, choices)
@@ -439,8 +439,8 @@ end
 
 sgs.ai_card_intention.JiefanCard = -80
 
-function sgs.ai_cardneed.jiefan(to, card)
-	return isCard("Slash", card, to) and getKnownCard(to, "Slash", true) == 0
+function sgs.ai_cardneed.jiefan(to, card, self)
+	return isCard("Slash", card, to) and getKnownCard(to, self.player, "Slash", true) == 0
 end
 
 anxu_skill = {}
@@ -675,9 +675,9 @@ sgs.ai_skill_playerchosen.zhuiyi = function(self, targets)
 end
 
 
-function sgs.ai_cardneed.lihuo(to, card)
+function sgs.ai_cardneed.lihuo(to, card, self)
 	local slash = card:isKindOf("Slash") and not (card:isKindOf("FireSlash") or card:isKindOf("ThunderSlash"))
-	return (card:isKindOf("FireSlash") and getKnownCard(to, "FireSlash", false) == 0) or (slash and getKnownCard(to, "Slash", false) == 0)
+	return (card:isKindOf("FireSlash") and getKnownCard(to, self.player, "FireSlash", false) == 0) or (slash and getKnownCard(to, self.player, "Slash", false) == 0)
 end
 
 sgs.ai_skill_invoke.lihuo = function(self, data)

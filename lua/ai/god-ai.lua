@@ -85,8 +85,8 @@ function SmartAI:cantbeHurt(player, from, damageNum)
 			if from:getMaxHp() <= 3 or (self.room:getLord() and from:getRole() == "renegade") then return true end
 		end
 	end
-	if player:hasSkill("tianxiang") and getKnownCard(player, "diamond", false) + getKnownCard(player, "club", false) < player:getHandcardNum() then
-		local peach_num = self.player:objectName() == from:objectName() and self:getCardsNum("Peach") or getCardsNum("Peach", from)
+	if player:hasSkill("tianxiang") and getKnownCard(player, from, "diamond", false) + getKnownCard(player, from, "club", false) < player:getHandcardNum() then
+		local peach_num = self.player:objectName() == from:objectName() and self:getCardsNum("Peach") or getCardsNum("Peach", from, self.player)
 		for _, friend in ipairs(self:getFriends(from)) do
 			if friend:getHp() < 2 and peach_num then
 				dyingfriend = dyingfriend + 1
@@ -138,21 +138,22 @@ local gongxin_skill={}
 gongxin_skill.name="gongxin"
 table.insert(sgs.ai_skills,gongxin_skill)
 gongxin_skill.getTurnUseCard=function(self)
-		local card_str = ("@GongxinCard=.")
-		local gongxin_card = sgs.Card_Parse(card_str)
-		assert(gongxin_card)
-		return gongxin_card
+	if self.player:hasUsed("GongxinCard") then return end
+	local gongxin_card = sgs.Card_Parse("@GongxinCard=.")
+	assert(gongxin_card)
+	return gongxin_card
 end
 
 sgs.ai_skill_use_func.GongxinCard=function(card,use,self)
-	if self.player:hasUsed("GongxinCard") then return end
-	self:sort(self.enemies,"handcard")
+	self:sort(self.enemies, "handcard")
+	sgs.reverse(self.enemies)
 
-	for index = #self.enemies, 1, -1 do
-		if not self.enemies[index]:isKongcheng() and self:objectiveLevel(self.enemies[index]) > 0 then
+	for _, enemy in ipairs(self.enemies) do
+		if not enemy:isKongcheng() and self:objectiveLevel(enemy) > 0
+			and (self:hasSuit("heart", false, enemy) or self:getKnownNum(eneny) ~= enemy:getHandcardNum()) then
 			use.card = card
 			if use.to then
-				use.to:append(self.enemies[index])
+				use.to:append(enemy)
 			end
 			return
 		end
@@ -160,6 +161,7 @@ sgs.ai_skill_use_func.GongxinCard=function(card,use,self)
 end
 
 sgs.ai_skill_askforag.gongxin = function(self, card_ids)
+	self.gongxinchoice = nil
 	local target = self.player:getTag("gongxin"):toPlayer()
 	if not target or self:isFriend(target) then return -1 end
 	local nextAlive = self.player
@@ -178,12 +180,17 @@ sgs.ai_skill_askforag.gongxin = function(self, card_ids)
 		if card:isKindOf("Slash") then slash = id end
 	end
 	valuable = peach or ex_nihilo or jink or nullification or slash or card_ids[1]
-
-	if sgs.Sanguosha:getCard(valuable):getSuit() == sgs.Card_Heart and target:hasSkill("tuntian") then
-		self.gongxinchoice = "put"
-		return valueable
+	local card = sgs.Sanguosha:getCard(valuable)
+	if self:isEnemy(target) and target:hasSkill("tuntian") then
+		local zhangjiao = self.room:findPlayerBySkillName("guidao")
+		if zhangjiao and self:isFriend(zhangjiao, target) and self:canRetrial(zhangjiao, target) and self:isValuableCard(card, zhangjiao) then
+			self.gongxinchoice = "discard"
+		else
+			self.gongxinchoice = "put"
+		end
+		return valuable
 	end
-	
+
 	local willUseExNihilo, willRecast
 	if self:getCardsNum("ExNihilo") > 0 then
 		local ex_nihilo = self:getCard("ExNihilo")
@@ -280,7 +287,7 @@ sgs.ai_skill_askforag.gongxin = function(self, card_ids)
 		end
 	end
 
-	if self:isFriend(nextAlive) and not self:willSkipDrawPhase() and not self:willSkipPlayPhase()
+	if self:isFriend(nextAlive) and not self:willSkipDrawPhase(nextAlive) and not self:willSkipPlayPhase(nextAlive)
 		and not nextAlive:hasSkill("luoshen")
 		and not nextAlive:hasSkill("tuxi") and not (nextAlive:hasSkill("qiaobian") and nextAlive:getHandcardNum() > 0) then
 		if (peach and valuable == peach) or (ex_nihilo and valuable == ex_nihilo) then
@@ -824,10 +831,10 @@ function SmartAI:getSaveNum(isFriend)
 					num = num + self:getSuitNum("diamond", true, player)
 					num = num + player:getHandcardNum() * 0.4
 				end
-				if player:hasSkill("nosjiefan") and getCardsNum("Slash", player) > 0 then
-					if self:isFriend(player) or self:getCardsNum("Jink") == 0 then num = num + getCardsNum("Slash", player) end
+				if player:hasSkill("nosjiefan") and getCardsNum("Slash", player, self.player) > 0 then
+					if self:isFriend(player) or self:getCardsNum("Jink") == 0 then num = num + getCardsNum("Slash", player, self.player) end
 				end
-				num = num + getCardsNum("Peach", player)
+				num = num + getCardsNum("Peach", player, self.player)
 			end
 			if player:hasSkill("buyi") and not player:isKongcheng() then num = num + 0.3 end
 			if player:hasSkill("chunlao") and not player:getPile("wine"):isEmpty() then num = num + player:getPile("wine"):length() end
@@ -842,7 +849,7 @@ end
 
 function SmartAI:canSaveSelf(player)
 	if hasBuquEffect(player) then return true end
-	if getCardsNum("Analeptic", player) > 0 then return true end
+	if getCardsNum("Analeptic", player, self.player) > 0 then return true end
 	if player:hasSkill("jiushi") and player:faceUp() then return true end
 	if player:hasSkill("jiuchi") then
 		for _, c in sgs.qlist(player:getHandcards()) do
