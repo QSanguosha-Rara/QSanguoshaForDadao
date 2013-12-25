@@ -18,7 +18,7 @@ function sgs.CreateTriggerSkill(spec)
 			skill:addEvent(event)
 		end
 	end
-	
+
 	if type(spec.global) == "boolean" then skill:setGlobal(spec.global) end
 
 	skill.on_trigger = spec.on_trigger
@@ -86,16 +86,16 @@ end
 function sgs.CreateAttackRangeSkill(spec)
 	assert(type(spec.name) == "string")
 	assert(type(spec.extra_func) == "function" or type(spec.fixed_func) == "function")
-	
+
 	local skill = sgs.LuaAttackRangeSkill(spec.name)
-	
+
 	if spec.extra_func then
 		skill.extra_func = spec.extra_func
 	end
 	if spec.fixed_func then
 		skill.fixed_func = spec.fixed_func
 	end
-	
+
 	return skill
 end
 
@@ -120,42 +120,42 @@ end
 
 function sgs.CreateMasochismSkill(spec)
 	assert(type(spec.on_damaged) == "function")
-	
+
 	spec.events = sgs.Damaged
-	
+
 	function spec.on_trigger(skill, event, player, data)
 		local damage = data:toDamage()
 		spec.on_damaged(skill, player, damage)
 		return false
 	end
-	
+
 	return sgs.CreateTriggerSkill(spec)
 end
 
 function sgs.CreatePhaseChangeSkill(spec)
 	assert(type(spec.on_phasechange) == "function")
-	
+
 	spec.events = sgs.EventPhaseStart
-	
+
 	function spec.on_trigger(skill, event, player, data)
 		return spec.on_phasechange(skill, player)
 	end
-	
+
 	return sgs.CreateTriggerSkill(spec)
 end
 
 function sgs.CreateDrawCardsSkill(spec)
 	assert(type(spec.draw_num_func) == "function")
-	
+
 	if not spec.is_initial then spec.events = sgs.DrawNCards else spec.events = sgs.DrawInitialCards end
-	
+
 	function spec.on_trigger(skill, event, player, data)
 		local n = data:toInt()
 		local nn = spec.draw_num_func(skill, player, n)
 		data:setValue(nn)
 		return false
 	end
-	
+
 	return sgs.CreateTriggerSkill(spec)
 end
 
@@ -180,7 +180,7 @@ function sgs.CreateFakeMoveSkill(spec)
 	else
 		skillname = spec.skillname
 	end
-	
+
 	local fakemove = sgs.LuaTriggerSkill("#" .. skillname .. "-fake-move", sgs.Skill_NotFrequent, "")
 	fakemove:addEvent(sgs.BeforeCardsMove)
 	fakemove:addEvent(sgs.CardsMoveOneTime)
@@ -191,16 +191,16 @@ function sgs.CreateFakeMoveSkill(spec)
 	function fakemove.on_trigger(skill, event, player, data)
 		local room = player:getRoom()
 		local flag = skillname .. "_InTempMoving"
-		
+
 		for _, p in sgs.qlist(room:getAllPlayers()) do
 			if p:hasFlag(flag) then return true end
 		end
-		
+
 		return false
 	end
-	
+
 	return fakemove
-	
+
 end
 
 --------------------------------------------
@@ -224,11 +224,11 @@ function sgs.CreateSkillCard(spec)
 	if type(spec.can_recast) == "boolean" then
 		card:setCanRecast(spec.can_recast)
 	end
-		
+
 	if type(spec.handling_method) == "number" then
 		card:setHandlingMethod(spec.handling_method)
 	end
-	
+
 	if type(spec.mute) == "boolean" then
 		card:setMute(spec.mute)
 	end
@@ -252,7 +252,7 @@ function sgs.CreateBasicCard(spec)
 	if spec.number then assert(type(spec.number) == "number") end
 	if spec.subtype then assert(type(spec.subtype) == "string") end
 	local card = sgs.LuaBasicCard(spec.suit or sgs.Card_NoSuit, spec.number or 0, spec.name, spec.class_name, spec.subtype or "BasicCard")
-	
+
 	if type(spec.target_fixed) == "boolean" then
 		card:setTargetFixed(spec.target_fixed)
 	end
@@ -380,7 +380,7 @@ function onNullified_DelayedTrick_movable(self, target)
 	local players = room:getOtherPlayers(target)
 	players:append(target)
 	local p = nil
- 
+
 	for _, player in sgs.qlist(players) do
 		if player:containsTrick(self:objectName()) then continue end
 
@@ -420,28 +420,28 @@ function onNullified_DelayedTrick_movable(self, target)
 	end
 	if p then self:on_nullified(p) end
 end
- 
+
 function onNullified_DelayedTrick_unmovable(self, target)
 	local reason = sgs.CardMoveReason(sgs.CardMoveReason_S_REASON_NATURAL_ENTER, target:objectName())
 	target:getRoom():throwCard(self, reason, nil)
 end
 
 -- ============================================
- 
+
 function sgs.CreateTrickCard(spec)
 	assert(type(spec.name) == "string" or type(spec.class_name) == "string")
 	if not spec.name then spec.name = spec.class_name
 	elseif not spec.class_name then spec.class_name = spec.name end
 	if spec.suit then assert(type(spec.suit) == "number") end
 	if spec.number then assert(type(spec.number) == "number") end
-	
+
 	if spec.subtype then
 		assert(type(spec.subtype) == "string")
 	else
 		local subtype_table = { "TrickCard", "single_target_trick", "delayed_trick", "aoe", "global_effect" }
 		spec.subtype = subtype_table[(spec.subclass or 0) + 1]
 	end
-	
+
 	local card = sgs.LuaTrickCard(spec.suit or sgs.Card_NoSuit, spec.number or 0, spec.name, spec.class_name, spec.subtype)
 
 	if type(spec.target_fixed) == "boolean" then
@@ -519,14 +519,14 @@ function sgs.CreateOneCardViewAsSkill(spec)
 	if spec.response_pattern then assert(type(spec.response_pattern) == "string") end
 	local response_pattern = spec.response_pattern or ""
 	if spec.filter_pattern then assert(type(spec.filter_pattern) == "string") end
-	
+
 	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern)
-	
+
 	function skill:view_as(cards)
 		if #cards ~= 1 then return nil end
 		return spec.view_as(self, cards[1])
 	end
-	
+
 	function skill:view_filter(selected, to_select)
 		if #selected >= 1 or to_select:hasFlag("using") then return false end
 		if spec.view_filter then return spec.view_filter(self, to_select) end
@@ -539,11 +539,11 @@ function sgs.CreateOneCardViewAsSkill(spec)
 			return sgs.Sanguosha:matchExpPattern(pat, sgs.Self, to_select)
 		end
 	end
-	
+
 	skill.enabled_at_play = spec.enabled_at_play
 	skill.enabled_at_response = spec.enabled_at_response
 	skill.enabled_at_nullification = spec.enabled_at_nullification
-	
+
 	return skill
 end
 
@@ -551,22 +551,22 @@ function sgs.CreateZeroCardViewAsSkill(spec)
 	assert(type(spec.name) == "string")
 	if spec.response_pattern then assert(type(spec.response_pattern) == "string") end
 	local response_pattern = spec.response_pattern or ""
-	
+
 	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern)
-	
+
 	function skill:view_as(cards)
 		if #cards > 0 then return nil end
 		return spec.view_as(self)
 	end
-	
+
 	function skill:view_filter(selected, to_select)
 		return false
 	end
-	
+
 	skill.enabled_at_play = spec.enabled_at_play
 	skill.enabled_at_response = spec.enabled_at_response
 	skill.enabled_at_nullification = spec.enabled_at_nullification
-	
+
 	return skill
 end
 

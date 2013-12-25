@@ -18,7 +18,7 @@ config = {
 		qun = "#8A807A",
 		god = "#96943D",
 	},
-	
+
 	package_names = {
 		"StandardCard",
 		"StandardExCard",
@@ -101,7 +101,7 @@ config = {
 		"杀！神挡杀神！佛挡杀佛！",
 		"你也忒坏了吧？！"
 	},
-	
+
 	robot_names = {
 		"啦啦SLG",
 		"Fsu0413",
@@ -179,7 +179,7 @@ config = {
 		"bgm_lvmeng",
 		"zhanggongqi"
 	},
-	
+
 	hegemony_ban = {
 		"xiahoujuan" ,
 		"neo2013_sp_guanyu" ,
@@ -244,7 +244,7 @@ config = {
 		"wis_jiangwei+zhanggongqi", "luxun+zhanggongqi", "wis_jiangwei+xunyou", "kongrong+caozhi", "heg_dengai+guojia", "luji+erzhang", "luji+caozhi",
 		"tadun+yuanshao", "tadun+shenlvbu", "zhuran+hetaihou", "liru+shenlvbu", "zhugejin+zhangjiao", "zhugejin+nos_zhangjiao"
 	},
-	
+
 	couple_lord = "caocao",
 	couple_couples = {
 		"caopi|caozhi+zhenji",
@@ -261,7 +261,7 @@ config = {
 		"diy_simazhao+diy_wangyuanji",
 		"liuxie|diy_liuxie+fuhuanghou"
 	},
-	
+
 	convert_pairs = {
 		"caiwenji->sp_caiwenji",
 		"jiaxu->sp_jiaxu",

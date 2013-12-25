@@ -4,22 +4,22 @@ return {
 
 	["$koftuxi1"] = "哼，没想到吧！" ,
 	["$koftuxi2"] = "拿来吧。" ,
-	
+
 	["$xiechan"] = "与我较量一番！" ,
-	
+
 	-- 甄姬1v1
 	["$kofqingguo1"] = "凌波微步，罗袜生尘。",
 	["$kofqingguo2"] = "休迅飞凫，飘忽若神。",
-	
+
 	["huwei"] = "武神现世，天下莫敌！" ,
-	
-	["$kofxiaoxi"] = "（枪声，马叫声）" , 
-	
+
+	["$kofxiaoxi"] = "（枪声，马叫声）" ,
+
 	["kofliegong1"] = "中！" ,
 	["kofliegong2"] = "百步穿杨！" ,
-	
+
 	["$manyi"] = "（南蛮地区的水声）" ,
-	
+
 	["$yinli"] = "看我的厉害。" ,
 	["$kofxiaoji1"] = "哼。" ,
 	["$kofxiaoji2"] = "看我的厉害。" ,
