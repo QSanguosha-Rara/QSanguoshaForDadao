@@ -1217,6 +1217,28 @@ end
 
 sgs.ai_chaofeng.yuejin = 2
 
+function getNextJudgeReason(self, player)
+	if self:playerGetRound(player) > 2 then
+		if player:hasSkills("ganglie|vsganglie") then return end
+		local caiwenji = self.room:findPlayerBySkillName("beige")
+		if caiwenji and caiwenji:canDiscard(caiwenji, "he") and self:isFriend(caiwenji, player) then return end
+		if player:hasArmorEffect("EightDiagram") or player:hasSkill("bazhen") then
+			if self:playerGetRound(player) > 3 and self:isEnemy(player) then return "EightDiagram"
+			else return end
+		end
+	end
+	if self:isFriend(player) and player:hasSkill("luoshen") then return "luoshen" end
+	if not player:getJudgingArea():isEmpty() and not player:containsTrick("YanxiaoCard") then
+		return player:getJudgingArea():last():objectName()
+	end
+	if player:hasSkill("qianxi") then return "qianxi" end
+	if player:hasSkill("nosmiji") and player:getLostHp() > 0 then return "nosmiji" end
+	if player:hasSkill("tuntian") then return "tuntian" end
+	if player:hasSkill("tieji") then return "tieji" end
+	if player:hasSkill("nosqianxi") then return "nosqianxi" end
+	if player:hasSkill("caizhaoji_hujia") then return "caizhaoji_hujia" end
+end
+
 local zhoufu_skill = {}
 zhoufu_skill.name = "zhoufu"
 table.insert(sgs.ai_skills, zhoufu_skill)
@@ -1234,6 +1256,7 @@ sgs.ai_skill_use_func.ZhoufuCard = function(card, use, self)
 	self:sort(self.friends_noself)
 	local zhenji
 	for _, friend in ipairs(self.friends_noself) do
+		if friend:getPile("incantation"):length() > 0 then continue end
 		local reason = getNextJudgeReason(self, friend)
 		if reason then
 			if reason == "luoshen" then
@@ -1264,6 +1287,32 @@ sgs.ai_skill_use_func.ZhoufuCard = function(card, use, self)
 						return
 					end
 				end
+			elseif reason == "nosmiji" then
+				for _, card in ipairs(cards) do
+					if card:getSuit() == sgs.Card_Club or (card:getSuit() == sgs.Card_Spade and not friend:hasSkill("hongyan")) then
+						use.card = sgs.Card_Parse("@ZhoufuCard=" .. card:getEffectiveId())
+						if use.to then use.to:append(friend) end
+						return
+					end
+				end
+			elseif reason == "nosqianxi" or reason == "tuntian" then
+				for _, card in ipairs(cards) do
+					if (card:getSuit() ~= sgs.Card_Heart and not (card:getSuit() == sgs.Card_Spade and friend:hasSkill("hongyan")))
+						and (friend:hasSkill("tiandu") or not self:isValuableCard(card)) then
+						use.card = sgs.Card_Parse("@ZhoufuCard=" .. card:getEffectiveId())
+						if use.to then use.to:append(friend) end
+						return
+					end
+				end
+			elseif reason == "tieji" or reason == "caizaoji-hujia" then
+				for _, card in ipairs(cards) do
+					if (card:isRed() or card:getSuit() == sgs.Card_Spade and friend:hasSkill("hongyan"))
+						and (friend:hasSkill("tiandu") or not self:isValuableCard(card)) then
+						use.card = sgs.Card_Parse("@ZhoufuCard=" .. card:getEffectiveId())
+						if use.to then use.to:append(friend) end
+						return
+					end
+				end
 			end
 		end
 	end
@@ -1278,6 +1327,7 @@ sgs.ai_skill_use_func.ZhoufuCard = function(card, use, self)
 	end
 	self:sort(self.enemies)
 	for _, enemy in ipairs(self.enemies) do
+		if enemy:getPile("incantation"):length() > 0 then continue end
 		local reason = getNextJudgeReason(self, enemy)
 		if not enemy:hasSkill("tiandu") and reason then
 			if reason == "indulgence" then
@@ -1300,6 +1350,79 @@ sgs.ai_skill_use_func.ZhoufuCard = function(card, use, self)
 			elseif reason == "lightning" and not enemy:hasSkills("hongyan|wuyan") then
 				for _, card in ipairs(cards) do
 					if card:getSuit() == sgs.Card_Spade and card:getNumber() >= 2 and card:getNumber() <= 9 then
+						use.card = sgs.Card_Parse("@ZhoufuCard=" .. card:getEffectiveId())
+						if use.to then use.to:append(enemy) end
+						return
+					end
+				end
+			elseif reason == "nosmiji" then
+				for _, card in ipairs(cards) do
+					if card:isRed() or card:getSuit() == sgs.Card_Spade and enemy:hasSkill("hongyan") then
+						use.card = sgs.Card_Parse("@ZhoufuCard=" .. card:getEffectiveId())
+						if use.to then use.to:append(enemy) end
+						return
+					end
+				end
+			elseif reason == "nosqianxi" or reason == "tuntian" then
+				for _, card in ipairs(cards) do
+					if (card:getSuit() == sgs.Card_Heart or card:getSuit() == sgs.Card_Spade and enemy:hasSkill("hongyan"))
+						and not self:isValuableCard(card) then
+						use.card = sgs.Card_Parse("@ZhoufuCard=" .. card:getEffectiveId())
+						if use.to then use.to:append(enemy) end
+						return
+					end
+				end
+			elseif reason == "tieji" or reason == "caizaoji-hujia" then
+				for _, card in ipairs(cards) do
+					if (card:getSuit() == sgs.Card_Club or (card:getSuit() == sgs.Card_Spade and not enemy:hasSkill("hongyan")))
+						and not self:isValuableCard(card) then
+						use.card = sgs.Card_Parse("@ZhoufuCard=" .. card:getEffectiveId())
+						if use.to then use.to:append(enemy) end
+						return
+					end
+				end
+			end
+		end
+	end
+	
+	local has_indulgence, has_supplyshortage
+	local friend
+	for _, p in ipairs(self.friends) do
+		if getKnownCard(p, "Indulgence", true, "he") > 0 then
+			has_indulgence = true
+			friend = p
+			break
+		end
+		if getKnownCard(p, "SupplySortage", true, "he") > 0 then
+			has_supplyshortage = true
+			friend = p
+			break
+		end
+	end
+	if has_indulgence then
+		local indulgence = sgs.Sanguosha:cloneCard("indulgence")
+		for _, enemy in ipairs(self.enemies) do
+			if enemy:getPile("incantation"):length() > 0 then continue end
+			if self:hasTrickEffective(indulgence, enemy, friend) and self:playerGetRound(friend) < self:playerGetRound(enemy) and not self:willSkipPlayPhase(enemy) then
+				for _, card in ipairs(cards) do
+					if not (card:getSuit() == sgs.Card_Heart or (enemy:hasSkill("hongyan") and card:getSuit() == sgs.Card_Spade))
+						and not self:isValuableCard(card) then
+						use.card = sgs.Card_Parse("@ZhoufuCard=" .. card:getEffectiveId())
+						if use.to then use.to:append(enemy) end
+						return
+					end
+				end
+			end
+		end
+	elseif has_supplyshortage then
+		local supplyshortage = sgs.Sanguosha:cloneCard("supply_shortage")
+		local distance = self:getDistanceLimit(supplyshortage, friend)
+		for _, enemy in ipairs(self.enemies) do
+			if enemy:getPile("incantation"):length() > 0 then continue end
+			if self:hasTrickEffective(supplyshortage, enemy, friend) and self:playerGetRound(friend) < self:playerGetRound(enemy)
+				and not self:willSkipDrawPhase(enemy) and friend:distanceTo(enemy) <= distance then
+				for _, card in ipairs(cards) do
+					if card:getSuit() ~= sgs.Card_Club and not self:isValuableCard(card) then
 						use.card = sgs.Card_Parse("@ZhoufuCard=" .. card:getEffectiveId())
 						if use.to then use.to:append(enemy) end
 						return
@@ -1743,24 +1866,6 @@ sgs.ai_use_priority.DuwuCard = 0.6
 sgs.ai_use_value.DuwuCard = 2.45
 sgs.dynamic_value.damage_card.DuwuCard = true
 sgs.ai_card_intention.DuwuCard = 80
-
-function getNextJudgeReason(self, player)
-	if self:playerGetRound(player) > 2 then
-		if player:hasSkills("ganglie|vsganglie") then return end
-		local caiwenji = self.room:findPlayerBySkillName("beige")
-		if caiwenji and caiwenji:canDiscard(caiwenji, "he") and self:isFriend(caiwenji, player) then return end
-		if player:hasArmorEffect("EightDiagram") or player:hasSkill("bazhen") then
-			if self:playerGetRound(player) > 3 and self:isEnemy(player) then return "EightDiagram"
-			else return end
-		end
-	end
-	if self:isFriend(player) and player:hasSkill("luoshen") then return "luoshen" end
-	if not player:getJudgingArea():isEmpty() and not player:containsTrick("YanxiaoCard") then
-		return player:getJudgingArea():last():objectName()
-	end
-	if player:hasSkill("qianxi") then return "qianxi" end
-end
-
 
 sgs.ai_skill_invoke.cv_sunshangxiang = function(self, data)
 	local lord = self.room:getLord()

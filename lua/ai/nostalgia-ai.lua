@@ -179,7 +179,7 @@ function sgs.ai_slash_prohibit.nosenyuan(self, from, to, card)
 end
 
 sgs.ai_need_damaged.nosenyuan = function (self, attacker, player)
-	if player:hasSkill("nosenyuan") and self:isEnemy(attacker, player) and self:isWeak(attacker)
+	if player:hasSkill("nosenyuan") and attacker and self:isEnemy(attacker, player) and self:isWeak(attacker)
 		and not (self:needToLoseHp(attacker) and not self:hasSkills(sgs.masochism_skill, attacker)) then
 			return true
 	end
@@ -644,7 +644,8 @@ function sgs.ai_slash_prohibit.nosleiji(self, from, to, card)
 		end
 	end
 
-	if getKnownCard(to, "Jink", true) >= 1 or (self:hasSuit("spade", true, to) and hcard >= 2) then return true end
+	if sgs.card_lack[to:objectName()]["Jink"] == 2 then return true end
+	if getKnownCard(to, "Jink", true) >= 1 or (self:hasSuit("spade", true, to) and hcard >= 2) or hcard >= 4 then return true end
 	if self:hasEightDiagramEffect(to) then return true end
 end
 
@@ -955,7 +956,8 @@ sgs.ai_skill_use["@@nosfengyin"] = function(self, data)
 	if self:isFriend(target) and self:willSkipPlayPhase(target) and target:getHandcardNum() + 2 > target:getHp() and target:getHp() >= self.player:getHp() then
 		return "@NosFengyinCard="..card_id
 	end
-	if self:isEnemy(target) and not self:willSkipPlayPhase(target) and target:getHandcardNum() >= target:getHp() and target:getHp() >= self.player:getHp() then
+	if self:isEnemy(target) and not target:hasSkill("yongsi") and not self:willSkipPlayPhase(target) and target:getHandcardNum() >= target:getHp()
+			and target:getHp() >= self.player:getHp() then
 		return "@NosFengyinCard="..card_id
 	end
 	return "."

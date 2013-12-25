@@ -116,7 +116,7 @@ function setInitialTables()
 						"yinling|jilve|qingcheng|neoluoyi|diyyicong"
 	sgs.need_equip_skill = 		"shensu|mingce|jujian|beige|yuanhu|huyuan|gongqi|nosgongqi|yanzheng|qingcheng|neoluoyi|longhun|shuijian"
 	sgs.judge_reason =		"bazhen|EightDiagram|wuhun|supply_shortage|tuntian|nosqianxi|nosmiji|indulgence|lightning|baonue"..
-									"|nosleiji|leiji|caizhaoji_hujia|tieji|luoshen|ganglie|neoganglie|vsganglie"
+									"|nosleiji|leiji|caizhaoji_hujia|tieji|luoshen|ganglie|neoganglie|vsganglie|kofkuanggu"
 
 	sgs.Friend_All = 0
 	sgs.Friend_Draw = 1
@@ -360,12 +360,26 @@ function SmartAI:assignKeep(num, start)
 			end
 		end
 		
-		if not self:isWeak() and (self.player:getHp() > getBestHp(self.player) or self:getDamagedEffects(self.player) or not sgs.isGoodTarget(self.player, self.friends, self)) then
-			self.keepdata.ThunderSlash = 5.3
-			self.keepdata.FireSlash = 5.2
-			self.keepdata.Slash = 5.1
-			self.keepdata.Jink = 4.2
+		if not self:isWeak() then
+		local needDamaged = false
+		if self.player:getHp() > getBestHp(self.player) then needDamaged = true end
+		if not needDamaged and not sgs.isGoodTarget(self.player, self.friends, self) then needDamaged = true end
+		if not needDamaged then
+			for _, skill in sgs.qlist(self.player:getVisibleSkillList()) do
+				local callback = sgs.ai_need_damaged[skill:objectName()]
+				if type(callback) == "function" and callback(self, nil, self.player) then
+					needDamaged = true
+					break
+				end
+			end
 		end
+		if needDamaged then
+			self.keepdata.ThunderSlash = 5.2
+			self.keepdata.FireSlash = 5.1
+			self.keepdata.Slash = 5
+			self.keepdata.Jink = 4.5
+		end
+	end
 
 		for _, enemy in ipairs(self.enemies) do
 			if enemy:hasSkill("nosqianxi") and enemy:distanceTo(self.player) == 1 then
@@ -427,7 +441,7 @@ function SmartAI:getKeepValue(card, kept, Write)
 		if CardPlace == sgs.Player_PlaceHand then
 			local v = self.keepValue[card:getId()]
 			if not v then
-				self.room:writeToConsole(debug.traceback())
+				-- self.room:writeToConsole(debug.traceback())
 				v = 0
 			end
 			return v
@@ -1937,7 +1951,7 @@ function SmartAI:filterEvent(event, player, data)
 		end
 	end
 
-	if self.player:objectName() == player:objectName() and player:getPhase() == sgs.Player_NotActive and event == sgs.CardsMoveOneTime then
+	if self.player:objectName() == player:objectName() and player:getPhase() ~= sgs.Player_Play and event == sgs.CardsMoveOneTime then
 		local move = data:toMoveOneTime()
 		if move.to and move.to:objectName() == player:objectName() and move.to_place == sgs.Player_PlaceHand and player:getHandcardNum() > 1 then
 			self:assignKeep(false, true)
@@ -2087,6 +2101,7 @@ function SmartAI:filterEvent(event, player, data)
 		local from = damage.from
 		local to = damage.to
 		local source = self.room:getCurrent()
+		local reason = damage.reason
 
 		if not damage.card then
 			local intention
@@ -2096,6 +2111,8 @@ function SmartAI:filterEvent(event, player, data)
 				intention = 80
 				from = xunyu
 			elseif from and (from:hasFlag("ShenfenUsing") or from:hasFlag("FenchengUsing")) then
+				intention = 0
+			elseif reason == "zhendu" then
 				intention = 0
 			else
 				intention = 100
@@ -3686,6 +3703,9 @@ function SmartAI:willUsePeachTo(dying)
 			then
 		return "."
 	end
+	
+	if self.role ~= "rebel" and isLord(dying) and self.player:aliveCount() > 2 then
+		return self:getCardId("Peach") end
 
 	if isLord(self.player) and dying:objectName() ~= self.player:objectName() and self:getEnemyNumBySeat(self.room:getCurrent(), self.player, self.player) > 0 and
 		self:getCardsNum("Peach") == 1 and self:isWeak() and self.player:getHp() == 1 then return "." end
@@ -5678,7 +5698,7 @@ function SmartAI:needToLoseHp(to, from, isSlash, passive, recover)
 			return false
 		end
 	end
-	if self:hasHeavySlashDamage(from) then return false end
+	if self:hasHeavySlashDamage(from, nil, to) then return false end then return false end
 	if from:hasSkill("jueqing") and self:hasSkills(sgs.masochism_skill, to) then return false end
 	local n = getBestHp(to)
 

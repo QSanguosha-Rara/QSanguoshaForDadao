@@ -179,6 +179,11 @@ sgs.ai_skill_askforag.gongxin = function(self, card_ids)
 	end
 	valuable = peach or ex_nihilo or jink or nullification or slash or card_ids[1]
 
+	if sgs.Sanguosha:getCard(valuable):getSuit() == sgs.Card_Heart and target:hasSkill("tuntian") then
+		self.gongxinchoice = "put"
+		return valueable
+	end
+	
 	local willUseExNihilo, willRecast
 	if self:getCardsNum("ExNihilo") > 0 then
 		local ex_nihilo = self:getCard("ExNihilo")
