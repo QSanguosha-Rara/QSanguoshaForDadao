@@ -1212,7 +1212,7 @@ sgs.ai_skill_use["@@xingsuan"]=function(self, prompt)
 	if #clubcards > 0 and willput then return "@XingsuanCard="..table.concat(clubcards, "+").."->".."." end
 	return "."
 end
-sgs.ai_chaofeng.luji = 0.5
+sgs.ai_chaofeng.luji = 4
 
 
 sgs.ai_skill_discard.fuji = function(self, discard_num, min_num, optional, include_equip)
