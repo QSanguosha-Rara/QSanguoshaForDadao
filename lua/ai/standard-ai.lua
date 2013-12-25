@@ -878,7 +878,7 @@ sgs.ai_skill_use_func.RendeCard = function(card, use, self)
 	use.card = card
 end
 
-sgs.ai_skill_askforyiji.rende = ssg.ai_skill_askforyiji.yiji
+sgs.ai_skill_askforyiji.rende = sgs.ai_skill_askforyiji.yiji
 
 --[[
 sgs.ai_skill_use_func.RendeCard = function(card, use, self)
