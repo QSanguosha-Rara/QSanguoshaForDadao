@@ -1738,7 +1738,7 @@ public:
             Config.AIDelay = 0;
             while (!cards.empty()) {
                 room->fillAG(cards, zhanglu);
-                int id = room->askForAG(zhanglu, cards, true, objectName());
+                int id = room->askForAG(zhanglu, cards, true, "xiliang");
                 if (id == -1) {
                     room->clearAG(zhanglu);
                     break;

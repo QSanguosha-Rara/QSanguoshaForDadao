@@ -1,4 +1,5 @@
 if sgs.GetConfig("GameMode", ""):match("zombie") then
+--[[
 	function sgs.ai_filterskill_filter.ganran(card, card_place)
 		if card:getTypeId() == sgs.Card_Equip then
 			local str = string.format("iron_chain:ganran[%s:%s]=%d",
@@ -33,7 +34,7 @@ if sgs.GetConfig("GameMode", ""):match("zombie") then
 			return acard
 		end
 	end
-
+]]
 	local useTrickCard = SmartAI.useTrickCard
 	function SmartAI:useTrickCard(card, use)
 		if #self.enemies == 0 then

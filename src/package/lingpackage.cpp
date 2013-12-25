@@ -2895,7 +2895,7 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     addMetaObject<Neo2013XiechanCard>();
 
     skills << new Neo2013HuileiDecrease << new Neo2013Huwei
-        << new Neo2013Tongwu << new Neo2013Bingyin << new Neo2013Touxi << new Neo2013Muhui << new Neo2013MuhuiDis;
+        << new Neo2013Tongwu << new Neo2013Bingyin << new Neo2013Touxi << new Neo2013TouxiRange << new Neo2013Muhui << new Neo2013MuhuiDis;
 }
 
 ADD_PACKAGE(Ling2013)

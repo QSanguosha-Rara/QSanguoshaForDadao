@@ -30,7 +30,7 @@ shemi_skill.getTurnUseCard = function(self)
 						am:addSubcard(second_card)
 						local dummy_use = {isDummy = true}
 						self:useTrickCard(am, dummy_use)
-						if not dummy_use.card then 
+						if not dummy_use.card then
 							first_card=nil
 							second_card=nil
 							break
@@ -939,7 +939,7 @@ end
 sgs.ai_playerchosen_intention.manwu = 30
 
 sgs.ai_skill_invoke.annei = function(self, data)
-    local damage = data:toDamage()
+	local damage = data:toDamage()
 	local from = damage.from
 	local target = damage.to
 	if self:isFriend(target) and (self:isWeak(target) or target:getHp() < 3) and not self:needToLoseHp(target, from) then return true end
@@ -1437,6 +1437,12 @@ sgs.ai_skill_use_func.DuyiCard = function(card,use,self)
 end
 
 sgs.ai_skill_playerchosen.duyi = function(self, targets)
+	if sgs.ai_duyi then
+		local tg = sgs.ai_duyi.tg
+		local card = sgs.ai_duyi.id and sgs.Sanguosha:getCard(sgs.ai_duyi.id)
+		sgs.ai_duyi = nil
+		if card and card:isBlack() and tg then return tg end
+	end
 	if self:needBear() then return self.player end
 	local to
 	if self:getOverflow() < 0 then
@@ -1462,3 +1468,4 @@ end
 sgs.ai_skill_choice.duanzhi = function(self, choices)
 	return "discard"
 end
+
