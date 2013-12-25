@@ -284,7 +284,7 @@ return {
 	["@xuanying-movefield2"] = "请选择移动【%arg】的目标角色",
 	["xuanying:discardpile"] = "移动移出游戏的牌" ,
 	["@xuanying-discardpile"] = "你可以选择一名角色，将其移出游戏的牌置入弃牌堆" ,
-	[":xuanying:exchangehandcards"] = "交换手牌" ,
+	["xuanying:exchangehandcards"] = "交换手牌" ,
 	["@xuanying-exchangehandcards1"] = "你可以选择一名角色，获得其所有手牌，然后你须将相同数量的手牌交给其" ,
 	["@xuanying-exchangehandcards2"] = "请选择交换给 %src 的 %arg 张手牌" ,
 	["xingyun"] = "行云" ,
