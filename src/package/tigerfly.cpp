@@ -2933,7 +2933,15 @@ public:
             //case 2: discard an out-of-game card
             bool flag2 = false;
             foreach (ServerPlayer *p, room->getAlivePlayers()){
-                if (!p->getPileNames().isEmpty()){
+                QStringList pilenames = p->getPileNames();
+                bool fflag2 = false;
+                foreach (QString pilename, pilenames){
+                    if (!p->getPile(pilename).isEmpty()){
+                        fflag2 = true;
+                        break;
+                    }
+                }
+                if (fflag2){
                     flag2 = true;
                     break;
                 }
@@ -3001,13 +3009,21 @@ public:
             else if (choice == "discardpile"){
                 QList<ServerPlayer *> players;
                 foreach (ServerPlayer *p, room->getAlivePlayers()){
-                    if (!p->getPileNames().isEmpty())
+                    QStringList pilenames = p->getPileNames();
+                    bool fflag2 = false;
+                    foreach (QString pilename, pilenames){
+                        if (!p->getPile(pilename).isEmpty()){
+                            fflag2 = true;
+                            break;
+                        }
+                    }
+                    if (fflag2)
                         players << p;
                 }
 
                 room->broadcastSkillInvoke(objectName(), 3);
 
-                ServerPlayer *target = room->askForPlayerChosen(player, players, objectName() + "_discardpile_target", "@xuanying-discardpile", false, true);
+                ServerPlayer *target = room->askForPlayerChosen(player, players, objectName() + "_discardpile_target", "@xuanying-discardpile", false);
                 QList<int> outofgamecards;
                 foreach (QString pile_name, target->getPileNames())
                     outofgamecards << target->getPile(pile_name);
@@ -3028,7 +3044,7 @@ public:
 
                 room->broadcastSkillInvoke(objectName(), 4);
 
-                ServerPlayer *target = room->askForPlayerChosen(player, players, objectName() + "_exchangehandcards_target", "@xuanying-exchangehandcards1", false, true);
+                ServerPlayer *target = room->askForPlayerChosen(player, players, objectName() + "_exchangehandcards_target", "@xuanying-exchangehandcards1", false);
                 int num = target->getHandcardNum();
                 
                 DummyCard *handcards = target->wholeHandCards();
