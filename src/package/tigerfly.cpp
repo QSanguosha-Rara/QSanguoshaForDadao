@@ -2917,7 +2917,7 @@ public:
             room->broadcastSkillInvoke(objectName(), 1);
 
             if (qrand() % 4 == 1)
-                room->doLightbox("$dadaopic", 3750);
+                room->doLightbox("$dadaopic", 7500);
 
             player->drawCards(1);
 
