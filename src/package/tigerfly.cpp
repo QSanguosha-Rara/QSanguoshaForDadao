@@ -2930,7 +2930,7 @@ public:
                 }
             }
 
-            //case 2: discard an out-of-game card
+            //case 2: let someone obtain an out-of-game card
             bool flag2 = false;
             foreach (ServerPlayer *p, room->getAlivePlayers()){
                 QStringList pilenames = p->getPileNames();
@@ -3023,7 +3023,7 @@ public:
 
                 room->broadcastSkillInvoke(objectName(), 3);
 
-                ServerPlayer *target = room->askForPlayerChosen(player, players, objectName() + "_discardpile_target", "@xuanying-discardpile", false);
+                ServerPlayer *target = room->askForPlayerChosen(player, players, objectName() + "_discardpile_target1", "@xuanying-discardpile1", false);
                 QList<int> outofgamecards;
                 foreach (QString pile_name, target->getPileNames())
                     outofgamecards << target->getPile(pile_name);
@@ -3032,8 +3032,8 @@ public:
                 int to_discard = room->askForAG(player, outofgamecards, false, objectName() + "_discardpile");
                 room->clearAG(player);
 
-                CardMoveReason reason(CardMoveReason::S_REASON_REMOVE_FROM_PILE, player->objectName(), objectName(), QString());
-                room->moveCardTo(Sanguosha->getCard(to_discard), NULL, Player::DiscardPile, reason, true);
+                ServerPlayer *target2 = room->askForPlayerChosen(player, room->getAlivePlayers(), objectName() + "_discardpile_target2", "@xuanying-discardpile2", false);
+                target2->obtainCard(Sanguosha->getCard(to_discard));
             }
             else if (choice == "exchangehandcards"){
                 QList<ServerPlayer *> players;
