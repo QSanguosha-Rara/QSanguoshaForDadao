@@ -404,10 +404,54 @@ public:
     }
 };
 
+
+XuanfengCard::XuanfengCard(){
+}
+
+bool XuanfengCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    if (targets.length() >= 2 || to_select == Self)
+        return false;
+
+    return Self->canDiscard(to_select, "he");
+}
+
+void XuanfengCard::use(Room *room, ServerPlayer *lingtong, QList<ServerPlayer *> &targets) const{
+    lingtong->setFlags("XuanfengUsed");
+    QMap<ServerPlayer*,int> map;
+    int totaltarget = 0;
+    foreach(ServerPlayer* sp, targets)
+        map[sp]++;
+    totaltarget = map.keys().size();
+    // only chose one and throw only one card of him is forbiden
+    if(totaltarget == 1) map[targets.first()] = 2;
+
+    foreach(ServerPlayer* sp, targets){
+        while(map[sp] > 0){
+            if(lingtong->isAlive() && sp->isAlive() && lingtong->canDiscard(sp, "he")){
+                int card_id = room->askForCardChosen(lingtong, sp, "he", "xuanfeng", false, Card::MethodDiscard);
+                room->throwCard(card_id, sp, lingtong);
+            }
+            map[sp]--;
+        }
+    }
+}
+
+class XuanfengViewAsSkill: public ZeroCardViewAsSkill{
+public:
+    XuanfengViewAsSkill():ZeroCardViewAsSkill("xuanfeng"){
+        response_pattern = "@@xuanfeng";
+    }
+
+    virtual const Card *viewAs() const{
+        return new XuanfengCard;
+    }
+};
+
 class Xuanfeng: public TriggerSkill {
 public:
     Xuanfeng(): TriggerSkill("xuanfeng") {
         events << CardsMoveOneTime << EventPhaseChanging;
+        view_as_skill = new XuanfengViewAsSkill;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -436,34 +480,7 @@ public:
                 }
                 if (targets.isEmpty())
                     return false;
-
-                if (lingtong->askForSkillInvoke(objectName())) {
-                    if (!move.from_places.contains(Player::PlaceEquip))
-                        lingtong->setFlags("XuanfengUsed");
-                    room->broadcastSkillInvoke(objectName());
-
-                    ServerPlayer *first = room->askForPlayerChosen(lingtong, targets, "xuanfeng");
-                    ServerPlayer *second = NULL;
-                    int first_id = -1;
-                    int second_id = -1;
-                    if (first != NULL) {
-                        first_id = room->askForCardChosen(lingtong, first, "he", "xuanfeng", false, Card::MethodDiscard);
-                        room->throwCard(first_id, first, lingtong);
-                    }
-                    if (!lingtong->isAlive())
-                        return false;
-                    targets.clear();
-                    foreach (ServerPlayer *target, room->getOtherPlayers(lingtong)) {
-                        if (lingtong->canDiscard(target, "he"))
-                            targets << target;
-                    }
-                    if (!targets.isEmpty())
-                        second = room->askForPlayerChosen(lingtong, targets, "xuanfeng");
-                    if (second != NULL) {
-                        second_id = room->askForCardChosen(lingtong, second, "he", "xuanfeng", false, Card::MethodDiscard);
-                        room->throwCard(second_id, second, lingtong);
-                    }
-                }
+                room->askForUseCard(lingtong, "@@xuanfeng", "@xuanfeng-card");
             }
         }
 
