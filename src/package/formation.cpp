@@ -753,7 +753,7 @@ public:
         }
         else {
             if ((move.from == player && (move.from_places[move.card_ids.indexOf(fldfid)] == Player::PlaceHand || move.from_places[move.card_ids.indexOf(fldfid)] == Player::PlaceEquip))
-                    && (move.to != player || (move.to_place != Player::PlaceHand && move.to_place != Player::PlaceEquip))
+                    && (move.to != player || (move.to_place != Player::PlaceHand && move.to_place != Player::PlaceEquip && move.to_place != Player::DrawPile))
                     /*&& player->askForSkillInvoke(objectName())*/){ // infinity loop
                 room->showCard(player, fldfid);
                 move.from_places.removeAt(move.card_ids.indexOf(fldfid));
