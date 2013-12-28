@@ -222,7 +222,6 @@ public:
 
     // just for convenience
     void addQinggangTag(const Card *card);
-    bool hasQinggangTag(const Card *card) const;
     void removeQinggangTag(const Card *card);
 
     void copyFrom(Player *p);
