@@ -1,5 +1,6 @@
 #include "joypackage.h"
 #include "engine.h"
+#include "maneuvering.h"
 
 Shit::Shit(Suit suit, int number):BasicCard(suit, number){
     setObjectName("shit");
@@ -493,10 +494,520 @@ public:
     }
 };
 
+class Jieao: public PhaseChangeSkill{
+public:
+    Jieao(): PhaseChangeSkill("jieao"){
+        frequency = Compulsory;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() == Player::Start){
+            Room *room = target->getRoom();
+            room->broadcastSkillInvoke(objectName());
+            room->notifySkillInvoked(target, objectName());
+
+            target->drawCards(2);
+        }
+
+        return false;
+    }
+};
+
+YuluCard::YuluCard() {
+    target_fixed = true;
+    will_throw = false;
+    handling_method = Card::MethodNone;
+}
+
+void YuluCard::use(Room *, ServerPlayer *source, QList<ServerPlayer *> &) const{
+    source->addToPile("yulu", subcards);
+}
+
+class Yulu: public ViewAsSkill{
+public:
+    Yulu(): ViewAsSkill("yulu"){
+
+    }
+
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        if (selected.length() >= 5)
+            return false;
+
+        return !to_select->isEquipped();
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        if (cards.length() >= 2 && cards.length() <= 5){
+            YuluCard *yulu = new YuluCard;
+            yulu->addSubcards(cards);
+            return yulu;
+        }
+        return NULL;
+    }
+};
+
+NumaNRNMCard::NumaNRNMCard(){
+    m_skillName = "numa_nrnm";
+    mute = true;
+}
+
+bool NumaNRNMCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    if (targets.length() == 0)
+        return true;
+    else if (targets.length() == 1)
+        return (to_select != targets[0] && !to_select->isKongcheng());
+    
+    return false;
+}
+
+bool NumaNRNMCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
+    return targets.length() == 2;
+}
+
+void NumaNRNMCard::onUse(Room *room, const CardUseStruct &card_use) const{
+    ServerPlayer *miheng = card_use.from;
+
+    LogMessage log;
+    log.from = miheng;
+    log.to << card_use.to;
+    log.type = "#UseCard";
+    log.card_str = toString();
+    room->sendLog(log);
+
+    QVariant data = QVariant::fromValue(card_use);
+    RoomThread *thread = room->getThread();
+
+    thread->trigger(PreCardUsed, room, miheng, data);
+    thread->trigger(CardUsed, room, miheng, data);
+    thread->trigger(CardFinished, room, miheng, data);
+}
+
+void NumaNRNMCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+    room->showAllCards(targets[1], targets[0]);
+}
+
+class NumaNRNM: public ZeroCardViewAsSkill{
+public:
+    NumaNRNM(): ZeroCardViewAsSkill("numa"){
+        response_pattern = "@@numa-card1!";
+    }
+
+    virtual const Card *viewAs() const{
+        return new NumaNRNMCard;
+    }
+};
+
+class Numa: public PhaseChangeSkill{
+public:
+    Numa(): PhaseChangeSkill("numa"){
+        view_as_skill = new NumaNRNM;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return PhaseChangeSkill::triggerable(target) && target->getPhase() == Player::Finish && !target->getPile("yulu").isEmpty();
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *player) const{
+        static QMap<Card::Suit, QChar> suitmap;
+        if (suitmap.isEmpty()){
+            suitmap[Card::Heart] = 'w';
+            suitmap[Card::Spade] = 'r';
+            suitmap[Card::Diamond] = 'n';
+            suitmap[Card::Club] = 'm';
+        }
+
+        static QStringList knownyulu;
+        if (knownyulu.isEmpty()){
+            knownyulu << "wm" << "nm" << "mm" << "rn" << "wr" << "wrm" << "wrn" << "nrw" << "rnm" << "rwm" << "www" << "rrr" << "nnn" << "mmm"
+                      << "nmnm" << "wrnm" << "mmrw" << "nrnm" << "nrwm" << "nrwmm" << "wrnmm" << "nmrwm" << "rrnmm" << "rrrmm" << "wwwww";
+        }
+
+        QString to_speak;
+
+        QList<int> yulu = player->getPile("yulu");
+        foreach (int id, yulu){
+            to_speak = to_speak + suitmap[Sanguosha->getCard(id)->getSuit()];
+        }
+
+        if (!knownyulu.contains(to_speak))
+            to_speak = "unknown" + QString::number(qMin(yulu.length(), 6));
+
+
+
+        if (player->askForSkillInvoke(objectName(), "speak:::yulu_" + to_speak)){
+            Room *room = player->getRoom();
+            LogMessage log;
+            log.type = "#numaspeak";
+            if (!to_speak.startsWith("unknown"))
+                log.arg = "yulu_" + to_speak;
+            else
+                log.arg = "yulu_unknown";
+            log.from = player;
+            room->sendLog(log);
+
+            DummyCard dummy(yulu);
+            CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, player->objectName(), objectName(), QString());
+            room->moveCardTo(&dummy, NULL, Player::DiscardPile, reason, true);
+
+            //lightbox
+
+            if (to_speak == "wm"){
+                RecoverStruct recover;
+                recover.who = player;
+                room->recover(player, recover);
+            }
+            else if (to_speak == "nm"){
+                QList<ServerPlayer *> pls;
+                foreach (ServerPlayer *p, room->getAlivePlayers()){
+                    if (p->canDiscard(p, "h"))
+                        pls << p;
+                }
+
+                if (pls.isEmpty())
+                    return false;
+
+                ServerPlayer *victim = room->askForPlayerChosen(player, pls, objectName() + "_nm", "@numa_nm", false, true);
+                room->askForDiscard(victim, objectName() + "_nm", 2, 2, false, false);
+            }
+            else if (to_speak == "mm"){
+                QList<ServerPlayer *> pls;
+                foreach (ServerPlayer *p, room->getAlivePlayers()){
+                    if (player->canDiscard(p, "j"))
+                        pls << p;
+                }
+
+                if (pls.isEmpty())
+                    return false;
+
+                ServerPlayer *victim = room->askForPlayerChosen(player, pls, objectName() + "_mm", "@numa_mm", false, true);
+                DummyCard dummy2(victim->getJudgingAreaID());
+                CardMoveReason reason(CardMoveReason::S_REASON_NATURAL_ENTER, player->objectName(), victim->objectName(), objectName(), QString());
+                room->moveCardTo(&dummy2, NULL, Player::DiscardPile, reason, true);
+            }
+            else if (to_speak == "rn"){
+                QList<ServerPlayer *> pls;
+                foreach (ServerPlayer *p, room->getOtherPlayers(player)){
+                    if (!p->isKongcheng())
+                        pls << p;
+                }
+
+                if (pls.isEmpty())
+                    return false;
+
+                ServerPlayer *victim = room->askForPlayerChosen(player, pls, objectName() + "_rn", "@numa_rn", false, true);
+                const Card *card = room->askForExchange(victim, objectName() + "_rn", 1);
+                player->obtainCard(card, false);
+                RecoverStruct recover;
+                recover.who = player;
+                room->recover(victim, recover);
+            }
+            else if (to_speak == "wr"){
+                JudgeStruct judge;
+                judge.who = player;
+                judge.pattern = "Peach,GodSalvation";
+                judge.good = true;
+                judge.reason = objectName() + "_wr";
+
+                room->judge(judge);
+
+                if (judge.isGood()){
+                    room->handleAcquireDetachSkills(player, "fanchun");
+                }
+            }
+            else if (to_speak == "wrm" || to_speak == "wrn"){
+                QList<ServerPlayer *> pls;
+                bool selectMale = (to_speak == "wrn");
+                bool selectFemale = (to_speak == "wrm");
+                foreach (ServerPlayer *p, room->getOtherPlayers(player)){
+                    if (p->isMale() == selectMale && p->isFemale() == selectFemale)
+                        pls << p;
+                }
+
+                if (pls.isEmpty())
+                    return false;
+
+                ServerPlayer *target = room->askForPlayerChosen(player, pls, objectName() + "_" + to_speak, "@numa_" + to_speak, false, true);
+                RecoverStruct recover;
+                recover.who = player;
+                room->recover(player, recover);
+                room->recover(target, recover);
+            }
+            else if (to_speak == "nrw"){
+                QList<ServerPlayer *> pls;
+                foreach (ServerPlayer *p, room->getOtherPlayers(player)){
+                    if (p->canSlash(player))
+                        pls << p;
+                }
+
+                if (pls.isEmpty())
+                    return false;
+
+                ServerPlayer *victim = room->askForPlayerChosen(player, pls, objectName() + "_nrw", "@numa_nrw", false, true);
+                bool slashed = room->askForUseSlashTo(victim, player, "@numa_nrw_slash");
+                if (!slashed){
+                    DummyCard dummy3;
+                    dummy3.addSubcards(victim->getCards("he"));
+                    room->moveCardTo(&dummy3, player, Player::PlaceHand, false);
+                }
+            }
+            else if (to_speak == "rnm" || to_speak == "wrnm"){
+                if (to_speak == "rnm")
+                    room->setPlayerMark(player, "drank", 0);
+                else
+                    room->setPlayerMark(player, "drank", 1);
+                
+                int ri = (to_speak == "rnm") ? yulu[0] : yulu[1];
+                int riPoint = Sanguosha->getCard(ri)->getNumber();
+
+                Slash *slash;
+                if (riPoint < 5)
+                    slash = new ThunderSlash(Card::NoSuit, 0);
+                else if (riPoint > 9)
+                    slash = new FireSlash(Card::NoSuit, 0);
+                else
+                    slash = new Slash(Card::NoSuit, 0);
+
+                QList<ServerPlayer *> pls;
+                foreach (ServerPlayer *p, room->getOtherPlayers(player)){
+                    if (player->canSlash(p, false))
+                        pls << p;
+                }
+
+                if (pls.isEmpty()){
+                    delete slash;
+                    return false;
+                }
+
+                slash->setSkillName("_numa_" + to_speak);
+                ServerPlayer *victim = room->askForPlayerChosen(player, pls, objectName() + "_" + to_speak, "@numa_" + to_speak + ":" + slash->objectName(), false, true);
+                CardUseStruct use(slash, player, victim, true);
+                room->useCard(use);
+            }
+            else if (to_speak == "rwm"){
+                ServerPlayer *victim = room->askForPlayerChosen(player, room->getAlivePlayers(), objectName() + "_rwm", "@numa_rwm", false, true);
+                room->damage(DamageStruct(objectName() + "_rwm", victim, player));
+                RecoverStruct recover;
+                recover.who = player;
+                room->recover(victim, recover);
+            }
+            else if (to_speak == "www"){
+                player->turnOver();
+                player->drawCards(3);
+            }
+            else if (to_speak == "rrr"){
+                ServerPlayer *victim = room->askForPlayerChosen(player, room->getAlivePlayers(), objectName() + "_rrr", "@numa_rrr", false, true);
+                victim->turnOver();
+                victim->drawCards(player->getLostHp());
+            }
+            else if (to_speak == "nnn"){
+                ServerPlayer *victim = room->askForPlayerChosen(player, room->getAlivePlayers(), objectName() + "_nnn", "@numa_nnn", false, true);
+                victim->obtainCard(&dummy);
+            }
+            else if (to_speak == "mmm"){
+                QList<ServerPlayer *> pls;
+                foreach (ServerPlayer *p, room->getAlivePlayers()){
+                    if (!p->getEquips().isEmpty())
+                        pls << p;
+                }
+
+                if (pls.isEmpty())
+                    return false;
+
+                ServerPlayer *victim = room->askForPlayerChosen(player, pls, objectName() + "_mmm", "@numa_mmm", false, true);
+                DummyCard dummy4;
+                dummy4.addSubcards(victim->getEquips());
+                room->throwCard(&dummy4, victim, player);
+            }
+            else if (to_speak == "nmnm"){
+                ServerPlayer *victim = room->askForPlayerChosen(player, room->getAlivePlayers(), objectName() + "_nmnm", "@numa_nmnm", false, true);
+                victim->gainAnExtraTurn();
+            }
+            else if (to_speak == "mmrw"){
+                RecoverStruct recover;
+                recover.recover = player->getLostHp();
+                recover.who = player;
+                room->recover(player, recover);
+            }
+            else if (to_speak == "nrnm"){
+                room->askForUseCard(player, "@@numa-card1!", "@numa_nrnm", 1, Card::MethodNone);
+            }
+            else if (to_speak == "nrwm"){
+                DamageStruct damage;
+                damage.from = player;
+                room->killPlayer(player, &damage);
+            }
+            else if (to_speak == "nrwmm"){
+                ServerPlayer *victim = room->askForPlayerChosen(player, room->getAlivePlayers(), objectName() + "_nrwmm", "@numa_nrwmm", false, true);
+                room->setPlayerFlag(victim, "numa_nrwmm_InTempMoving");
+                QList<int> discard_ids;
+                QList<Player::Place> discard_places;
+                for (int i = 1; i <= 4; i++)
+                    if (player->canDiscard(victim, "he")){
+                        int id = room->askForCardChosen(player, victim, "he", objectName() + "_nrwmm", player == victim, Card::MethodDiscard);
+                        discard_ids << id;
+                        discard_places << room->getCardPlace(id);
+                        victim->addToPile("#numa_nrwmm", id);
+                    }
+                    else
+                        break;
+                
+                for (int i = 0; i < discard_ids.length(); i++)
+                    room->moveCardTo(Sanguosha->getCard(discard_ids[i]), victim, discard_places[i], false);
+                room->setPlayerFlag(victim, "-numa_nrwmm_InTempMoving");
+                DummyCard dummy5(discard_ids);
+                room->throwCard(&dummy5, victim, player);
+
+                room->damage(DamageStruct(objectName() + "_nrwmm", player, player, 2));
+            }
+            else if (to_speak == "wrnmm"){
+                if (player->getMark("@numawrnmm") == 0){
+                    player->gainMark("@numawrnmm");
+                    ServerPlayer *victim = room->askForPlayerChosen(player, room->getAlivePlayers(), objectName() + "_wrnmm", "@numa_wrnmm", false, true);
+
+                    DamageStruct damage(objectName() + "_wrnmm", player, victim);
+                
+                    damage.nature = DamageStruct::Thunder;
+                    if (victim->isAlive())
+                        room->damage(damage);
+                    damage.nature = DamageStruct::Fire;
+                    if (victim->isAlive())
+                        room->damage(damage);
+                    damage.nature = DamageStruct::Normal;
+                    if (victim->isAlive())
+                        room->damage(damage);
+
+                    room->loseHp(player, 2);
+                }
+            }
+            else if (to_speak == "nmrwm"){
+                if (player->getMark("@numarrnmm") == 0){
+                    player->gainMark("@numanmrwm");
+                    room->loseHp(player);
+
+                    foreach (ServerPlayer *p, room->getOtherPlayers(player)){
+                        if (!p->isKongcheng()){
+                            int id = room->askForCardChosen(player, p, "h", objectName() + "_nmrwm");
+                            player->obtainCard(Sanguosha->getCard(id), false);
+                        }
+                    }
+
+                    player->turnOver();
+                }
+            }
+            else if (to_speak == "rrnmm"){
+                if (player->getMark("@numarrnmm") == 0){
+                    player->gainMark("@numarrnmm");
+                    QMap<ServerPlayer *, int> light;
+                    foreach (ServerPlayer *p, room->getAlivePlayers()){
+                        QList<const Card *> judgingarea = p->getJudgingArea();
+                        foreach (const Card *c, judgingarea){
+                            if (c->isKindOf("Lightning")){
+                                light[p] = c->getEffectiveId();
+                                break;
+                            }
+                        }
+                    }
+
+                    if (light.isEmpty())
+                        return false;
+
+                    ServerPlayer *victim = room->askForPlayerChosen(player, light.keys(), objectName() + "_rrnmm", "@numa_rrnmm", false, true);
+
+                    room->throwCard(light[victim], NULL);
+
+                    room->damage(DamageStruct(Sanguosha->getCard(light[victim]), NULL, victim, 3, DamageStruct::Thunder));
+                }
+            }
+            else if (to_speak == "rrrmm"){
+                if (player->getMark("@numarrrmm") == 0){
+                    player->gainMark("@numarrrmm");
+                    QList<ServerPlayer *> pls;
+                    foreach (ServerPlayer *p, room->getOtherPlayers(player)){
+                        if (p->getMaxHp() > player->getMaxHp())
+                            pls << p;
+                    }
+
+                    if (pls.isEmpty())
+                        return false;
+
+                    ServerPlayer *victim = room->askForPlayerChosen(player, pls, objectName() + "_rrrmm", "@numa_rrrmm", false, true);
+
+                    room->setPlayerProperty(victim, "maxhp", victim->getMaxHp() + 1);
+
+                    QString to_gain = room->askForChoice(player, objectName() + "_rrrmm", "benghuai+wumou", QVariant::fromValue(victim));
+                    room->handleAcquireDetachSkills(victim, to_gain);
+                }
+            }
+            else if (to_speak == "wwwww"){
+                room->changeHero(player, "dengai", true, true, false);
+                player->addToPile("field", &dummy, true);
+            }
+            else {
+                if (dummy.subcardsLength() == 4 && player->getMark("@numa4wd") == 0){
+                    player->gainMark("@numa4wd");
+
+                    if (room->changeMaxHpForAwakenSkill(player, 2)){
+                        QList<const Skill *> skillslist = player->getVisibleSkillList();
+                        QStringList detachlist;
+                        foreach (const Skill *skill, skillslist){
+                            if (skill->getLocation() == Skill::Right && !skill->isAttachedLordSkill())
+                                detachlist.append("-" + skill->objectName());
+                        }
+                        room->handleAcquireDetachSkills(player, detachlist);
+                        if (player->isAlive())
+                            player->gainMark("@duanchang");
+                    }
+                }
+                else if (dummy.subcardsLength() == 5 && player->getMark("@numa5wd") == 0){
+                    player->gainMark("@numa5wd");
+                    if (room->changeMaxHpForAwakenSkill(player))
+                        room->handleAcquireDetachSkills(player, "longhun");
+                }
+                else if (dummy.subcardsLength() >= 6 && player->getMark("@numa6wd") == 0){
+                    player->gainMark("@numa6wd");
+                    if (room->changeMaxHpForAwakenSkill(player, -2))
+                        room->handleAcquireDetachSkills(player, "wuyan|buqu");
+                }
+            }
+        }
+        return false;
+    }
+};
+
+class Fanchun: public MasochismSkill{
+public:
+    Fanchun(): MasochismSkill("fanchun"){
+        frequency = Frequent;
+    }
+
+    virtual void onDamaged(ServerPlayer *target, const DamageStruct &damage) const{
+        Room *room = target->getRoom();
+        const Card *card = damage.card;
+        if (card != NULL && room->getCardPlace(card->getEffectiveId()) == Player::PlaceTable){
+            if (target->askForSkillInvoke(objectName(), QVariant::fromValue(card))){
+                room->broadcastSkillInvoke(objectName());
+                target->addToPile("yulu", card);
+            }
+        }
+    }
+};
+
 DCPackage::DCPackage(): Package("DC"){
     General *xiahoujie = new General(this, "xiahoujie", "wei", 3);
     xiahoujie->addSkill(new Xianiao);
     xiahoujie->addSkill(new Tangqiang);
+
+    General *miheng = new General(this, "miheng", "god", 3);
+    miheng->addSkill(new Jieao);
+    miheng->addSkill(new Yulu);
+    miheng->addSkill(new Numa);
+    miheng->addSkill(new FakeMoveSkill("numa_nrwmm"));
+    related_skills.insertMulti("numa", "#numa_nrwmm-fake-move");
+    miheng->addRelateSkill("fanchun");
+    skills << new Fanchun;
+
+    addMetaObject<YuluCard>();
+    addMetaObject<NumaNRNMCard>();
 
 }
 
