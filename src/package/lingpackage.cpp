@@ -1499,7 +1499,7 @@ public:
         if (use.from == NULL || use.card == NULL || !use.card->isKindOf("Slash"))
             return false;
 
-        foreach (ServerPlayer *p, room->findPlayersBySkillName(objectName())
+        foreach (ServerPlayer *p, room->findPlayersBySkillName(objectName()))
             room->askForUseSlashTo(p, use.from, "@neo2013touxi-slash:" + use.from->objectName(), false);
 
         return false;
@@ -1513,7 +1513,7 @@ public:
     }
 
     virtual int getFixed(const Player *target, bool ) const{
-        if (target->hasSkill("neo2013touxi") {
+        if (target->hasSkill("neo2013touxi")) {
             const Player *current = NULL;
             foreach (const Player *p, target->getAliveSiblings()){
                 if (p->getPhase() != Player::NotActive){
