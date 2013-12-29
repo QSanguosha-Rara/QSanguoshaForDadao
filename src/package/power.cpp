@@ -560,7 +560,7 @@ public:
                     room->setPlayerFlag(p, "-powerZhibaInvoked");
             }
         }
-		return false;
+        return false;
     }
 };
 
@@ -1237,6 +1237,7 @@ PowerPackage::PowerPackage(): Package("Power"){
     addMetaObject<PowerZhibaCard>();
     addMetaObject<WuxinCard>();
     addMetaObject<WendaoCard>();
+    addMetaObject<HongfaCard>();
 }
 
 ADD_PACKAGE(Power)
