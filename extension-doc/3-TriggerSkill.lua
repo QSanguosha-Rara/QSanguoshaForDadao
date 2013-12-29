@@ -6,7 +6,7 @@
 
 --CreateTriggerSkill需要以下参数：
 
---name, frequency, events, on_trigger, can_trigger, priority
+--name, frequency, limit_mark, events, global, on_trigger, can_trigger, priority
 
 --name：
 --技能名称字符串
@@ -24,10 +24,19 @@
 	--ssg.Skill_Wake（觉醒技：该技能的默认优先度为2而不是1；该技能会在显示上提示玩家这是一个觉醒技）
 --frequency的默认值为sgs.Skill_NotFrequent
 
+--limit_mark:
+--字符串，如果此技能为限定技，则在游戏开始时会自动赋予以此值命名的mark。
+--无默认值。
+
 --events：
 --Event枚举类型，或者一个包含Event枚举类型的lua表。代表该技能的触发时机。
 --可用的Event列表请参考游戏代码中的struct.h文件。
 --无默认值。
+
+--global:
+--布尔值。指示此技能是否为全局触发技。
+--全局触发技加入技能表之后，即使没有人拥有这个技能，在游戏执行中只要满足can_trigger也会触发。
+--默认值为false，即此技能不是全局触发技。
 
 --on_trigger:
 --lua函数，无返回值，执行事件触发时的技能效果。
@@ -52,25 +61,27 @@
 
 --以下是曹操奸雄的实现：
 
-jianxiong=sgs.CreateTriggerSkill{
-	
-	frequency = sgs.Skill_NotFrequent,
-	
-	name      = "jianxiong",
-	
-	events={sgs.Damaged}, --或者events=sgs.Damaged
-	
-	on_trigger=function(self,event,player,data)
+Jianxiong = sgs.CreateTriggerSkill{
+	name = "Jianxiong",
+	events = {sgs.Damaged}, --或者events=sgs.Damaged
+	on_trigger = function(self, event, player, data)
 		local room = player:getRoom()
-		local card = data:toDamage().card
+		local damage = data:toDamage()
 		--这两步通常是必要的。我们需要room对象来操作大多数的游戏要素，我们也需要将data对象转成对应的数据类型来得到相应的信息。
-		if not room:obtainable(card,player) then return end
-		if room:askForSkillInvoke(player,"jianxiong") then
-			room:playSkillEffect("jianxiong")
-			player:obtainCard(card)
+		local card = damage.card
+		if card then
+			local id = card:getEffectiveId()
+			if room:getCardPlace(id) == sgs.Player_PlaceTable then
+				local card_data = sgs.QVariant()
+				card_data:setValue(card)
+				if room:askForSkillInvoke(player, self:objectName(), card_data) then
+					player:obtainCard(card);
+				end
+			end
 		end
 	end
 }
+
 --在on_trigger方法中，我们首先获取了room对象。
 
 --对于影响整盘游戏的效果，我们必须需要获取room对象。大多数情况下，room对象都是必须获取的。
@@ -79,11 +90,11 @@ jianxiong=sgs.CreateTriggerSkill{
 --对于Damaged事件（你受到了伤害），data对象的类型是DamageStruct，我们使用toDamage()得到DamageStruct。
 
 --询问技能发动时，需要使用room对象的askForSkillInvoke方法。
---playSkillEffect方法则可以播放技能的发动效果。（但是对技能发动效果本身没有影响）
+--broadcastSkillInvoke方法则可以播放技能的发动效果。（但是对技能发动效果本身没有影响）
 
 --player:obtainCard(card) 即让player得到造成伤害的card。
 
---在”某个阶段可触发“的技能，或者”摸牌时改为xx“这样的技能，可以使用PhaseChange事件来触发，并对event对象进行判断进行触发控制。
+--在”某个阶段可触发“的技能，或者”摸牌时改为xx“这样的技能，可以使用EventPhaseStart事件来触发，并对event对象进行判断进行触发控制。
 
 --对于在复数个时机发动的触发技，我们需要在on_trigger中使用条件语句。
 
@@ -95,7 +106,7 @@ yongsi=sgs.CreateTriggerSkill{
 	
 	name      = "yongsi",
 	
-	events={sgs.DrawNCards,sgs.PhaseChange}, --两个触发时机
+	events={sgs.DrawNCards,sgs.EventPhaseStart}, --两个触发时机
 	
 	on_trigger=function(self,event,player,data)
 	
@@ -116,10 +127,10 @@ yongsi=sgs.CreateTriggerSkill{
 		
 		if event==sgs.DrawNCards then 
 			--摸牌阶段，改变摸牌数
-			room:playSkillEffect("yongsi")
+			room:broadcastSkillInvoke("yongsi")
 			data:setValue(data:toInt()+getKingdoms()) 
 			--DrawNCards事件的data是一个int类型的QVariant即摸牌数，改变该QVariant对象会改变摸牌数
-		elseif (event==sgs.PhaseChange) and (player:getPhase()==sgs.Player_Discard) then
+		elseif (event==sgs.EventPhaseStart) and (player:getPhase()==sgs.Player_Discard) then
 			--进入弃牌阶段时，先执行庸肆弃牌，然后再执行常规弃牌
 			local x = getKingdoms()
 			local e = player:getEquips():length()+player:getHandcardNum()

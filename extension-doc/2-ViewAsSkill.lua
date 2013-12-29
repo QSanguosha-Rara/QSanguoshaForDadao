@@ -40,18 +40,24 @@
 
 --视为技在创建时，需要以下方法|变量的定义：
 
---name, response_pattern, n, view_filter, view_as, enabled_at_play, enabled_at_response和enabled_at_nullification
+--name, response_pattern, filter_pattern, n, view_filter, view_as, enabled_at_play, enabled_at_response和enabled_at_nullification
 
 --name：
 --一个字符串即技能名称。
 --该字段必须定义。（无默认值）
 
---response_pattern :
+--filter_pattern :
 --字符串，仅当视为技通过sgs.CreateOneCardViewAsSkill创建时有效
 --可以通过使用类似于ExpPattern格式（详见ExpPattern章节）的字符串匹配可被选中以发动技能的卡牌
 --与ExpPattern不同的是，此处可在可解析的ExpPattern末尾处加上字符"!"(无引号)
---以"!"结尾的response_pattern表明此技能选择的牌是以弃置为目的的（如离间、青囊），需要检测卡牌是否可以弃置
---默认值为空字符串，即不会与任何牌匹配成功。值得注意的是，当技能同时提供了response_pattern与view_filter时，前者失效，后者有效.
+--以"!"结尾的filter_pattern表明此技能选择的牌是以弃置为目的的（如离间、青囊），需要检测卡牌是否可以弃置
+--默认值为nil，即不会与任何牌匹配成功。值得注意的是，当技能同时提供了filter_pattern与view_filter时，前者失效，后者有效.
+
+--response_pattern :
+--字符串，可以指定响应牌的匹配规则
+--这个规则可以是以"@@"开头的技能牌pattern，也可以是牌的特定pattern（比如"slash"对应【杀】）
+--当此串不为空字符串时，此技能在出牌阶段不可以点击使用。
+--默认值为nil，即此技能为出牌阶段使用。值得注意的是，当技能同时提供了enabled_at_play或enabled_at_response与response_pattern时，前者有效，后者失效。
 
 --n：
 --整数值，每次发动技能所用牌数的最大值。绝大多数DIY用到的n可能都为1或2.
@@ -74,12 +80,13 @@
 --enabled_at_play
 --lua函数，返回一个布尔值，即你在出牌阶段是否可以使用该技能。（该按钮是否可点）
 --传入参数为self(技能对象本身)，player(玩家对象)
---默认为true，即如果你没有定义，你永远可以在出牌阶段使用本技能。
+--如果response_pattern不为nil，则如果你没有定义，你不可以在出牌阶段使用本技能。
+--如果response_pattern为nil，则如果你没有定义，你永远可以在出牌阶段使用本技能。
 
 --enabled_at_response
 --lua函数，返回一个布尔值，即你在需要用响应时，是否可以使用本技能进行响应。
 --传入参数为self(技能对象本身)，player(玩家对象),pattern(要求响应的牌的匹配规则)
---默认为false,即如果你没有定义，你永远不可以在响应时使用本技能。
+--默认为返回response_pattern，即如果你没有定义response_pattern，你永远不可以在响应时使用本技能。
 
 --enabled_at_nullification
 --lua函数，返回一个布尔值，即你在询问无懈可击时是否可以使用该技能。（该按钮是否可点）
@@ -88,16 +95,9 @@
 
 --** 实例
 
---以下为“任意一张草花牌”的view_filter方法：
+--以下为“任意一张草花牌”的filter_pattern：
 
-n=1,
-
-view_filter = function(self, selected, to_select)
-	return to_select:getSuit()==sgs.Card_Club
-end,
-
---getSuit()返回一张牌的花色的enum。
---如果to_select的花色为草花Club，则返回真（可被选择）。否则返回假（不可被选择）。
+filter_pattern = ".|spade" ,
 
 --以下为“任意两张同花色手牌“的view_filter方法：
 
@@ -107,6 +107,9 @@ view_filter = function(self, selected, to_select)
 	if #selected<1 then return not to_select:isEquipped() end
 	return to_select:getSuit()==selected[1]:getSuit() and not to_select:isEquipped()
 end,
+
+--getSuit()返回一张牌的花色的enum。
+--如果to_select的花色为草花Club，则返回真（可被选择）。否则返回假（不可被选择）。
 
 --如果选中的牌数小于1，那么任何未被装备的牌（手牌）都可以被选择；
 --否则，只有那些和已被选中的第一张牌花色相同的牌才能被选中。
@@ -170,7 +173,7 @@ end
 
 --以下是大乔”流离“的enabled_at_response方法：
 enabled_at_response=function(self, player, pattern)
-	return pattern=="@liuli_effect"
+	return pattern=="@@liuli"
 	--仅在询问流离时可以发动此技能
 end
 
@@ -180,7 +183,7 @@ end
 --2、在且仅在你响应使用"流离牌"时，你可以将任意一张牌视为"流离牌"使用。用视为技实现。
 --3、流离牌的效果为：流离牌的目标成为杀的目标，该杀跳过对你的结算。用技能牌实现。
 
---注意到正常情况下pattern永远不会自己就是"@liuli_effect"
---你需要在触发技当中使用room:askForUseCard(daqiao,"@liuli_effect",prompt)
---其中第二个参数最好由1~2个"@"开头，其后为响应的视为技名称，可以在末尾加"-card"，只有这样才能自动点选视为技按钮
+--注意到正常情况下pattern永远不会自己就是"@@liuli"
+--你需要在触发技当中使用room:askForUseCard(daqiao,"@@liuli",prompt)
+--其中第二个参数最好由2个"@"开头，其后为响应的视为技名称，可以在末尾加"-card"，只有这样才能自动点选视为技按钮
 --这样，就可以创造出一个专门用于流离的响应来。

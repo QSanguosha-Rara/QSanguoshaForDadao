@@ -496,7 +496,7 @@ function sgs.CreateViewAsSkill(spec)
 	local response_pattern = spec.response_pattern or ""
 
 	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern)
-	local n = spec.n or 0
+	local n = spec.n or 0  --Fs:I want to delete this property or change the default value to 998
 
 	function skill:view_as(cards)
 		return spec.view_as(self, cards)
