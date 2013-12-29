@@ -108,6 +108,24 @@ public:
     Q_INVOKABLE YxSword(Card::Suit suit, int number);
 };
 
+class YuluCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE YuluCard();
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+};
+
+class NumaNRNMCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE NumaNRNMCard();
+    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    virtual bool targetsFeasible(const QList<const Player *> &targets, const Player *Self) const;
+    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
+    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
+};
 
 class DCPackage: public Package{
     Q_OBJECT

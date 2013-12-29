@@ -959,11 +959,6 @@ void Player::addQinggangTag(const Card *card) {
     this->tag["Qinggang"] = QVariant::fromValue(qinggang);
 }
 
-bool Player::hasQinggangTag(const Card *card) const{
-    QStringList qinggang = this->tag["Qinggang"].toStringList();
-    return qinggang.contains(card->toString());
-}
-
 void Player::removeQinggangTag(const Card *card) {
     QStringList qinggang = this->tag["Qinggang"].toStringList();
     if (!qinggang.isEmpty()) {
