@@ -1499,7 +1499,7 @@ TouduCard::TouduCard(){
 }
 
 bool TouduCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    return targets.empty() && Self->canSlash(to_select, NULL, false);
+    return targets.isEmpty() && Self->canSlash(to_select, NULL, false);
 }
 
 void TouduCard::onEffect(const CardEffectStruct &effect) const{
@@ -1736,7 +1736,7 @@ public:
         if (zhanglu->askForSkillInvoke("xiliang", guzheng_cardsToGet)) {
             int ai_delay = Config.AIDelay;
             Config.AIDelay = 0;
-            while (!cards.empty()) {
+            while (!cards.isEmpty()) {
                 room->fillAG(cards, zhanglu);
                 int id = room->askForAG(zhanglu, cards, true, "xiliang");
                 if (id == -1) {

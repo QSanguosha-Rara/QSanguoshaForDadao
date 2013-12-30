@@ -464,7 +464,7 @@ void PowerZhibaCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *>
         if (p->hasLordSkill("powerzhiba") && !p->hasFlag("powerZhibaInvoked"))
             sunces << p;
     }
-    if (sunces.empty())
+    if (sunces.isEmpty())
         room->setPlayerFlag(source, "ForbidPowerZhiba");
 }
 
