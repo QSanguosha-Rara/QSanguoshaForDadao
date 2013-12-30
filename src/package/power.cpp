@@ -56,7 +56,7 @@ public:
             target = damage.to;
         else
             target = damage.from;
-        if (target == NULL || target->isDead())
+        if (target == NULL || target->isDead() || target->hasFlag("Global_KOFDebut"))
             return false;
 
         int x = damage.damage;

@@ -315,27 +315,24 @@ public:
         if (triggerEvent == Damage){
             DamageStruct damage = data.value<DamageStruct>();
             ServerPlayer *victim = damage.to;
-            if (player->getPhase() == Player::Play)
-                if (damage.card != NULL && damage.card->isKindOf("Slash"))
-                    if (damage.from == player)
-                        if (player->distanceTo(victim) == 1)
-                            if (!damage.chain && !damage.transfer)
-                                if (room->askForSkillInvoke(player, objectName())){
-                                    room->broadcastSkillInvoke(objectName(), 1);
-                                    JudgeStruct judge;
-                                    judge.pattern = ".|black";
-                                    judge.good = true;
-                                    judge.reason = objectName();
-                                    judge.who = player;
-                                    room->judge(judge);
-                                    room->getThread()->delay();
-                                    if (judge.isGood()){
-                                        room->addPlayerMark(player, "zhuixi_extra");
-                                        room->broadcastSkillInvoke(objectName(), 3);
-                                    }
-                                    else
-                                        room->broadcastSkillInvoke(objectName(), 2);
-                                }
+            if (player->getPhase() == Player::Play && damage.card != NULL && damage.card->isKindOf("Slash") && player->distanceTo(victim) == 1
+                    && !damage.chain && !damage.transfer && damage.by_user && player->askForSkillInvoke(objectName())){
+                room->broadcastSkillInvoke(objectName(), 1);
+                JudgeStruct judge;
+                judge.pattern = ".|black";
+                judge.good = true;
+                judge.reason = objectName();
+                judge.who = player;
+                judge.time_consuming = true;
+                room->judge(judge);
+
+                if (judge.isGood()){
+                    room->addPlayerMark(player, "zhuixi_extra");
+                    room->broadcastSkillInvoke(objectName(), 3);
+                }
+                else
+                    room->broadcastSkillInvoke(objectName(), 2);
+            }
         }
         else if (triggerEvent == EventPhaseChanging){
             PhaseChangeStruct change = data.value<PhaseChangeStruct>();
@@ -2269,7 +2266,7 @@ public:
         view_as_skill = new ChanyuVS;
     }
 
-    virtual int getPriority() const{
+    virtual int getPriority(TriggerEvent) const{
         return 1;
     }
 
@@ -2290,7 +2287,7 @@ public:
         events << CardEffected;
     }
 
-    virtual int getPriority() const{
+    virtual int getPriority(TriggerEvent) const{
         return -2;
     }
 
@@ -2444,7 +2441,7 @@ public:
 
     virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
-        if (damage.to != player && damage.to->getHp() <= player->getHp() && damage.to->isAlive()){
+        if (damage.to != player && damage.to->getHp() <= player->getHp() && damage.to->isAlive() && !damage.to->hasFlag("Global_KOFDebut")){
             QString choice = "draw";
 
             LogMessage l;
@@ -3109,7 +3106,7 @@ public:
         return false;
     }
 
-    virtual int getPriority() const{
+    virtual int getPriority(TriggerEvent) const{
         return 1;
     }
 };

@@ -301,6 +301,7 @@ void PlayerCardContainer::updatePile(const QString &pile_name) {
     if (pile.size() == 0) {
         if (_m_privatePiles.contains(pile_name)) {
             delete _m_privatePiles[pile_name];
+            _m_privatePiles[pile_name] = NULL;
             _m_privatePiles.remove(pile_name);
         }
     } else {
@@ -397,7 +398,7 @@ void PlayerCardContainer::_updateEquips() {
     }
 }
 
-void PlayerCardContainer::refresh() {
+void PlayerCardContainer::refresh(bool killed) {
     if (!m_player || !m_player->getGeneral() || !m_player->isAlive()) {
         _m_faceTurnedIcon->setVisible(false);
         _m_chainIcon->setVisible(false);
@@ -545,10 +546,17 @@ QPixmap PlayerCardContainer::_getEquipPixmap(const EquipCard *equip) {
     // equip suit
     painter.drawPixmap(_m_layout->m_equipSuitArea, G_ROOM_SKIN.getCardSuitPixmap(realCard->getSuit()));
     // equip point
-    _m_layout->m_equipPointFont.paintText(&painter,
-                                          _m_layout->m_equipPointArea,
-                                          Qt::AlignLeft | Qt::AlignVCenter,
-                                          realCard->getNumberString());
+    if (realCard->isRed()) {
+        _m_layout->m_equipPointFontRed.paintText(&painter,
+                                                 _m_layout->m_equipPointArea,
+                                                 Qt::AlignLeft | Qt::AlignVCenter,
+                                                 realCard->getNumberString());
+    } else {
+        _m_layout->m_equipPointFontBlack.paintText(&painter,
+                                                   _m_layout->m_equipPointArea,
+                                                   Qt::AlignLeft | Qt::AlignVCenter,
+                                                   realCard->getNumberString());
+    }
     // distance
     int index = (int)(equip->location());
     QString distance;
@@ -776,7 +784,7 @@ void PlayerCardContainer::_layBetween(QGraphicsItem *middle, QGraphicsItem *item
         _allZAdjusted = false;
 }
 
-void PlayerCardContainer::_adjustComponentZValues() {
+void PlayerCardContainer::_adjustComponentZValues(bool killed) {
     // all components use negative zvalues to ensure that no other generated
     // cards can be under us.
 
@@ -787,8 +795,10 @@ void PlayerCardContainer::_adjustComponentZValues() {
     _layUnder(_m_floatingArea);
     _layUnder(_m_distanceItem);
     _layUnder(_m_votesItem);
-    foreach (QGraphicsItem *pile, _m_privatePiles.values())
-        _layUnder(pile);
+    if (!killed){
+        foreach (QGraphicsItem *pile, _m_privatePiles.values())
+            _layUnder(pile);
+    }
     foreach (QGraphicsItem *judge, _m_judgeIcons)
         _layUnder(judge);
     _layUnder(_m_markItem);
@@ -817,7 +827,8 @@ void PlayerCardContainer::_adjustComponentZValues() {
     _layUnder(_m_circleItem);
     if (!second_zuoci)
         _layUnder(_m_smallAvatarIcon);
-    _layUnder(_m_huashenItem);
+    if (!killed)
+        _layUnder(_m_huashenItem);
     if (second_zuoci)
         _layUnder(_m_smallAvatarIcon);
     _layUnder(_m_avatarIcon);
@@ -904,7 +915,7 @@ void PlayerCardContainer::killPlayer() {
     effect->setColor(_m_layout->m_deathEffectColor);
     effect->setStrength(1.0);
     _m_groupMain->setGraphicsEffect(effect);
-    refresh();
+    refresh(true);
     if (ServerInfo.GameMode == "04_1v3" && !m_player->isLord()) {
         _m_deathIcon->hide();
         _m_votesGot = 6;

@@ -353,7 +353,7 @@ public:
         events << Debut;
     }
 
-    virtual int getPriority() const{
+    virtual int getPriority(TriggerEvent) const{
         return 5;
     }
 
@@ -861,7 +861,7 @@ bool PujiCard::targetFilter(const QList<const Player *> &targets, const Player *
 
 void PujiCard::onEffect(const CardEffectStruct &effect) const{
     Room *room = effect.from->getRoom();
-    int id = room->askForCardChosen(effect.from, effect.to, "he", "puji");
+    int id = room->askForCardChosen(effect.from, effect.to, "he", "puji", false, Card::MethodDiscard);
     room->throwCard(id, effect.to, effect.from);
 
     if (effect.from->isAlive() && this->getSuit() == Card::Spade)
@@ -979,7 +979,7 @@ public:
         events << BuryVictim;
     }
 
-    virtual int getPriority() const{
+    virtual int getPriority(TriggerEvent) const{
         return -2;
     }
 
@@ -1065,7 +1065,7 @@ public:
         events << TargetConfirmed << EventPhaseStart;
     }
 
-    virtual int getPriority() const{
+    virtual int getPriority(TriggerEvent) const{
         return 4;
     }
 

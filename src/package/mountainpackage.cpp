@@ -992,18 +992,26 @@ public:
 class Fangquan: public TriggerSkill {
 public:
     Fangquan(): TriggerSkill("fangquan") {
-        events << EventPhaseChanging;
+        events << EventPhaseChanging << EventPhaseStart;
         view_as_skill = new FangquanViewAsSkill;
+    }
+
+    virtual int getPriority(TriggerEvent triggerEvent) const{
+        if (triggerEvent == EventPhaseStart)
+            return 1;
+        else
+            return TriggerSkill::getPriority(triggerEvent);
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *liushan, QVariant &data) const{
-        PhaseChangeStruct change = data.value<PhaseChangeStruct>();
-        switch (change.to) {
-        case Player::Play: {
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *liushan, QVariant &data) const{
+        if (triggerEvent == EventPhaseChanging) {
+            PhaseChangeStruct change = data.value<PhaseChangeStruct>();
+            switch (change.to) {
+            case Player::Play: {
                 bool invoked = false;
                 if (!TriggerSkill::triggerable(liushan) || liushan->isSkipped(Player::Play))
                     return false;
@@ -1013,42 +1021,26 @@ public:
                     liushan->skip(Player::Play, true);
                 }
                 break;
-            }
-        case Player::NotActive: {
+                               }
+            case Player::NotActive: {
                 if (liushan->hasFlag(objectName())) {
                     if (!liushan->canDiscard(liushan, "h"))
                         return false;
                     room->askForUseCard(liushan, "@@fangquan", "@fangquan-give", -1, Card::MethodDiscard);
                 }
                 break;
-            }
-        default:
+                                    }
+            default:
                 break;
-        }
-        return false;
-    }
-};
-
-class FangquanGive: public PhaseChangeSkill {
-public:
-    FangquanGive(): PhaseChangeSkill("#fangquan-give") {
-    }
-
-    virtual int getPriority() const{
-        return 1;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL && target->getPhase() == Player::NotActive;
-    }
-
-    virtual bool onPhaseChange(ServerPlayer *liushan) const{
-        Room *room = liushan->getRoom();
-        if (!room->getTag("FangquanTarget").isNull()) {
-            PlayerStar target = room->getTag("FangquanTarget").value<PlayerStar>();
-            room->removeTag("FangquanTarget");
-            if (target->isAlive())
-                target->gainAnExtraTurn();
+            }
+        } else if (triggerEvent == EventPhaseStart && liushan->getPhase() == Player::NotActive) {
+            Room *room = liushan->getRoom();
+            if (!room->getTag("FangquanTarget").isNull()) {
+                PlayerStar target = room->getTag("FangquanTarget").value<PlayerStar>();
+                room->removeTag("FangquanTarget");
+                if (target->isAlive())
+                    target->gainAnExtraTurn();
+            }
         }
         return false;
     }
@@ -1332,33 +1324,18 @@ void HuashenDialog::popup() {
     show();
 }
 
-class HuashenBegin: public PhaseChangeSkill {
+class HuashenSelect: public PhaseChangeSkill {
 public:
-    HuashenBegin(): PhaseChangeSkill("#huashen-begin") {
+    HuashenSelect(): PhaseChangeSkill("#huashen-select") {
     }
 
-    virtual int getPriority() const{
+    virtual int getPriority(TriggerEvent) const{
         return 4;
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
-        return PhaseChangeSkill::triggerable(target) && target->getPhase() == Player::RoundStart;
-    }
-
-    virtual bool onPhaseChange(ServerPlayer *zuoci) const{
-        if (zuoci->askForSkillInvoke("huashen"))
-            Huashen::SelectSkill(zuoci);
-        return false;
-    }
-};
-
-class HuashenEnd: public PhaseChangeSkill {
-public:
-    HuashenEnd(): PhaseChangeSkill("#huashen-end") {
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return PhaseChangeSkill::triggerable(target) && target->getPhase() == Player::NotActive;
+        return PhaseChangeSkill::triggerable(target) && 
+                (target->getPhase() == Player::RoundStart || target->getPhase() == Player::NotActive);
     }
 
     virtual bool onPhaseChange(ServerPlayer *zuoci) const{
@@ -1419,10 +1396,8 @@ MountainPackage::MountainPackage()
     liushan->addSkill(new Xiangle);
     liushan->addSkill(new XiangleRemoveMark);
     liushan->addSkill(new Fangquan);
-    liushan->addSkill(new FangquanGive);
     liushan->addSkill(new Ruoyu);
     related_skills.insertMulti("xiangle", "#xiangle");
-    related_skills.insertMulti("fangquan", "#fangquan-give");
 
     General *sunce = new General(this, "sunce$", "wu"); // WU 010
     sunce->addSkill(new Jiang);
@@ -1437,12 +1412,10 @@ MountainPackage::MountainPackage()
 
     General *zuoci = new General(this, "zuoci", "qun", 3); // QUN 009
     zuoci->addSkill(new Huashen);
-    zuoci->addSkill(new HuashenBegin);
-    zuoci->addSkill(new HuashenEnd);
+    zuoci->addSkill(new HuashenSelect);
     zuoci->addSkill(new HuashenClear);
     zuoci->addSkill(new Xinsheng);
-    related_skills.insertMulti("huashen", "#huashen-begin");
-    related_skills.insertMulti("huashen", "#huashen-end");
+    related_skills.insertMulti("huashen", "#huashen-select");
     related_skills.insertMulti("huashen", "#huashen-clear");
 
     General *caiwenji = new General(this, "caiwenji", "qun", 3, false); // QUN 012

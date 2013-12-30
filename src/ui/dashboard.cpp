@@ -112,8 +112,8 @@ void Dashboard::_createMiddle() {
     trusting_text->hide();
 }
 
-void Dashboard::_adjustComponentZValues() {
-    PlayerCardContainer::_adjustComponentZValues();
+void Dashboard::_adjustComponentZValues(bool killed) {
+    PlayerCardContainer::_adjustComponentZValues(killed);
     // make sure right frame is on top because we have a lot of stuffs
     // attached to it, such as the rolecomboBox, which should not be under
     // middle frame
@@ -195,7 +195,7 @@ void Dashboard::setDeathColor() {
     effect->setColor(_m_layout->m_deathEffectColor);
     effect->setStrength(1.0);
     this->setGraphicsEffect(effect);
-    refresh();
+    refresh(true);
 }
 
 bool Dashboard::_addCardItems(QList<CardItem *> &card_items, const CardsMoveStruct &moveInfo) {

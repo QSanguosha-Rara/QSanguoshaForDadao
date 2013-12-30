@@ -33,7 +33,7 @@ bool GameRule::triggerable(const ServerPlayer *) const{
     return true;
 }
 
-int GameRule::getPriority() const{
+int GameRule::getPriority(TriggerEvent) const{
     return 0;
 }
 
@@ -1019,7 +1019,7 @@ QString BasaraMode::getMappedRole(const QString &role) {
     return roles[role];
 }
 
-int BasaraMode::getPriority() const{
+int BasaraMode::getPriority(TriggerEvent) const{
     return 15;
 }
 
@@ -1056,7 +1056,7 @@ void BasaraMode::generalShowed(ServerPlayer *player, QString general_name) const
     if (names.isEmpty()) return;
 
     if (player->getGeneralName() == "anjiang") {
-        room->changeHero(player, general_name, false, true, false, false);
+        room->changeHero(player, general_name, false, false, false, false);
         room->setPlayerProperty(player, "kingdom", player->getGeneral()->getKingdom());
 
         if (player->getGeneral()->getKingdom() == "god") {
@@ -1073,11 +1073,10 @@ void BasaraMode::generalShowed(ServerPlayer *player, QString general_name) const
         if (Config.EnableHegemony)
             room->setPlayerProperty(player, "role", getMappedRole(player->getKingdom()));
     } else {
-        room->changeHero(player, general_name, false, true, true, false);
+        room->changeHero(player, general_name, false, false, true, false);
     }
 
     Q_ASSERT(room->getThread() != NULL);
-    room->getThread()->addPlayerSkills(player);
 
     names.removeOne(general_name);
     room->setTag(player->objectName(), QVariant::fromValue(names));

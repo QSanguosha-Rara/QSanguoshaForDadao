@@ -430,7 +430,7 @@ public:
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *panfeng, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         ServerPlayer *target = damage.to;
-        if (damage.card && damage.card->isKindOf("Slash") && target->hasEquip() && !damage.chain && !damage.transfer) {
+        if (damage.card && damage.card->isKindOf("Slash") && target->isAlive() && !target->hasFlag("Global_KOFDebut") && target->hasEquip() && !damage.chain && !damage.transfer) {
             QStringList equiplist;
             for (int i = 0; i <= 3; i++) {
                 if (!target->getEquip(i)) continue;
@@ -477,7 +477,7 @@ public:
         return target != NULL;
     }
 
-    virtual int getPriority() const{
+    virtual int getPriority(TriggerEvent) const{
         return 5;
     }
 
@@ -605,7 +605,7 @@ public:
         return target != NULL;
     }
 
-    virtual int getPriority() const{
+    virtual int getPriority(TriggerEvent) const{
         return 6;
     }
 

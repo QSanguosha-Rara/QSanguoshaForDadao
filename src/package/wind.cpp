@@ -1151,13 +1151,13 @@ public:
         return target != NULL;
     }
 
-    virtual int getPriority() const{
+    virtual int getPriority(TriggerEvent) const{
         return 5;
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == EventLoseSkill) {
-            if (data.toString() == objectName()) return false;
+            if (data.toString() != objectName()) return false;
             room->removePlayerMark(player, "@chanyuan");
         } else if (triggerEvent == EventAcquireSkill) {
             if (data.toString() != objectName()) return false;
