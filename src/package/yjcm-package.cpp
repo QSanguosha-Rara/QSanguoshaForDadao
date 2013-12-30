@@ -1223,6 +1223,7 @@ YJCMPackage::YJCMPackage()
     addMetaObject<MingceCard>();
     addMetaObject<GanluCard>();
     addMetaObject<XianzhenCard>();
+    addMetaObject<XuanfengCard>();
     addMetaObject<XinzhanCard>();
     addMetaObject<JujianCard>();
     addMetaObject<PaiyiCard>();
