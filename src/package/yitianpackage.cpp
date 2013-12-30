@@ -44,6 +44,8 @@ YitianSword::YitianSword(Suit suit, int number)
 
 void YitianSword::onUninstall(ServerPlayer *player) const{
     player->setFlags("yitianlost");
+
+    Weapon::onUninstall(player);
 }
 
 YTChengxiangCard::YTChengxiangCard()
@@ -831,6 +833,7 @@ public:
                     judge.reason = objectName();
                     judge.who = caizhaoji;
                     judge.time_consuming = true;
+                    judge.play_animation = false;
 
                     room->judge(judge);
 

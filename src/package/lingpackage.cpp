@@ -3254,6 +3254,8 @@ PeaceSpell::PeaceSpell(Card::Suit suit, int number): Armor(suit, number){
 void PeaceSpell::onUninstall(ServerPlayer *player) const{
     if (player->isAlive() && player->hasArmorEffect(objectName()))
         player->setFlags("peacespell_throwing");
+
+    Armor::onUninstall(player);
 }
 
 PeaceSpellCard::PeaceSpellCard(){
