@@ -1,56 +1,6 @@
 -- translation for Ling Package
 
 return {
-	["ling"] = "翼包",
-
-	["neo_xiahoudun"] = "夏侯惇-翼",
-	["&neo_xiahoudun"] = "夏侯惇",
-	["neoganglie"] = "刚烈",
-	[":neoganglie"] = "每当你受到伤害后，你可以进行判定，若结果不为<font color=\"red\">♥</font>，则你选择一项：令伤害来源弃置两张手牌，或对伤害来源造成1点伤害。",
-	["neoganglie:throw"] = "令伤害来源弃置两张手牌",
-	["neoganglie:damage"] = "对伤害来源造成1点伤害",
-
-	["neo_xuchu"] = "许褚-翼",
-	["&neo_xuchu"] = "许褚",
-	["neoluoyi"] = "裸衣",
-	[":neoluoyi"] = "<font color=\"green\"><b>出牌阶段限一次，</b></font>你可以弃置一张装备牌，若如此做，本回合你使用【杀】或【决斗】对目标角色造成伤害时，此伤害+1。",
-	["#LuoyiBuff"] = "%from 的“<font color=\"yellow\"><b>裸衣</b></font>”效果被触发，伤害从 %arg 点增加至 %arg2 点",
-
-	["neo_caoren"] = "曹仁-翼",
-	["&neo_caoren"] = "曹仁",
-	["neojushou"] = "据守",
-	[":neojushou"] = "结束阶段开始时，你可以摸X+2张牌，然后将你的武将牌翻面。（X为你已损失的体力值）",
-
-	["neo_guanyu"] = "关羽-翼",
-	["&neo_guanyu"] = "关羽",
-	["designer:neo_guanyu"] = "官方，凌天翼",
-	["yishi"] = "义释",
-	[":yishi"] = "每当你使用<font color=\"red\">♥</font>【杀】对目标角色造成伤害时，你可以防止此伤害，然后获得其区域里的一张牌。",
-	["#Yishi"] = "%from 发动了“%arg”，防止了对 %to 的伤害",
-
-	["neo_zhangfei"] = "张飞-翼",
-	["&neo_zhangfei"] = "张飞",
-	["designer:neo_zhangfei"] = "官方，凌天翼",
-	["tannang"] = "探囊",
-	[":tannang"] = "<font color=\"blue\"><b>锁定技，</b></font>你与其他角色的距离-X。（X为你已损失的体力值）",
-
-	["neo_zhaoyun"] = "赵云-翼",
-	["&neo_zhaoyun"] = "赵云",
-	["designer:neo_zhaoyun"] = "官方，凌天翼",
-
-	["neo_zhouyu"] = "周瑜-翼",
-	["&neo_zhouyu"] = "周瑜",
-	["neofanjian"] = "反间",
-	[":neofanjian"] = "<font color=\"green\"><b>出牌阶段限一次，</b></font>你可以选择一张手牌并令一名其他角色选择一种花色，然后该角色正面朝上获得该牌。若该牌花色与该角色所选花色不同，你对其造成1点伤害。",
-
-	["neo_gongsunzan"] = "公孙瓒-翼",
-	["&neo_gongsunzan"] = "公孙瓒",
-	["cv:neo_gongsunzan"] = "桃花僧",
-	["illustrator:neo_gongsunzan"] = "Vincent",
-	["zhulou"] = "筑楼",
-	[":zhulou"] = "结束阶段开始时，你可以摸两张牌，然后选择一项：失去1点体力，或弃置一张武器牌。",
-	["@zhulou-discard"] = "请弃置一张武器牌",
-
 	["Ling2013"] = "翼包2013",
 
 	["#neo2013_masu"] = "怀才自负",
@@ -104,6 +54,7 @@ return {
 	["neo2013_guanyu"]="翼关羽",
 	["neo2013yishi"]="义释",
 	[":neo2013yishi"]= "每当你使用【杀】对目标角色造成伤害时，若该角色的区域里有牌，你可以防止此伤害，获得其区域里的一张牌。 ",
+	["#Yishi"] = "%from 发动了“%arg”，防止了对 %to 的伤害",
 	["designer:neo2013_guanyu"] = "凌天翼",
 	-- ["cv:yi_guanyu"] = "桃花僧&凌天翼",
 	-- ["$yi_yishi1"] = "大丈夫以信义为重。", -- 防止伤害
@@ -112,6 +63,8 @@ return {
 	-- ["$yi_yishi4"] = "吾杀汝犹杀狗彘耳，空污刀斧。", -- 手牌
 
 	["neo2013_zhangfei"]="翼张飞",
+	["tannang"] = "探囊",
+	[":tannang"] = "<font color=\"blue\"><b>锁定技，</b></font>你与其他角色的距离-X。（X为你已损失的体力值）",
 	["neo2013haoyin"]="豪饮",
 	[":neo2013haoyin"]= "每当你需要使用【酒】（方法一）时，你可以失去1点体力，视为使用一张【酒】。",
 	["designer:neo2013_zhangfei"] = "凌天翼",
@@ -120,6 +73,7 @@ return {
 	["neo2013_gongsunzan"]="翼公孙瓒",
 	["neo2013zhulou"]="筑楼",
 	[":neo2013zhulou"]= "结束阶段开始时，你可以摸两张牌，然后选择一项：1.失去1点体力；2.弃置一张非基本牌。",
+	["@zhulou-discard"] = "请弃置一张非基本牌",
 	["designer:neo2013gongsunzan"] = "凌天翼",
 	["cv:yi_gongsunzan"] = "桃花僧",
 	-- ["$yi_zhulou1"] = "易京高楼，易守难攻。",
@@ -187,6 +141,9 @@ return {
 	["#neo2013_xuchu"]="虎痴",
 	["neo2013_xuchu"]="翼许褚",
 	["designer:neo2013_zhaoyun"] = "凌天翼",
+	["neoluoyi"] = "裸衣",
+	[":neoluoyi"] = "<font color=\"green\"><b>出牌阶段限一次，</b></font>你可以弃置一张装备牌，若如此做，本回合你使用【杀】或【决斗】对目标角色造成伤害时，此伤害+1。",
+	["#LuoyiBuff"] = "%from 的“<font color=\"yellow\"><b>裸衣</b></font>”效果被触发，伤害从 %arg 点增加至 %arg2 点",
 	["neo2013xiechan"] = "挟缠" ,
 	[":neo2013xiechan"] = "限定技，出牌阶段，你可以与一名角色拼点。若你赢，你视为对其使用一张【杀】。若你没赢，你视为对其使用一张【决斗】。" ,
 	["@neo2013xiechan"] = "战" ,
@@ -204,6 +161,8 @@ return {
 	["neo2013ganglie"]="刚烈",
 	[":neo2013ganglie"]= "每当你受到一次伤害后，你可以选择一名其他角色，进行判定，若结果不为红桃，你选择一项：1.该角色弃置两张手牌；2.对该角色造成1点伤害。",
 	["@neo2013ganglie"] = "请选择“刚烈”的目标。" ,
+	["neo2013ganglie:throw"] = "令伤害来源弃置两张手牌",
+	["neo2013ganglie:damage"] = "对伤害来源造成1点伤害",
 	-- ["designer:yi_xiahoudun"] = "凌天翼",
 	-- ["$yi_ganglie1"] = "鼠辈，竟敢伤我！",
 	-- ["$yi_ganglie2"] = "以彼之道，还施彼身！",
@@ -293,26 +252,6 @@ return {
 	[":neo2013chengxiang"]= "每当你受到 1 点伤害后，你可以亮出牌堆顶的四张牌，然后获得其中点数之和不大于 13的至少一张牌，将其余的牌置入弃牌堆。",
 	["designer:neo2013_caochong"] = "凌天翼",
 	["illustrator:neo2013_caochong"] = "真命天子",
-
-	--["#neo2013_fuwan"]="沉毅的国丈",
-	--["neo2013_fuwan"]="翼伏完",
-	--["neo2013fengyin"]="奉印",
-	--[":neo2013fengyin"]= "其他角色的回合开始时，若该角色当前的体力值不比你小，你可以将一张装备牌或【杀】交给其，令其跳过其出牌阶段和弃牌阶段，然后你摸一张牌。",
-	--["designer:neo2013_fuwan"] = "凌天翼",
-	--["illustrator:neo2013_fuwan"] = "liuheng",
-	-- ["$yi_fengyin"] = "丞相功劳显赫,老臣愿退位让贤。",
-	-- ["~yi_fuwan"] = "悔不该坐视曹贼成了气候！",
-	-- ["cv:yi_fuwan"] = "逍遥小鱼儿",
-
-	--["#neo2013_fuhuanghou"]="与世不侵",
-	--["neo2013_fuhuanghou"]="翼伏皇后",
-	--["neo2013cangni"]="藏匿",
-	--[":neo2013cangni"]= "<font color=\"blue\"><b>锁定技，</b></font>你不是攻击范围内含有你的其他角色使用锦囊牌的合法目标。",
-	-- ["$yi_cangni"] = "郗虑!你为虎作伥必受骂名千载!",
-	--["designer:neo2013_fuhuanghou"] = "凌天翼",
-	--["illustrator:neo2013_fuhuanghou"] = "G.G.G.",
-	-- ["~yi_fuhuanghou"] = "连陛下都救不了我吗？",
-	-- ["cv:yi_fuhuanghou"] = "蒲小猫",
 
 	["neo2013_mateng"] = "翼马腾" ,
 	["neo2013xiongyi"] = "雄异" ,
