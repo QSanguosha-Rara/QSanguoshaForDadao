@@ -36,15 +36,6 @@ public:
     virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
 };
 
-class NeoFanjianCard: public SkillCard {
-    Q_OBJECT
-
-public:
-    Q_INVOKABLE NeoFanjianCard();
-    virtual void onEffect(const CardEffectStruct &effect) const;
-    virtual void DifferentEffect(Room *, ServerPlayer *, ServerPlayer *) const;
-};
-
 class Neo2013XinzhanCard: public XinzhanCard{
     Q_OBJECT
 
@@ -52,12 +43,12 @@ public:
     Q_INVOKABLE Neo2013XinzhanCard();
 };
 
-class Neo2013FanjianCard: public NeoFanjianCard{
+class Neo2013FanjianCard: public SkillCard{
     Q_OBJECT
 
 public:
     Q_INVOKABLE Neo2013FanjianCard();
-    virtual void DifferentEffect(Room *, ServerPlayer *, ServerPlayer *) const;
+    virtual void onEffect(const CardEffectStruct &effect) const;
 };
 
 class Neo2013PujiCard: public SkillCard{
