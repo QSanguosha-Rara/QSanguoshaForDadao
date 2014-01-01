@@ -53,7 +53,6 @@ config = {
 		"Hegemony",
 		"Formation",
 		"Power" ,
-		"Ling",
 		"Ling2013" ,
 		"TigerFly" ,
 		"NostalStandard",

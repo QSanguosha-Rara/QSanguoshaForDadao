@@ -8,273 +8,6 @@
 #include "settings.h"
 #include "hegemony.h"
 
-LuoyiCard::LuoyiCard() {
-    target_fixed = true;
-}
-
-void LuoyiCard::use(Room *, ServerPlayer *source, QList<ServerPlayer *> &) const{
-    source->setFlags("neoluoyi");
-}
-
-class NeoLuoyi: public OneCardViewAsSkill {
-public:
-    NeoLuoyi(): OneCardViewAsSkill("neoluoyi") {
-        filter_pattern = "EquipCard!";
-    }
-
-    virtual bool isEnabledAtPlay(const Player *player) const{
-        return !player->hasUsed("LuoyiCard") && player->canDiscard(player, "he");
-    }
-
-    virtual const Card *viewAs(const Card *originalCard) const{
-        LuoyiCard *card = new LuoyiCard;
-        card->addSubcard(originalCard);
-        return card;
-    }
-};
-
-class NeoLuoyiBuff: public TriggerSkill {
-public:
-    NeoLuoyiBuff(): TriggerSkill("#neoluoyi") {
-        events << DamageCaused;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL && target->hasFlag("neoluoyi") && target->isAlive();
-    }
-
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *xuchu, QVariant &data) const{
-        DamageStruct damage = data.value<DamageStruct>();
-        if (damage.chain || damage.transfer || !damage.by_user) return false;
-        const Card *reason = damage.card;
-        if (reason && (reason->isKindOf("Slash") || reason->isKindOf("Duel"))) {
-            LogMessage log;
-            log.type = "#LuoyiBuff";
-            log.from = xuchu;
-            log.to << damage.to;
-            log.arg = QString::number(damage.damage);
-            log.arg2 = QString::number(++damage.damage);
-            room->sendLog(log);
-
-            data = QVariant::fromValue(damage);
-        }
-
-        return false;
-    }
-};
-
-NeoFanjianCard::NeoFanjianCard() {
-    will_throw = false;
-    handling_method = Card::MethodNone;
-}
-
-void NeoFanjianCard::onEffect(const CardEffectStruct &effect) const{
-    ServerPlayer *zhouyu = effect.from;
-    ServerPlayer *target = effect.to;
-    Room *room = zhouyu->getRoom();
-
-    const Card *card = Sanguosha->getCard(getSubcards().first());
-    int card_id = card->getEffectiveId();
-    Card::Suit suit = room->askForSuit(target, objectName() == "NeoFanjianCard" ? "neofanjian" : "neo2013fanjian");
-
-    LogMessage log;
-    log.type = "#ChooseSuit";
-    log.from = target;
-    log.arg = Card::Suit2String(suit);
-    room->sendLog(log);
-
-    room->getThread()->delay();
-    target->obtainCard(this);
-    room->showCard(target, card_id);
-
-    if (card->getSuit() != suit)
-        DifferentEffect(room, zhouyu, target);
-}
-
-void NeoFanjianCard::DifferentEffect(Room *room, ServerPlayer *from, ServerPlayer *to) const{
-    room->damage(DamageStruct(objectName(), from, to));
-}
-
-class NeoFanjian: public OneCardViewAsSkill {
-public:
-    NeoFanjian(): OneCardViewAsSkill("neofanjian") {
-        filter_pattern = ".|.|.|hand";
-    }
-
-    virtual bool isEnabledAtPlay(const Player *player) const{
-        return !player->isKongcheng() && !player->hasUsed("NeoFanjianCard");
-    }
-
-    virtual const Card *viewAs(const Card *originalCard) const{
-        Card *card = new NeoFanjianCard;
-        card->addSubcard(originalCard);
-        return card;
-    }
-};
-
-class Yishi: public TriggerSkill {
-public:
-    Yishi(): TriggerSkill("yishi") {
-        events << DamageCaused;
-    }
-
-    virtual bool canInvoke(ServerPlayer *, const Card *c) const{
-        return c->getSuit() == Card::Heart;
-    }
-
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        DamageStruct damage = data.value<DamageStruct>();
-
-        if (damage.card && damage.card->isKindOf("Slash") && canInvoke(player, damage.card)
-            && damage.by_user && !damage.chain && !damage.transfer
-            && player->askForSkillInvoke(objectName(), data)) {
-            room->broadcastSkillInvoke("yishi", 1);
-            LogMessage log;
-            log.type = "#Yishi";
-            log.from = player;
-            log.arg = objectName();
-            log.to << damage.to;
-            room->sendLog(log);
-            if (!damage.to->isAllNude()) {
-                int card_id = room->askForCardChosen(player, damage.to, "hej", objectName());
-                if(room->getCardPlace(card_id) == Player::PlaceDelayedTrick)
-                    room->broadcastSkillInvoke("yishi", 2);
-                else if(room->getCardPlace(card_id) == Player::PlaceEquip)
-                    room->broadcastSkillInvoke("yishi", 3);
-                else
-                    room->broadcastSkillInvoke("yishi", 4);
-                CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, player->objectName());
-                room->obtainCard(player, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::PlaceHand);
-            }
-            return true;
-        }
-        return false;
-    }
-};
-
-class Zhulou: public PhaseChangeSkill {
-public:
-    Zhulou(): PhaseChangeSkill("zhulou") {
-    }
-
-    virtual QString getAskForCardPattern() const{
-        return ".Weapon";
-    }
-
-    virtual bool onPhaseChange(ServerPlayer *gongsun) const{
-        Room *room = gongsun->getRoom();
-        if (gongsun->getPhase() == Player::Finish && gongsun->askForSkillInvoke(objectName())) {
-            gongsun->drawCards(2);
-            room->broadcastSkillInvoke("zhulou");
-            if (!room->askForCard(gongsun, getAskForCardPattern(), "@zhulou-discard"))
-                room->loseHp(gongsun);
-        }
-        return false;
-    }
-};
-
-class Tannang: public DistanceSkill {
-public:
-    Tannang(): DistanceSkill("tannang") {
-    }
-
-    virtual int getCorrect(const Player *from, const Player *) const{
-        if (from->hasSkill(objectName()))
-            return -from->getLostHp();
-        else
-            return 0;
-    }
-};
-
-#include "wind.h"
-class NeoJushou: public Jushou {
-public:
-    NeoJushou(): Jushou() {
-        setObjectName("neojushou");
-    }
-
-    virtual int getJushouDrawNum(ServerPlayer *caoren) const{
-        return 2 + caoren->getLostHp();
-    }
-};
-
-class NeoGanglie: public MasochismSkill {
-public:
-    NeoGanglie(): MasochismSkill("neoganglie") {
-    }
-
-    virtual void onDamaged(ServerPlayer *xiahou, const DamageStruct &damage) const{
-        ServerPlayer *from = damage.from;
-        Room *room = xiahou->getRoom();
-        QVariant data = QVariant::fromValue(damage);
-
-        if (room->askForSkillInvoke(xiahou, "neoganglie", data)) {
-            room->broadcastSkillInvoke("ganglie");
-
-            JudgeStruct judge;
-            judge.pattern = ".|heart";
-            judge.good = false;
-            judge.reason = objectName();
-            judge.who = xiahou;
-
-            room->judge(judge);
-            if (!from || from->isDead()) return;
-            if (judge.isGood()) {
-                QStringList choicelist;
-                choicelist << "damage";
-                if (from->getHandcardNum() > 1)
-                    choicelist << "throw";
-                QString choice = room->askForChoice(xiahou, objectName(), choicelist.join("+"));
-                if (choice == "damage")
-                    room->damage(DamageStruct(objectName(), xiahou, from));
-                else
-                    room->askForDiscard(from, objectName(), 2, 2);
-            }
-        }
-    }
-};
-
-LingPackage::LingPackage()
-    : Package("ling")
-{
-    General *neo_xiahoudun = new General(this, "neo_xiahoudun", "wei");
-    neo_xiahoudun->addSkill(new NeoGanglie);
-
-    General *neo_xuchu = new General(this, "neo_xuchu", "wei");
-    neo_xuchu->addSkill(new NeoLuoyi);
-    neo_xuchu->addSkill(new NeoLuoyiBuff);
-    related_skills.insertMulti("neoluoyi", "#neoluoyi");
-
-    General *neo_caoren = new General(this, "neo_caoren", "wei");
-    neo_caoren->addSkill(new NeoJushou);
-
-    General *neo_guanyu = new General(this, "neo_guanyu", "shu");
-    neo_guanyu->addSkill("wusheng");
-    neo_guanyu->addSkill(new Yishi);
-
-    General *neo_zhangfei = new General(this, "neo_zhangfei", "shu");
-    neo_zhangfei->addSkill("paoxiao");
-    neo_zhangfei->addSkill(new Tannang);
-
-    General *neo_zhaoyun = new General(this, "neo_zhaoyun", "shu");
-    neo_zhaoyun->addSkill("longdan");
-    neo_zhaoyun->addSkill("yicong");
-
-    General *neo_zhouyu = new General(this, "neo_zhouyu", "wu", 3);
-    neo_zhouyu->addSkill("yingzi");
-    neo_zhouyu->addSkill(new NeoFanjian);
-
-    General *neo_gongsunzan = new General(this, "neo_gongsunzan", "qun");
-    neo_gongsunzan->addSkill(new Zhulou);
-    neo_gongsunzan->addSkill("yicong");
-
-    addMetaObject<LuoyiCard>();
-    addMetaObject<NeoFanjianCard>();
-}
-
-ADD_PACKAGE(Ling)
-
-
 Neo2013XinzhanCard::Neo2013XinzhanCard(): XinzhanCard(){
     setObjectName("Neo2013XinzhanCard");
 }
@@ -350,14 +83,53 @@ public:
     }
 };
 
-class Neo2013Yishi: public Yishi{
+
+class Neo2013Yishi: public TriggerSkill {
 public:
-    Neo2013Yishi(): Yishi(){
-        setObjectName("neo2013yishi");
+    Neo2013Yishi(): TriggerSkill("neo2013yishi") {
+        events << DamageCaused;
     }
 
-    virtual bool canInvoke(ServerPlayer *player, const Card *) const{
-        return !player->isAllNude();
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        DamageStruct damage = data.value<DamageStruct>();
+
+        if (damage.card && damage.card->isKindOf("Slash") && !player->isAllNude()
+        && damage.by_user && !damage.chain && !damage.transfer
+            && player->askForSkillInvoke(objectName(), data)) {
+                room->broadcastSkillInvoke(objectName(), 1);
+                LogMessage log;
+                log.type = "#Yishi";
+                log.from = player;
+                log.arg = objectName();
+                log.to << damage.to;
+                room->sendLog(log);
+                if (!damage.to->isAllNude()) {
+                    int card_id = room->askForCardChosen(player, damage.to, "hej", objectName());
+                    if(room->getCardPlace(card_id) == Player::PlaceDelayedTrick)
+                        room->broadcastSkillInvoke(objectName(), 2);
+                    else if(room->getCardPlace(card_id) == Player::PlaceEquip)
+                        room->broadcastSkillInvoke(objectName(), 3);
+                    else
+                        room->broadcastSkillInvoke(objectName(), 4);
+                    CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, player->objectName());
+                    room->obtainCard(player, Sanguosha->getCard(card_id), reason, room->getCardPlace(card_id) != Player::PlaceHand);
+                }
+                return true;
+        }
+        return false;
+    }
+};
+
+class Tannang: public DistanceSkill {
+public:
+    Tannang(): DistanceSkill("tannang") {
+    }
+
+    virtual int getCorrect(const Player *from, const Player *) const{
+        if (from->hasSkill(objectName()))
+            return -from->getLostHp();
+        else
+            return 0;
     }
 };
 
@@ -370,12 +142,6 @@ public:
     virtual bool isEnabledAtPlay(const Player *player) const{
         return Analeptic::IsAvailable(player);
     }
-
-/*
-    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
-        return pattern.contains("analeptic");
-    }
-*/
 
     virtual const Card *viewAs() const{
         Analeptic *a = new Analeptic(Card::NoSuit, 0);
@@ -402,40 +168,65 @@ public:
 
 };
 
-class Neo2013Zhulou: public Zhulou{
+class Neo2013Zhulou: public PhaseChangeSkill {
 public:
-    Neo2013Zhulou(): Zhulou(){
-        setObjectName("neo2013zhulou");
+    Neo2013Zhulou(): PhaseChangeSkill("neo2013zhulou") {
     }
 
-    virtual QString getAskForCardPattern() const{
-        return "^BasicCard";
+    virtual bool onPhaseChange(ServerPlayer *gongsun) const{
+        Room *room = gongsun->getRoom();
+        if (gongsun->getPhase() == Player::Finish && gongsun->askForSkillInvoke(objectName())) {
+            gongsun->drawCards(2);
+            room->broadcastSkillInvoke(objectName());
+            if (!room->askForCard(gongsun, "^BasicCard", "@zhulou-discard"))
+                room->loseHp(gongsun);
+        }
+        return false;
     }
 };
 
-Neo2013FanjianCard::Neo2013FanjianCard(): NeoFanjianCard(){
+Neo2013FanjianCard::Neo2013FanjianCard() {
     will_throw = false;
     handling_method = Card::MethodNone;
-    setObjectName("Neo2013FanjianCard");
 }
 
-void Neo2013FanjianCard::DifferentEffect(Room *room, ServerPlayer *from, ServerPlayer *to) const{
-    from->setFlags("Neo2013Fanjian_InTempMoving");
-    int card_id1 = room->askForCardChosen(from, to, "he", "neo2013fanjian");
-    Player::Place place1 = room->getCardPlace(card_id1);
-    to->addToPile("#fanjian", card_id1);
-    int card_id2 = -1;
-    if (!to->isNude()){
-        card_id2 = room->askForCardChosen(from, to, "he", "neo2013fanjian");
-    }
-    room->moveCardTo(Sanguosha->getCard(card_id1), to, place1, CardMoveReason(CardMoveReason::S_REASON_GOTCARD, from->objectName()));
-    from->setFlags("-Neo2013Fanjian_InTempMoving");
-    DummyCard dummy;
-    dummy.addSubcard(card_id1);
-    if (card_id2 != -1)
-        dummy.addSubcard(card_id2);
+void Neo2013FanjianCard::onEffect(const CardEffectStruct &effect) const{
+    ServerPlayer *zhouyu = effect.from;
+    ServerPlayer *target = effect.to;
+    Room *room = zhouyu->getRoom();
 
-    room->obtainCard(from, &dummy);
+    const Card *card = Sanguosha->getCard(getSubcards().first());
+    int card_id = card->getEffectiveId();
+    Card::Suit suit = room->askForSuit(target, "neo2013fanjian");
+
+    LogMessage log;
+    log.type = "#ChooseSuit";
+    log.from = target;
+    log.arg = Card::Suit2String(suit);
+    room->sendLog(log);
+
+    room->getThread()->delay();
+    target->obtainCard(this);
+    room->showCard(target, card_id);
+
+    if (card->getSuit() != suit){
+        zhouyu->setFlags("Neo2013Fanjian_InTempMoving");
+        int card_id1 = room->askForCardChosen(zhouyu, target, "he", "neo2013fanjian");
+        Player::Place place1 = room->getCardPlace(card_id1);
+        target->addToPile("#fanjian", card_id1);
+        int card_id2 = -1;
+        if (!target->isNude()){
+            card_id2 = room->askForCardChosen(zhouyu, target, "he", "neo2013fanjian");
+        }
+        room->moveCardTo(Sanguosha->getCard(card_id1), target, place1, CardMoveReason(CardMoveReason::S_REASON_GOTCARD, zhouyu->objectName()));
+        zhouyu->setFlags("-Neo2013Fanjian_InTempMoving");
+        DummyCard dummy;
+        dummy.addSubcard(card_id1);
+        if (card_id2 != -1)
+            dummy.addSubcard(card_id2);
+
+        room->obtainCard(zhouyu, &dummy);
+    }
 }
 
 class Neo2013Fanjian: public OneCardViewAsSkill{
@@ -1227,6 +1018,61 @@ public:
     }
 };
 
+LuoyiCard::LuoyiCard() {
+    target_fixed = true;
+}
+
+void LuoyiCard::use(Room *, ServerPlayer *source, QList<ServerPlayer *> &) const{
+    source->setFlags("neoluoyi");
+}
+
+class NeoLuoyi: public OneCardViewAsSkill {
+public:
+    NeoLuoyi(): OneCardViewAsSkill("neoluoyi") {
+        filter_pattern = "EquipCard!";
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("LuoyiCard") && player->canDiscard(player, "he");
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        LuoyiCard *card = new LuoyiCard;
+        card->addSubcard(originalCard);
+        return card;
+    }
+};
+
+class NeoLuoyiBuff: public TriggerSkill {
+public:
+    NeoLuoyiBuff(): TriggerSkill("#neoluoyi") {
+        events << DamageCaused;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->hasFlag("neoluoyi") && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *xuchu, QVariant &data) const{
+        DamageStruct damage = data.value<DamageStruct>();
+        if (damage.chain || damage.transfer || !damage.by_user) return false;
+        const Card *reason = damage.card;
+        if (reason && (reason->isKindOf("Slash") || reason->isKindOf("Duel"))) {
+            LogMessage log;
+            log.type = "#LuoyiBuff";
+            log.from = xuchu;
+            log.to << damage.to;
+            log.arg = QString::number(damage.damage);
+            log.arg2 = QString::number(++damage.damage);
+            room->sendLog(log);
+
+            data = QVariant::fromValue(damage);
+        }
+
+        return false;
+    }
+};
+
 Neo2013XiechanCard::Neo2013XiechanCard(){
 
 }
@@ -1442,6 +1288,14 @@ public:
             }
         }
         return false;
+    }
+
+    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+        if (card->isKindOf("Slash"))
+            return 1;
+        else
+            return 2;
+        return Skill::getEffectIndex(player, card);
     }
 };
 
@@ -1840,20 +1694,6 @@ public:
         events << BeforeCardsMove;
     }
 
-/*
-private:
-    void moveToEndOfDrawPile(Room *room, int card_id) const{
-        room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
-        if (room->getCardPlace(card_id) == Player::DrawPile){
-            QList<int> &drawpile = room->getDrawPile();
-            drawpile.removeOne(card_id);
-            drawpile.append(card_id);
-        }
-        room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
-    }
-*/
-
-public:
     virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
         if (((move.reason.m_reason & CardMoveReason::S_MASK_BASIC_REASON) == CardMoveReason::S_REASON_DISCARD)
@@ -2045,20 +1885,6 @@ public:
         return target != NULL && target->isAlive();
     }
 
-/*
-private:
-    void moveToEndOfDrawPile(Room *room, int card_id) const{
-        room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
-        if (room->getCardPlace(card_id) == Player::DrawPile){
-            QList<int> &drawpile = room->getDrawPile();
-            drawpile.removeOne(card_id);
-            drawpile.append(card_id);
-        }
-        room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
-    }
-*/
-
-public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == BeforeCardsMove && TriggerSkill::triggerable(player)){
             if (room->getCurrent() == NULL || room->getCurrent() == player || room->getCurrent()->getPhase() != Player::Play)
@@ -2727,7 +2553,7 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     General *neo2013_zhangfei = new General(this, "neo2013_zhangfei", "shu");
     neo2013_zhangfei->addSkill(new Neo2013Haoyin);
     neo2013_zhangfei->addSkill("paoxiao");
-    neo2013_zhangfei->addSkill("tannang");
+    neo2013_zhangfei->addSkill(new Tannang);
 
     General *neo2013_gongsun = new General(this, "neo2013_gongsunzan", "qun");
     neo2013_gongsun->addSkill(new Neo2013Zhulou);
@@ -2769,7 +2595,9 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     neo2013_huatuo->addSkill("jijiu");
 
     General *neo2013_xuchu = new General(this, "neo2013_xuchu", "wei", 4);
-    neo2013_xuchu->addSkill("neoluoyi");
+    neo2013_xuchu->addSkill(new NeoLuoyi);
+    neo2013_xuchu->addSkill(new NeoLuoyiBuff);
+    related_skills.insertMulti("neoluoyi", "#neoluoyi");
     neo2013_xuchu->addSkill(new Neo2013Xiechan);
 
     General *neo2013_zhaoyun = new General(this, "neo2013_zhaoyun", "shu", 4);
@@ -2894,6 +2722,7 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
     addMetaObject<Neo2013JinanCard>();
     addMetaObject<Neo2013PujiCard>();
     addMetaObject<Neo2013XiechanCard>();
+    addMetaObject<LuoyiCard>();
 
     skills << new Neo2013HuileiDecrease << new Neo2013Huwei
         << new Neo2013Tongwu << new Neo2013Bingyin << new Neo2013Touxi << new Neo2013TouxiRange << new Neo2013Muhui << new Neo2013MuhuiDis;
