@@ -302,6 +302,21 @@ public:
     }
 };
 
+class Neo2013XiezunEffect: public TriggerSkill{
+public:
+    Neo2013XiezunEffect(): TriggerSkill("#neo2013xiezun-effect"){
+        events << EventPhaseProceeding;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (player->getPhase() == Player::Discard && player->getMaxCards() > player->getHp() && player->hasSkill("neo2013xiezun")){
+            room->broadcastSkillInvoke("neo2013xiezun");
+            room->notifySkillInvoked(player, "neo2013xiezun");
+        }
+        return false;
+    }
+};
+
 /*
 class Neo2013RenWang: public TriggerSkill{
 public:
@@ -526,8 +541,11 @@ public:
             CardUseStruct use = data.value<CardUseStruct>();
             if ((use.card->isKindOf("Slash") || use.card->isNDTrick()) && use.to.length() == 1 && use.to.contains(player)){
                 const Card *c = room->askForExchange(player, objectName(), 1, false, "@neo2013yongyiput", true);
-                if (c != NULL)
+                if (c != NULL){
+                    room->notifySkillInvoked(player, "neo2013yongyi");
+                    room->broadcastSkillInvoke("neo2013yongyi", 1);
                     player->addToPile("neoarrow", c, false);
+                }
             }
         }
         else {
@@ -553,7 +571,7 @@ public:
 
     virtual int getEffectIndex(const ServerPlayer *, const Card *card) const{
         if (card->isKindOf("Slash"))
-            return qrand() % 2 + 1;
+            return 2;
         return -1;
     }
 };
@@ -583,6 +601,8 @@ public:
 
             if (room->askForDiscard(selfplayer, objectName(), 1, 1, true, true, "@neo2013duoyi")){
                 QString choice = room->askForChoice(selfplayer, objectName(), types.join("+"), data);
+                room->notifySkillInvoked(selfplayer, objectName());
+                room->broadcastSkillInvoke(objectName(), 1);
                 room->setPlayerMark(player, "YiDuoyiType", types.indexOf(choice) + 1);
             }
         }
@@ -604,8 +624,10 @@ public:
             if (c == NULL)
                 return false;
 
-            if (c->isKindOf(t.c_str()))
+            if (c->isKindOf(t.c_str())){
                 selfplayer->drawCards(1);
+                room->broadcastSkillInvoke(objectName(), 2);
+            }
         }
         else {
             PhaseChangeStruct change = data.value<PhaseChangeStruct>();
@@ -1188,6 +1210,7 @@ public:
             return false;
 
         room->broadcastSkillInvoke(objectName());
+        room->notifySkillInvoked(target, objectName());
         room->doLightbox("$neo2013xiangxue");
 
         if (room->changeMaxHpForAwakenSkill(target)){
@@ -1325,6 +1348,7 @@ public:
             return false;
 
         room->broadcastSkillInvoke(objectName());
+        room->notifySkillInvoked(target, objectName());
         room->doLightbox("$neo2013bingyin");
 
         room->setPlayerMark(target, objectName(), 1);
@@ -1402,8 +1426,12 @@ public:
     }
 
     virtual bool onPhaseChange(ServerPlayer *target) const{
-        if (target->getPhase() == Player::NotActive)
-            target->getRoom()->loseMaxHp(target);
+        if (target->getPhase() == Player::NotActive){
+            Room *room = target->getRoom();
+            room->loseMaxHp(target);
+            room->broadcastSkillInvoke("neo2013muhui");
+            room->notifySkillInvoked(target, "neo2013muhui");
+        }
         return false;
     }
 };
@@ -1805,6 +1833,8 @@ public:
             room->clearAG(selfplayer);
             if (card_id != -1){
                 room->throwCard(Sanguosha->getCard(card_id), CardMoveReason(CardMoveReason::S_REASON_PUT, QString()), NULL);
+                room->broadcastSkillInvoke(objectName(), 2);
+                room->notifySkillInvoked(selfplayer, objectName());
                 room->obtainCard(selfplayer, use.card);
                 use.to.clear();
                 data = QVariant::fromValue(use);
@@ -1827,6 +1857,8 @@ public:
                 room->clearAG(selfplayer);
                 if (card_id != -1){
                     room->throwCard(Sanguosha->getCard(card_id), CardMoveReason(CardMoveReason::S_REASON_PUT, QString()), NULL);
+                    room->broadcastSkillInvoke(objectName(), 2);
+                    room->notifySkillInvoked(selfplayer, objectName());
                     player->tag["jiejijink"] = QVariant::fromValue(resp.m_card);
                     return true;
                 }
@@ -1867,11 +1899,17 @@ public:
             room->clearAG(selfplayer);
             if (card_id != -1){
                 room->throwCard(Sanguosha->getCard(card_id), CardMoveReason(CardMoveReason::S_REASON_PUT, QString()), NULL);
+                room->broadcastSkillInvoke(objectName(), 2);
+                room->notifySkillInvoked(selfplayer, objectName());
                 room->obtainCard(selfplayer, card);
             }
         }
 
         return false;
+    }
+
+    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+        return 1;
     }
 };
 
@@ -1898,9 +1936,13 @@ public:
                 if (player->getMark("neo2013yanyu") >= 3)
                     return false;
 
+                int aidelay = Config.AIDelay;
+
                 while (!ids.isEmpty() && player->getMark("neo2013yanyu") < 3){
                     room->fillAG(ids, player);
+                    Config.AIDelay = 0;
                     int selected = room->askForAG(player, ids, false, objectName());
+                    Config.AIDelay = aidelay;
                     room->clearAG(player);
 
                     ids.removeOne(selected);
@@ -1922,7 +1964,9 @@ public:
                     if (choices.length() == 1)
                         continue;
 
+                    Config.AIDelay = 0;
                     QString choice = room->askForChoice(player, objectName(), choices.join("+"), QVariant(selected));
+                    Config.AIDelay = aidelay;
 
                     if (choice != "cancel"){
                         room->setPlayerMark(player, "neo2013yanyu", player->getMark("neo2013yanyu") + 1);
@@ -1931,7 +1975,10 @@ public:
                     if (choice == "cancel")
                         continue;
                     else if (choice == "gain"){
+                        Config.AIDelay = 0;
                         const Card *card = room->askForExchange(player, objectName() + "-gain", 1, true, "@neo2013yanyu-gain", false);
+                        Config.AIDelay = aidelay;
+
                         QList<int> to_move;
                         to_move << card->getEffectiveId();
                         room->moveCardsToEndOfDrawpile(to_move);
@@ -1955,11 +2002,15 @@ public:
                                 Q_ASSERT(false);
 
                         }
+                        Config.AIDelay = 0;
                         const Card *card = room->askForCard(player, pattern, "@neo2013yanyu-give", QVariant(selected), Card::MethodNone, NULL, false, objectName());
+                        Config.AIDelay = aidelay;
                         if (card == NULL)
                             continue;
+                        Config.AIDelay = 0;
                         QString choice2 = room->askForChoice(player, objectName() + "-moveplace", "up+down", QVariant(QVariantList() << selected << card->getEffectiveId()));
-                        ServerPlayer *to_give = room->askForPlayerChosen(player, room->getOtherPlayers(player), objectName() + "-give", "@neo2013yanyu-giveplayer");
+                        ServerPlayer *to_give = room->askForPlayerChosen(player, room->getOtherPlayers(player), objectName() + "-give", "@neo2013yanyu-giveplayer", false, true);
+                        Config.AIDelay = aidelay;
                         if (choice2 == "up")
                             room->moveCardTo(card, NULL, Player::DrawPile);
                         else {
@@ -2571,6 +2622,8 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
 
     General *neo2013_caocao = new General(this, "neo2013_caocao$", "wei");
     neo2013_caocao->addSkill(new Neo2013Xiezun);
+    neo2013_caocao->addSkill(new Neo2013XiezunEffect);
+    related_skills.insertMulti("neo2013xiezun", "#neo2013xiezun-effect");
     neo2013_caocao->addSkill("jianxiong");
     neo2013_caocao->addSkill("hujia");
 
