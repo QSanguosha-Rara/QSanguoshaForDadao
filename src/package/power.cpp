@@ -136,7 +136,7 @@ public:
                             drawflag = true;
                             break;
                         }
-                    if (drawflag && player->askForSkillInvoke(objectName(), "drawcard"))
+                    if (drawflag && lidian->askForSkillInvoke(objectName(), "drawcard"))
                         lidian->drawCards(1);
                 }
                 room->setPlayerMark(player, "hengjiang_discard", 0);
@@ -705,7 +705,7 @@ public:
         CardUseStruct use = data.value<CardUseStruct>();
         if (use.card != NULL && use.card->isKindOf("Slash") && use.from != NULL){
             foreach(ServerPlayer *p, use.to){
-                if (player->isAdjacentTo(p) && player->canDiscard(p, "e") /*&& player->askForSkillInvoke(objectName(), QVariant::fromValue(p))*/){
+                if (player->isAdjacentTo(p) && player->canDiscard(p, "e") && player->askForSkillInvoke(objectName(), QVariant::fromValue(p))){
                     int id = room->askForCardChosen(player, p, "e", objectName(), false, Card::MethodDiscard);
                     room->throwCard(id, p, player);
                 }
@@ -1230,14 +1230,14 @@ PowerPackage::PowerPackage(): Package("Power"){
     zhangjiao->addSkill(new Hongfa);
     skills << new HongfaSlash;
 
-    skills << new Baoling; //for future use
-
     addMetaObject<CunsiCard>();
     addMetaObject<DuanxieCard>();
     addMetaObject<PowerZhibaCard>();
     addMetaObject<WuxinCard>();
     addMetaObject<WendaoCard>();
     addMetaObject<HongfaCard>();
+
+    skills << new Baoling; //for future use
 }
 
 ADD_PACKAGE(Power)
