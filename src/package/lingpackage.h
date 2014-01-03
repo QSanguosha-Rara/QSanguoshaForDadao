@@ -163,6 +163,7 @@ class SixSwords: public Weapon{
 
 public:
     Q_INVOKABLE SixSwords(Card::Suit suit, int number);
+    virtual void onUninstall(ServerPlayer *player) const;
 };
 
 class SixSwordsCard: public SkillCard{
