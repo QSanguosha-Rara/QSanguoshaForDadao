@@ -2929,6 +2929,16 @@ SixSwords::SixSwords(Card::Suit suit, int number): Weapon(suit, number, 2){
     setObjectName("SixSwords");
 }
 
+void SixSwords::onUninstall(ServerPlayer *player) const{
+    Room *room = player->getRoom();
+    foreach (ServerPlayer *p, room->getAlivePlayers()){
+        if (p->getMark("@SixSwordsBuff") > 0)
+            p->loseAllMarks("@SixSwordsBuff");
+    }
+
+    Weapon::onUninstall(player);
+}
+
 SixSwordsCard::SixSwordsCard(){
 
 }
@@ -2955,27 +2965,13 @@ public:
 class SixSwordsSkill: public WeaponSkill{
 public:
     SixSwordsSkill(): WeaponSkill("SixSwords"){
-        events << EventPhaseStart << BeforeCardsMove;
+        events << EventPhaseStart;
         view_as_skill = new SixSwordsSkillVS;
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        QList<ServerPlayer *> players = room->getOtherPlayers(player);
-        if (triggerEvent == BeforeCardsMove){
-            CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-            if (move.from != NULL && move.from == player && move.from_places.contains(Player::PlaceEquip))
-                foreach(int id, move.card_ids){
-                    const Card *card = Sanguosha->getEngineCard(id);
-                    if (card->getClassName() == "SixSwords"){
-                        foreach(ServerPlayer *p, players)
-                            if (p->getMark("@SixSwordsBuff") > 0)
-                                p->loseAllMarks("@SixSwordsBuff");
-                        break;
-                    }
-                }
-        }
-        else if (player->getPhase() == Player::NotActive){
-            foreach(ServerPlayer *p, players)
+        if (player->getPhase() == Player::NotActive){
+            foreach(ServerPlayer *p, room->getOtherPlayers(player))
                 if (p->getMark("@SixSwordsBuff") > 0)
                     p->loseAllMarks("@SixSwordsBuff");
             room->askForUseCard(player, "@@SixSwords", "@six_swords");
@@ -3137,6 +3133,10 @@ void PeaceSpell::onUninstall(ServerPlayer *player) const{
     if (player->isAlive() && player->hasArmorEffect(objectName()))
         player->setFlags("peacespell_throwing");
 
+    foreach(ServerPlayer *p, player->getRoom()->getAlivePlayers())
+        if (p->getMark("@PeaceSpellBuff") > 0)
+            p->loseAllMarks("@PeaceSpellBuff");
+
     Armor::onUninstall(player);
 }
 
@@ -3166,7 +3166,7 @@ public:
 class PeaceSpellSkill: public ArmorSkill{
 public:
     PeaceSpellSkill(): ArmorSkill("PeaceSpell"){
-        events << EventPhaseStart << DamageInflicted << BeforeCardsMove << CardsMoveOneTime;
+        events << EventPhaseStart << DamageInflicted << CardsMoveOneTime;
         view_as_skill = new PeaceSpellVS;
     }
 
@@ -3195,20 +3195,6 @@ public:
                 DamageStruct damage = data.value<DamageStruct>();
                 if (damage.nature != DamageStruct::Normal)
                     return true;
-                break;
-            }
-            case (BeforeCardsMove):{
-                CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-                if (move.from != NULL && move.from == player && move.from_places.contains(Player::PlaceEquip))
-                    foreach(int id, move.card_ids){
-                        const Card *card = Sanguosha->getEngineCard(id);
-                        if (card->getClassName() == "PeaceSpell"){
-                            foreach(ServerPlayer *p, room->getAlivePlayers())
-                                if (p->getMark("@PeaceSpellBuff") > 0)
-                                    p->loseAllMarks("@PeaceSpellBuff");
-                            break;
-                        }
-                    }
                 break;
             }
             case (CardsMoveOneTime):{
@@ -3242,14 +3228,7 @@ public:
 
     virtual int getExtra(const Player *target) const{
         if (target->getMark("@PeaceSpellBuff") > 0){
-            QList<const Player *> players = target->getAliveSiblings();
-            players << target;
-            int ext = 0;
-            foreach(const Player *p, players){
-                if (p->getKingdom() == target->getKingdom())
-                    ext++;
-            }
-            return ext;
+            return 1;
         }
         return 0;
     }

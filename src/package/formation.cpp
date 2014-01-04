@@ -242,13 +242,8 @@ bool HeyiCard::targetFilter(const QList<const Player *> &, const Player *to_sele
     return to_select->isAdjacentTo(Self);
 }
 
-void HeyiCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
-    QStringList targetnames;
-    foreach (ServerPlayer *p, targets){
-        targetnames << p->objectName();
-        room->acquireSkill(p, "feiying");
-    }
-    source->tag["heyi"] = targetnames;
+void HeyiCard::onEffect(const CardEffectStruct &effect) const{
+    effect.to->gainMark("@heyi_feiying");
 }
 
 class HeyiVS: public ZeroCardViewAsSkill{
@@ -270,17 +265,11 @@ public:
     }
 
 private:
-    void loseEffect(Room *room, ServerPlayer *Caohong) const{
-        QStringList effectlist = Caohong->tag["heyi"].toStringList();
-        if (effectlist.isEmpty())
-            return;
-
+    static void loseEffect(Room *room){
         foreach (ServerPlayer *p, room->getAlivePlayers()){
-            if (effectlist.contains(p->objectName()) && !p->hasInnateSkill("feiying"))
-                room->detachSkillFromPlayer(p, "feiying");
+            if (p->getMark("@heyi_feiying") > 0)
+                p->loseAllMarks("@heyi_feiying");
         }
-
-        Caohong->tag.remove("heyi");
     }
 
 public:
@@ -291,7 +280,7 @@ public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         if (triggerEvent == EventPhaseStart && TriggerSkill::triggerable(player)){
             if (player->getPhase() == Player::RoundStart)
-                loseEffect(room, player);
+                loseEffect(room);
             else if (player->getPhase() == Player::Start)
                 room->askForUseCard(player, "@@heyi", "@heyi");
         }
@@ -306,46 +295,36 @@ public:
                     loseeffect = true;
             }
             if (loseeffect)
-                loseEffect(room, player);
+                loseEffect(room);
         }
         return false;
     }
 };
+class HeyiAcquireDetach: public TriggerSkill{
+public:
+    HeyiAcquireDetach(): TriggerSkill("#heyi-acquire-detach"){
+        events << MarkChanged;
+    }
 
-/*
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        if (triggerEvent == EventPhaseStart && player->getPhase() == Player::RoundStart) {
-            QList<ServerPlayer *> jiangweis = room->findPlayersBySkillName(objectName());
-            foreach (ServerPlayer *jiangwei, jiangweis) {
-                if (jiangwei->isAlive() && (player == jiangwei || player->isAdjacentTo(jiangwei))
-                    && room->askForSkillInvoke(player, objectName(), QVariant::fromValue((PlayerStar)jiangwei))) {
-                    if (player != jiangwei) {
-                        room->notifySkillInvoked(jiangwei, objectName());
-                        LogMessage log;
-                        log.type = "#InvokeOthersSkill";
-                        log.from = player;
-                        log.to << jiangwei;
-                        log.arg = objectName();
-                        room->sendLog(log);
-                    }
-                    jiangwei->addMark(objectName());
-                    room->acquireSkill(jiangwei, "kanpo");
-                }
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
+        MarkChangeStruct change = data.value<MarkChangeStruct>();
+        if (change.name == "@heyi_feiying"){
+            int kanpo = player->getMark("@heyi_feiying");
+            if (kanpo > 0 && kanpo - change.num == 0){
+                room->acquireSkill(player, "feiying");
             }
-        } else if (triggerEvent == EventPhaseChanging) {
-            PhaseChangeStruct change = data.value<PhaseChangeStruct>();
-            if (change.to != Player::NotActive) return false;
-            foreach (ServerPlayer *p, room->getAllPlayers()) {
-                if (p->getMark(objectName()) > 0) {
-                    p->setMark(objectName(), 0);
-                    room->detachSkillFromPlayer(p, "kanpo", false, true);
-                }
+            else if (kanpo == 0 && change.num < 0){
+                if (!player->hasInnateSkill("feiying"))
+                    room->detachSkillFromPlayer(player, "feiying");
             }
         }
         return false;
     }
-*/
-// Paracel's Version
+};
 
 class Tianfu: public TriggerSkill {
 public:
@@ -376,9 +355,8 @@ public:
             }
         }
         else {
-            if (data.toString() == "tianfu" && player->getMark("@tianfu_kanpo") > 0 && !player->hasInnateSkill("kanpo")){
+            if (data.toString() == "tianfu" && player->getMark("@tianfu_kanpo") > 0){
                 player->loseAllMarks("@tianfu_kanpo");
-                room->detachSkillFromPlayer(player, "kanpo");
             }
         }
         return false;
@@ -388,6 +366,10 @@ class TianfuAcquireDetach: public TriggerSkill{
 public:
     TianfuAcquireDetach(): TriggerSkill("#tianfu-acquire-detach"){
         events << MarkChanged;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
     }
 
     virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
@@ -719,20 +701,6 @@ public:
         events << CardsMoveOneTime << BeforeCardsMove;
     }
 
-/*
-private:
-    void moveToEndOfDrawPile(Room *room, int card_id) const{
-        room->moveCardTo(Sanguosha->getCard(card_id), NULL, Player::DrawPile);
-        if (room->getCardPlace(card_id) == Player::DrawPile){
-            QList<int> &drawpile = room->getDrawPile();
-            drawpile.removeOne(card_id);
-            drawpile.append(card_id);
-        }
-        room->doBroadcastNotify(QSanProtocol::S_COMMAND_UPDATE_PILE, Json::Value(room->getDrawPile().length()));
-    }
-*/
-
-public:
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
         if (move.to_place == Player::DrawPile)
@@ -840,16 +808,15 @@ FormationPackage::FormationPackage()
     heg_dengai->addSkill(new Ziliang);
 
     General *heg_caohong = new General(this, "heg_caohong", "wei"); // WEI 018
-    //heg_caohong->addSkill(new Huyuan);
     heg_caohong->addSkill("yuanhu");
     heg_caohong->addSkill(new Heyi);
+    heg_caohong->addSkill(new HeyiAcquireDetach);
+    related_skills.insertMulti("heyi", "#heyi-acquire-detach");
 
     General *jiangwanfeiyi = new General(this, "jiangwanfeiyi", "shu", 3); // SHU 018
-    //ToDo: Add skin for jiangwanfeiyi @@Yan Guam
     jiangwanfeiyi->addSkill(new Shengxi);
     jiangwanfeiyi->addSkill(new Shoucheng);
 
-    //ToDo: Jiang Qin(I don't understand the skill)
     General *jiangqin = new General(this, "jiangqin", "wu", 4);
     jiangqin->addSkill(new Shangyi);
     jiangqin->addSkill(new Niaoxiang);
