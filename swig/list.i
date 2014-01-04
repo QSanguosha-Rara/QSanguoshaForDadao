@@ -19,7 +19,7 @@ public:
 
 %extend QList {
     T at(int i) const{
-        return $self->value(i);
+        return $self->value(i); //$self[i]
     }
 }
 

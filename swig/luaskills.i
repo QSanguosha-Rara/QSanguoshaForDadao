@@ -14,75 +14,9 @@ public:
     int priority;
 };
 
-class GameStartSkill: public TriggerSkill {
-public:
-    GameStartSkill(const QString &name);
-
-    virtual bool trigger(TriggerEvent event, Room *room, ServerPlayer *player, QVariant &data) const;
-    virtual void onGameStart(ServerPlayer *player) const = 0;
-};
-
-class ProhibitSkill: public Skill {
-public:
-    ProhibitSkill(const QString &name);
-
-    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others = QList<const Player *>()) const = 0;
-};
-
-class DistanceSkill: public Skill {
-public:
-    DistanceSkill(const QString &name);
-
-    virtual int getCorrect(const Player *from, const Player *to) const = 0;
-};
-
-class MaxCardsSkill: public Skill {
-public:
-    MaxCardsSkill(const QString &name);
-
-    virtual int getExtra(const Player *target) const;
-    virtual int getFixed(const Player *target) const;
-};
-
-class TargetModSkill: public Skill {
-public:
-    enum ModType {
-        Residue,
-        DistanceLimit,
-        ExtraTarget
-    };
-
-    TargetModSkill(const QString &name);
-    virtual QString getPattern() const;
-
-    virtual int getResidueNum(const Player *from, const Card *card) const;
-    virtual int getDistanceLimit(const Player *from, const Card *card) const;
-    virtual int getExtraTargetNum(const Player *from, const Card *card) const;
-
-protected:
-    QString pattern;
-};
-
-class AttackRangeSkill: public Skill{
-public:
-    AttackRangeSkill(const QString &name);
-
-    virtual int getExtra(const Player *target, bool include_weapon) const;
-    virtual int getFixed(const Player *target, bool include_weapon) const;
-};
-
-class LuaProhibitSkill: public ProhibitSkill {
-public:
-    LuaProhibitSkill(const char *name);
-
-    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others = QList<const Player *>()) const;
-
-    LuaFunction is_prohibited;
-};
-
 class ViewAsSkill: public Skill {
 public:
-    ViewAsSkill(const QString &name);
+    ViewAsSkill(const char *name);
 
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const = 0;
     virtual const Card *viewAs(const QList<const Card *> &cards) const = 0;
@@ -108,7 +42,7 @@ public:
 
 class OneCardViewAsSkill: public ViewAsSkill {
 public:
-    OneCardViewAsSkill(const QString &name);
+    OneCardViewAsSkill(const char *name);
 
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const;
     virtual const Card *viewAs(const QList<const Card *> &cards) const;
@@ -119,7 +53,7 @@ public:
 
 class FilterSkill: public OneCardViewAsSkill {
 public:
-    FilterSkill(const QString &name);
+    FilterSkill(const char *name);
 };
 
 class LuaFilterSkill: public FilterSkill {
@@ -133,12 +67,43 @@ public:
     LuaFunction view_as;
 };
 
+class ProhibitSkill: public Skill {
+public:
+    ProhibitSkill(const char *name);
+
+    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others = QList<const Player *>()) const = 0;
+};
+
+class LuaProhibitSkill: public ProhibitSkill {
+public:
+    LuaProhibitSkill(const char *name);
+
+    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &others = QList<const Player *>()) const;
+
+    LuaFunction is_prohibited;
+};
+
+class DistanceSkill: public Skill {
+public:
+    DistanceSkill(const char *name);
+
+    virtual int getCorrect(const Player *from, const Player *to) const = 0;
+};
+
 class LuaDistanceSkill: public DistanceSkill {
 public:
     LuaDistanceSkill(const char *name);
     virtual int getCorrect(const Player *from, const Player *to) const;
 
     LuaFunction correct_func;
+};
+
+class MaxCardsSkill: public Skill {
+public:
+    MaxCardsSkill(const char *name);
+
+    virtual int getExtra(const Player *target) const;
+    virtual int getFixed(const Player *target) const;
 };
 
 class LuaMaxCardsSkill: public MaxCardsSkill {
@@ -149,6 +114,25 @@ public:
 
     LuaFunction extra_func;
     LuaFunction fixed_func;
+};
+
+class TargetModSkill: public Skill {
+public:
+    enum ModType {
+        Residue,
+        DistanceLimit,
+        ExtraTarget
+    };
+
+    TargetModSkill(const char *name);
+    virtual QString getPattern() const;
+
+    virtual int getResidueNum(const Player *from, const Card *card) const;
+    virtual int getDistanceLimit(const Player *from, const Card *card) const;
+    virtual int getExtraTargetNum(const Player *from, const Card *card) const;
+
+protected:
+    QString pattern;
 };
 
 class LuaTargetModSkill: public TargetModSkill {
@@ -164,6 +148,14 @@ public:
     LuaFunction extra_target_func;
 };
 
+class AttackRangeSkill: public Skill{
+public:
+    AttackRangeSkill(const char *name);
+
+    virtual int getExtra(const Player *target, bool include_weapon) const;
+    virtual int getFixed(const Player *target, bool include_weapon) const;
+};
+
 class LuaAttackRangeSkill: public AttackRangeSkill{
 public:
     LuaAttackRangeSkill(const char *name);
@@ -173,6 +165,14 @@ public:
 
     LuaFunction extra_func;
     LuaFunction fixed_func;
+};
+
+class GameStartSkill: public TriggerSkill {
+public:
+    GameStartSkill(const char *name);
+
+    virtual bool trigger(TriggerEvent event, Room *room, ServerPlayer *player, QVariant &data) const;
+    virtual void onGameStart(ServerPlayer *player) const = 0;
 };
 
 class LuaSkillCard: public SkillCard {

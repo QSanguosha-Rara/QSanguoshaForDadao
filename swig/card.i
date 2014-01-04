@@ -7,7 +7,7 @@
 
 class BasicCard: public Card {
 public:
-    BasicCard(Suit suit, int number): Card(suit, number), will_throw(false) {}
+    BasicCard(Suit suit, int number);
     virtual QString getType() const;
     virtual CardType getTypeId() const;
 };
@@ -20,9 +20,6 @@ public:
     virtual QString getType() const;
     virtual CardType getTypeId() const;
     virtual bool isCancelable(const CardEffectStruct &effect) const;
-
-private:
-    bool cancelable;
 };
 
 class DelayedTrick: public TrickCard {
@@ -46,7 +43,6 @@ public:
 
     virtual QString getType() const;
     virtual CardType getTypeId() const;
-    virtual void use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const;
 
     virtual void onInstall(ServerPlayer *player) const;
     virtual void onUninstall(ServerPlayer *player) const;
@@ -67,16 +63,13 @@ public:
 class Weapon: public EquipCard {
 public:
     Weapon(Suit suit, int number, int range);
-    int getRange();
+    int getRange() const;
     virtual QString getSubtype() const;
 
     virtual Location location() const;
 
     virtual void onInstall(ServerPlayer *player) const;
     virtual void onUninstall(ServerPlayer *player) const;
-
-protected:
-    int range;
 };
 
 class Armor: public EquipCard {
@@ -90,13 +83,11 @@ public:
 class Horse: public EquipCard {
 public:
     Horse(Suit suit, int number, int correct);
+    int getCorrect() const;
 
     virtual Location location() const;
     virtual void onInstall(ServerPlayer *player) const;
     virtual void onUninstall(ServerPlayer *player) const;
-
-private:
-    int correct;
 };
 
 class OffensiveHorse: public Horse {
