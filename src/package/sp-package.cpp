@@ -2209,8 +2209,8 @@ public:
         return player->canDiscard(player, "he") && !player->hasFlag("DuwuEnterDying");
     }
 
-    virtual bool viewFilter(const QList<const Card *> &, const Card *) const{
-        return true;
+    virtual bool viewFilter(const QList<const Card *> &, const Card *card) const{
+        return !Self->isJilei(card);
     }
 
     virtual const Card *viewAs(const QList<const Card *> &cards) const{
