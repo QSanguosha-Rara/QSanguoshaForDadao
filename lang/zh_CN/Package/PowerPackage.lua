@@ -3,7 +3,7 @@ return {
 
 	["lidian"] = "李典" ,
 	["#lidian"] = "深明大义" ,
-
+	["illustrator:lidian"] = "张帅" ,
 	["xunxun"] = "恂恂" ,
 	[":xunxun"] = "摸牌阶段开始时，你可以放弃摸牌，观看牌堆顶的四张牌，然后获得其中的两张牌，将其余的牌以任意顺序置于牌堆底。\
 ■现有问题：本技能使用观星框。将牌放入牌堆底用上面那一排，而不是用下面的那一排，但是上面那一排，图片上写着“置于牌堆顶的牌”，除非有人能把那张图片上面的字P掉……" ,
@@ -13,7 +13,7 @@ return {
 
 	["zangba"] = "臧霸" ,
 	["#zangba"] = "节度青徐" ,
-
+	["illustrator:zangba"] = "HOOO" ,
 	["hengjiang"] = "横江" ,
 	[":hengjiang"] = "每当你受到1点伤害后，你可以令当前回合角色于此回合内手牌上限-1；一名角色的回合结束时，若该角色未于弃牌阶段内弃置过手牌且存在手牌数量比你多的角色，你可以摸一张牌。" ,
 	["hengjiang:maxcard"] = "你可以发动【横江】令 %src 损失手牌上限。" ,
@@ -21,6 +21,7 @@ return {
 
 	["mifuren"] = "靡夫人" ,
 	["#mifuren"] = "乱世沉香" ,
+	["illustrator:mifuren"] = "木美人" ,
 	["guixiu"] = "闺秀" ,
 	[":guixiu"] = "回合开始前，若你是手牌最少的角色，你可以摸一张牌。" ,
 	["yongjue"] = "勇决" ,
@@ -32,6 +33,7 @@ return {
 
 	["chenwudongxi"] = "陈武董袭" ,
 	["#chenwudongxi"] = "壮怀激烈" ,
+	["illustrator:chenwudongxi"] = "地狱许" ,
 	["duanxie"] = "断绁" ,
 	[":duanxie"] = "出牌阶段限一次，你可以令一名其他角色横置武将牌，若如此做，你横置武将牌。" ,
 	["fenming"] = "奋命" ,
@@ -39,6 +41,7 @@ return {
 
 	["heg_sunce"] = "孙策-国" ,
 	["&heg_sunce"] = "孙策" ,
+	["illustrator:heg_sunce"] = "木美人" ,
 	["yingyang"] = "鹰扬" ,
 	[":yingyang"] = "每当你拼点的牌亮出后，你可以令此牌的点数于此次拼点中+3或-3。" ,
 	["yingyang:add3"] = "+3" ,
@@ -53,6 +56,7 @@ return {
 
 	["heg_dongzhuo"] = "董卓-国" ,
 	["&heg_dongzhuo"] = "董卓" ,
+	["illustartor:heg_dongzhuo"] = "巴萨小马" ,
 	["hengzheng"] = "横征" ,
 	[":hengzheng"] = "摸牌阶段开始时，若你的体力值为1或你没有手牌，你可以放弃摸牌，获得每名其他角色区域里的一张牌。" ,
 
@@ -62,6 +66,7 @@ return {
 
 	["zhangren"] = "张任" ,
 	["#zhangren"] = "索命神射" ,
+	["illustrator:zhangren"] = "DH" ,
 	["chuanxin"] = "穿心" ,
 	[":chuanxin"] = "每当你使用【杀】或【决斗】对目标角色造成伤害时，你可以防止此伤害，令该角色选择一项：1、弃置装备区里的所有牌，若如此做，其失去1点体力；2、你选择的其一项技能无效，直到你下回合开始。" ,
 	["fengshi"] = "锋矢" ,
@@ -70,6 +75,7 @@ return {
 	["heg_zhangjiao"] = "张角-国" ,
 	["&heg_zhangjiao"] = "张角" ,
 	["#heg_zhangjiao"] = "时代的先驱" ,
+	["illustrator:heg_zhangjiao"] = "青骑士" ,
 	["wuxin"] = "悟心" ,
 	[":wuxin"] = "准备阶段开始时，你可以观看牌堆顶的三张牌，将这些牌以任意顺序置于牌堆顶，然后若没有“天兵”，你将牌堆顶的X张牌置于武将牌上（X为群势力角色的数量），称为“天兵”；每当你扣减体力前，你可以将扣减体力改为将一张红色“天兵”置入弃牌堆；你可以将一张黑色“天兵”当【杀】使用或打出。" ,
 	["wendao"] = "问道" ,
