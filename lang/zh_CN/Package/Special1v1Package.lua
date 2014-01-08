@@ -59,11 +59,13 @@ return {
 
 	["kof_menghuo"] = "孟获1v1",
 	["&kof_menghuo"] = "孟获",
+	["illustrator:kof_menghuo"] = "废柴男" ,
 	["manyi"] = "蛮裔",
 	[":manyi"] = "你登场时，你可以视为使用一张【南蛮入侵】。<font color=\"blue\"><b>锁定技，</b></font>【南蛮入侵】对你无效。",
 
 	["kof_zhurong"] = "祝融1v1",
 	["&kof_zhurong"] = "祝融",
+	["illustrator:kof_zhurong"] = "废柴男" ,
 
 	["kof_sunshangxiang"] = "孙尚香1v1",
 	["&kof_sunshangxiang"] = "孙尚香",
@@ -110,6 +112,7 @@ return {
 
 	["kof_weiyan"] = "魏延1v1",
 	["&kof_weiyan"] = "魏延",
+	["illustrator:kof_weiyan"] = "SoniaTang" ,
 	["kofkuanggu"] = "狂骨",
 	[":kofkuanggu"] = "每当你造成一次伤害后，你可以进行判定，若结果不为<font color=\"red\">♥</font>，你回复1点体力。",
 
@@ -132,6 +135,7 @@ return {
 
 	["kof_pangde"] = "庞德1v1",
 	["&kof_pangde"] = "庞德",
+	["illustrator:kof_pangde"] = "LiuHeng" ,
 
 	["Special1v1Ext"] = "1v1扩展" ,
 

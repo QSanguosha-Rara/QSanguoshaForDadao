@@ -56,7 +56,7 @@ return {
 
 	["heg_dongzhuo"] = "董卓-国" ,
 	["&heg_dongzhuo"] = "董卓" ,
-	["illustartor:heg_dongzhuo"] = "巴萨小马" ,
+	["illustrator:heg_dongzhuo"] = "巴萨小马" ,
 	["hengzheng"] = "横征" ,
 	[":hengzheng"] = "摸牌阶段开始时，若你的体力值为1或你没有手牌，你可以放弃摸牌，获得每名其他角色区域里的一张牌。" ,
 

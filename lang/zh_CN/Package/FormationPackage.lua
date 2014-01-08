@@ -33,7 +33,7 @@ return {
 
 	["heg_xusheng"] = "徐盛-国",
 	["&heg_xusheng"] = "徐盛",
-	["illustrator:heg_xusheng"] = "XXX",
+	["illustrator:heg_xusheng"] = "天信",
 	["yicheng"] = "疑城",
 	[":yicheng"] = "每当一名角色成为【杀】的目标后，你可以令该角色摸一张牌，然后令其弃置一张牌。",
 
@@ -48,7 +48,7 @@ return {
 
 	["#hetaihou"] = "弄权之蛇蝎",
 	["hetaihou"] = "何太后",
-	["illustrator:hetaihou"] = "KayaK, 木美人",
+	["illustrator:hetaihou"] = "KayaK && 木美人",
 	["zhendu"] = "鸩毒",
 	[":zhendu"] = "其他角色的出牌阶段开始时，你可以弃置一张手牌，令该角色先视为以方法Ⅰ使用一张【酒】再失去1点体力，然后若其体力值小于你，你摸一张牌。",
 	["@zhendu-discard"] = "你可以弃置一张手牌发动“鸩毒”",
@@ -66,6 +66,7 @@ return {
 
 	["#jiangqin"] = "祁奚之器" ,
 	["jiangqin"] = "蒋钦" ,
+	["illustrator:jiangqin"] = "天空之城" ,
 	["shangyi"] = "尚义" ,
 	[":shangyi"] = "出牌阶段限一次，你可以令一名其他角色观看你的手牌，你观看其手牌，然后选择一项：1.弃置其中一张黑色牌；2.摸一张牌。" ,
 	["niaoxiang"] = "鸟翔" ,
@@ -74,6 +75,7 @@ return {
 	["#heg_liubei"] = "龙横蜀汉" ,
 	["heg_liubei"] = "刘备-国" ,
 	["&heg_liubei"] = "刘备" ,
+	["illustrator:heg_liubei"] = "LiuHeng" ,
 	["zhangwu"] = "章武" ,
 	[":zhangwu"] = "锁定技，每当【飞龙夺凤】置入弃牌堆后或置入其他角色的装备区后，你获得之；每当你的【飞龙夺凤】移动到除你的手牌或装备区外的其他区域时，你展示之，然后将之置于牌堆底，摸两张牌。" ,
 	["shouyue"] = "授钺" ,

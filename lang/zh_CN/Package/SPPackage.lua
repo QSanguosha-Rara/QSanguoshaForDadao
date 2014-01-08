@@ -157,6 +157,7 @@ return {
 
 	["#caoang"] = "取义成仁" ,
 	["caoang"] = "曹昂" ,
+	["illustrator:caoang"] = "Zero" ,
 	["kangkai"] = "慷忾" ,
 	[":kangkai"] = "每当你距离1以内的一名角色成为【杀】的目标后，你可以摸一张牌，将一张手牌正面朝上交给该角色，若此牌为装备牌，其可以使用之。" ,
 	["kangkai:use"] = "使用此装备" ,
@@ -164,7 +165,7 @@ return {
 
 	["#zhugejin"] = "联盟的维系者",
 	["zhugejin"] = "诸葛瑾",
-	["illustrator:zhugejin"] = "LiuHeng",
+	["illustrator:zhugejin"] = "G.G.G.",
 	["hongyuan"] = "弘援",
 	[":hongyuan"] = "摸牌阶段，你可以少摸一张牌，令至多两名其他角色各摸一张牌。\
 3v3：摸牌阶段，你可以少摸一张牌，令其他己方角色各摸一张牌。" ,
