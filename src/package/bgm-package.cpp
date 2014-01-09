@@ -588,9 +588,8 @@ public:
             if (!to_givelist.isEmpty()) {
                 ServerPlayer *to_give = room->askForPlayerChosen(pindian->from, to_givelist, "dahe", "@dahe-give", true);
                 if (!to_give) return false;
-                CardMoveReason reason(CardMoveReason::S_REASON_GIVE, pindian->from->objectName());
-                reason.m_playerId = to_give->objectName();
-                to_give->obtainCard(pindian->to_card);
+                CardMoveReason reason(CardMoveReason::S_REASON_GIVE, pindian->from->objectName(), to_give->objectName(), "dahe", QString());
+                room->obtainCard(to_give, pindian->to_card, reason);
             }
         } else {
             if (!pindian->from->isKongcheng()) {
@@ -904,8 +903,7 @@ void ShichouCard::onEffect(const CardEffectStruct &effect) const{
     victim->gainMark("@hate_to");
     room->setPlayerMark(victim, "hate_" + player->objectName(), 1);
 
-    CardMoveReason reason(CardMoveReason::S_REASON_GIVE, player->objectName());
-    reason.m_playerId = victim->objectName();
+    CardMoveReason reason(CardMoveReason::S_REASON_GIVE, player->objectName(), victim->objectName(), "shichou", QString());
     room->obtainCard(victim, this, reason, false);
 }
 

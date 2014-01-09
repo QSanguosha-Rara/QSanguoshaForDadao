@@ -109,7 +109,8 @@ void HuangtianCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> 
             room->broadcastSkillInvoke("huangtian");
 
         room->notifySkillInvoked(zhangjiao, "huangtian");
-        zhangjiao->obtainCard(this);
+        CardMoveReason reason(CardMoveReason::S_REASON_GIVE, source->objectName(), zhangjiao->objectName(), "huangtian", QString());
+        room->obtainCard(zhangjiao, this, reason);
         QList<ServerPlayer *> zhangjiaos;
         QList<ServerPlayer *> players = room->getOtherPlayers(source);
         foreach (ServerPlayer *p, players) {
@@ -523,7 +524,9 @@ public:
             && ((move.reason.m_reason == CardMoveReason::S_REASON_DISMANTLE
                  && move.reason.m_playerId != move.reason.m_targetId)
                 || ((move.to_place == Player::PlaceTable && move.origin_to && move.origin_to != move.from && move.origin_to_place == Player::PlaceHand)
-                    || (move.to && move.to != move.from && move.to_place == Player::PlaceHand)))) {
+                    || (move.to && move.to != move.from && move.to_place == Player::PlaceHand)
+                    && move.reason.m_reason != CardMoveReason::S_REASON_GIVE
+                    && move.reason.m_reason != CardMoveReason::S_REASON_SWAP))) {
             if (room->askForSkillInvoke(player, objectName(), data)) {
                 room->loseHp(player);
                 if (move.from->isAlive())

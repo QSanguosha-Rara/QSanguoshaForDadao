@@ -674,6 +674,7 @@ TushouGiveCard::TushouGiveCard(){
     will_throw = false;
     handling_method = Card::MethodNone;
     mute = true;
+    m_skillName = "tushou";
 }
 
 bool TushouGiveCard::targetFilter(const QList<const Player *> &selected, const Player *to_select, const Player *) const{
@@ -696,7 +697,8 @@ bool TushouGiveCard::targetFilter(const QList<const Player *> &selected, const P
 }
 
 void TushouGiveCard::onEffect(const CardEffectStruct &effect) const{
-    effect.to->obtainCard(this);
+    CardMoveReason reason(CardMoveReason::S_REASON_GIVE, effect.from->objectName(), effect.to->objectName(), "tushou", QString());
+    effect.to->getRoom()->obtainCard(effect.to, this, reason);
 }
 
 class TushouGiveVS: public OneCardViewAsSkill{
@@ -1152,7 +1154,7 @@ void ChouduCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &ta
     }
     room->setTag("choudutargets", players.join("+"));
     room->setPlayerMark(source, "chouduuse", 0);
-    room->moveCards(moves, false);
+    room->moveCards(moves, false);  //move to placetable then move to hand?
 }
 
 class ChouduVS: public ZeroCardViewAsSkill{
@@ -1582,7 +1584,8 @@ ShangjianCard::ShangjianCard(){
 }
 
 void ShangjianCard::onEffect(const CardEffectStruct &effect) const{
-    effect.to->obtainCard(this, false);
+    CardMoveReason reason(CardMoveReason::S_REASON_GIVE, effect.from->objectName(), effect.to->objectName(), "shangjian", QString());
+    effect.to->getRoom()->obtainCard(effect.to, this, reason, false);
 }
 
 class ShangjianVS: public ViewAsSkill{
@@ -2441,7 +2444,7 @@ public:
 
     virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
-        if (damage.to != player && damage.to->getHp() <= player->getHp() && damage.to->isAlive() && !damage.to->hasFlag("Global_KOFDebut")){
+        if (damage.to != player && damage.to->getHp() <= player->getHp() && damage.to->isAlive() && !damage.to->hasFlag("Global_DebutFlag")){
             QString choice = "draw";
 
             LogMessage l;

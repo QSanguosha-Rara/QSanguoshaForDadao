@@ -497,7 +497,7 @@ public:
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         if (damage.card && damage.card->isKindOf("Slash") && !damage.chain && !damage.transfer
-            && damage.to->isAlive() && !damage.to->hasFlag("Global_KOFDebut") && room->askForSkillInvoke(player, objectName(), data)) {
+            && damage.to->isAlive() && !damage.to->hasFlag("Global_DebutFlag") && room->askForSkillInvoke(player, objectName(), data)) {
             int x = qMin(5, damage.to->getHp());
             room->broadcastSkillInvoke(objectName(), (x >= 3 || !damage.to->faceUp()) ? 2 : 1);
             damage.to->drawCards(x);
@@ -642,7 +642,8 @@ void MingceCard::onEffect(const CardEffectStruct &effect) const{
     }
 
     try {
-        effect.to->obtainCard(this);
+        CardMoveReason reason(CardMoveReason::S_REASON_GIVE, effect.from->objectName(), effect.to->objectName(), "mingce", QString());
+        room->obtainCard(effect.to, this, reason);
     }
     catch (TriggerEvent triggerEvent) {
         if (triggerEvent == TurnBroken || triggerEvent == StageChange)

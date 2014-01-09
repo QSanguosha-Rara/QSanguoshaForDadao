@@ -207,7 +207,7 @@ public:
         DamageStruct damage = data.value<DamageStruct>();
         ServerPlayer *target = damage.to;
         if (damage.card && damage.card->isKindOf("Slash") && !zhurong->isKongcheng()
-            && !target->isKongcheng() && target->isAlive() && !target->hasFlag("Global_KOFDebut") && target != zhurong 
+            && !target->isKongcheng() && target->isAlive() && !target->hasFlag("Global_DebutFlag") && target != zhurong 
             && !damage.chain && !damage.transfer && room->askForSkillInvoke(zhurong, objectName(), data)) {
             room->broadcastSkillInvoke(objectName(), 1);
 

@@ -559,7 +559,7 @@ public:
                     }
                 }
                 else if (damage.card->isBlack()){
-                    if (damage.to->isAlive() && !damage.to->hasFlag("Global_KOFDebut") && !damage.to->isNude() && player->askForSkillInvoke(objectName(), data)){
+                    if (damage.to->isAlive() && !damage.to->hasFlag("Global_DebutFlag") && !damage.to->isNude() && player->askForSkillInvoke(objectName(), data)){
                         int card_id = room->askForCardChosen(player, damage.to, "he", objectName(), false, Card::MethodDiscard);
                         room->throwCard(card_id, damage.to, player);
                         room->broadcastSkillInvoke(objectName(), 4);
@@ -2278,7 +2278,7 @@ public:
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *panfeng, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         ServerPlayer *target = damage.to;
-        if (target->isAlive() && !target->hasFlag("Global_KOFDebut") &&  target->getHp() <= panfeng->getHp() && target->hasEquip()) {
+        if (target->isAlive() && !target->hasFlag("Global_DebutFlag") &&  target->getHp() <= panfeng->getHp() && target->hasEquip()) {
             QStringList equiplist;
             for (int i = 0; i <= 3; i++) {
                 if (!target->getEquip(i)) continue;
