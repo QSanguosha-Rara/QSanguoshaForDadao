@@ -17,12 +17,12 @@ return {
 	["designer:yt_shencaocao"] = "官方内测第三版",
 	["illustrator:yt_shencaocao"] = "三国志大战",
 	["cv:yt_shencaocao"] = "极光星逝",
-	["weiwudi_guixin"] = "归心",
-	[":weiwudi_guixin"] = "回合结束阶段，你可以做以下二选一：\
+	["nosguixin"] = "归心",
+	[":nosguixin"] = "回合结束阶段，你可以做以下二选一：\
 1. 永久改变一名其他角色的势力\
 2. 永久获得一项未上场或已死亡角色的主公技。(获得后即使你不是主公仍然有效)",
-	["weiwudi_guixin:modify"] = "永久改变一名其他角色的势力",
-	["weiwudi_guixin:obtain"] = "永久获得一项未上场或已死亡角色的主公技",
+	["nosguixin:modify"] = "永久改变一名其他角色的势力",
+	["nosguixin:obtain"] = "永久获得一项未上场或已死亡角色的主公技",
 
 	-- 曹冲
 	["#yt_caochong"] = "早夭的神童",
