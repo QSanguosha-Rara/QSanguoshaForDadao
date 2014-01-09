@@ -813,7 +813,7 @@ end
 sgs.ai_skill_choice.gudan_saveself = function(self, choices)
 	local str = choices
 	choices = str:split("+")
-	if self.player:hasFlag("Global_PreventPeach") then return "analeptic" end
+	if self.player:getMark("Global_PreventPeach") > 0 then return "analeptic" end
 	local anal = sgs.Sanguosha:cloneCard("analeptic")
 	local peach = sgs.Sanguosha:cloneCard("peach")
 	if self.player:isLocked(anal) then return "peach" end
@@ -849,7 +849,7 @@ sgs.ai_view_as.gudan = function(card, player, card_place, class_name)
 		if (player:getHp() < 2 or player:getHandcardNum() < 4) and jinknum == 0 and peachnum == 0 and analnum == 0 then
 			return ("jink:gudan[to_be_decided:0]".."="..idstr)
 		end
-	elseif (class_name == "Peach" and not player:hasFlag("Global_PreventPeach")) then
+	elseif (class_name == "Peach" and player:getMark("Global_PreventPeach") == 0) then
 		if peachnum == 0 and analnum == 0 then
 			return ("peach:gudan[to_be_decided:0]".."="..idstr)
 		end
