@@ -40,7 +40,7 @@
 
 --视为技在创建时，需要以下方法|变量的定义：
 
---name, response_pattern, filter_pattern, n, view_filter, view_as, enabled_at_play, enabled_at_response和enabled_at_nullification
+--name, response_pattern, filter_pattern, guhuo_dialog, n, view_filter, view_as, enabled_at_play, enabled_at_response和enabled_at_nullification
 
 --name：
 --一个字符串即技能名称。
@@ -58,6 +58,31 @@
 --这个规则可以是以"@@"开头的技能牌pattern，也可以是牌的特定pattern（比如"slash"对应【杀】）
 --当此串不为空字符串时，此技能在出牌阶段不可以点击使用。
 --默认值为nil，即此技能为出牌阶段使用。值得注意的是，当技能同时提供了enabled_at_play或enabled_at_response与response_pattern时，前者有效，后者失效。
+
+--guhuo_dialog （此部分为高级技能应用，如果不理解LUA技能的基本语法的话，建议先跳过此段）:
+--LuaViewAsSkill::GuhuoDialogType类型，指定这个视为技是否需要用到蛊惑对话框（不单单是蛊惑，奇策和孤胆用的也是蛊惑对话框）
+--取值：
+{
+	LuaViewAsSkill_NoDialog , --没有对话框
+	LuaViewAsSkill_LeftOnlyDialog , --只有左边的对话框，也就是孤胆
+	LuaViewAsSkill_RightOnlyDialog , --只有右边的对话框，也就是奇策
+	LuaViewAsSkill_LeftRightDialog   --两边都有的对话框，也就是蛊惑
+}
+--默认值为LuaViewAsSkill_NoDialog，即这个技能没有蛊惑对话框。
+--注意，如果想要此技能显示蛊惑对话框，则此技能不能是触发技的附属视为技
+--蛊惑对话框使用之后，需要调用的话，通过sgs.Self:getTag(self:objectName()):toCard()来调用选择的卡牌，注意这个值类型为const Card *，不能addSubcard等等操作，所以正确的做法如下：
+
+view_as = function(self, cards)
+	if #cards == 0 then return false end --关于cards的条件
+
+	local _card = sgs.Self:getTag(self:objectName()):toCard() --获取选择的牌
+	local card = sgs.Sanguosha:cloneCard(_card:objectName(), sgs.Card_SuitToBeDecided, -1) --克隆一张同样的牌，注意此处大多数用的是技能卡然后用Validate的方式
+	card:setSkillName(self:objectName()) --下面不解释了
+	for _, c in ipairs(cards) do
+		card:addSubcard(c)
+	end
+	return card
+end
 
 --n：
 --整数值，每次发动技能所用牌数的最大值。绝大多数DIY用到的n可能都为1或2.
@@ -97,7 +122,7 @@
 
 --以下为“任意一张草花牌”的filter_pattern：
 
-filter_pattern = ".|spade" ,
+filter_pattern = ".|club" ,
 
 --以下为“任意两张同花色手牌“的view_filter方法：
 
