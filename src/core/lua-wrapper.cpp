@@ -1,5 +1,6 @@
 #include "lua-wrapper.h"
 #include "util.h"
+#include "wind.h"
 
 LuaTriggerSkill::LuaTriggerSkill(const char *name, Frequency frequency, const char *limit_mark)
     : TriggerSkill(name), on_trigger(0), can_trigger(0)
@@ -23,9 +24,20 @@ LuaProhibitSkill::LuaProhibitSkill(const char *name)
 
 LuaViewAsSkill::LuaViewAsSkill(const char *name, const char *response_pattern)
     : ViewAsSkill(name), view_filter(0), view_as(0),
-      enabled_at_play(0), enabled_at_response(0), enabled_at_nullification(0)
+      enabled_at_play(0), enabled_at_response(0), enabled_at_nullification(0), guhuo_dialog_type(NoDialog)
 {
     this->response_pattern = response_pattern;
+}
+
+QDialog *LuaViewAsSkill::getDialog() const{
+    int dialog_type = (int)guhuo_dialog_type;
+    if (dialog_type == 0)
+        return NULL;
+
+    bool has_left = (dialog_type & 1);
+    bool has_right = (dialog_type & 2);
+
+    return GuhuoDialog::getInstance(objectName(), has_left, has_right);
 }
 
 LuaFilterSkill::LuaFilterSkill(const char *name)

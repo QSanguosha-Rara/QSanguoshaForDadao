@@ -27,6 +27,8 @@ public:
 
 class LuaViewAsSkill: public ViewAsSkill {
 public:
+    enum GuhuoDialogType{ NoDialog = 0, LeftOnlyDialog = 1, RightOnlyDialog = 2, LeftRightDialog = 3 };
+
     LuaViewAsSkill(const char *name, const char *response_pattern = "");
 
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const;
@@ -38,6 +40,8 @@ public:
     LuaFunction enabled_at_play;
     LuaFunction enabled_at_response;
     LuaFunction enabled_at_nullification;
+
+    void setGuhuoDialogType(const GuhuoDialogType t);
 };
 
 class OneCardViewAsSkill: public ViewAsSkill {

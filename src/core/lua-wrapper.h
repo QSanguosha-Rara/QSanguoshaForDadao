@@ -41,8 +41,11 @@ public:
 
 class LuaViewAsSkill: public ViewAsSkill {
     Q_OBJECT
+    Q_ENUMS(GuhuoDialogType)
 
 public:
+    enum GuhuoDialogType{ NoDialog = 0, LeftOnlyDialog = 1, RightOnlyDialog = 2, LeftRightDialog = 3 };
+
     LuaViewAsSkill(const char *name, const char *response_pattern = "");
 
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const;
@@ -60,6 +63,15 @@ public:
     virtual bool isEnabledAtPlay(const Player *player) const;
     virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const;
     virtual bool isEnabledAtNullification(const ServerPlayer *player) const;
+
+    virtual QDialog *getDialog() const;
+
+    inline void setGuhuoDialogType(const GuhuoDialogType t) {
+        guhuo_dialog_type = t;
+    }
+
+private:
+    GuhuoDialogType guhuo_dialog_type; //left, right, left+right
 };
 
 class LuaFilterSkill: public FilterSkill {

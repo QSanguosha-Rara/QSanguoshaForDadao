@@ -497,6 +497,11 @@ function sgs.CreateViewAsSkill(spec)
 
 	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern)
 	local n = spec.n or 0  --Fs:I want to delete this property or change the default value to 998
+	
+	if (spec.guhuo_dialog) then
+		assert(type(spec.guhuo_dialog) == "number")
+		skill:setGuhuoDialogType(spec.guhuo_dialog)
+	end
 
 	function skill:view_as(cards)
 		return spec.view_as(self, cards)
@@ -522,6 +527,11 @@ function sgs.CreateOneCardViewAsSkill(spec)
 
 	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern)
 
+	if (spec.guhuo_dialog) then
+		assert(type(spec.guhuo_dialog) == "number")
+		skill:setGuhuoDialogType(spec.guhuo_dialog)
+	end
+	
 	function skill:view_as(cards)
 		if #cards ~= 1 then return nil end
 		return spec.view_as(self, cards[1])
@@ -554,6 +564,11 @@ function sgs.CreateZeroCardViewAsSkill(spec)
 
 	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern)
 
+	if (spec.guhuo_dialog) then
+		assert(type(spec.guhuo_dialog) == "number")
+		skill:setGuhuoDialogType(spec.guhuo_dialog)
+	end
+	
 	function skill:view_as(cards)
 		if #cards > 0 then return nil end
 		return spec.view_as(self)
