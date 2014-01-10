@@ -305,11 +305,11 @@ public:
 class Neo2013XiezunEffect: public TriggerSkill{
 public:
     Neo2013XiezunEffect(): TriggerSkill("#neo2013xiezun-effect"){
-        events << EventPhaseProceeding;
+        events << EventPhaseEnd;
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
-        if (player->getPhase() == Player::Discard && player->getMaxCards() > player->getHp() && player->hasSkill("neo2013xiezun")){
+        if (player->getPhase() == Player::Discard && player->getHandcardNum() > player->getHp() && player->hasSkill("neo2013xiezun")){
             room->broadcastSkillInvoke("neo2013xiezun");
             room->notifySkillInvoked(player, "neo2013xiezun");
         }
