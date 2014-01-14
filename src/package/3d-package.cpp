@@ -354,6 +354,7 @@ public:
             room->addPlayerMark(target, objectName());
             room->acquireSkill(target, "wuyan");
         }
+        return false;
     }
 };
 
