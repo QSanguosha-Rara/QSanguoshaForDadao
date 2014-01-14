@@ -469,6 +469,11 @@ StandardPackage::StandardPackage()
     patterns[".Equip"] = new ExpPattern("EquipCard");
 
     patterns[".Weapon"] = new ExpPattern("Weapon");
+    patterns[".Armor"] = new ExpPattern("Armor");
+    patterns[".Horse"] = new ExpPattern("Horse");
+    patterns[".OffHorse"] = new ExpPattern("OffensiveHorse");
+    patterns[".DefHorse"] = new ExpPattern("DefensiveHorse");
+
     patterns["slash"] = new ExpPattern("Slash");
     patterns["jink"] = new ExpPattern("Jink");
     patterns["peach"] = new  ExpPattern("Peach");
