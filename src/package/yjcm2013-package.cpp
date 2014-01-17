@@ -335,7 +335,6 @@ class QiaoshuiUse: public TriggerSkill {
 public:
     QiaoshuiUse(): TriggerSkill("#qiaoshui-use") {
         events << PreCardUsed;
-        view_as_skill = new QiaoshuiViewAsSkill;
     }
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *jianyong, QVariant &data) const{
