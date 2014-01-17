@@ -1806,7 +1806,8 @@ public:
                 do {
                     skill = Sanguosha->getSkill(skills[qrand() % skills.length()]);
                 }
-                while (!(skill && skill->isVisible() && !skill->isLordSkill() && !skill->isAttachedLordSkill() && !target->hasSkill(skill->objectName())));
+                while (!(skill && skill->isVisible() && !skill->isLordSkill() && !skill->isAttachedLordSkill() 
+                        && !skill->inherits("WeaponSkill") && !skill->inherits("ArmorSkill") && !target->hasSkill(skill->objectName())));
                 room->acquireSkill(target, skill->objectName());
             }
         return false;
@@ -2181,7 +2182,7 @@ TestPackage::TestPackage()
     lzxqqqq2->addRelateSkill("lzxsanwo");
     lzxqqqq2->addRelateSkill("lzxshengqi");
 
-    General *Fsu0413 = new General(this, "Fsu0413", "god", 5);
+    General *Fsu0413 = new General(this, "Fsu0413", "qun", 5);
     Fsu0413->addSkill(new Zhazha);
 
     addMetaObject<NimeiCard>();

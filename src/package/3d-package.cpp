@@ -3,6 +3,7 @@
 #include "clientplayer.h"
 #include "engine.h"
 #include "wind.h"
+#include "standard.h"
 
 class SanD1Chishen: public TriggerSkill{
 public:
@@ -358,6 +359,324 @@ public:
     }
 };
 
+class SanD1Xianxi: public TargetModSkill{
+public:
+    SanD1Xianxi(): TargetModSkill("sand1xianxi"){
+        pattern = "slash";
+    }
+
+    virtual int getExtraTargetNum(const Player *from, const Card *card) const{
+        if (from->hasSkill(objectName()) && from->getPhase() == Player::Play)
+            return 99;
+
+        return 0;
+    }
+};
+
+class SanD1XianxiEffect1: public TriggerSkill{
+public:
+    SanD1XianxiEffect1(): TriggerSkill("#sand1xianxi1"){
+        events << CardUsed << CardResponded << CardFinished;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent != CardResponded && TriggerSkill::triggerable(player)){
+            CardUseStruct use = data.value<CardUseStruct>();
+            if (use.from->hasSkill("sand1xianxi") && use.to.length() > 1){
+                if (triggerEvent == CardUsed){
+                    QVariantMap xianxi_list;
+                    for (int i = 0; i <= use.to.length(); i ++)
+                        xianxi_list[use.to[i]->objectName()] = false;
+                    use.from->tag["Xianxi_" + use.card->toString()] = xianxi_list;
+                    use.from->setFlags("xianxi_using");
+                }
+                else {
+                    use.from->tag.remove("xianxi_" + use.card->toString());
+                    use.from->setFlags("-xianxi_using")
+                }
+            }
+        }
+        else if (triggerEvent == CardResponded){
+            CardResponseStruct resp = data.value<CardResponseStruct>();
+            if (resp.m_card->isKindOf("Jink") && resp.m_isUse == true && TriggerSkill::triggerable(resp.m_who)
+                    && resp.m_who->hasFlag("xianxi_using") && player->hasFlag("xianxi_target")){
+                QVariantMap xianxi_list = resp.m_who->tag["Xianxi_" + player->tag["xianxi_slash"].value<const Card *>()->toString()].toMap();
+                xianxi_list[player->objectName()] = true;
+
+                bool used_jink = false, need_discard = false;
+                foreach (QVariant b, xianxi_list){
+                    if (b.toBool()){
+                        if (!used_jink)
+                            used_jink = true;
+                        else {
+                            need_discard = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (need_discard){
+                    if (!room->askForDiscard(resp.m_who, objectName(), 2, 2, true, true, "@SanD1Xianxi-discard"))
+                        room->loseHp(resp.m_who, 1);
+                }
+
+            }
+        }
+    }
+};
+
+class SanD1XianxiEffect2: public TriggerSkill{
+public:
+    SanD1XianxiEffect2(): TriggerSkill("#sand1xianxi2"){
+        events << SlashProceed;
+    }
+
+    virtual int getPriority(TriggerEvent triggerEvent) const{
+        return 1;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (player->hasFlag("xianxi_using")){
+            SlashEffectStruct effect = data.value<SlashEffectStruct>();
+            effect.to->setFlags("xianxi_target");
+            effect.to->tag["xianxi_slash"] = QVariant::fromValue(effect.slash);
+        }
+        return false;
+    }
+};
+
+class SanD1XianxiEffect3: public TriggerSkill{
+public:
+    SanD1XianxiEffect3(): TriggerSkill("#sand1xianxi3"){
+        events << SlashProceed;
+    }
+
+    virtual int getPriority(TriggerEvent triggerEvent) const{
+        return -2;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (player->hasFlag("xianxi_using")){
+            SlashEffectStruct effect = data.value<SlashEffectStruct>();
+            effect.to->setFlags("xianxi_target");
+            effect.to->tag.remove("xianxi_slash");
+        }
+        return false;
+    }
+};
+
+SanD1KuangxiCard::SanD1KuangxiCard(){
+
+}
+
+bool SanD1KuangxiCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+    return targets.isEmpty() && Self->distanceTo(to_select) == 1 && to_select != Self && !to_select->isKongcheng();
+}
+
+void SanD1KuangxiCard::onEffect(const CardEffectStruct &effect) const{
+    Room *room = effect.to->getRoom();
+    int card_id = room->askForCardChosen(effect.from, effect.to, "h", "sand1kuangxi");
+    room->showCard(effect.to, card_id);
+
+    const Card *card = Sanguosha->getCard(card_id);
+    if (card->isKindOf("Slash") || card->isKindOf("Jink")){
+        effect.from->obtainCard(card);
+
+        Slash *slash = new Slash(Card::SuitToBeDecided, -1);
+        slash->addSubcard(card);
+        slash->setSkillName("_sand1kuangxi");
+        room->useCard(CardUseStruct(slash, effect.from, effect.to));
+
+
+        room->askForUseCard(effect.from, "@@sand1kuangxi", "@sand1kuangxi", -1, Card::MethodDiscard);
+    }
+}
+
+class SanD1KuangxiVS: public OneCardViewAsSkill{
+public:
+    SanD1KuangxiVS(): OneCardViewAsSkill("sand1kuangxi"){
+        filter_pattern = ".!";
+        response_pattern = "@@sand1kuangxi";
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        SanD1KuangxiCard *c = new SanD1KuangxiCard;
+        c->addSubcard(originalCard);
+        return c;
+    }
+};
+
+class SanD1Kuangxi: public PhaseChangeSkill{
+public:
+    SanD1Kuangxi(): PhaseChangeSkill("sand1kuangxi"){
+
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() == Player::Start){
+            if (target->getRoom()->askForUseCard(target, "@@sand1kuangxi", "@sand1kuangxi", -1, Card::MethodDiscard)){
+                target->skip(Player::Judge);
+                target->skip(Player::Draw);
+            }
+        }
+        return false;
+    }
+};
+
+SanD1ShenzhiCard::SanD1ShenzhiCard(){
+    will_throw = false;
+    handling_method = Card::MethodNone;
+}
+
+void SanD1ShenzhiCard::onEffect(const CardEffectStruct &effect) const{
+    Room *room = effect.from->getRoom();
+    int card_id = subcards.first();
+    room->showCard(effect.from, card_id, effect.to);
+
+    QString choice = room->askForChoice(effect.to, objectName(), "obtaindrawlosehp+discardletdraw", card_id);
+    if (choice == "obtaindrawlosehp"){
+        effect.to->obtainCard(Sanguosha->getCard(card_id), false);
+        effect.to->drawCards(1);
+        room->loseHp(effect.to);
+    }
+    else {
+        room->throwCard(card_id, effect.from, effect.to);
+        if (!effect.to->isNude()){
+            int to_gain = room->askForCardChosen(effect.from, effect.to, "he", objectName());
+            effect.from->obtainCard(Sanguosha->getCard(to_gain), false);
+        }
+    }
+}
+
+class SanD1Shenzhi: public OneCardViewAsSkill{
+public:
+    SanD1Shenzhi(): OneCardViewAsSkill("sand1shenzhi"){
+        filter_pattern = ".|.|.|hand";
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("SanD1ShenzhiCard");
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        SanD1ShenzhiCard *c = new SanD1ShenzhiCard;
+        c->addSubcard(originalCard);
+        return c;
+    }
+};
+
+class SanD1Zhaolie: public TriggerSkill{
+public:
+    SanD1Zhaolie(): TriggerSkill("sand1zhaolie"){
+        events << TargetConfirmed << CardAsked << CardFinished;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == TargetConfirmed){
+            CardUseStruct use = data.value<CardUseStruct>();
+            if (use.card != NULL && use.card->isKindOf("Slash") && use.to.contains(player) && TriggerSkill::triggerable(player)){
+                const Card *slash = use.card;
+                if (player->askForSkillInvoke(objectName(), QVariant::fromValue(slash))){
+                    QString pattern;
+                    if (slash->isBlack())
+                        pattern = ".|red";
+                    else if (slash->isRed())
+                        pattern = ".|black";
+                    else
+                        pattern = ".";
+
+                    JudgeStruct judge;
+                    judge.who = player;
+                    judge.pattern = pattern;
+                    judge.good = true;
+                    
+                    room->judge(judge);
+
+                    if (judge.isGood()){
+                        player->addMark("SanD1Zhaolie_" + slash->toString());
+                    }
+                }
+            }
+        }
+        else if (triggerEvent == CardFinished){
+            CardUseStruct use = data.value<CardUseStruct>();
+            if (use.card != NULL && use.card->isKindOf("Slash")){
+                foreach(ServerPlayer *p, room->getAlivePlayers()){
+                    if (p->getMark("SanD1Zhaolie_" + use.card->toString()) > 0)
+                        p->setMark("SanD1Zhaolie_" + use.card->toString(), 0);
+                }
+            }
+        }
+        else if (triggerEvent == CardAsked && TriggerSkill::triggerable(player)){
+            QStringList ask = data.toStringList();
+            if (ask.first() == "jink" && player->hasFlag("SanD1Zhaolie_Jink")){
+                player->setFlags("-SanD1Zhaolie_Jink");
+                Jink *jink = new Jink(Card::NoSuit, 0);
+                jink->setSkillName("_sand1zhaolie");
+                room->provide(jink);
+                return true;
+            }
+        }
+        return false;
+    }
+};
+
+class SanD1ZhaolieEffect1: public TriggerSkill{
+public:
+    SanD1ZhaolieEffect1(): TriggerSkill("#sand1zhaolie1"){
+        events << SlashProceed;
+    }
+
+    virtual int getPriority(TriggerEvent triggerEvent) const{
+        return 1;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        SlashEffectStruct effect = data.value<SlashEffectStruct>();
+        if (player->getMark("SanD1Zhaolie_" + effect.slash->toString()) > 0){
+            player->setFlags("SanD1Zhaolie_Jink");
+        }
+        return false;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+};
+
+class SanD1ZhaolieEffect2: public TriggerSkill{
+public:
+    SanD1ZhaolieEffect2(): TriggerSkill("#sand1zhaolie2"){
+        events << SlashProceed;
+    }
+
+    virtual int getPriority(TriggerEvent triggerEvent) const{
+        return -2;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        SlashEffectStruct effect = data.value<SlashEffectStruct>();
+        if (player->getMark("SanD1Zhaolie_" + effect.slash->toString()) > 0){
+            player->setFlags("-SanD1Zhaolie_Jink");
+        }
+        return false;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+};
+
+
+
 SanD1Package::SanD1Package(): Package("sand1"){
 
     General *miheng = new General(this, "sand1_miheng", "qun", 3);
@@ -374,9 +693,30 @@ SanD1Package::SanD1Package(): Package("sand1"){
     xushu->addSkill(new SanD1Bianzhen);
     xushu->addSkill(new SanD1Congwen);
 
+    General *handang = new General(this, "sand1_handang", "wu", 4);
+    handang->addSkill(new SanD1Xianxi);
+    handang->addSkill(new SanD1XianxiEffect1);
+    handang->addSkill(new SanD1XianxiEffect2);
+    handang->addSkill(new SanD1XianxiEffect3);
+    related_skills.insertMulti("sand1xianxi", "#sand1xianxi1");
+    related_skills.insertMulti("sand1xianxi", "#sand1xianxi2");
+    related_skills.insertMulti("sand1xianxi", "#sand1xianxi3");
+
+    General *weiyan = new General(this, "sand1_weiyan", "shu", 4);
+    weiyan->addSkill(new SanD1Kuangxi);
+
+    General *ganqian = new General(this, "sand1_ganqian", "shu", 3);
+    ganqian->addSkill(new SanD1Shenzhi);
+    ganqian->addSkill(new SanD1Zhaolie);
+    ganqian->addSkill(new SanD1ZhaolieEffect1);
+    ganqian->addSkill(new SanD1ZhaolieEffect2);
+    related_skills.insertMulti("sand1zhaolie", "#sand1zhaolie1");
+    related_skills.insertMulti("sand1zhaolie", "#sand1zhaolie2");
 
     addMetaObject<SanD1XinveCard>();
     addMetaObject<SanD1BianzhenCard>();
+    addMetaObject<SanD1KuangxiCard>();
+    addMetaObject<SanD1ShenzhiCard>();
 }
 
 ADD_PACKAGE(SanD1)

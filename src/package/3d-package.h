@@ -35,4 +35,21 @@ private:
     static Player::Phase getPhaseFromString(const QString &s);
 };
 
+class SanD1KuangxiCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE SanD1KuangxiCard();
+    virtual bool targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const;
+    virtual void onEffect(const CardEffectStruct &effect) const;
+};
+
+class SanD1ShenzhiCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE SanD1ShenzhiCard();
+    virtual void onEffect(const CardEffectStruct &effect) const;
+};
+
 #endif
