@@ -396,7 +396,7 @@ public:
                 }
                 else {
                     use.from->tag.remove("xianxi_" + use.card->toString());
-                    use.from->setFlags("-xianxi_using")
+                    use.from->setFlags("-xianxi_using");
                 }
             }
         }
@@ -426,6 +426,7 @@ public:
 
             }
         }
+        return false;
     }
 };
 
