@@ -740,48 +740,6 @@ public:
     }
 };
 
-class Yuwen: public TriggerSkill{
-public:
-    Yuwen():TriggerSkill("yuwen"){
-        events << GameOverJudge;
-        frequency = Compulsory;
-    }
-
-    virtual int getPriority(TriggerEvent) const{
-        return 4;
-    }
-
-    virtual bool triggerable(const ServerPlayer *target) const{
-        return target != NULL && target->hasSkill(objectName()) && !target->isAlive();
-    }
-
-    virtual bool trigger(TriggerEvent, Room* room, ServerPlayer *tianfeng, QVariant &data) const{
-        DeathStruct death = data.value<DeathStruct>();
-
-        if(death.damage){
-            if(death.damage->from == tianfeng)
-                return false;
-        }else{
-            death.damage = new DamageStruct;
-            death.damage->to = tianfeng;
-            data = QVariant::fromValue(death);
-        }
-
-        death.damage->from = tianfeng;
-
-        room->broadcastSkillInvoke(objectName());
-        room->notifySkillInvoked(tianfeng, objectName());
-
-        LogMessage log;
-        log.type = "#TriggerSkill";
-        log.from = tianfeng;
-        log.arg = objectName();
-        room->sendLog(log);
-
-        return false;
-    }
-};
-
 ShouyeCard::ShouyeCard(){
 }
 
@@ -939,7 +897,7 @@ WisdomPackage::WisdomPackage()
         wistianfeng = new General(this, "wis_tianfeng", "qun", 3);
         wistianfeng->addSkill(new Shipo);
         wistianfeng->addSkill(new Gushou);
-        wistianfeng->addSkill(new Yuwen);
+        wistianfeng->addSkill(new Skill("yuwen", Skill::Compulsory));
 
         wisshuijing = new General(this, "wis_shuijing", "qun");
         wisshuijing->addSkill(new Shouye);

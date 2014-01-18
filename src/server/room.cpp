@@ -303,6 +303,24 @@ void Room::updateStateItem() {
 
 void Room::killPlayer(ServerPlayer *victim, DamageStruct *reason) {
     ServerPlayer *killer = reason ? reason->from : NULL;
+
+    if (victim->hasSkill("yuwen")){
+        broadcastSkillInvoke("yuwen");
+        notifySkillInvoked(victim, "yuwen");
+
+        LogMessage log;
+        log.type = "#TriggerSkill";
+        log.from = victim;
+        log.arg = "yuwen";
+        sendLog(log);
+
+        if (reason == NULL)
+            reason = new DamageStruct("yuwen", victim, victim);  //memory leak...I can't solve the problem
+        
+        reason->from = victim;
+        killer = victim;
+    } //for skill yuwen
+
     QList<ServerPlayer *> players_with_victim = getAllPlayers();
 
     victim->setAlive(false);
