@@ -265,6 +265,7 @@ void PackagingEditor::browseFiles(){
 }
 
 void PackagingEditor::makePackage(){
+#ifndef QT_NO_PROCESS
     if(file_list->count() == 0)
         return;
 
@@ -303,6 +304,9 @@ void PackagingEditor::makePackage(){
 
         connect(process, SIGNAL(finished(int)), this, SLOT(done7zProcess(int)));
     }
+#else
+	QMessageBox::warning(this, tr("Warning"), tr("I'm so sorry. This function cannot work normally in the current version."));
+#endif
 }
 
 void PackagingEditor::done7zProcess(int exit_code){

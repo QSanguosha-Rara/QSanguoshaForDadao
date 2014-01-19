@@ -39,6 +39,9 @@ public:
     void exchangePlayersInfo(QListWidgetItem *first, QListWidgetItem *second);
     void exchangeCardRange(QListWidgetItem *first, QListWidgetItem *second, QString flag);
 
+	static QLayout *HLay(QWidget *left, QWidget *right, QWidget *mid = NULL,
+                     QWidget *rear = NULL, bool is_vertically = false);
+
 protected:
     virtual void accept();
     virtual void reject();

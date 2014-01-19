@@ -501,6 +501,7 @@
     <ClCompile Include="Release\moc_power.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\all.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\src\server\ai.h">
@@ -1347,8 +1348,5 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\resource\icon.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\src\QSanIncludes.h" />
   </ItemGroup>
 </Project>

@@ -66,6 +66,7 @@ public:
     void fillGenerals(const QList<const General *> &generals, bool init = true);
 
     static GeneralOverview *getInstance(QWidget *main_window);
+	static QLayout *HLay(QWidget *left, QWidget *right);
 
 private:
     Ui::GeneralOverview *ui;

@@ -27,6 +27,8 @@ public:
     virtual void addCardItems(QList<CardItem *> &card_items, const CardsMoveStruct &moveInfo);
     virtual QList<CardItem *> cloneCardItems(QList<int> card_ids);
 
+	static bool CompareByNumber(const Card *card1, const Card *card2);
+
 protected:
     // @return Whether the card items should be destroyed after animation
     virtual bool _addCardItems(QList<CardItem *> &card_items, const CardsMoveStruct &moveInfo) = 0;

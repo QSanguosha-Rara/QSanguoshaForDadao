@@ -23,7 +23,7 @@
 #include <QHostInfo>
 #include <QAction>
 
-static QLayout *HLay(QWidget *left, QWidget *right) {
+QLayout *ServerDialog::HLay(QWidget *left, QWidget *right) {
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(left);
     layout->addWidget(right);

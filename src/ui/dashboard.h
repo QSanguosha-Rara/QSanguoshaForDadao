@@ -97,6 +97,10 @@ public:
             _m_skillDock->update();
     }
 
+	static bool CompareByNumber(const CardItem *a, const CardItem *b);
+	static bool CompareBySuit(const CardItem *a, const CardItem *b);
+	static bool CompareByType(const CardItem *a, const CardItem *b);
+
 public slots:
     void sortCards();
     void beginSorting();

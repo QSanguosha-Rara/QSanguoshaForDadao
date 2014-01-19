@@ -291,7 +291,7 @@ void PlayerCardContainer::updateHp() {
         _m_saveMeIcon->setVisible(false);
 }
 
-static bool CompareByNumber(const Card *card1, const Card *card2) {
+bool GenericCardContainer::CompareByNumber(const Card *card1, const Card *card2) {
     return card1->getNumber() < card2->getNumber();
 }
 

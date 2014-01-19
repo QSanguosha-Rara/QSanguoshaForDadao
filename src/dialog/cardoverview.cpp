@@ -9,13 +9,13 @@
 #include <QMessageBox>
 #include <QFile>
 
-static CardOverview *Overview;
+static CardOverview *COverview;
 
 CardOverview *CardOverview::getInstance(QWidget *main_window) {
-    if (Overview == NULL)
-        Overview = new CardOverview(main_window);
+    if (COverview == NULL)
+        COverview = new CardOverview(main_window);
 
-    return Overview;
+    return COverview;
 }
 
 CardOverview::CardOverview(QWidget *parent)

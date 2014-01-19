@@ -54,6 +54,8 @@ public:
     virtual void askForGuanxing(const QList<int> &cards, QList<int> &up, QList<int> &bottom, bool up_only) = 0;
     virtual void filterEvent(TriggerEvent triggerEvent, ServerPlayer *player, const QVariant &data);
 
+	static bool CompareByNumber(const Card *c1, const Card *c2);
+
 protected:
     Room *room;
     ServerPlayer *self;

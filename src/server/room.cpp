@@ -27,7 +27,7 @@
 #include <QTextStream>
 
 #ifdef QSAN_UI_LIBRARY_AVAILABLE
-#pragma message WARN("UI elements detected in server side!!!")
+#pragma message("UI elements detected in server side!!!")
 #endif
 
 using namespace QSanProtocol;

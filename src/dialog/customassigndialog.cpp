@@ -15,8 +15,8 @@
 #include <QCommandLinkButton>
 #include <QCompleter>
 
-static QLayout *HLay(QWidget *left, QWidget *right, QWidget *mid = NULL,
-                     QWidget *rear = NULL, bool is_vertically = false) {
+QLayout *CustomAssignDialog::HLay(QWidget *left, QWidget *right, QWidget *mid,
+                     QWidget *rear, bool is_vertically) {
     QBoxLayout *layout;
     if (is_vertically) layout = new QVBoxLayout;
     else layout = new QHBoxLayout;
@@ -1753,9 +1753,9 @@ SkillAssignDialog::SkillAssignDialog(QDialog *parent, QString player_name, QStri
     QVBoxLayout *sided_lay = new QVBoxLayout;
     sided_lay->addWidget(skill_info);
     sided_lay->addStretch();
-    sided_lay->addLayout(HLay(input_skill, add_skill));
-    sided_lay->addLayout(HLay(select_skill, delete_skill));
-    sided_lay->addLayout(HLay(ok_button, cancel_button));
+    sided_lay->addLayout(CustomAssignDialog::HLay(input_skill, add_skill));
+    sided_lay->addLayout(CustomAssignDialog::HLay(select_skill, delete_skill));
+    sided_lay->addLayout(CustomAssignDialog::HLay(ok_button, cancel_button));
     layout->addLayout(sided_lay);
     QVBoxLayout *mainlayout = new QVBoxLayout;
     mainlayout->addLayout(layout);

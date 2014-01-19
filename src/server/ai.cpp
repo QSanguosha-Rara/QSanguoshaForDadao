@@ -306,7 +306,7 @@ const Card *TrustAI::askForCardShow(ServerPlayer *, const QString &) {
     return self->getRandomHandCard();
 }
 
-static bool CompareByNumber(const Card *c1, const Card *c2) {
+bool AI::CompareByNumber(const Card *c1, const Card *c2) {
     return c1->getNumber() < c2->getNumber();
 }
 
