@@ -355,7 +355,13 @@ void MainWindow::gotoStartScene() {
 }
 
 void MainWindow::startGameInAnotherInstance() {
+#ifndef QT_NO_PROCESS
     QProcess::startDetached(QApplication::applicationFilePath(), QStringList());
+#else
+	QMessageBox::warning(this, tr("Warning"), tr("I'm so sorry, you cannot start a \
+												 server and start a game at the same \
+												 time in the current version."));
+#endif
 }
 
 void MainWindow::on_actionGeneral_Overview_triggered() {

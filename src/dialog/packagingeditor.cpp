@@ -201,20 +201,27 @@ QWidget *PackagingEditor::createPackagingTab(){
 }
 
 void PackagingEditor::installPackage(){
-    QString filename = QFileDialog::getOpenFileName(this,
-                                                    tr("Select a package to install"),
-                                                    QString(),
-                                                    tr("7z format (*.7z)")
-                                                    );
+	/// We cannot use QProcess in some systems, such as Win8.
+	/// However, Win32 API can work in Win8 (Pro) normally.
+	/// I think QProcess should only be banned in Win8 RTM.
+#ifndef QT_NO_PROCESS
+	QString filename = QFileDialog::getOpenFileName(this,
+													tr("Select a package to install"),
+													QString(),
+													tr("7z format (*.7z)")
+													);
 
-    if(!filename.isEmpty()){
-        QProcess *process = new QProcess(this);
-        QStringList args;
-        args << "x" << filename;
-        process->start("7zr", args);
+	if(!filename.isEmpty()){
+		QProcess *process = new QProcess(this);
+		QStringList args;
+		args << "x" << filename;
+		process->start("7zr", args);
 
-        connect(process, SIGNAL(finished(int)), this, SLOT(done7zProcess(int)));
-    }
+		connect(process, SIGNAL(finished(int)), this, SLOT(done7zProcess(int)));
+	}
+#else
+	QMessageBox::warning(this, tr("Warning"), tr("I'm so sorry. This function cannot work normally in the current version."));
+#endif
 }
 
 void PackagingEditor::uninstallPackage(){
@@ -310,3 +317,4 @@ void MainWindow::on_actionPackaging_triggered()
     PackagingEditor *editor = new PackagingEditor(this);
     editor->show();
 }
+

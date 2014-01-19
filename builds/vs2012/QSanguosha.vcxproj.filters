@@ -791,6 +791,78 @@
     <CustomBuild Include="..\..\src\package\power.h">
       <Filter>package</Filter>
     </CustomBuild>
+    <CustomBuild Include="GeneratedFiles\ui_cardoverview.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GeneratedFiles\ui_configdialog.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GeneratedFiles\ui_connectiondialog.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GeneratedFiles\ui_generaloverview.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GeneratedFiles\ui_mainwindow.h">
+      <Filter>Generated Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="sanguosha.ts">
+      <Filter>Translation Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\core\compiler-specific.h">
+      <Filter>core</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\core\jsonutils.h">
+      <Filter>core</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\core\protocol.h">
+      <Filter>core</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\core\structs.h">
+      <Filter>core</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\core\audio.h">
+      <Filter>core</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\core\banpair.h">
+      <Filter>core</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\package\exppattern.h">
+      <Filter>package</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\scenario\scenerule.h">
+      <Filter>scenario</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\ui\SkinBank.h">
+      <Filter>ui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\src\ui\uiUtils.h">
+      <Filter>ui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\swig\ai.i">
+      <Filter>Swig Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\swig\card.i">
+      <Filter>Swig Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\swig\list.i">
+      <Filter>Swig Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\swig\luaskills.i">
+      <Filter>Swig Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\swig\native.i">
+      <Filter>Swig Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\swig\naturalvar.i">
+      <Filter>Swig Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\swig\qvariant.i">
+      <Filter>Swig Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\swig\sanguosha.i">
+      <Filter>Swig Files</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="debug\moc_ai.cpp">
@@ -1257,35 +1329,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\swig\sanguosha.i">
-      <Filter>Swig Files</Filter>
-    </None>
-    <None Include="sanguosha.ts">
-      <Filter>Translation Files</Filter>
-    </None>
-    <None Include="..\..\swig\ai.i">
-      <Filter>Swig Files</Filter>
-    </None>
-    <None Include="..\..\swig\card.i">
-      <Filter>Swig Files</Filter>
-    </None>
-    <None Include="..\..\swig\list.i">
-      <Filter>Swig Files</Filter>
-    </None>
-    <None Include="..\..\swig\luaskills.i">
-      <Filter>Swig Files</Filter>
-    </None>
-    <None Include="..\..\swig\native.i">
-      <Filter>Swig Files</Filter>
-    </None>
-    <None Include="..\..\swig\naturalvar.i">
-      <Filter>Swig Files</Filter>
-    </None>
-    <None Include="..\..\swig\qvariant.i">
-      <Filter>Swig Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <CustomBuild Include="..\..\src\dialog\cardoverview.ui">
       <Filter>ui\form</Filter>
     </CustomBuild>
@@ -1306,50 +1349,6 @@
     <ResourceCompile Include="..\..\resource\icon.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GeneratedFiles\ui_cardoverview.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_configdialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_connectiondialog.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_generaloverview.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_mainwindow.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\audio.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\banpair.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\package\exppattern.h">
-      <Filter>package</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\scenario\scenerule.h">
-      <Filter>scenario</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\protocol.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\jsonutils.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\structs.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\ui\SkinBank.h">
-      <Filter>ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\core\compiler-specific.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\ui\uiUtils.h">
-      <Filter>ui</Filter>
-    </ClInclude>
+    <ClInclude Include="..\..\src\QSanIncludes.h" />
   </ItemGroup>
 </Project>
