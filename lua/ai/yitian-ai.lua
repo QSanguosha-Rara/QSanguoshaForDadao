@@ -1015,8 +1015,6 @@ end
 ]]--
 sgs.ai_skill_invoke.xiliang = true
 
-sgs.ai_skill_askforag.xiliang = -1
-
 sgs.ai_skill_choice.xiliang = function(self, choices)
 	if self.player:hasSkill("manjuan") or self:needKongcheng(self.player) then return "put" end
 	if not self.player:hasSkill("yishe") then return "obtain" end
