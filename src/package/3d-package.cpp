@@ -676,6 +676,132 @@ public:
     }
 };
 
+SanD1DoudanCard::SanD1DoudanCard(){
+    target_fixed = true;
+    mute = true;
+    will_throw = false;
+    handling_method = Card::MethodNone;
+}
+
+void SanD1DoudanCard::onUse(Room *room, const CardUseStruct &card_use) const{
+    QVariantList l;
+    foreach (int id, subcards){
+        l << id;
+    }
+
+    room->setPlayerProperty(card_use.from, "doudan_sorted", l);
+}
+
+class SanD1DoudanVS: public ViewAsSkill{
+public:
+    SanD1DoudanVS(): ViewAsSkill("sand1doudan"){
+        response_pattern = "@@sand1doudan!";
+    }
+
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+        QVariantList l = Self->property("doudan_table").toList();
+        if (l.contains(to_select->getEffectiveId()))
+            return true;
+    }
+
+    virtual const Card *viewAs(const QList<const Card *> &cards) const{
+        QVariantList l = Self->property("doudan_table").toList();
+        if (l.length() == cards.length()){
+            SanD1DoudanCard *c = new SanD1DoudanCard;
+            c->addSubcards(cards);
+            return c;
+        }
+        return NULL;
+    }
+};
+
+class SanD1Doudan: public PhaseChangeSkill{
+public:
+    SanD1Doudan(): PhaseChangeSkill("sand1doudan"){
+        view_as_skill = new SanD1DoudanVS;
+    }
+
+    virtual bool onPhaseChange(ServerPlayer *target) const{
+        if (target->getPhase() == Player::Draw && target->askForSkillInvoke(objectName())){
+            Room *room = target->getRoom();
+            QList<int> card_ids = room->getNCards(3);
+            
+            CardMoveReason reason(CardMoveReason::S_REASON_TURNOVER, target->objectName(), objectName(), QString());
+            CardsMoveStruct move(card_ids, NULL, Player::PlaceTable, reason);
+            room->moveCardsAtomic(move, true);
+            room->getThread()->delay();
+            room->getThread()->delay();
+
+            //for ai
+            QVariantList l;
+            foreach (int id, card_ids)
+                l << id;
+
+            QString choice = room->askForChoice(target, objectName(), "gainone+puttotop", l);
+
+            if (choice == "gainone"){
+                room->fillAG(card_ids, target);
+                int id = room->askForAG(target, card_ids, false, objectName());
+                room->clearAG(target);
+                room->obtainCard(target, id, true);
+
+                card_ids.removeOne(id);
+                CardMoveReason reason2(CardMoveReason::S_REASON_PUT, target->objectName(), objectName(), QString());
+                CardsMoveStruct move2(card_ids, NULL, Player::DiscardPile, reason);
+                room->moveCardsAtomic(move2, true);
+            }
+            else {
+                QList<ServerPlayer *> _target;
+                _target << target;
+                QList<CardsMoveStruct> _clientmovelist;
+                _clientmovelist << CardsMoveStruct(card_ids, NULL, target, Player::PlaceTable, Player::PlaceHand, 
+                        CardMoveReason(CardMoveReason::S_REASON_PREVIEW, target->objectName()));
+
+                room->notifyMoveCards(true, _clientmovelist, true, _target);
+                room->notifyMoveCards(false, _clientmovelist, true, _target);
+                
+                room->setPlayerProperty(target, "doudan_table", l);
+                room->askForUseCard(target, "@@sand1doudan!", "@sand1doudan-put", -1, Card::MethodNone);
+                room->setPlayerProperty(target, "doudan_table", QVariant());
+
+                QVariantList sorted_l = target->property("doudan_sorted").toList();
+                room->setPlayerProperty(target, "doudan_sorted", QVariant());
+
+                _clientmovelist.clear();
+                _clientmovelist << CardsMoveStruct(card_ids, target, NULL, Player::PlaceHand, Player::PlaceTable,
+                        CardMoveReason(CardMoveReason::S_REASON_PREVIEW, target->objectName()));
+
+                room->notifyMoveCards(true, _clientmovelist, true, _target);
+                room->notifyMoveCards(false, _clientmovelist, true, _target);
+
+                DummyCard dummy;
+                foreach (QVariant id, sorted_l){
+                    dummy.addSubcard(id.toInt());
+                }
+
+                room->moveCardTo(&dummy, NULL, Player::DrawPile, 
+                        CardMoveReason(CardMoveReason::S_REASON_PUT, target->objectName(), objectName(), QString()), true);
+            }
+
+            QList<ServerPlayer *> can_slash;
+            foreach (ServerPlayer *p, room->getOtherPlayers(target)){
+                if (target->canSlash(p))
+                    can_slash << p;
+            }
+
+            if (!can_slash.isEmpty()){
+                ServerPlayer *victim = room->askForPlayerChosen(target, can_slash, objectName(), "@sand1doudan-slash", false, true);
+                Slash *slash = new Slash(Card::NoSuit, 0);
+                slash->setSkillName("_sand1doudan");
+                room->useCard(CardUseStruct(slash, target, victim), false);
+            }
+
+            target->skip(Player::Play);
+        }
+        return false;
+    }
+};
+
 
 
 SanD1Package::SanD1Package(): Package("sand1"){
@@ -714,10 +840,14 @@ SanD1Package::SanD1Package(): Package("sand1"){
     related_skills.insertMulti("sand1zhaolie", "#sand1zhaolie1");
     related_skills.insertMulti("sand1zhaolie", "#sand1zhaolie2");
 
+    General *jiangwei = new General(this, "sand1_jiangwei", "shu", 4);
+    jiangwei->addSkill(new SanD1Doudan);
+
     addMetaObject<SanD1XinveCard>();
     addMetaObject<SanD1BianzhenCard>();
     addMetaObject<SanD1KuangxiCard>();
     addMetaObject<SanD1ShenzhiCard>();
+    addMetaObject<SanD1DoudanCard>();
 }
 
 ADD_PACKAGE(SanD1)

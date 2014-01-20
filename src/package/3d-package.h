@@ -52,4 +52,12 @@ public:
     virtual void onEffect(const CardEffectStruct &effect) const;
 };
 
+class SanD1DoudanCard: public SkillCard{
+    Q_OBJECT
+
+public:
+    Q_INVOKABLE SanD1DoudanCard();
+    virtual void onUse(Room *room, const CardUseStruct &card_use) const;
+};
+
 #endif
