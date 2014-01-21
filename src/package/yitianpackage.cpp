@@ -608,6 +608,7 @@ public:
                 room->setPlayerProperty(player, "kingdom", "wei");
             }
         }
+        return false;
     }
 };
 

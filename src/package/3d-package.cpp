@@ -702,6 +702,8 @@ public:
         QVariantList l = Self->property("doudan_table").toList();
         if (l.contains(to_select->getEffectiveId()))
             return true;
+
+        return false;
     }
 
     virtual const Card *viewAs(const QList<const Card *> &cards) const{

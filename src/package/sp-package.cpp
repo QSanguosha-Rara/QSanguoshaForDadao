@@ -2461,6 +2461,102 @@ public:
     }
 };
 
+class Nianrui: public DrawCardsSkill{
+public:
+    Nianrui(): DrawCardsSkill("nianrui"){
+        frequency = Compulsory;
+    }
+
+    virtual int getDrawNum(ServerPlayer *, int n) const{
+        return n + 2;
+    }
+};
+
+class Qixiang: public FilterSkill{
+public:
+    Qixiang(): FilterSkill("qixiang"){
+
+    }
+
+    virtual bool viewFilter(const Card *to_select) const{
+        Room *room = Sanguosha->currentRoom();
+        if (room->getCardPlace(to_select->getEffectiveId()) == Player::PlaceJudge){
+            ServerPlayer *nianshou = room->getCardOwner(to_select->getEffectiveId());
+            if (nianshou != NULL && nianshou->hasSkill(objectName())){
+                QString reason = nianshou->property("qixiang_currentjudge").toString();
+                if (reason == "indulgence")
+                    return to_select->getSuit() == Card::Diamond;
+                else if (reason == "supply_shortage")
+                    return to_select->getSuit() == Card::Spade;
+            }
+        }
+        return false;
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        WrappedCard *wrap = Sanguosha->getWrappedCard(originalCard->getEffectiveId());
+        if (originalCard->getSuit() == Card::Diamond)
+            wrap->setSuit(Card::Heart);
+        else if (originalCard->getSuit() == Card::Spade)
+            wrap->setSuit(Card::Club);
+        else
+            return originalCard;
+
+        wrap->setSkillName(objectName());
+        wrap->setModified(true);
+        return wrap;
+    }
+};
+
+class QixiangTrigger: public TriggerSkill{
+public:
+    QixiangTrigger(): TriggerSkill("#qixiang-trigger"){
+        events << StartJudge << FinishJudge << TurnBroken;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == StartJudge && TriggerSkill::triggerable(player)){
+            if (!player->property("qixiang_stack").canConvert(QVariant::StringList))
+                room->setPlayerProperty(player, "qixiang_stack", QStringList());
+            
+            if (player->property("qixiang_currentjudge").canConvert(QVariant::String)){
+                QString s = player->property("qixiang_currentjudge").toString();
+                QStringList stack = player->property("qixiang_stack").toStringList();
+                stack << s;
+                room->setPlayerProperty(player, "qixiang_stack", stack);
+            }
+
+            JudgeStruct *judge = data.value<JudgeStruct *>();
+            room->setPlayerProperty(player, "qixiang_currentjudge", judge->reason);
+        }
+        else if (triggerEvent == FinishJudge && TriggerSkill::triggerable(player)){
+            QStringList stack = player->property("qixiang_stack").toStringList();
+            if (!stack.isEmpty()){
+                QString s = stack.takeLast();
+                room->setPlayerProperty(player, "qixiang_currentjudge", s);
+                room->setPlayerProperty(player, "qixiang_stack", stack);
+            }
+            else {
+                room->setPlayerProperty(player, "qixiang_currentjudge", QVariant());
+                room->setPlayerProperty(player, "qixiang_stack", QVariant());
+            }
+        }
+        else if (triggerEvent == TurnBroken){
+            ServerPlayer *nianshou = room->findPlayerBySkillName("qixiang");
+            if (nianshou != NULL){
+                room->setPlayerProperty(nianshou, "qixiang_currentjudge", QVariant());
+                room->setPlayerProperty(nianshou, "qixiang_stack", QVariant());
+            }
+        }
+        return false;
+    }
+};
+
+
 SPCardPackage::SPCardPackage()
     : Package("sp_cards")
 {
@@ -2637,6 +2733,12 @@ OLPackage::OLPackage()
     General *zhugeke = new General(this, "zhugeke", "wu", 3); // OL 002
     zhugeke->addSkill(new Aocai);
     zhugeke->addSkill(new Duwu);
+
+    General *nianshou = new General(this, "nianshou", "qun", 10000, true, true, true);
+    nianshou->addSkill(new Nianrui);
+    nianshou->addSkill(new Qixiang);
+    nianshou->addSkill(new QixiangTrigger);
+    related_skills.insertMulti("qixiang", "#qixiang-trigger");
 
     addMetaObject<AocaiCard>();
     addMetaObject<DuwuCard>();
