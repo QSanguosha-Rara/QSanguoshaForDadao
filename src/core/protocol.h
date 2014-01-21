@@ -1,14 +1,12 @@
 #ifndef _PROTOCOL_H
 #define _PROTOCOL_H
 
-#include <string>
-#include <list>
-#include <json/json.h>
+#include <QJsonDocument>
 
 namespace QSanProtocol {
     namespace Utils {
-        bool isStringArray(const Json::Value &jsonObject, unsigned int startIndex, unsigned int endIndex);
-        bool isIntArray(const Json::Value &jsonObject, unsigned int startIndex, unsigned int endIndex);
+        bool isStringArray(const QJsonValue &jsonObject, unsigned int startIndex, unsigned int endIndex);
+        bool isIntArray(const QJsonValue &jsonObject, unsigned int startIndex, unsigned int endIndex);
     }
 
     enum PacketDescription {
@@ -168,7 +166,7 @@ namespace QSanProtocol {
     };
 
     //static consts
-    extern const char *S_PLAYER_SELF_REFERENCE_ID;
+    extern const QString S_PLAYER_SELF_REFERENCE_ID;
 
     class Countdown {
     public:
@@ -177,21 +175,21 @@ namespace QSanProtocol {
             S_COUNTDOWN_USE_SPECIFIED,
             S_COUNTDOWN_USE_DEFAULT
         } m_type;
-        static const std::string S_COUNTDOWN_MAGIC;
+        static const QString S_COUNTDOWN_MAGIC;
         time_t m_current;
         time_t m_max;
         inline Countdown(CountdownType type = S_COUNTDOWN_NO_LIMIT, time_t current = 0, time_t max = 0)
             : m_type(type), m_current(current), m_max(max) {}
-        bool tryParse(Json::Value val);
-        inline Json::Value toJsonValue() {
+        bool tryParse(QJsonValue val);
+        inline QJsonValue toJsonValue() {
             if (m_type == S_COUNTDOWN_NO_LIMIT
                 || m_type == S_COUNTDOWN_USE_DEFAULT) {
-                Json::Value val(Json::arrayValue);
+                QJsonArray val;
                 val[0] = S_COUNTDOWN_MAGIC;
                 val[1] = (int)m_type;
                 return val;
             } else {
-                Json::Value val(Json::arrayValue);
+                QJsonArray val;
                 val[0] = S_COUNTDOWN_MAGIC;
                 val[1] = (int)m_current;
                 val[2] = (int)m_max;
@@ -208,8 +206,8 @@ namespace QSanProtocol {
 
     class QSanPacket {
     public:
-        virtual bool parse(const std::string &) = 0;
-        virtual std::string toString() const = 0;
+        virtual bool parse(const QByteArray &) = 0;
+        virtual QString toByteArray() const = 0;
         virtual PacketDescription getPacketDestination() const = 0;
         virtual PacketDescription getPacketSource() const = 0;
         virtual PacketDescription getPacketType() const = 0;
@@ -220,21 +218,21 @@ namespace QSanProtocol {
     class QSanGeneralPacket: public QSanPacket {
     public:
         //format: [global_serial, local_serial, packet_type, command_name, command_body]
-        unsigned int m_globalSerial;
-        unsigned int m_localSerial;
+        int m_globalSerial;
+        int m_localSerial;
         inline QSanGeneralPacket(int packetDescription = S_DESC_UNKNOWN, CommandType command = S_COMMAND_UNKNOWN) {
             _m_globalSerial++;
             m_globalSerial = _m_globalSerial;
             m_localSerial = 0;
             m_packetDescription = static_cast<PacketDescription>(packetDescription);
             m_command = command;
-            m_msgBody = Json::nullValue;
+            m_msgBody = QJsonValue();
         }
-        inline void setMessageBody(const Json::Value &value) { m_msgBody = value; }
-        inline Json::Value &getMessageBody() { return m_msgBody; }
-        inline const Json::Value &getMessageBody() const{ return m_msgBody; }
-        virtual bool parse(const std::string &);
-        virtual std::string toString() const;
+        inline void setMessageBody(const QJsonValue &value) { m_msgBody = value; }
+        inline QJsonValue &getMessageBody() { return m_msgBody; }
+        inline const QJsonValue &getMessageBody() const{ return m_msgBody; }
+        virtual bool parse(const QByteArray &);
+        virtual QByteArray toByteArray() const;
         virtual PacketDescription getPacketDestination() const{
             return static_cast<PacketDescription>(m_packetDescription & S_DEST_MASK);
         }
@@ -250,15 +248,13 @@ namespace QSanProtocol {
         static unsigned int _m_globalSerial;
         CommandType m_command;
         PacketDescription m_packetDescription;
-        Json::Value m_msgBody;
-        inline virtual bool parseBody(const Json::Value &value) { m_msgBody = value; return true; }
-        virtual const Json::Value &constructBody() const{ return m_msgBody; }
+        QJsonValue m_msgBody;
+        inline virtual bool parseBody(const QJsonValue &value) { m_msgBody = value; return true; }
+        virtual const QJsonValue &constructBody() const{ return m_msgBody; }
 
         //helper functions
-        static bool tryParse(const std::string &result, int &val);
+        static bool tryParse(const QString &result, int &val);
         static const unsigned int S_MAX_PACKET_SIZE;
-
-        Json::Reader m_jsonReader;
     };
 }
 

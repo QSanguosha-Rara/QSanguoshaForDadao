@@ -58,8 +58,8 @@ public:
     void requestSurrender();
 
     void disconnectFromHost();
-    void replyToServer(QSanProtocol::CommandType command, const Json::Value &arg = Json::Value::null);
-    void requestToServer(QSanProtocol::CommandType command, const Json::Value &arg = Json::Value::null);
+    void replyToServer(QSanProtocol::CommandType command, const QJsonValue &arg = QJsonValue());
+    void requestToServer(QSanProtocol::CommandType command, const QJsonValue &arg = QJsonValue());
     void request(const QString &message);
     void onPlayerResponseCard(const Card *card, const QList<const Player *> &targets = QList<const Player *>());
     void setStatus(Status status);
@@ -85,7 +85,7 @@ public:
     QTextDocument *getPromptDoc() const;
 
     typedef void (Client::*Callback) (const QString &);
-    typedef void (Client::*CallBack) (const Json::Value &);
+    typedef void (Client::*CallBack) (const QJsonValue &);
 
     void checkVersion(const QString &server_version);
     void setup(const QString &setup_str);
@@ -94,16 +94,16 @@ public:
     void removePlayer(const QString &player_name);
     void startInXs(const QString &);
     void arrangeSeats(const QString &seats);
-    void activate(const Json::Value &playerId);
+    void activate(const QJsonValue &playerId);
     void startGame(const Json::Value &);
     void hpChange(const Json::Value &change_str);
     void maxhpChange(const Json::Value &change_str);
     void resetPiles(const Json::Value &);
     void setPileNumber(const Json::Value &pile_str);
     void gameOver(const Json::Value &);
-    void loseCards(const Json::Value &);
-    void getCards(const Json::Value &);
-    void updateProperty(const Json::Value &);
+    void loseCards(const QJsonValue &);
+    void getCards(const QJsonValue &);
+    void updateProperty(const QJsonValue &);
     void killPlayer(const Json::Value &player_arg);
     void revivePlayer(const Json::Value &player_arg);
     void setDashboardShadow(const Json::Value &player_arg);
@@ -127,7 +127,7 @@ public:
     void updateStateItem(const Json::Value &state_str);
     void setAvailableCards(const Json::Value &pile);
     void setCardFlag(const Json::Value &pattern_str);
-    void updateCard(const Json::Value &arg);
+    void updateCard(const QJsonValue &arg);
 
     void fillAG(const Json::Value &cards_str);
     void takeAG(const Json::Value &take_str);
