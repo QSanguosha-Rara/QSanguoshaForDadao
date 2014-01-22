@@ -10,6 +10,7 @@ class Slash;
 #include "player.h"
 
 #include <QVariant>
+#include <QJsonArray>
 #include <serverplayer.h>
 
 struct DamageStruct {

@@ -32,8 +32,8 @@ bool QSanProtocol::Countdown::tryParse(QJsonValue val) {
 bool QSanProtocol::Utils::isStringArray(const QJsonValue &jsonObject, unsigned int startIndex, unsigned int endIndex) {
     if (!jsonObject.isArray()) return false;
 	QJsonArray ary = jsonObject.toArray();
-	if (ary.size() <= endIndex) return false;
-    for (unsigned int i = startIndex; i <= endIndex; i++) {
+	if (ary.size() <= (int)endIndex) return false;
+    for (int i = startIndex; i <= (int)endIndex; i++) {
         if (!ary[i].isString())
             return false;
     }
@@ -56,8 +56,8 @@ bool QSanProtocol::QSanGeneralPacket::tryParse(const QString &s, int &val) {
     return true;
 }
 
-bool QSanProtocol::QSanGeneralPacket::parse(const QByteArray &bytearray) {
-	QJsonDocument jd = QJsonDocument::fromJson(bytearray);
+bool QSanProtocol::QSanGeneralPacket::parse(const QString &string) {
+	QJsonDocument jd = QJsonDocument::fromJson(string.toUtf8().toBase64());
 	if (!jd.isArray()) return false;
 	QJsonArray result = jd.array();
     if (!Utils::isIntArray(result, 0, 3) || result.size() > 5)
@@ -73,7 +73,7 @@ bool QSanProtocol::QSanGeneralPacket::parse(const QByteArray &bytearray) {
     return true;
 }
 
-QByteArray QSanProtocol::QSanGeneralPacket::toByteArray() const{
+QString QSanProtocol::QSanGeneralPacket::toString() const{
     QJsonArray result;
     result[0] = m_globalSerial;
     result[1] = m_localSerial;
@@ -83,6 +83,6 @@ QByteArray QSanProtocol::QSanGeneralPacket::toByteArray() const{
 	if (!body.isNull())
         result[4] = body;
 
-    return QJsonDocument(result).toJson();
+    return QString::fromUtf8(QByteArray::fromBase64(QJsonDocument(result).toJson()));
 }
 

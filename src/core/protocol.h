@@ -1,6 +1,7 @@
 #ifndef _PROTOCOL_H
 #define _PROTOCOL_H
 
+#include <QJsonArray>
 #include <QJsonDocument>
 
 namespace QSanProtocol {
@@ -206,8 +207,8 @@ namespace QSanProtocol {
 
     class QSanPacket {
     public:
-        virtual bool parse(const QByteArray &) = 0;
-        virtual QString toByteArray() const = 0;
+        virtual bool parse(const QString &) = 0;
+        virtual QString toString() const = 0;
         virtual PacketDescription getPacketDestination() const = 0;
         virtual PacketDescription getPacketSource() const = 0;
         virtual PacketDescription getPacketType() const = 0;
@@ -231,8 +232,8 @@ namespace QSanProtocol {
         inline void setMessageBody(const QJsonValue &value) { m_msgBody = value; }
         inline QJsonValue &getMessageBody() { return m_msgBody; }
         inline const QJsonValue &getMessageBody() const{ return m_msgBody; }
-        virtual bool parse(const QByteArray &);
-        virtual QByteArray toByteArray() const;
+        virtual bool parse(const QString &);
+        virtual QString toString() const;
         virtual PacketDescription getPacketDestination() const{
             return static_cast<PacketDescription>(m_packetDescription & S_DEST_MASK);
         }
