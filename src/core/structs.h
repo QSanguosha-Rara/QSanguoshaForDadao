@@ -10,7 +10,11 @@ class Slash;
 #include "player.h"
 
 #include <QVariant>
+<<<<<<< HEAD
 #include <QJsonArray>
+=======
+#include <json/json.h>
+>>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
 #include <serverplayer.h>
 
 struct DamageStruct {
@@ -114,8 +118,8 @@ public:
         m_eventName = eventName;
     }
 
-    bool tryParse(const QJsonValue &);
-    QJsonValue toJsonValue() const;
+    bool tryParse(const Json::Value &);
+    Json::Value toJsonValue() const;
 
     inline bool operator == (const CardMoveReason &other) const{
         return m_reason == other.m_reason
@@ -276,8 +280,8 @@ struct CardsMoveStruct {
     Player *origin_from, *origin_to;
     QString origin_from_pile_name, origin_to_pile_name; //for case of the movement transitted
 
-    bool tryParse(const QJsonValue &);
-    QJsonValue toJsonValue() const;
+    bool tryParse(const Json::Value &);
+    Json::Value toJsonValue() const;
     inline bool isRelevant(const Player *player) {
         return player != NULL && (from == player || (to == player && to_place != Player::PlaceSpecial));
     }
@@ -410,19 +414,22 @@ struct JsonValueForLUA{
     void setStringAt(int n, const QString &v);
     void setArrayAt(int n, const JsonValueForLUA &v);
 
-    inline operator QJsonValue(){
+    inline operator Json::Value(){
         return m_realvalue;
     }
-    inline operator QJsonValue() const{
+    inline operator Json::Value() const{
         return m_realvalue;
     }
 
-    inline const QJsonValue &operator [](int x) const{
-		return m_realvalue.toArray()[x];
+    inline Json::Value &operator [](int x){
+        return m_realvalue[x];
+    }
+    inline const Json::Value &operator [](int x) const{
+        return m_realvalue[x];
     }
 
 private:
-    QJsonValue m_realvalue;
+    Json::Value m_realvalue;
 };
 
 struct MarkChangeStruct{

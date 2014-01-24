@@ -58,8 +58,8 @@ public:
     void requestSurrender();
 
     void disconnectFromHost();
-    void replyToServer(QSanProtocol::CommandType command, const QJsonValue &arg = QJsonValue());
-    void requestToServer(QSanProtocol::CommandType command, const QJsonValue &arg = QJsonValue());
+    void replyToServer(QSanProtocol::CommandType command, const Json::Value &arg = Json::Value::null);
+    void requestToServer(QSanProtocol::CommandType command, const Json::Value &arg = Json::Value::null);
     void request(const QString &message);
     void onPlayerResponseCard(const Card *card, const QList<const Player *> &targets = QList<const Player *>());
     void setStatus(Status status);
@@ -85,7 +85,7 @@ public:
     QTextDocument *getPromptDoc() const;
 
     typedef void (Client::*Callback) (const QString &);
-    typedef void (Client::*CallBack) (const QJsonValue &);
+    typedef void (Client::*CallBack) (const Json::Value &);
 
     void checkVersion(const QString &server_version);
     void setup(const QString &setup_str);
@@ -94,6 +94,7 @@ public:
     void removePlayer(const QString &player_name);
     void startInXs(const QString &);
     void arrangeSeats(const QString &seats);
+<<<<<<< HEAD
     void activate(const QJsonValue &playerId);
     void startGame(const QJsonValue &);
     void hpChange(const QJsonValue &change_str);
@@ -107,11 +108,27 @@ public:
     void killPlayer(const QJsonValue &player_arg);
     void revivePlayer(const QJsonValue &player_arg);
     void setDashboardShadow(const QJsonValue &player_arg);
+=======
+    void activate(const Json::Value &playerId);
+    void startGame(const Json::Value &);
+    void hpChange(const Json::Value &change_str);
+    void maxhpChange(const Json::Value &change_str);
+    void resetPiles(const Json::Value &);
+    void setPileNumber(const Json::Value &pile_str);
+    void gameOver(const Json::Value &);
+    void loseCards(const Json::Value &);
+    void getCards(const Json::Value &);
+    void updateProperty(const Json::Value &);
+    void killPlayer(const Json::Value &player_arg);
+    void revivePlayer(const Json::Value &player_arg);
+    void setDashboardShadow(const Json::Value &player_arg);
+>>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
     void warn(const QString &);
     void setMark(const QJsonValue &mark_str);
     void showCard(const QJsonValue &show_str);
     void log(const QJsonValue &log_str);
     void speak(const QString &speak_data);
+<<<<<<< HEAD
     void addHistory(const QJsonValue &history);
     void moveFocus(const QJsonValue &focus);
     void setEmotion(const QJsonValue &set_str);
@@ -128,6 +145,24 @@ public:
     void setAvailableCards(const QJsonValue &pile);
     void setCardFlag(const QJsonValue &pattern_str);
     void updateCard(const QJsonValue &arg);
+=======
+    void addHistory(const Json::Value &history);
+    void moveFocus(const Json::Value &focus);
+    void setEmotion(const Json::Value &set_str);
+    void skillInvoked(const Json::Value &invoke_str);
+    void animate(const Json::Value &animate_str);
+    void cardLimitation(const Json::Value &limit);
+    void setNullification(const Json::Value &str);
+    void enableSurrender(const Json::Value &enabled);
+    void exchangeKnownCards(const Json::Value &players);
+    void setKnownCards(const Json::Value &set_str);
+    void viewGenerals(const Json::Value &str);
+    void setFixedDistance(const Json::Value &set_str);
+    void updateStateItem(const Json::Value &state_str);
+    void setAvailableCards(const Json::Value &pile);
+    void setCardFlag(const Json::Value &pattern_str);
+    void updateCard(const Json::Value &arg);
+>>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
 
     void fillAG(const QJsonValue &cards_str);
     void takeAG(const QJsonValue &take_str);
