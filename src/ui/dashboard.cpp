@@ -567,7 +567,7 @@ void Dashboard::_onEquipSelectChanged() {
 
 void Dashboard::_createEquipBorderAnimations() {
     for (int i = 0; i < 4; i++) {
-        _m_equipBorders[i] = new PixmapAnimation(RoomSceneInstance);
+        _m_equipBorders[i] = new PixmapAnimation();
         _m_equipBorders[i]->setParentItem(_getEquipParent());
         _m_equipBorders[i]->setPath("image/system/emotion/equipborder/");
         if (!_m_equipBorders[i]->valid()) {
