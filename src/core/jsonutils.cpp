@@ -31,18 +31,10 @@ Json::Value QSanProtocol::Utils::toJsonArray(const QList<int> &arg) {
 
 bool QSanProtocol::Utils::tryParse(const Json::Value &arg, QList<int> &result) {
     if (!arg.isArray()) return false;
-<<<<<<< HEAD
-	QJsonArray ary = arg.toArray();
-    for (int i = 0; i < ary.size(); i++)
-        if (!ary[i].isDouble()) return false;
-    for (int i = 0; i < ary.size(); i++)
-        result.append(ary[i].toInt());
-=======
     for (unsigned int i = 0; i < arg.size(); i++)
         if (!arg[i].isInt()) return false;
     for (unsigned int i = 0; i < arg.size(); i++)
         result.append(arg[i].asInt());
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
     return true;
 }
 
@@ -110,18 +102,10 @@ bool QSanProtocol::Utils::tryParse(const Json::Value &arg, QString &result) {
 
 bool QSanProtocol::Utils::tryParse(const Json::Value &arg, QStringList &result) {
     if (!arg.isArray()) return false;
-<<<<<<< HEAD
-	QJsonArray ary = arg.toArray();
-    for (int i = 0; i < ary.size(); i++)
-        if (!ary[i].isString()) return false;
-    for (int i = 0; i < ary.size(); i++)
-        result.append(ary[i].toString());
-=======
     for (unsigned int i = 0; i < arg.size(); i++)
         if (!arg[i].isString()) return false;
     for (unsigned int i = 0; i < arg.size(); i++)
         result.append(arg[i].asCString());
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
     return true;
 }
 

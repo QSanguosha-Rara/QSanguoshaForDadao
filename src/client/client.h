@@ -94,21 +94,6 @@ public:
     void removePlayer(const QString &player_name);
     void startInXs(const QString &);
     void arrangeSeats(const QString &seats);
-<<<<<<< HEAD
-    void activate(const QJsonValue &playerId);
-    void startGame(const QJsonValue &);
-    void hpChange(const QJsonValue &change_str);
-    void maxhpChange(const QJsonValue &change_str);
-    void resetPiles(const QJsonValue &);
-    void setPileNumber(const QJsonValue &pile_str);
-    void gameOver(const QJsonValue &);
-    void loseCards(const QJsonValue &);
-    void getCards(const QJsonValue &);
-    void updateProperty(const QJsonValue &);
-    void killPlayer(const QJsonValue &player_arg);
-    void revivePlayer(const QJsonValue &player_arg);
-    void setDashboardShadow(const QJsonValue &player_arg);
-=======
     void activate(const Json::Value &playerId);
     void startGame(const Json::Value &);
     void hpChange(const Json::Value &change_str);
@@ -122,30 +107,11 @@ public:
     void killPlayer(const Json::Value &player_arg);
     void revivePlayer(const Json::Value &player_arg);
     void setDashboardShadow(const Json::Value &player_arg);
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
     void warn(const QString &);
-    void setMark(const QJsonValue &mark_str);
-    void showCard(const QJsonValue &show_str);
-    void log(const QJsonValue &log_str);
+    void setMark(const Json::Value &mark_str);
+    void showCard(const Json::Value &show_str);
+    void log(const Json::Value &log_str);
     void speak(const QString &speak_data);
-<<<<<<< HEAD
-    void addHistory(const QJsonValue &history);
-    void moveFocus(const QJsonValue &focus);
-    void setEmotion(const QJsonValue &set_str);
-    void skillInvoked(const QJsonValue &invoke_str);
-    void animate(const QJsonValue &animate_str);
-    void cardLimitation(const QJsonValue &limit);
-    void setNullification(const QJsonValue &str);
-    void enableSurrender(const QJsonValue &enabled);
-    void exchangeKnownCards(const QJsonValue &players);
-    void setKnownCards(const QJsonValue &set_str);
-    void viewGenerals(const QJsonValue &str);
-    void setFixedDistance(const QJsonValue &set_str);
-    void updateStateItem(const QJsonValue &state_str);
-    void setAvailableCards(const QJsonValue &pile);
-    void setCardFlag(const QJsonValue &pattern_str);
-    void updateCard(const QJsonValue &arg);
-=======
     void addHistory(const Json::Value &history);
     void moveFocus(const Json::Value &focus);
     void setEmotion(const Json::Value &set_str);
@@ -162,51 +128,50 @@ public:
     void setAvailableCards(const Json::Value &pile);
     void setCardFlag(const Json::Value &pattern_str);
     void updateCard(const Json::Value &arg);
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
 
-    void fillAG(const QJsonValue &cards_str);
-    void takeAG(const QJsonValue &take_str);
-    void clearAG(const QJsonValue &);
+    void fillAG(const Json::Value &cards_str);
+    void takeAG(const Json::Value &take_str);
+    void clearAG(const Json::Value &);
 
     //interactive server callbacks
-    void askForCardOrUseCard(const QJsonValue &);
-    void askForAG(const QJsonValue &);
-    void askForSinglePeach(const QJsonValue &);
-    void askForCardShow(const QJsonValue &);
-    void askForSkillInvoke(const QJsonValue &);
-    void askForChoice(const QJsonValue &);
-    void askForDiscard(const QJsonValue &);
-    void askForExchange(const QJsonValue &);
-    void askForSuit(const QJsonValue &);
-    void askForKingdom(const QJsonValue &);
-    void askForNullification(const QJsonValue &);
-    void askForPindian(const QJsonValue &);
-    void askForCardChosen(const QJsonValue &);
-    void askForPlayerChosen(const QJsonValue &);
-    void askForGeneral(const QJsonValue &);
-    void askForYiji(const QJsonValue &);
-    void askForGuanxing(const QJsonValue &);
-    void showAllCards(const QJsonValue &);
-    void askForGongxin(const QJsonValue &);
-    void askForAssign(const QJsonValue &); // Assign roles at the beginning of game
-    void askForSurrender(const QJsonValue &);
-    void askForLuckCard(const QJsonValue &);
-    void handleGameEvent(const QJsonValue &);
+    void askForCardOrUseCard(const Json::Value &);
+    void askForAG(const Json::Value &);
+    void askForSinglePeach(const Json::Value &);
+    void askForCardShow(const Json::Value &);
+    void askForSkillInvoke(const Json::Value &);
+    void askForChoice(const Json::Value &);
+    void askForDiscard(const Json::Value &);
+    void askForExchange(const Json::Value &);
+    void askForSuit(const Json::Value &);
+    void askForKingdom(const Json::Value &);
+    void askForNullification(const Json::Value &);
+    void askForPindian(const Json::Value &);
+    void askForCardChosen(const Json::Value &);
+    void askForPlayerChosen(const Json::Value &);
+    void askForGeneral(const Json::Value &);
+    void askForYiji(const Json::Value &);
+    void askForGuanxing(const Json::Value &);
+    void showAllCards(const Json::Value &);
+    void askForGongxin(const Json::Value &);
+    void askForAssign(const Json::Value &); // Assign roles at the beginning of game
+    void askForSurrender(const Json::Value &);
+    void askForLuckCard(const Json::Value &);
+    void handleGameEvent(const Json::Value &);
     //3v3 & 1v1
-    void askForOrder(const QJsonValue &);
-    void askForRole3v3(const QJsonValue &);
-    void askForDirection(const QJsonValue &);
+    void askForOrder(const Json::Value &);
+    void askForRole3v3(const Json::Value &);
+    void askForDirection(const Json::Value &);
 
     // 3v3 & 1v1 methods
-    void fillGenerals(const QJsonValue &generals);
-    void askForGeneral3v3(const QJsonValue &);
-    void takeGeneral(const QJsonValue &take_str);
-    void startArrange(const QJsonValue &to_arrange);
+    void fillGenerals(const Json::Value &generals);
+    void askForGeneral3v3(const Json::Value &);
+    void takeGeneral(const Json::Value &take_str);
+    void startArrange(const Json::Value &to_arrange);
 
-    void recoverGeneral(const QJsonValue &);
-    void revealGeneral(const QJsonValue &);
+    void recoverGeneral(const Json::Value &);
+    void revealGeneral(const Json::Value &);
 
-    void attachSkill(const QJsonValue &skill);
+    void attachSkill(const Json::Value &skill);
 
     inline virtual RoomState *getRoomState() { return &_m_roomState; }
     inline virtual Card *getCard(int cardId) const{ return _m_roomState.getCard(cardId); }
@@ -288,6 +253,7 @@ private:
 
 private slots:
     void processServerPacket(const QString &cmd);
+    void processServerPacket(const char *cmd);
     bool processServerRequest(const QSanProtocol::QSanGeneralPacket &packet);
     void processObsoleteServerPacket(const QString &cmd);
     void notifyRoleChange(const QString &new_role);
@@ -339,7 +305,7 @@ signals:
     void game_started();
     void game_over();
     void standoff();
-    void event_received(const QJsonValue &);
+    void event_received(const Json::Value &);
 
     void move_cards_lost(int moveId, QList<CardsMoveStruct> moves);
     void move_cards_got(int moveId, QList<CardsMoveStruct> moves);

@@ -7,7 +7,6 @@
 #include "recorder.h"
 #include "jsonutils.h"
 #include "SkinBank.h"
-#include "util.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -20,6 +19,7 @@
 #include <QTextDocument>
 #include <QTextCursor>
 
+using namespace std;
 using namespace QSanProtocol;
 using namespace QSanProtocol::Utils;
 
@@ -217,19 +217,19 @@ void Client::replyToServer(CommandType command, const Json::Value &arg) {
         QSanGeneralPacket packet(S_SRC_CLIENT | S_TYPE_REPLY | S_DEST_ROOM, command);
         packet.m_localSerial = _m_lastServerSerial;
         packet.setMessageBody(arg);
-        socket->send(packet.toString());
+        socket->send(toQString(packet.toString()));
     }
 }
 
-void Client::handleGameEvent(const QJsonValue &arg) {
+void Client::handleGameEvent(const Json::Value &arg) {
     emit event_received(arg);
 }
 
-void Client::requestToServer(CommandType command, const QJsonValue &arg) {
+void Client::requestToServer(CommandType command, const Json::Value &arg) {
     if (socket) {
         QSanGeneralPacket packet(S_SRC_CLIENT | S_TYPE_REQUEST | S_DEST_ROOM, command);
         packet.setMessageBody(arg);
-        socket->send(packet.toString());
+        socket->send(toQString(packet.toString()));
     }
 }
 
@@ -274,6 +274,10 @@ void Client::disconnectFromHost() {
 typedef char buffer_t[65535];
 
 void Client::processServerPacket(const QString &cmd) {
+    processServerPacket(cmd.toLatin1().data());
+}
+
+void Client::processServerPacket(const char *cmd) {
     if (m_isGameOver) return;
     QSanGeneralPacket packet;
     if (packet.parse(cmd)) {
@@ -297,13 +301,8 @@ bool Client::processServerRequest(const QSanGeneralPacket &packet) {
     Json::Value msg = packet.getMessageBody();
     Countdown countdown;
     countdown.m_current = 0;
-<<<<<<< HEAD
-	if (!msg.isArray() || msg.toArray().size() <= 1
-		|| !countdown.tryParse(msg.toArray()[msg.toArray().size() - 1])) {
-=======
     if (!msg.isArray() || msg.size() <= 1
         || !countdown.tryParse(msg[msg.size() - 1])) {
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
         countdown.m_type = Countdown::S_COUNTDOWN_USE_DEFAULT;
         countdown.m_max = ServerInfo.getCommandTimeout(command, S_CLIENT_INSTANCE);
     }
@@ -395,11 +394,7 @@ void Client::getCards(const Json::Value &arg) {
     Q_ASSERT(arg.isArray() && arg.size() >= 1);
     int moveId = arg[0].asInt();
     QList<CardsMoveStruct> moves;
-<<<<<<< HEAD
-    for (int i = 1; i < ary.size(); i++) {
-=======
     for (unsigned int i = 1; i < arg.size(); i++) {
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
         CardsMoveStruct move;
         if (!move.tryParse(arg[i])) return;
         move.from = getPlayer(move.from_player_name);
@@ -422,11 +417,7 @@ void Client::loseCards(const Json::Value &arg) {
     Q_ASSERT(arg.isArray() && arg.size() >= 1);
     int moveId = arg[0].asInt();
     QList<CardsMoveStruct> moves;
-<<<<<<< HEAD
-    for (int i = 1; i < ary.size(); i++) {
-=======
     for (unsigned int i = 1; i < arg.size(); i++) {
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
         CardsMoveStruct move;
         if (!move.tryParse(arg[i])) return;
         move.from = getPlayer(move.from_player_name);
@@ -595,7 +586,7 @@ void Client::activate(const Json::Value &playerId) {
     setStatus(toQString(playerId) == Self->objectName() ? Playing : NotActive);
 }
 
-void Client::startGame(const QJsonValue &) {
+void Client::startGame(const Json::Value &) {
     Sanguosha->registerRoom(this);
     _m_roomState.reset();
 
@@ -605,30 +596,26 @@ void Client::startGame(const QJsonValue &) {
     emit game_started();
 }
 
-void Client::hpChange(const QJsonValue &change_str) {
-    if (!change_str.isArray() || change_str.toArray().size() != 3) return;
+void Client::hpChange(const Json::Value &change_str) {
+    if (!change_str.isArray() || change_str.size() != 3) return;
+    if (!change_str[0].isString() || !change_str[1].isInt() || !change_str[2].isInt()) return;
 
-	QJsonArray ary = change_str.toArray();
-    if (!ary[0].isString() || !ary[1].isDouble() || !ary[2].isDouble()) return;
+    QString who = toQString(change_str[0]);
+    int delta = change_str[1].asInt();
 
-    QString who = ary[0].toString();
-    int delta = ary[1].toInt();
-
-    int nature_index = ary[2].toInt();
+    int nature_index = change_str[2].asInt();
     DamageStruct::Nature nature = DamageStruct::Normal;
     if (nature_index > 0) nature = (DamageStruct::Nature)nature_index;
 
     emit hp_changed(who, delta, nature, nature_index == -1);
 }
 
-void Client::maxhpChange(const QJsonValue &change_str) {
-    if (!change_str.isArray() || change_str.toArray().size() != 2) return;
+void Client::maxhpChange(const Json::Value &change_str) {
+    if (!change_str.isArray() || change_str.size() != 2) return;
+    if (!change_str[0].isString() || !change_str[1].isInt()) return;
 
-	QJsonArray ary = change_str.toArray();
-    if (!ary[0].isString() || !ary[1].isDouble()) return;
-
-	QString who = ary[0].toString();
-    int delta = ary[1].toInt();
+    QString who = toQString(change_str[0]);
+    int delta = change_str[1].asInt();
     emit maxhp_changed(who, delta);
 }
 
@@ -650,19 +637,17 @@ Client::Status Client::getStatus() const{
     return status;
 }
 
-void Client::cardLimitation(const QJsonValue &limit) {
-    if (!limit.isArray() || limit.toArray().size() != 4) return;
+void Client::cardLimitation(const Json::Value &limit) {
+    if (!limit.isArray() || limit.size() != 4) return;
 
-	QJsonArray ary = limit.toArray();
-
-    bool set = ary[0].toBool();
-    bool single_turn = ary[3].toBool();
-    if (ary[1].isNull() && ary[2].isNull()) {
+    bool set = limit[0].asBool();
+    bool single_turn = limit[3].asBool();
+    if (limit[1].isNull() && limit[2].isNull()) {
         Self->clearCardLimitation(single_turn);
     } else {
-        if (!ary[1].isString() || !ary[2].isString()) return;
-		QString limit_list = ary[1].toString();
-		QString pattern = ary[2].toString();
+        if (!limit[1].isString() || !limit[2].isString()) return;
+        QString limit_list = toQString(limit[1]);
+        QString pattern = toQString(limit[2]);
         if (set)
             Self->setCardLimitation(limit_list, pattern, single_turn);
         else
@@ -670,9 +655,9 @@ void Client::cardLimitation(const QJsonValue &limit) {
     }
 }
 
-void Client::setNullification(const QJsonValue &str) {
+void Client::setNullification(const Json::Value &str) {
     if (!str.isString()) return;
-	QString astr = str.toString();
+    QString astr = toQString(str);
     if (astr != ".") {
         if (m_noNullificationTrickName == ".") {
             m_noNullificationThisTime = false;
@@ -686,19 +671,15 @@ void Client::setNullification(const QJsonValue &str) {
     }
 }
 
-void Client::enableSurrender(const QJsonValue &enabled) {
+void Client::enableSurrender(const Json::Value &enabled) {
     if (!enabled.isBool()) return;
-    bool en = enabled.toBool();
+    bool en = enabled.asBool();
     emit surrender_enabled(en);
 }
 
-void Client::exchangeKnownCards(const QJsonValue &players) {
-	if (!players.isArray() || players.toArray().size() != 2 ||
-		!players.toArray()[0].isString() 
-		|| !players.toArray()[1].isString()) return;
-
-	QJsonArray ary = players.toArray();
-	ClientPlayer *a = getPlayer(ary[0].toString()), *b = getPlayer(ary[1].toString());
+void Client::exchangeKnownCards(const Json::Value &players) {
+    if (!players.isArray() || players.size() != 2 || !players[0].isString() || !players[1].isString()) return;
+    ClientPlayer *a = getPlayer(toQString(players[0])), *b = getPlayer(toQString(players[1]));
     QList<int> a_known, b_known;
     foreach (const Card *card, a->getHandcards())
         a_known << card->getId();
@@ -708,25 +689,22 @@ void Client::exchangeKnownCards(const QJsonValue &players) {
     b->setCards(a_known);
 }
 
-void Client::setKnownCards(const QJsonValue &set_str) {
-    if (!set_str.isArray() || set_str.toArray().size() != 2) return;
-
-	QJsonArray ary = set_str.toArray();
-	QString name = ary[0].toString();
+void Client::setKnownCards(const Json::Value &set_str) {
+    if (!set_str.isArray() || set_str.size() != 2) return;
+    QString name = toQString(set_str[0]);
     ClientPlayer *player = getPlayer(name);
     if (player == NULL) return;
     QList<int> ids;
-    tryParse(ary[1], ids);
+    tryParse(set_str[1], ids);
     player->setCards(ids);
+
 }
 
-void Client::viewGenerals(const QJsonValue &str) {
-    if (str.toArray().size() != 2 || !str.toArray()[0].isString()) return;
-
-	QJsonArray ary = str.toArray();
-	QString reason = ary[0].toString();
+void Client::viewGenerals(const Json::Value &str) {
+    if (str.size() != 2 || !str[0].isString()) return;
+    QString reason = toQString(str[0]);
     QStringList names;
-    if (!tryParse(ary[1], names)) return;
+    if (!tryParse(str[1], names)) return;
     emit generals_viewed(reason, names);
 }
 
@@ -798,17 +776,15 @@ QString Client::_processCardPattern(const QString &pattern) {
     return pattern;
 }
 
-void Client::askForCardOrUseCard(const QJsonValue &cardUsage) {
-	if (!cardUsage.isArray() || !cardUsage.toArray()[0].isString() 
-		|| !cardUsage.toArray()[1].isString()) return;
-
-	QJsonArray ary = cardUsage.toArray();
-	QString card_pattern = ary[0].toString();
+void Client::askForCardOrUseCard(const Json::Value &cardUsage) {
+    if (!cardUsage.isArray() || !cardUsage[0].isString() || !cardUsage[1].isString())
+        return;
+    QString card_pattern = toQString(cardUsage[0]);
     _m_roomState.setCurrentCardUsePattern(card_pattern);
-	QStringList texts = ary[1].toString().split(":");
+    QStringList texts = toQString(cardUsage[1]).split(":");
     int index = -1;
-    if (ary[3].isDouble() && ary[3].toInt() > 0)
-        index = ary[3].toInt();
+    if (cardUsage[3].isInt() && cardUsage[3].asInt() > 0)
+        index = cardUsage[3].asInt();
 
     if (texts.isEmpty())
         return;
@@ -833,8 +809,8 @@ void Client::askForCardOrUseCard(const QJsonValue &cardUsage) {
     }
 
     Status status = Responding;
-    if (ary[2].isDouble()) {
-        Card::HandlingMethod method = (Card::HandlingMethod)(ary[2].toInt());
+    if (cardUsage[2].isInt()) {
+        Card::HandlingMethod method = (Card::HandlingMethod)(cardUsage[2].asInt());
         switch (method) {
         case Card::MethodDiscard: status = RespondingForDiscard; break;
         case Card::MethodUse: status = RespondingUse; break;
@@ -845,12 +821,10 @@ void Client::askForCardOrUseCard(const QJsonValue &cardUsage) {
     setStatus(status);
 }
 
-void Client::askForSkillInvoke(const QJsonValue &arg) {
+void Client::askForSkillInvoke(const Json::Value &arg) {
     if (!isStringArray(arg, 0, 1)) return;
-
-	QJsonArray ary = arg.toArray();
-	QString skill_name = ary[0].toString();
-	QString data = ary[1].toString();
+    QString skill_name = toQString(arg[0]);
+    QString data = toQString(arg[1]);
 
     skill_to_invoke = skill_name;
 
@@ -876,16 +850,16 @@ void Client::askForSkillInvoke(const QJsonValue &arg) {
 
 void Client::onPlayerMakeChoice() {
     QString option = sender()->objectName();
-    replyToServer(S_COMMAND_MULTIPLE_CHOICE, option);
+    replyToServer(S_COMMAND_MULTIPLE_CHOICE, toJsonString(option));
     setStatus(NotActive);
 }
 
-void Client::askForSurrender(const QJsonValue &initiator) {
+void Client::askForSurrender(const Json::Value &initiator) {
     if (!initiator.isString()) return;
 
     QString text = tr("%1 initiated a vote for disadvataged side to claim "
                       "capitulation. Click \"OK\" to surrender or \"Cancel\" to resist.")
-                      .arg(Sanguosha->translate(initiator.toString()));
+                      .arg(Sanguosha->translate(toQString(initiator)));
     text.append(tr("<br/> <b>Noitce</b>: if all people on your side decides to surrender. "
                    "You'll lose this game."));
     skill_name = "surrender";
@@ -894,28 +868,27 @@ void Client::askForSurrender(const QJsonValue &initiator) {
     setStatus(AskForSkillInvoke);
 }
 
-void Client::askForLuckCard(const QJsonValue &) {
+void Client::askForLuckCard(const Json::Value &) {
     skill_to_invoke = "luck_card";
     prompt_doc->setHtml(tr("Do you want to use the luck card?"));
     setStatus(AskForSkillInvoke);
 }
 
-void Client::askForNullification(const QJsonValue &arg) {
-	if (!arg.isArray() || arg.toArray().size() != 3 || !arg.toArray()[0].isString()
-		|| !(arg.toArray()[1].isNull() || arg.toArray()[1].isString())
-		|| !arg.toArray()[2].isString())
+void Client::askForNullification(const Json::Value &arg) {
+    if (!arg.isArray() || arg.size() != 3 || !arg[0].isString()
+        || !(arg[1].isNull() || arg[1].isString())
+        || !arg[2].isString())
         return;
 
-	QJsonArray ary = arg.toArray();
-	QString trick_name = ary[0].toString();
-    QJsonValue source_name = ary[1];
-	ClientPlayer *target_player = getPlayer(ary[2].toString());
+    QString trick_name = toQString(arg[0]);
+    Json::Value source_name = arg[1];
+    ClientPlayer *target_player = getPlayer(toQString(arg[2]));
 
     if (!target_player || !target_player->getGeneral()) return;
 
     ClientPlayer *source = NULL;
-	if (!source_name.isNull())
-        source = getPlayer(source_name.toString());
+    if (source_name != Json::Value::null)
+        source = getPlayer(source_name.asCString());
 
     const Card *trick_card = Sanguosha->findChild<const Card *>(trick_name);
     if (Config.NeverNullifyMyTrick && source == Self) {
@@ -949,7 +922,7 @@ void Client::askForNullification(const QJsonValue &arg) {
 }
 
 void Client::onPlayerChooseCard(int card_id) {
-    QJsonValue reply;
+    Json::Value reply = Json::Value::null;
     if (card_id != -2)
         reply = card_id;
     replyToServer(S_COMMAND_CHOOSE_CARD, reply);
@@ -960,7 +933,7 @@ void Client::onPlayerChoosePlayer(const Player *player) {
     if (player == NULL && !m_isDiscardActionRefusable)
         player = findChild<const Player *>(players_to_choose.first());
 
-    replyToServer(S_COMMAND_CHOOSE_PLAYER, (player == NULL) ? QJsonValue() : player->objectName());
+    replyToServer(S_COMMAND_CHOOSE_PLAYER, (player == NULL) ? Json::Value::null : toJsonString(player->objectName()));
     setStatus(NotActive);
 }
 
@@ -988,14 +961,12 @@ void Client::speakToServer(const QString &text) {
     request(QString("speak %1").arg(QString(data)));
 }
 
-void Client::addHistory(const QJsonValue &history) {
-    if (!history.isArray() || history.toArray().size() != 2) return;
+void Client::addHistory(const Json::Value &history) {
+    if (!history.isArray() || history.size() != 2) return;
+    if (!history[0].isString() || !history[1].isInt()) return;
 
-	QJsonArray ary = history.toArray();
-    if (!ary[0].isString() || !ary[1].isDouble()) return;
-
-	QString add_str = ary[0].toString();
-    int times = ary[1].toInt();
+    QString add_str = toQString(history[0]);
+    int times = history[1].asInt();
     if (add_str == "pushPile") {
         emit card_used();
         return;
@@ -1059,27 +1030,25 @@ QTextDocument *Client::getPromptDoc() const{
     return prompt_doc;
 }
 
-void Client::resetPiles(const QJsonValue &) {
+void Client::resetPiles(const Json::Value &) {
     discarded_list.clear();
     swap_pile++;
     updatePileNum();
     emit pile_reset();
 }
 
-void Client::setPileNumber(const QJsonValue &pile_str) {
-    if (!pile_str.isDouble()) return;
-    pile_num = pile_str.toInt();
+void Client::setPileNumber(const Json::Value &pile_str) {
+    if (!pile_str.isInt()) return;
+    pile_num = pile_str.asInt();
     updatePileNum();
 }
 
-void Client::setCardFlag(const QJsonValue &pattern_str) {
-    if (!pattern_str.isArray() || pattern_str.toArray().size() != 2) return;
+void Client::setCardFlag(const Json::Value &pattern_str) {
+    if (!pattern_str.isArray() || pattern_str.size() != 2) return;
+    if (!pattern_str[0].isInt() || !pattern_str[1].isString()) return;
 
-	QJsonArray ary = pattern_str.toArray();
-    if (!ary[0].isDouble() || !ary[1].isString()) return;
-
-    int id = ary[0].toInt();
-	QString flag = ary[1].toString();
+    int id = pattern_str[0].asInt();
+    QString flag = toQString(pattern_str[1]);
     Sanguosha->getCard(id)->setFlags(flag);
 }
 
@@ -1089,18 +1058,15 @@ void Client::updatePileNum() {
     lines_doc->setHtml(QString("<font color='%1'><p align = \"center\">" + pile_str + "</p></font>").arg(Config.TextEditColor.name()));
 }
 
-void Client::askForDiscard(const QJsonValue &req) {
-	if (!req.isArray() || !req.toArray()[0].isDouble() 
-		|| !req.toArray()[1].isDouble() || !req.toArray()[2].isBool() 
-		|| !req.toArray()[3].isBool()) return;
+void Client::askForDiscard(const Json::Value &req) {
+    if (!req.isArray() || !req[0].isInt() || !req[1].isInt() || !req[2].isBool() || !req[3].isBool())
+        return;
 
-	QJsonArray ary = req.toArray();
-
-    discard_num = ary[0].toInt();
-    min_num = ary[1].toInt();
-    m_isDiscardActionRefusable = ary[2].toBool();
-    m_canDiscardEquip = ary[3].toBool();
-    QString prompt = ary[4].toString();
+    discard_num = req[0].asInt();
+    min_num = req[1].asInt();
+    m_isDiscardActionRefusable = req[2].asBool();
+    m_canDiscardEquip = req[3].asBool();
+    QString prompt = req[4].asCString();
 
     if (prompt.isEmpty()) {
         if (m_canDiscardEquip)
@@ -1125,22 +1091,18 @@ void Client::askForDiscard(const QJsonValue &req) {
     setStatus(Discarding);
 }
 
-void Client::askForExchange(const QJsonValue &exchange_str) {
-	if (!exchange_str.isArray() || !exchange_str.toArray()[0].isDouble() 
-		|| !exchange_str.toArray()[1].isBool() 
-		|| !exchange_str.toArray()[2].isString() 
-		|| !exchange_str.toArray()[3].isBool()) {
+void Client::askForExchange(const Json::Value &exchange_str) {
+    if (!exchange_str.isArray() || !exchange_str[0].isInt() || !exchange_str[1].isBool()
+        || !exchange_str[2].isString() || !exchange_str[3].isBool()) {
         QMessageBox::warning(NULL, tr("Warning"), tr("Exchange string is not well formatted!"));
         return;
     }
 
-	QJsonArray ary = exchange_str.toArray();
-
-    discard_num = ary[0].toInt();
-    m_canDiscardEquip = ary[1].toBool();
-    QString prompt = ary[2].toString();
+    discard_num = exchange_str[0].asInt();
+    m_canDiscardEquip = exchange_str[1].asBool();
+    QString prompt = exchange_str[2].asCString();
     min_num = discard_num;
-    m_isDiscardActionRefusable = ary[3].toBool();
+    m_isDiscardActionRefusable = exchange_str[3].asBool();
 
     if (prompt.isEmpty()) {
         prompt = tr("Please give %1 cards to exchange").arg(discard_num);
@@ -1157,15 +1119,13 @@ void Client::askForExchange(const QJsonValue &exchange_str) {
     setStatus(Exchanging);
 }
 
-void Client::gameOver(const QJsonValue &arg) {
+void Client::gameOver(const Json::Value &arg) {
     disconnectFromHost();
     m_isGameOver = true;
     setStatus(Client::NotActive);
-
-	QJsonArray ary = arg.toArray();
-	QString winner = ary[0].toString();
+    QString winner = toQString(arg[0]);
     QStringList roles;
-    tryParse(ary[1], roles);
+    tryParse(arg[1], roles);
 
     Q_ASSERT(roles.length() == players.length());
 
@@ -1192,9 +1152,9 @@ void Client::gameOver(const QJsonValue &arg) {
     emit game_over();
 }
 
-void Client::killPlayer(const QJsonValue &player_arg) {
+void Client::killPlayer(const Json::Value &player_arg) {
     if (!player_arg.isString()) return;
-	QString player_name = player_arg.toString();
+    QString player_name = toQString(player_arg);
 
     alive_count--;
     ClientPlayer *player = getPlayer(player_name);
@@ -1225,16 +1185,16 @@ void Client::killPlayer(const QJsonValue &player_arg) {
     emit player_killed(player_name);
 }
 
-void Client::setDashboardShadow(const QJsonValue &player_arg) {
+void Client::setDashboardShadow(const Json::Value &player_arg) {
     if (!player_arg.isString()) return;
-	QString player_name = player_arg.toString();
+    QString player_name = toQString(player_arg);
 
     emit dashboard_death(player_name);
 }
 
-void Client::revivePlayer(const QJsonValue &player_arg) {
+void Client::revivePlayer(const Json::Value &player_arg) {
     if (!player_arg.isString()) return;
-    QString player_name = player_arg.toString();
+    QString player_name = toQString(player_arg);
 
     alive_count++;
     emit player_revived(player_name);
@@ -1256,109 +1216,102 @@ void Client::warn(const QString &reason) {
     QMessageBox::warning(NULL, tr("Warning"), msg);
 }
 
-void Client::askForGeneral(const QJsonValue &arg) {
+void Client::askForGeneral(const Json::Value &arg) {
     QStringList generals;
     if (!tryParse(arg, generals)) return;
     emit generals_got(generals);
     setStatus(ExecDialog);
 }
 
-void Client::askForSuit(const QJsonValue &) {
+void Client::askForSuit(const Json::Value &) {
     QStringList suits;
     suits << "spade" << "club" << "heart" << "diamond";
     emit suits_got(suits);
     setStatus(ExecDialog);
 }
 
-void Client::askForKingdom(const QJsonValue &) {
+void Client::askForKingdom(const Json::Value &) {
     QStringList kingdoms = Sanguosha->getKingdoms();
     kingdoms.removeOne("god"); // god kingdom does not really exist
     emit kingdoms_got(kingdoms);
     setStatus(ExecDialog);
 }
 
-void Client::askForChoice(const QJsonValue &ask_str) {
+void Client::askForChoice(const Json::Value &ask_str) {
     if (!isStringArray(ask_str, 0, 1)) return;
-
-	QJsonArray ary = ask_str.toArray();
-	QString skill_name = ary[0].toString();
-	QStringList options = ary[1].toString().split("+");
+    QString skill_name = toQString(ask_str[0]);
+    QStringList options = toQString(ask_str[1]).split("+");
     emit options_got(skill_name, options);
     setStatus(ExecDialog);
 }
 
-void Client::askForCardChosen(const QJsonValue &ask_str) {
-    if (!ask_str.isArray() || ask_str.toArray().size() != 6 
-		|| !isStringArray(ask_str, 0, 2) || !ask_str.toArray()[3].isBool() 
-		|| !ask_str.toArray()[4].isDouble()) return;
-
-	QJsonArray ary = ask_str.toArray();
-	QString player_name = ary[0].toString();
-	QString flags = ary[1].toString();
-	QString reason = ary[2].toString();
-    bool handcard_visible = ary[3].toBool();
-    Card::HandlingMethod method = (Card::HandlingMethod)ary[4].toInt();
+void Client::askForCardChosen(const Json::Value &ask_str) {
+    if (!ask_str.isArray() || ask_str.size() != 6 || !isStringArray(ask_str, 0, 2)
+        || !ask_str[3].isBool() || !ask_str[4].isInt()) return;
+    QString player_name = toQString(ask_str[0]);
+    QString flags = toQString(ask_str[1]);
+    QString reason = toQString(ask_str[2]);
+    bool handcard_visible = ask_str[3].asBool();
+    Card::HandlingMethod method = (Card::HandlingMethod)ask_str[4].asInt();
     ClientPlayer *player = getPlayer(player_name);
     if (player == NULL) return;
     QList<int> disabled_ids;
-    tryParse(ary[5], disabled_ids);
+    tryParse(ask_str[5], disabled_ids);
     emit cards_got(player, flags, reason, handcard_visible, method, disabled_ids);
     setStatus(ExecDialog);
 }
 
 
-void Client::askForOrder(const QJsonValue &arg) {
-    if (!arg.isDouble()) return;
-    Game3v3ChooseOrderCommand reason = (Game3v3ChooseOrderCommand)arg.toInt();
+void Client::askForOrder(const Json::Value &arg) {
+    if (!arg.isInt()) return;
+    Game3v3ChooseOrderCommand reason = (Game3v3ChooseOrderCommand)arg.asInt();
     emit orders_got(reason);
     setStatus(ExecDialog);
 }
 
-void Client::askForRole3v3(const QJsonValue &arg) {
-    if (!arg.isArray() || arg.toArray().size() != 2	
-		|| !arg.toArray()[0].isString() || !arg.toArray()[1].isArray()) return;
-
-	QJsonArray ary = arg.toArray();
+void Client::askForRole3v3(const Json::Value &arg) {
+    if (!arg.isArray() || arg.size() != 2
+        || !arg[0].isString() || !arg[1].isArray()) return;
     QStringList roles;
-    if (!tryParse(ary[1], roles)) return;
-	QString scheme = ary[0].toString();
+    if (!tryParse(arg[1], roles)) return;
+    QString scheme = toQString(arg[0]);
     emit roles_got(scheme, roles);
     setStatus(ExecDialog);
 }
 
-void Client::askForDirection(const QJsonValue &) {
+void Client::askForDirection(const Json::Value &) {
     emit directions_got();
     setStatus(ExecDialog);
 }
 
 
-void Client::setMark(const QJsonValue &mark_str) {
-    if (!mark_str.isArray() || mark_str.toArray().size() != 3) return;
+void Client::setMark(const Json::Value &mark_str) {
+    if (!mark_str.isArray() || mark_str.size() != 3) return;
+    if (!mark_str[0].isString() || !mark_str[1].isString() || !mark_str[2].isInt()) return;
 
-	QJsonArray ary = mark_str.toArray();
-    if (!ary[0].isString() || !ary[1].isString() || !ary[2].isDouble()) return;
-
-	QString who = ary[0].toString();
-	QString mark = ary[1].toString();
-    int value = ary[2].toInt();
+    QString who = toQString(mark_str[0]);
+    QString mark = toQString(mark_str[1]);
+    int value = mark_str[2].asInt();
 
     ClientPlayer *player = getPlayer(who);
     player->setMark(mark, value);
 }
 
 void Client::onPlayerChooseSuit() {
-    replyToServer(S_COMMAND_CHOOSE_SUIT, sender()->objectName());
+    replyToServer(S_COMMAND_CHOOSE_SUIT, toJsonString(sender()->objectName()));
     setStatus(NotActive);
 }
 
 void Client::onPlayerChooseKingdom() {
-    replyToServer(S_COMMAND_CHOOSE_KINGDOM, sender()->objectName());
+    replyToServer(S_COMMAND_CHOOSE_KINGDOM, toJsonString(sender()->objectName()));
     setStatus(NotActive);
 }
 
 void Client::onPlayerDiscardCards(const Card *cards) {
-    QJsonArray val;
-    if (cards) {
+    Json::Value val;
+    if (!cards)
+        val = Json::Value::null;
+    else {
         foreach (int card_id, cards->getSubcards())
             val.append(card_id);
         if (cards->isVirtualCard() && !cards->parent())
@@ -1369,51 +1322,45 @@ void Client::onPlayerDiscardCards(const Card *cards) {
     setStatus(NotActive);
 }
 
-void Client::fillAG(const QJsonValue &cards_str) {
-	if (!cards_str.isArray() || cards_str.toArray().size() != 2) return;
-
-	QJsonArray ary = cards_str.toArray();
+void Client::fillAG(const Json::Value &cards_str) {
+    if (!cards_str.isArray() || cards_str.size() != 2) return;
     QList<int> card_ids, disabled_ids;
-    tryParse(ary[0], card_ids);
-    tryParse(ary[1], disabled_ids);
+    tryParse(cards_str[0], card_ids);
+    tryParse(cards_str[1], disabled_ids);
     emit ag_filled(card_ids, disabled_ids);
 }
 
-void Client::takeAG(const QJsonValue &take_str) {
-	if (!take_str.isArray() || take_str.toArray().size() != 3) return;
+void Client::takeAG(const Json::Value &take_str) {
+    if (!take_str.isArray() || take_str.size() != 3) return;
+    if (!take_str[1].isInt() || !take_str[2].isBool()) return;
 
-	QJsonArray ary = take_str.toArray();
-    if (!ary[1].isDouble() || !ary[2].isBool()) return;
-
-    int card_id = ary[1].toInt();
-    bool move_cards = ary[2].toBool();
+    int card_id = take_str[1].asInt();
+    bool move_cards = take_str[2].asBool();
     const Card *card = Sanguosha->getCard(card_id);
 
-    if (ary[0].isNull()) {
+    if (take_str[0].isNull()) {
         if (move_cards) {
             discarded_list.prepend(card);
             updatePileNum();
         }
         emit ag_taken(NULL, card_id, move_cards);
     } else {
-		ClientPlayer *taker = getPlayer(ary[0].toString());
+        ClientPlayer *taker = getPlayer(toQString(take_str[0]));
         if (move_cards)
             taker->addCard(card, Player::PlaceHand);
         emit ag_taken(taker, card_id, move_cards);
     }
 }
 
-void Client::clearAG(const QJsonValue &) {
+void Client::clearAG(const Json::Value &) {
     emit ag_cleared();
 }
 
-void Client::askForSinglePeach(const QJsonValue &arg) {
-	if (!arg.isArray() || arg.toArray().size() != 2 
-		|| !arg.toArray()[0].isString() || !arg.toArray()[1].isDouble()) return;
+void Client::askForSinglePeach(const Json::Value &arg) {
+    if (!arg.isArray() || arg.size() != 2 || !arg[0].isString() || !arg[1].isInt()) return;
 
-	QJsonArray ary = arg.toArray();
-	ClientPlayer *dying = getPlayer(ary[0].toString());
-    int peaches = ary[1].toInt();
+    ClientPlayer *dying = getPlayer(toQString(arg[0]));
+    int peaches = arg[1].asInt();
 
     // @todo: anti-cheating of askForSinglePeach is not done yet!!!
     QStringList pattern;
@@ -1455,18 +1402,18 @@ void Client::askForSinglePeach(const QJsonValue &arg) {
     setStatus(RespondingUse);
 }
 
-void Client::askForCardShow(const QJsonValue &requestor) {
+void Client::askForCardShow(const Json::Value &requestor) {
     if (!requestor.isString()) return;
-	QString name = Sanguosha->translate(requestor.toString());
+    QString name = Sanguosha->translate(toQString(requestor));
     prompt_doc->setHtml(tr("%1 request you to show one hand card").arg(name));
 
     _m_roomState.setCurrentCardUsePattern(".");
     setStatus(AskForShowOrPindian);
 }
 
-void Client::askForAG(const QJsonValue &arg) {
+void Client::askForAG(const Json::Value &arg) {
     if (!arg.isBool()) return;
-    m_isDiscardActionRefusable = arg.toBool();
+    m_isDiscardActionRefusable = arg.asBool();
     setStatus(AskForAG);
 }
 
@@ -1484,14 +1431,13 @@ void Client::alertFocus() {
         QApplication::alert(QApplication::focusWidget());
 }
 
-void Client::showCard(const QJsonValue &show_str) {
-	if (!show_str.isArray() || show_str.toArray().size() != 2
-		|| !show_str.toArray()[0].isString() || !show_str.toArray()[1].isDouble())
+void Client::showCard(const Json::Value &show_str) {
+    if (!show_str.isArray() || show_str.size() != 2
+        || !show_str[0].isString() || !show_str[1].isInt())
         return;
 
-	QJsonArray ary = show_str.toArray();
-    QString player_name = ary[0].toString();
-    int card_id = ary[1].toInt();
+    QString player_name = toQString(show_str[0]);
+    int card_id = show_str[1].asInt();
 
     ClientPlayer *player = getPlayer(player_name);
     if (player != Self)
@@ -1500,30 +1446,29 @@ void Client::showCard(const QJsonValue &show_str) {
     emit card_shown(player_name, card_id);
 }
 
-void Client::attachSkill(const QJsonValue &skill) {
+void Client::attachSkill(const Json::Value &skill) {
     if (!skill.isString()) return;
 
-	QString skill_name = skill.toString();
+    QString skill_name = toQString(skill);
     Self->acquireSkill(skill_name);
     emit skill_attached(skill_name, true);
 }
 
-void Client::askForAssign(const QJsonValue &) {
+void Client::askForAssign(const Json::Value &) {
     emit assign_asked();
 }
 
 void Client::onPlayerAssignRole(const QList<QString> &names, const QList<QString> &roles) {
     Q_ASSERT(names.size() == roles.size());
-    QJsonArray reply;
+    Json::Value reply(Json::arrayValue);
     reply[0] = toJsonArray(names);
     reply[1] = toJsonArray(roles);
     replyToServer(S_COMMAND_CHOOSE_ROLE, reply);
 }
 
-void Client::askForGuanxing(const QJsonValue &arg) {
-	QJsonArray ary = arg.toArray();
-    QJsonValue deck = ary[0];
-    bool up_only = ary[1].toBool();
+void Client::askForGuanxing(const Json::Value &arg) {
+    Json::Value deck = arg[0];
+    bool up_only = arg[1].asBool();
     QList<int> card_ids;
     tryParse(deck, card_ids);
 
@@ -1531,31 +1476,29 @@ void Client::askForGuanxing(const QJsonValue &arg) {
     setStatus(AskForGuanxing);
 }
 
-void Client::showAllCards(const QJsonValue &arg) {
-    if (!arg.isArray() || arg.toArray().size() != 3 
-		|| !arg.toArray()[0].isString() || ! arg.toArray()[1].isBool()) return;
-
-	QJsonArray ary = arg.toArray();
-	ClientPlayer *who = getPlayer(ary[0].toString());
+void Client::showAllCards(const Json::Value &arg) {
+    if (!arg.isArray() || arg.size() != 3
+        || !arg[0].isString() || ! arg[1].isBool())
+        return;
+    ClientPlayer *who = getPlayer(toQString(arg[0]));
     QList<int> card_ids;
-    if (!tryParse(ary[2], card_ids)) return;
+    if (!tryParse(arg[2], card_ids)) return;
 
     if (who) who->setCards(card_ids);
 
     emit gongxin(card_ids, false, QList<int>());
 }
 
-void Client::askForGongxin(const QJsonValue &arg) {
-    if (!arg.isArray() || arg.toArray().size() != 4	
-		|| !arg.toArray()[0].isString() || ! arg.toArray()[1].isBool()) return;
-
-	QJsonArray ary = arg.toArray();
-	ClientPlayer *who = getPlayer(ary[0].toString());
-    bool enable_heart = ary[1].toBool();
+void Client::askForGongxin(const Json::Value &arg) {
+    if (!arg.isArray() || arg.size() != 4
+        || !arg[0].isString() || ! arg[1].isBool())
+        return;
+    ClientPlayer *who = getPlayer(toQString(arg[0]));
+    bool enable_heart = arg[1].asBool();
     QList<int> card_ids;
-    if (!tryParse(ary[2], card_ids)) return;
+    if (!tryParse(arg[2], card_ids)) return;
     QList<int> enabled_ids;
-    if (!tryParse(ary[3], enabled_ids)) return;
+    if (!tryParse(arg[3], enabled_ids)) return;
 
     who->setCards(card_ids);
 
@@ -1564,18 +1507,16 @@ void Client::askForGongxin(const QJsonValue &arg) {
 }
 
 void Client::onPlayerReplyGongxin(int card_id) {
-    QJsonValue reply;
+    Json::Value reply = Json::Value::null;
     if (card_id != -1)
         reply = card_id;
     replyToServer(S_COMMAND_SKILL_GONGXIN, reply);
     setStatus(NotActive);
 }
 
-void Client::askForPindian(const QJsonValue &ask_str) {
+void Client::askForPindian(const Json::Value &ask_str) {
     if (!isStringArray(ask_str, 0, 1)) return;
-
-	QJsonArray ary = ask_str.toArray();
-	QString from = ary[0].toString();
+    QString from = toQString(ask_str[0]);
     if (from == Self->objectName())
         prompt_doc->setHtml(tr("Please play a card for pindian"));
     else {
@@ -1586,17 +1527,15 @@ void Client::askForPindian(const QJsonValue &ask_str) {
     setStatus(AskForShowOrPindian);
 }
 
-void Client::askForYiji(const QJsonValue &ask_str) {
-	if (!ask_str.isArray() || (ask_str.toArray().size() != 4 
-		&& ask_str.toArray().size() != 5)) return;
+void Client::askForYiji(const Json::Value &ask_str) {
+    if (!ask_str.isArray() || (ask_str.size() != 4 && ask_str.size() != 5)) return;
+    //if (!ask_str[0].isArray() || !ask_str[1].isBool() || !ask_str[2].isInt()) return;
+    Json::Value card_list = ask_str[0];
+    int count = ask_str[2].asInt();
+    m_isDiscardActionRefusable = ask_str[1].asBool();
 
-	QJsonArray ary = ask_str.toArray();
-	QJsonArray card_list = ary[0].toArray();
-    int count = ary[2].toInt();
-    m_isDiscardActionRefusable = ary[1].toBool();
-
-    if (ary.size() == 5) {
-        QString prompt = ary[4].toString();
+    if (ask_str.size() == 5) {
+        QString prompt = toQString(ask_str[4]);
         QStringList texts = prompt.split(":");
         if (texts.length() < 4) {
             while (texts.length() < 3)
@@ -1612,32 +1551,28 @@ void Client::askForYiji(const QJsonValue &ask_str) {
 
     //@todo: use cards directly rather than the QString
     QStringList card_str;
-    for (int i = 0; i < card_list.size(); i++)
-        card_str << QString::number(card_list[i].toInt());
-    QJsonValue players = ary[3];
+    for (unsigned int i = 0; i < card_list.size(); i++)
+        card_str << QString::number(card_list[i].asInt());
+    Json::Value players = ask_str[3];
     QStringList names;
     tryParse(players, names);
     _m_roomState.setCurrentCardUsePattern(QString("%1=%2=%3").arg(count).arg(card_str.join("+")).arg(names.join("+")));
     setStatus(AskForYiji);
 }
 
-void Client::askForPlayerChosen(const QJsonValue &players) {
-    if (!players.isArray() || players.toArray().size() != 4) return;
-
-	QJsonArray ary = players.toArray();
-    if (!ary[1].isString() || !ary[0].isArray() || !ary[3].isBool()) return;
-
-	QJsonArray ary0 = ary[0].toArray();
-	if (ary0.size() == 0) return;
-	skill_name = ary[1].toString();
+void Client::askForPlayerChosen(const Json::Value &players) {
+    if (!players.isArray() || players.size() != 4) return;
+    if (!players[1].isString() || !players[0].isArray() || !players[3].isBool()) return;
+    if (players[0].size() == 0) return;
+    skill_name = toQString(players[1]);
     players_to_choose.clear();
-	for (int i = 0; i < ary0.size(); i++)
-		players_to_choose.push_back(ary0[i].toString());
-    m_isDiscardActionRefusable = ary[3].toBool();
+    for (unsigned int i = 0; i < players[0].size(); i++)
+        players_to_choose.push_back(toQString(players[0][i]));
+    m_isDiscardActionRefusable = players[3].asBool();
 
     QString text;
     QString description = Sanguosha->translate(ClientInstance->skill_name);
-	QString prompt = ary[2].toString();
+    QString prompt = toQString(players[2]);
     if (!prompt.isEmpty()) {
         QStringList texts = prompt.split(":");
         text = setPromptList(texts);
@@ -1654,10 +1589,13 @@ void Client::askForPlayerChosen(const QJsonValue &players) {
 }
 
 void Client::onPlayerReplyYiji(const Card *card, const Player *to) {
-    QJsonArray req;
-    if (card) {
+    Json::Value req;
+    if (!card)
+        req = Json::Value::null;
+    else {
+        req = Json::Value(Json::arrayValue);
         req[0] = toJsonArray(card->getSubcards());
-        req[1] = to->objectName();
+        req[1] = toJsonString(to->objectName());
     }
     replyToServer(S_COMMAND_SKILL_YIJI, req);
 
@@ -1665,7 +1603,7 @@ void Client::onPlayerReplyYiji(const Card *card, const Player *to) {
 }
 
 void Client::onPlayerReplyGuanxing(const QList<int> &up_cards, const QList<int> &down_cards) {
-    QJsonArray decks;
+    Json::Value decks(Json::arrayValue);
     decks[0] = toJsonArray(up_cards);
     decks[1] = toJsonArray(down_cards);
 
@@ -1674,8 +1612,8 @@ void Client::onPlayerReplyGuanxing(const QList<int> &up_cards, const QList<int> 
     setStatus(NotActive);
 }
 
-void Client::log(const QJsonValue &log_str) {
-	if (!log_str.isArray() || log_str.toArray().size() != 6)
+void Client::log(const Json::Value &log_str) {
+    if (!log_str.isArray() || log_str.size() != 6)
         emit log_received(QStringList() << QString());
     else {
         QStringList log;
@@ -1723,88 +1661,76 @@ void Client::speak(const QString &speak_data) {
     emit line_spoken(QString("<p style=\"margin:3px 2px;\">%1</p>").arg(line));
 }
 
-void Client::moveFocus(const QJsonValue &focus) {
+void Client::moveFocus(const Json::Value &focus) {
     QStringList players;
     Countdown countdown;
 
-    Q_ASSERT(focus.isArray() && focus.toArray().size() == 3);
-
-	QJsonArray ary = focus.toArray();
-    tryParse(ary[0], players);
+    Q_ASSERT(focus.isArray() && focus.size() == 3);
+    tryParse(focus[0], players);
     // focus[1] is the moveFocus reason, which is unused for now.
-    countdown.tryParse(ary[2]);
+    countdown.tryParse(focus[2]);
     emit focus_moved(players, countdown);
 }
 
-void Client::setEmotion(const QJsonValue &set_str) {
-    if (!set_str.isArray() || set_str.toArray().size() != 2) return;
+void Client::setEmotion(const Json::Value &set_str) {
+    if (!set_str.isArray() || set_str.size() != 2) return;
+    if (!set_str[0].isString() || !set_str[1].isString()) return;
 
-	QJsonArray ary = set_str.toArray();
-    if (!ary[0].isString() || !ary[1].isString()) return;
-
-	QString target_name = ary[0].toString();
-	QString emotion = ary[1].toString();
+    QString target_name = toQString(set_str[0]);
+    QString emotion = toQString(set_str[1]);
 
     emit emotion_set(target_name, emotion);
 }
 
-void Client::skillInvoked(const QJsonValue &arg) {
+void Client::skillInvoked(const Json::Value &arg) {
     if (!isStringArray(arg, 0, 1)) return;
-
-	QJsonArray ary = arg.toArray();
-    emit skill_invoked(ary[1].toString(), ary[0].toString());
+    emit skill_invoked(QString(arg[1].asCString()), QString(arg[0].asCString()));
 }
 
-void Client::animate(const QJsonValue &animate_str) {
-	if (!animate_str.isArray() || !animate_str.toArray()[0].isDouble()
-		|| !animate_str.toArray()[1].isString() 
-		||  !animate_str.toArray()[2].isString()) return;
-
-	QJsonArray ary = animate_str.toArray();
+void Client::animate(const Json::Value &animate_str) {
+    if (!animate_str.isArray() || !animate_str[0].isInt()
+        || !animate_str[1].isString() ||  !animate_str[2].isString())
+        return;
     QStringList args;
-	args << ary[1].toString() << ary[2].toString();
-    int name = ary[0].toInt();
+    args << toQString(animate_str[1]) << toQString(animate_str[2]);
+    int name = animate_str[0].asInt();
     emit animated(name, args);
 }
 
-void Client::setFixedDistance(const QJsonValue &set_str) {
-	if (!set_str.isArray() || set_str.toArray().size() != 3) return;
+void Client::setFixedDistance(const Json::Value &set_str) {
+    if (!set_str.isArray() || set_str.size() != 3) return;
+    if (!set_str[0].isString() || !set_str[1].isString() || !set_str[2].isInt()) return;
 
-	QJsonArray ary = set_str.toArray();
-    if (!ary[0].isString() || !ary[1].isString() || !ary[2].isDouble()) return;
-
-	ClientPlayer *from = getPlayer(ary[0].toString());
-	ClientPlayer *to = getPlayer(ary[1].toString());
-    int distance = ary[2].toInt();
+    ClientPlayer *from = getPlayer(toQString(set_str[0]));
+    ClientPlayer *to = getPlayer(toQString(set_str[1]));
+    int distance = set_str[2].asInt();
 
     if (from && to)
         from->setFixedDistance(to, distance);
 }
 
-void Client::fillGenerals(const QJsonValue &generals) {
+void Client::fillGenerals(const Json::Value &generals) {
     if (!generals.isArray()) return;
     QStringList filled;
     tryParse(generals, filled);
     emit generals_filled(filled);
 }
 
-void Client::askForGeneral3v3(const QJsonValue &) {
+void Client::askForGeneral3v3(const Json::Value &) {
     emit general_asked();
     setStatus(AskForGeneralTaken);
 }
 
-void Client::takeGeneral(const QJsonValue &take_str) {
+void Client::takeGeneral(const Json::Value &take_str) {
     if (!isStringArray(take_str, 0, 2)) return;
-
-	QJsonArray ary = take_str.toArray();
-	QString who = ary[0].toString();
-	QString name = ary[1].toString();
-	QString rule = ary[2].toString();
+    QString who = toQString(take_str[0]);
+    QString name = toQString(take_str[1]);
+    QString rule = toQString(take_str[2]);
 
     emit general_taken(who, name, rule);
 }
 
-void Client::startArrange(const QJsonValue &to_arrange) {
+void Client::startArrange(const Json::Value &to_arrange) {
     if (to_arrange.isNull()) {
         emit arrange_started(QString());
     } else {
@@ -1817,30 +1743,22 @@ void Client::startArrange(const QJsonValue &to_arrange) {
 }
 
 void Client::onPlayerChooseRole3v3() {
-    replyToServer(S_COMMAND_CHOOSE_ROLE_3V3, sender()->objectName());
+    replyToServer(S_COMMAND_CHOOSE_ROLE_3V3, toJsonString(sender()->objectName()));
     setStatus(NotActive);
 }
 
-void Client::recoverGeneral(const QJsonValue &recover_str) {
-	if (!recover_str.isArray() || recover_str.toArray().size() != 2 
-		|| !recover_str.toArray()[0].isDouble() 
-		|| !recover_str.toArray()[1].isString()) return;
-
-	QJsonArray ary = recover_str.toArray();
-    int index = ary[0].toInt();
-	QString name = ary[1].toString();
+void Client::recoverGeneral(const Json::Value &recover_str) {
+    if (!recover_str.isArray() || recover_str.size() != 2 || !recover_str[0].isInt() || !recover_str[1].isString()) return;
+    int index = recover_str[0].asInt();
+    QString name = toQString(recover_str[1]);
 
     emit general_recovered(index, name);
 }
 
-void Client::revealGeneral(const QJsonValue &reveal_str) {
-	if (!reveal_str.isArray() || reveal_str.toArray().size() != 2 
-		|| !reveal_str.toArray()[0].isString() 
-		|| !reveal_str.toArray()[1].isString()) return;
-
-	QJsonArray ary = reveal_str.toArray();
-	bool self = ary[0].toString() == Self->objectName());
-	QString general = ary[1].toString();
+void Client::revealGeneral(const Json::Value &reveal_str) {
+    if (!reveal_str.isArray() || reveal_str.size() != 2 || !reveal_str[0].isString() || !reveal_str[1].isString()) return;
+    bool self = (toQString(reveal_str[0]) == Self->objectName());
+    QString general = toQString(reveal_str[1]);
 
     emit general_revealed(self, general);
 }
@@ -1863,12 +1781,12 @@ void Client::onPlayerChooseOrder() {
     setStatus(NotActive);
 }
 
-void Client::updateStateItem(const QJsonValue &state_str) {
+void Client::updateStateItem(const Json::Value &state_str) {
     if (!state_str.isString()) return;
-	emit role_state_changed(state_str.toString());
+    emit role_state_changed(toQString(state_str));
 }
 
-void Client::setAvailableCards(const QJsonValue &pile) {
+void Client::setAvailableCards(const Json::Value &pile) {
     if (!pile.isArray()) return;
     QList<int> drawPile;
     tryParse(pile, drawPile);

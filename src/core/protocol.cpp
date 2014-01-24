@@ -31,20 +31,11 @@ bool QSanProtocol::Countdown::tryParse(Json::Value val) {
         return false;
 }
 
-<<<<<<< HEAD
-bool QSanProtocol::Utils::isStringArray(const QJsonValue &jsonObject, unsigned int startIndex, unsigned int endIndex) {
-    if (!jsonObject.isArray()) return false;
-	QJsonArray ary = jsonObject.toArray();
-	if (ary.size() <= (int)endIndex) return false;
-    for (int i = startIndex; i <= (int)endIndex; i++) {
-        if (!ary[i].isString())
-=======
 bool QSanProtocol::Utils::isStringArray(const Json::Value &jsonObject, unsigned int startIndex, unsigned int endIndex) {
     if (!jsonObject.isArray() || jsonObject.size() <= endIndex)
         return false;
     for (unsigned int i = startIndex; i <= endIndex; i++) {
         if (!jsonObject[i].isString())
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
             return false;
     }
     return true;
@@ -66,13 +57,6 @@ bool QSanProtocol::QSanGeneralPacket::tryParse(const string &s, int &val) {
     return true;
 }
 
-<<<<<<< HEAD
-bool QSanProtocol::QSanGeneralPacket::parse(const QString &string) {
-	QJsonDocument jd = QJsonDocument::fromJson(string.toUtf8().toBase64());
-	if (!jd.isArray()) return false;
-	QJsonArray result = jd.array();
-    if (!Utils::isIntArray(result, 0, 3) || result.size() > 5)
-=======
 bool QSanProtocol::QSanGeneralPacket::parse(const string &s) {
     if (s.length() > S_MAX_PACKET_SIZE) {
         return false;
@@ -81,7 +65,6 @@ bool QSanProtocol::QSanGeneralPacket::parse(const string &s) {
     Json::Value result;
     bool success = m_jsonReader.parse(s, result);
     if (!success || !Utils::isIntArray(result, 0, 3) || result.size() > 5)
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
         return false;
 
     m_globalSerial = (unsigned int)result[0].asInt();
@@ -94,13 +77,8 @@ bool QSanProtocol::QSanGeneralPacket::parse(const string &s) {
     return true;
 }
 
-<<<<<<< HEAD
-QString QSanProtocol::QSanGeneralPacket::toString() const{
-    QJsonArray result;
-=======
 string QSanProtocol::QSanGeneralPacket::toString() const{
     Json::Value result(Json::arrayValue);
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
     result[0] = m_globalSerial;
     result[1] = m_localSerial;
     result[2] = m_packetDescription;
@@ -109,15 +87,11 @@ string QSanProtocol::QSanGeneralPacket::toString() const{
     if (body != Json::nullValue)
         result[4] = body;
 
-<<<<<<< HEAD
-    return QString::fromUtf8(QByteArray::fromBase64(QJsonDocument(result).toJson()));
-=======
     string msg = result.toStyledString();
     msg.erase(remove_if(msg.begin(), msg.end(), (int(*)(int))isspace), msg.end());
     //truncate too long messages
     if (msg.length() > S_MAX_PACKET_SIZE)
         return msg.substr(0, S_MAX_PACKET_SIZE);
     return msg;
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
 }
 

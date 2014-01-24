@@ -10,11 +10,7 @@ class Slash;
 #include "player.h"
 
 #include <QVariant>
-<<<<<<< HEAD
-#include <QJsonArray>
-=======
 #include <json/json.h>
->>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
 #include <serverplayer.h>
 
 struct DamageStruct {
