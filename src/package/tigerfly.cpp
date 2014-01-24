@@ -1755,7 +1755,7 @@ public:
 
     }
 
-    virtual bool isProhibited(const Player *from, const Player *to, const Card *card, const QList<const Player *> &) const{
+    virtual bool isProhibited(const Player *, const Player *to, const Card *card, const QList<const Player *> &) const{
         if (to->hasSkill(objectName()) && card->isKindOf("BasicCard")){
             foreach(const Card *c, to->getEquips()){
                 if (card->getSuit() == c->getSuit())
@@ -3069,7 +3069,7 @@ public:
         events << DamageInflicted;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
         if (player->askForSkillInvoke(objectName())){
             room->broadcastSkillInvoke(objectName(), 1);
             room->loseHp(player);

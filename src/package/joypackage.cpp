@@ -551,7 +551,7 @@ NumaNRNMCard::NumaNRNMCard(){
     mute = true;
 }
 
-bool NumaNRNMCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool NumaNRNMCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *) const{
     if (targets.length() == 0)
         return true;
     else if (targets.length() == 1)
@@ -560,7 +560,7 @@ bool NumaNRNMCard::targetFilter(const QList<const Player *> &targets, const Play
     return false;
 }
 
-bool NumaNRNMCard::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
+bool NumaNRNMCard::targetsFeasible(const QList<const Player *> &targets, const Player *) const{
     return targets.length() == 2;
 }
 
@@ -582,7 +582,7 @@ void NumaNRNMCard::onUse(Room *room, const CardUseStruct &card_use) const{
     thread->trigger(CardFinished, room, miheng, data);
 }
 
-void NumaNRNMCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+void NumaNRNMCard::use(Room *room, ServerPlayer *, QList<ServerPlayer *> &targets) const{
     room->showAllCards(targets[1], targets[0]);
 }
 

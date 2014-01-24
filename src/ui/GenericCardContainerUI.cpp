@@ -398,7 +398,7 @@ void PlayerCardContainer::_updateEquips() {
     }
 }
 
-void PlayerCardContainer::refresh(bool killed) {
+void PlayerCardContainer::refresh(bool ) {
     if (!m_player || !m_player->getGeneral() || !m_player->isAlive()) {
         _m_faceTurnedIcon->setVisible(false);
         _m_chainIcon->setVisible(false);

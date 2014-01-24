@@ -308,7 +308,7 @@ public:
         events << EventPhaseEnd;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
         if (player->getPhase() == Player::Discard && player->getHandcardNum() > player->getHp() && player->hasSkill("neo2013xiezun")){
             room->broadcastSkillInvoke("neo2013xiezun");
             room->notifySkillInvoked(player, "neo2013xiezun");
@@ -1908,7 +1908,7 @@ public:
         return false;
     }
 
-    virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const{
+    virtual int getEffectIndex(const ServerPlayer *, const Card *) const{
         return 1;
     }
 };
@@ -2110,7 +2110,7 @@ public:
         response_pattern = "@@neo2013jinan";
     }
 
-    virtual bool viewFilter(const Card *to_select) const{
+    virtual bool viewFilter(const Card *) const{
         return true;
     }
 
@@ -2338,7 +2338,7 @@ public:
         events << TurnedOver;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
         if (player->askForSkillInvoke(objectName())){
             player->drawCards(1);
             if (room->askForCard(player, "^BasicCard", "@neo2013jiewei-discard") != NULL){
@@ -2407,7 +2407,7 @@ public:
         return target != NULL && target->isAlive() && target->getPhase() == Player::Start;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
         ServerPlayer *yuanshu = room->findPlayerBySkillName(objectName());
         if (yuanshu != NULL && yuanshu != player && player->getHandcardNum() > yuanshu->getHandcardNum() 
                 && yuanshu->askForSkillInvoke(objectName(), QVariant::fromValue(player))){
@@ -2471,7 +2471,7 @@ public:
         frequency = Frequent;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
         for (int i = 0; i < damage.damage; i++){
             if (!player->askForSkillInvoke(objectName()))
@@ -2969,7 +2969,7 @@ public:
         view_as_skill = new SixSwordsSkillVS;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
         if (player->getPhase() == Player::NotActive){
             foreach(ServerPlayer *p, room->getOtherPlayers(player))
                 if (p->getMark("@SixSwordsBuff") > 0)
@@ -3144,7 +3144,7 @@ PeaceSpellCard::PeaceSpellCard(){
     
 }
 
-bool PeaceSpellCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool PeaceSpellCard::targetFilter(const QList<const Player *> &, const Player *, const Player *) const{
     return true;
 }
 

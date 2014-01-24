@@ -165,7 +165,7 @@ public:
         frequency = Frequent;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &) const{
         foreach(ServerPlayer *p, room->getOtherPlayers(player)){
             if (p->getHandcardNum() < player->getHandcardNum())
                 return false;
@@ -320,7 +320,7 @@ private:
     }
 
 public:
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         PhaseChangeStruct change = data.value<PhaseChangeStruct>();
         if (change.to == Player::Start || change.to == Player::Draw || change.to == Player::Play || change.to == Player::Discard || change.to == Player::Finish){
             room->setPlayerProperty(player, "cunsi_phase", static_cast<int>(change.to));
@@ -387,7 +387,7 @@ public:
         return target != NULL;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *, QVariant &data) const{
         PindianStruct *pindian = data.value<PindianStruct *>();
         
         ServerPlayer *invoker = NULL;
@@ -601,7 +601,7 @@ public:
         frequency = Compulsory;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         DyingStruct dying = data.value<DyingStruct>();
         if (dying.who == player){
             room->handleAcquireDetachSkills(player, "-baoling");
@@ -701,7 +701,7 @@ public:
         frequency = Compulsory;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         CardUseStruct use = data.value<CardUseStruct>();
         if (use.card != NULL && use.card->isKindOf("Slash") && use.from != NULL){
             foreach(ServerPlayer *p, use.to){
@@ -805,7 +805,7 @@ public:
         return Slash::IsAvailable(player);
     }
 
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
+    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
         return pattern == "slash" && Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE_USE;
     }
 };
@@ -901,7 +901,7 @@ public:
         events << CardAsked;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         QStringList ask = data.toStringList();
         if (ask.first() == "slash"){
             QList<int> skysoldier = player->getPile("skysoldier");
@@ -936,7 +936,7 @@ WendaoCard::WendaoCard(){
     target_fixed = true;
 }
 
-void WendaoCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets) const{
+void WendaoCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const{
     const Card *tpys = NULL;
     foreach(ServerPlayer *p, room->getAlivePlayers()){
         foreach(const Card *card, p->getEquips()){
@@ -1101,7 +1101,7 @@ public:
         return Slash::IsAvailable(player);
     }
 
-    virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
+    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
         return pattern == "slash" && Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_RESPONSE_USE;
     }
 };
@@ -1114,7 +1114,7 @@ public:
         attached_lord_skill = true;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *player, QVariant &data) const{
         QStringList ask = data.toStringList();
         if (ask.first() == "slash"){
 
@@ -1175,7 +1175,7 @@ public:
         return target != NULL && target->hasLordSkill(objectName()) && target->isAlive();
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent , Room *room, ServerPlayer *, QVariant &) const{
         foreach(ServerPlayer *p, room->getAllPlayers()){
             room->attachSkillToPlayer(p, "hongfa_slash");
         }
