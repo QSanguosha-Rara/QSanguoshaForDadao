@@ -167,6 +167,10 @@
     <PreBuildEvent>
       <Command>$(ProjectDir)\..\..\tools\swig\swig.exe -c++ -lua "$(ProjectDir)\..\..\swig\sanguosha.i"</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\all.cpp" />
