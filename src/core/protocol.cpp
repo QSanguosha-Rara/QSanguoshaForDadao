@@ -35,8 +35,8 @@ bool QSanProtocol::Countdown::tryParse(Json::Value val) {
 bool QSanProtocol::Utils::isStringArray(const QJsonValue &jsonObject, unsigned int startIndex, unsigned int endIndex) {
     if (!jsonObject.isArray()) return false;
 	QJsonArray ary = jsonObject.toArray();
-	if (ary.size() <= endIndex) return false;
-    for (unsigned int i = startIndex; i <= endIndex; i++) {
+	if (ary.size() <= (int)endIndex) return false;
+    for (int i = startIndex; i <= (int)endIndex; i++) {
         if (!ary[i].isString())
 =======
 bool QSanProtocol::Utils::isStringArray(const Json::Value &jsonObject, unsigned int startIndex, unsigned int endIndex) {
@@ -67,13 +67,8 @@ bool QSanProtocol::QSanGeneralPacket::tryParse(const string &s, int &val) {
 }
 
 <<<<<<< HEAD
-<<<<<<< HEAD
 bool QSanProtocol::QSanGeneralPacket::parse(const QString &string) {
 	QJsonDocument jd = QJsonDocument::fromJson(string.toUtf8().toBase64());
-=======
-bool QSanProtocol::QSanGeneralPacket::parse(const QByteArray &bytearray) {
-	QJsonDocument jd = QJsonDocument::fromJson(bytearray);
->>>>>>> parent of e32e5d9... A lot of Protocol changes(Part 2)
 	if (!jd.isArray()) return false;
 	QJsonArray result = jd.array();
     if (!Utils::isIntArray(result, 0, 3) || result.size() > 5)
@@ -100,11 +95,7 @@ bool QSanProtocol::QSanGeneralPacket::parse(const string &s) {
 }
 
 <<<<<<< HEAD
-<<<<<<< HEAD
 QString QSanProtocol::QSanGeneralPacket::toString() const{
-=======
-QByteArray QSanProtocol::QSanGeneralPacket::toByteArray() const{
->>>>>>> parent of e32e5d9... A lot of Protocol changes(Part 2)
     QJsonArray result;
 =======
 string QSanProtocol::QSanGeneralPacket::toString() const{
@@ -119,7 +110,6 @@ string QSanProtocol::QSanGeneralPacket::toString() const{
         result[4] = body;
 
 <<<<<<< HEAD
-<<<<<<< HEAD
     return QString::fromUtf8(QByteArray::fromBase64(QJsonDocument(result).toJson()));
 =======
     string msg = result.toStyledString();
@@ -129,8 +119,5 @@ string QSanProtocol::QSanGeneralPacket::toString() const{
         return msg.substr(0, S_MAX_PACKET_SIZE);
     return msg;
 >>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
-=======
-    return QJsonDocument(result).toJson();
->>>>>>> parent of e32e5d9... A lot of Protocol changes(Part 2)
 }
 

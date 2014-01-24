@@ -33,9 +33,9 @@ bool QSanProtocol::Utils::tryParse(const Json::Value &arg, QList<int> &result) {
     if (!arg.isArray()) return false;
 <<<<<<< HEAD
 	QJsonArray ary = arg.toArray();
-    for (unsigned int i = 0; i < ary.size(); i++)
+    for (int i = 0; i < ary.size(); i++)
         if (!ary[i].isDouble()) return false;
-    for (unsigned int i = 0; i < ary.size(); i++)
+    for (int i = 0; i < ary.size(); i++)
         result.append(ary[i].toInt());
 =======
     for (unsigned int i = 0; i < arg.size(); i++)
@@ -112,9 +112,9 @@ bool QSanProtocol::Utils::tryParse(const Json::Value &arg, QStringList &result) 
     if (!arg.isArray()) return false;
 <<<<<<< HEAD
 	QJsonArray ary = arg.toArray();
-    for (unsigned int i = 0; i < ary.size(); i++)
+    for (int i = 0; i < ary.size(); i++)
         if (!ary[i].isString()) return false;
-    for (unsigned int i = 0; i < ary.size(); i++)
+    for (int i = 0; i < ary.size(); i++)
         result.append(ary[i].toString());
 =======
     for (unsigned int i = 0; i < arg.size(); i++)

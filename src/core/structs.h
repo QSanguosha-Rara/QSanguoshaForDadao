@@ -11,13 +11,10 @@ class Slash;
 
 #include <QVariant>
 <<<<<<< HEAD
-<<<<<<< HEAD
 #include <QJsonArray>
 =======
 #include <json/json.h>
 >>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
-=======
->>>>>>> parent of e32e5d9... A lot of Protocol changes(Part 2)
 #include <serverplayer.h>
 
 struct DamageStruct {
