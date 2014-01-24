@@ -12,7 +12,7 @@
 #include "server.h"
 #include "audio.h"
 
-#if defined(WIN32) && defined(VS2010)
+#ifdef WIN32 && VS2010 || VS2012 && WIN32
 #include "breakpad/client/windows/handler/exception_handler.h"
 
 using namespace google_breakpad;
