@@ -2,7 +2,10 @@
 #define _PROTOCOL_H
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include <QJsonArray>
+=======
+>>>>>>> parent of e32e5d9... A lot of Protocol changes(Part 2)
 #include <QJsonDocument>
 =======
 #include <string>
@@ -214,12 +217,17 @@ namespace QSanProtocol {
     class QSanPacket {
     public:
 <<<<<<< HEAD
+<<<<<<< HEAD
         virtual bool parse(const QString &) = 0;
         virtual QString toString() const = 0;
 =======
         virtual bool parse(const std::string &) = 0;
         virtual std::string toString() const = 0;
 >>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
+=======
+        virtual bool parse(const QByteArray &) = 0;
+        virtual QString toByteArray() const = 0;
+>>>>>>> parent of e32e5d9... A lot of Protocol changes(Part 2)
         virtual PacketDescription getPacketDestination() const = 0;
         virtual PacketDescription getPacketSource() const = 0;
         virtual PacketDescription getPacketType() const = 0;
@@ -244,6 +252,7 @@ namespace QSanProtocol {
         inline void setMessageBody(const QJsonValue &value) { m_msgBody = value; }
         inline QJsonValue &getMessageBody() { return m_msgBody; }
         inline const QJsonValue &getMessageBody() const{ return m_msgBody; }
+<<<<<<< HEAD
         virtual bool parse(const QString &);
         virtual QString toString() const;
 =======
@@ -253,6 +262,10 @@ namespace QSanProtocol {
         virtual bool parse(const std::string &);
         virtual std::string toString() const;
 >>>>>>> parent of 02c29d0... a lot of protocol changes(Part 1)
+=======
+        virtual bool parse(const QByteArray &);
+        virtual QByteArray toByteArray() const;
+>>>>>>> parent of e32e5d9... A lot of Protocol changes(Part 2)
         virtual PacketDescription getPacketDestination() const{
             return static_cast<PacketDescription>(m_packetDescription & S_DEST_MASK);
         }
