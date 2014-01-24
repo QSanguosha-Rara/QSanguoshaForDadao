@@ -1,4 +1,3 @@
-
 function SmartAI:useCardAwaitExhausted(card, use)
 	if #self.friends_noself == 0 and not self:isWeak() then return end
 	if self.player:getCardCount(false) <= 2 or self:needBear() then return end
@@ -162,3 +161,10 @@ function SmartAI:useCardDrowning(card, use)
 end
 
 sgs.ai_skill_choice.neo_drowning = sgs.ai_skill_choice.drowning
+
+sgs.ai_skill_use["@@PeaceSpell"] = function(self, prompt)
+	local targets = {}
+	self:sort(self.friends_noself)
+	for _, friend in ipairs(self.friends_noself) do table.insert(targets, friend:objectName()) end
+	if #targets == 0 then return "." else return "@PeaceSpellCard=.->" .. table.concat(targets, "+") end
+end
