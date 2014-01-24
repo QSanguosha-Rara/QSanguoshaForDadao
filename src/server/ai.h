@@ -15,6 +15,7 @@ typedef int LuaFunction;
 
 #include <QString>
 #include <QObject>
+#include <serverplayer.h>
 
 class AI: public QObject {
     Q_OBJECT
@@ -52,6 +53,8 @@ public:
     virtual ServerPlayer *askForYiji(const QList<int> &cards, const QString &reason, int &card_id) = 0;
     virtual void askForGuanxing(const QList<int> &cards, QList<int> &up, QList<int> &bottom, int guanxing_type) = 0;
     virtual void filterEvent(TriggerEvent triggerEvent, ServerPlayer *player, const QVariant &data);
+
+	static bool CompareByNumber(const Card *c1, const Card *c2);
 
 protected:
     Room *room;

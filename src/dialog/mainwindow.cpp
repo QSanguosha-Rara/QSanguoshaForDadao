@@ -220,7 +220,12 @@ void MainWindow::startConnection() {
 }
 
 void MainWindow::on_actionReplay_triggered() {
+#if QT_VERSION >= 0x050000
+    QString location;
+#else
     QString location = QDesktopServices::storageLocation(QDesktopServices::HomeLocation);
+#endif
+
     QString last_dir = Config.value("LastReplayDir").toString();
     if (!last_dir.isEmpty())
         location = last_dir;
@@ -356,7 +361,13 @@ void MainWindow::gotoStartScene() {
 }
 
 void MainWindow::startGameInAnotherInstance() {
+#ifndef QT_NO_PROCESS
     QProcess::startDetached(QApplication::applicationFilePath(), QStringList());
+#else
+	QMessageBox::warning(this, tr("Warning"), tr("I'm so sorry, you cannot start a \
+												 server and start a game at the same \
+												 time in the current version."));
+#endif
 }
 
 void MainWindow::on_actionGeneral_Overview_triggered() {
@@ -688,7 +699,12 @@ void MainWindow::on_actionReplay_file_convert_triggered() {
 }
 
 void MainWindow::on_actionRecord_analysis_triggered() {
+#if QT_VERSION >= 0x050000
+    QString location;
+#else
     QString location = QDesktopServices::storageLocation(QDesktopServices::HomeLocation);
+#endif
+
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Load replay record"),
                                                     location,

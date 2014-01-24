@@ -12,7 +12,7 @@
 #include <QCommandLinkButton>
 #include <QClipboard>
 
-static QLayout *HLay(QWidget *left, QWidget *right) {
+QLayout *GeneralOverview::HLay(QWidget *left, QWidget *right) {
     QHBoxLayout *layout = new QHBoxLayout;
     layout->addWidget(left);
     layout->addWidget(right);
@@ -45,13 +45,13 @@ QWidget *GeneralSearch::createInfoTab() {
     nickname_label->setToolTip(tr("<font color=#FFFF33>Input characters included by the nickname. '?' and '*' is available. Every nickname meets the condition if the line is empty.</font>"));
     nickname_edit = new QLineEdit;
     nickname_edit->clear();
-    layout->addLayout(HLay(nickname_label, nickname_edit));
+    layout->addLayout(GeneralOverview::HLay(nickname_label, nickname_edit));
 
     name_label = new QLabel(tr("Name"));
     name_label->setToolTip(tr("<font color=#FFFF33>Input characters included by the name. '?' and '*' is available. Every name meets the condition if the line is empty.</font>"));
     name_edit = new QLineEdit;
     name_edit->clear();
-    layout->addLayout(HLay(name_label, name_edit));
+    layout->addLayout(GeneralOverview::HLay(name_label, name_edit));
 
     maxhp_lower_label = new QLabel(tr("MaxHp Min"));
     maxhp_lower_label->setToolTip(tr("<font color=#FFFF33>Set lowerlimit and upperlimit of max HP. 0 ~ 0 meets all conditions.</font>"));
@@ -239,13 +239,12 @@ void GeneralSearch::unselectAllPackages() {
         button->setChecked(false);
 }
 
-static GeneralOverview *Overview;
+static GeneralOverview *GOverview;
 
 GeneralOverview *GeneralOverview::getInstance(QWidget *main_window) {
-    if (Overview == NULL)
-        Overview = new GeneralOverview(main_window);
-
-    return Overview;
+    if (GOverview == NULL)
+        GOverview = new GeneralOverview(main_window);
+    return GOverview;
 }
 
 GeneralOverview::GeneralOverview(QWidget *parent)

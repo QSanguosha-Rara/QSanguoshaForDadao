@@ -75,6 +75,8 @@ public:
     void ensureEnableAI();
     bool config();
 
+	static QLayout *HLay(QWidget *left, QWidget *right);
+
 private:
     QWidget *createBasicTab();
     QWidget *createPackageTab();

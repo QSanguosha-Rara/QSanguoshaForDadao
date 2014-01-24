@@ -12,7 +12,7 @@
 
 class Sprite: public QObject, public QGraphicsPixmapItem {
     Q_OBJECT
-    Q_INTERFACES(QGraphicsItem)
+	Q_INTERFACES(QGraphicsItem)
     Q_PROPERTY(qreal opacity READ opacity WRITE setOpacity)
     Q_PROPERTY(qreal scale READ scale WRITE setScale)
 
