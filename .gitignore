@@ -25,8 +25,8 @@ lib/lua.lib
 lib/breakpad.lib
 /tools/
 builds/vs2010/Win32/
+builds/vs2012/Win32/
 Bin/
-/builds/vs2010/ipch
 /lib/lua.lib
 /lib/jsoncpp.lib
 /lib/breakpad.lib
@@ -35,6 +35,11 @@ Bin/
 /builds/vs2010/QSanguosha.suo
 /builds/vs2010/*.user
 /builds/vs2010/*.opensdf
+/builds/vs2012/ipch
+/builds/vs2012/QSanguosha.sdf
+/builds/vs2012/QSanguosha.sdf
+/builds/vs2012/*.users
+/builds/vs2012/*.opensdf
 tags
 /extensions
 *~
@@ -63,3 +68,4 @@ ai.html
 /Qt*.dll
 /dmp/*.dmp
 *thumbs.db
+builds/vs2012/QSanguosha.suo
