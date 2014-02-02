@@ -19,7 +19,7 @@ return {
 	["hengjiang:maxcard"] = "你可以发动【横江】令 %src 损失手牌上限。" ,
 	["hengjiang:drawcard"] = "你现在可以发动【横江】摸一张牌。" ,
 
-	["mifuren"] = "靡夫人" ,
+	["mifuren"] = "糜夫人" ,
 	["#mifuren"] = "乱世沉香" ,
 	["illustrator:mifuren"] = "木美人" ,
 	["guixiu"] = "闺秀" ,
