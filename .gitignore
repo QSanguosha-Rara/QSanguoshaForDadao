@@ -71,3 +71,9 @@ ai.html
 builds/vs2012/QSanguosha.suo
 builds/vs2010/QSanguosha.v11.suo
 builds/vs2012/QSanguosha.v11.suo
+icudt51.dll
+icuin51.dll
+icuuc51.dll
+libGLESv2.dll
+libEGL.dll
+plugins/platforms/
