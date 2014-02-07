@@ -3954,7 +3954,7 @@ void Room::moveCardsToEndOfDrawpile(QList<int> card_ids) {
             if (cards_move.to) // Hand/Equip/Judge
                 cards_move.to->addCard(card, cards_move.to_place);
 
-            m_drawPile->append(card_id); break;
+            m_drawPile->append(card_id);
             doBroadcastNotify(S_COMMAND_UPDATE_PILE, Json::Value(m_drawPile->length()));
         }
     }
