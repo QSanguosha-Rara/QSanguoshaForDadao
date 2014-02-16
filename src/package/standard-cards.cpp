@@ -954,7 +954,7 @@ void Nullification::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> 
     // does nothing, just throw it
     if (room->getCardPlace(getEffectiveId()) == Player::PlaceTable){
         CardMoveReason reason(CardMoveReason::S_REASON_USE, source->objectName());
-        room->moveCardTo(this, source, NULL, Player::DiscardPile, reason);
+        room->moveCardTo(this, NULL, Player::DiscardPile, reason);
     }
 }
 

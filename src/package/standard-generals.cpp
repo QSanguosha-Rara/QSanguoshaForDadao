@@ -2096,6 +2096,55 @@ public:
     }
 };
 
+class Pianxian: public TriggerSkill{
+public:
+    Pianxian(): TriggerSkill("pianxian"){
+        events << DamageCaused << Death;
+        frequency = Compulsory;
+    }
+
+    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+        if (triggerEvent == DamageCaused){
+            DamageStruct damage = data.value<DamageStruct>();
+            if (damage.card != NULL && damage.card->isKindOf("Slash") && damage.to != damage.from && damage.by_user && player->getMark("@butterfly") == 0){
+                QList<const Skill *> skills = damage.to->getVisibleSkillList();
+                QStringList can_acquires;
+                foreach(const Skill *s, skills){
+                    if (s->getLocation() == Right && !s->isAttachedLordSkill()
+                            && s->getFrequency() != Compulsory && s->getFrequency() != Wake && s->getFrequency() != Limited && !s->isLordSkill())
+                        can_acquires << s->objectName();
+                }
+
+                if (can_acquires.isEmpty())
+                    return false;
+
+                QString choice = room->askForChoice(player, objectName(), can_acquires.join("+"));
+                player->gainMark("@butterfly");
+                room->handleAcquireDetachSkills(damage.to, "-" + choice);
+                room->acquireSkill(player, choice);
+            }
+        }
+        else if (triggerEvent == Death){
+            if (player->getMark("@butterfly") > 0)
+                player->loseAllMarks("@butterfly");
+        }
+        return false;
+    }
+};
+
+class PianxianTargetMod: public TargetModSkill{
+public:
+    PianxianTargetMod(): TargetModSkill("#pianxian-tarmod"){
+
+    }
+
+    virtual int getExtraTargetNum(const Player *from, const Card *card) const{
+        if (from->getMark("@butterfly") == 0)
+            return 1;
+        return 0;
+    }
+};
+
 class ExtraRound: public ZeroCardViewAsSkill{
 public:
     ExtraRound(): ZeroCardViewAsSkill("extra_round"){
@@ -2184,6 +2233,10 @@ TestPackage::TestPackage()
 
     General *Fsu0413 = new General(this, "Fsu0413", "qun", 5);
     Fsu0413->addSkill(new Zhazha);
+
+    General *Slob = new General(this, "Slob", "god", 4, false);
+    Slob->addSkill(new Pianxian);
+    Slob->addSkill(new PianxianTargetMod);
 
     addMetaObject<NimeiCard>();
     addMetaObject<NimaAojiaoCard>();
