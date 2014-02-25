@@ -16,8 +16,7 @@ QToolTip{
 }
 
 QTextEdit{
-	border: 10px;
-    border-image: url(image/system/border.png)10 10 10 10 ;
+    border: 1px solid gray;
     background-color: rgba(0,0,0,80);
 }
 
