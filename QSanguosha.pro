@@ -2,18 +2,13 @@
 # Project created by QtCreator 2010-06-13T04:26:52
 # -------------------------------------------------
 TARGET = QSanguosha
-QT += network sql declarative
+QT += network sql widgets declarative
 TEMPLATE = app
-CONFIG += warn_on audio
+CONFIG += audio
 
 # choose luajit if you like it, the default is to use lua.
-win32 {
-    CONFIG += lua
-}
-unix {
-    CONFIG += lua51
-#    CONFIG += luajit
-}
+CONFIG += lua
+
 
 # If you want to enable joystick support, please uncomment the following line:
 # CONFIG += joystick
@@ -37,10 +32,14 @@ SOURCES += \
     src/core/lua-wrapper.cpp \
     src/core/player.cpp \
     src/core/protocol.cpp \
+    src/core/record-analysis.cpp \
+    src/core/RoomState.cpp \
     src/core/settings.cpp \
     src/core/skill.cpp \
     src/core/structs.cpp \
     src/core/util.cpp \
+    src/core/WrappedCard.cpp \
+    src/dialog/AboutUs.cpp \
     src/dialog/cardeditor.cpp \
     src/dialog/cardoverview.cpp \
     src/dialog/choosegeneraldialog.cpp \
@@ -54,16 +53,21 @@ SOURCES += \
     src/dialog/playercarddialog.cpp \
     src/dialog/roleassigndialog.cpp \
     src/dialog/scenario-overview.cpp \
+    src/package/3d-package.cpp \
     src/package/bgm-package.cpp \
     src/package/exppattern.cpp \
     src/package/firepackage.cpp \
+    src/package/formation.cpp \
     src/package/god.cpp \
+    src/package/hegemony.cpp \
     src/package/joypackage.cpp \
     src/package/lingpackage.cpp \
     src/package/maneuvering.cpp \
     src/package/mountainpackage.cpp \
     src/package/nostalgia.cpp \
     src/package/package.cpp \
+    src/package/power.cpp \
+    src/package/special1v1-package.cpp \
     src/package/special3v3-package.cpp \
     src/package/sp-package.cpp \
     src/package/standard.cpp \
@@ -71,19 +75,23 @@ SOURCES += \
     src/package/standard-generals.cpp \
     src/package/standard-skillcards.cpp \
     src/package/thicket.cpp \
+    src/package/tigerfly.cpp \
     src/package/wind.cpp \
     src/package/wisdompackage.cpp \
     src/package/yitianpackage.cpp \
     src/package/yjcm-package.cpp \
     src/package/yjcm2012-package.cpp \
+    src/package/yjcm2013-package.cpp \
     src/scenario/boss-mode-scenario.cpp \
     src/scenario/couple-scenario.cpp \
+    src/scenario/fancheng-scenario.cpp \
     src/scenario/guandu-scenario.cpp \
     src/scenario/miniscenarios.cpp \
     src/scenario/scenario.cpp \
     src/scenario/scenerule.cpp \
     src/scenario/zombie-scenario.cpp \
     src/server/ai.cpp \
+    src/server/contestdb.cpp \
     src/server/gamerule.cpp \
     src/server/generalselector.cpp \
     src/server/room.cpp \
@@ -124,20 +132,13 @@ SOURCES += \
     src/jsoncpp/src/json_reader.cpp \
     src/jsoncpp/src/json_internalmap.inl \
     src/jsoncpp/src/json_internalarray.inl \
-    swig/sanguosha_wrap.cxx \
-    src/core/RoomState.cpp \
-    src/core/WrappedCard.cpp \
-    src/core/record-analysis.cpp \
-    src/package/assassinspackage.cpp \
-    src/package/hegemony.cpp \
-    src/scenario/fancheng-scenario.cpp \
-    src/package/yjcm2013-package.cpp
+    swig/sanguosha_wrap.cxx
+
 HEADERS += \
     src/client/aux-skills.h \
     src/client/client.h \
     src/client/clientplayer.h \
     src/client/clientstruct.h \
-    src/ui/SkinBank.h \
     src/core/audio.h \
     src/core/banpair.h \
     src/core/card.h \
@@ -148,10 +149,14 @@ HEADERS += \
     src/core/lua-wrapper.h \
     src/core/player.h \
     src/core/protocol.h \
+    src/core/record-analysis.h \
+    src/core/RoomState.h \
     src/core/settings.h \
     src/core/skill.h \
     src/core/structs.h \
     src/core/util.h \
+    src/core/WrappedCard.h \
+    src/dialog/AboutUs.h \
     src/dialog/cardeditor.h \
     src/dialog/cardoverview.h \
     src/dialog/choosegeneraldialog.h \
@@ -163,37 +168,46 @@ HEADERS += \
     src/dialog/mainwindow.h \
     src/dialog/packagingeditor.h \
     src/dialog/playercarddialog.h \
-    src/dialog/roleassigndialog.h \ 
+    src/dialog/roleassigndialog.h \
     src/dialog/scenario-overview.h \
+    src/package/3d-package.h \
     src/package/bgm-package.h \
     src/package/exppattern.h \
     src/package/firepackage.h \
+    src/package/formation.h \
     src/package/god.h \
+    src/package/hegemony.h \
     src/package/joypackage.h \
     src/package/lingpackage.h \
     src/package/maneuvering.h \
     src/package/mountainpackage.h \
     src/package/nostalgia.h \
     src/package/package.h \
+    src/package/power.h \
+    src/package/special1v1-package.h \
     src/package/special3v3-package.h \
     src/package/sp-package.h \
     src/package/standard.h \
     src/package/standard-equips.h \
     src/package/standard-skillcards.h \
     src/package/thicket.h \
+    src/package/tigerfly.h \
     src/package/wind.h \
     src/package/wisdompackage.h \
     src/package/yitianpackage.h \
     src/package/yjcm-package.h \
     src/package/yjcm2012-package.h \
+    src/package/yjcm2013-package.h \
     src/scenario/boss-mode-scenario.h \
     src/scenario/couple-scenario.h \
+    src/scenario/fancheng-scenario.h \
     src/scenario/guandu-scenario.h \
     src/scenario/miniscenarios.h \
     src/scenario/scenario.h \
     src/scenario/scenerule.h \
     src/scenario/zombie-scenario.h \
     src/server/ai.h \
+    src/server/contestdb.h \
     src/server/gamerule.h \
     src/server/generalselector.h \
     src/server/room.h \
@@ -239,22 +253,15 @@ HEADERS += \
     src/jsoncpp/include/json/features.h \
     src/jsoncpp/include/json/config.h \
     src/jsoncpp/include/json/autolink.h \
-    src/jsoncpp/include/json/assertions.h \
-    src/core/RoomState.h \
-    src/core/WrappedCard.h \
-    src/core/record-analysis.h \
-    src/package/assassinspackage.h \
-    src/package/hegemony.h \
-    src/scenario/fancheng-scenario.h \
-    src/package/yjcm2013-package.h
+    src/jsoncpp/include/json/assertions.h
 
 FORMS += \
     src/dialog/cardoverview.ui \
     src/dialog/configdialog.ui \
     src/dialog/connectiondialog.ui \
     src/dialog/generaloverview.ui \
-    src/dialog/mainwindow.ui 
-    
+    src/dialog/mainwindow.ui
+
 INCLUDEPATH += include
 INCLUDEPATH += src/client
 INCLUDEPATH += src/core
@@ -361,79 +368,20 @@ CONFIG(lua){
     INCLUDEPATH += src/lua
 }
 
-CONFIG(lua51){
-    SOURCES += \
-        src/lua51/lzio.c \
-        src/lua51/lvm.c \
-        src/lua51/lundump.c \
-        src/lua51/ltm.c \
-        src/lua51/ltablib.c \
-        src/lua51/ltable.c \
-        src/lua51/lstrlib.c \
-        src/lua51/lstring.c \
-        src/lua51/lstate.c \
-        src/lua51/lparser.c \
-        src/lua51/loslib.c \
-        src/lua51/lopcodes.c \
-        src/lua51/lobject.c \
-        src/lua51/loadlib.c \
-        src/lua51/lmem.c \
-        src/lua51/lmathlib.c \
-        src/lua51/llex.c \
-        src/lua51/liolib.c \
-        src/lua51/linit.c \
-        src/lua51/lgc.c \
-        src/lua51/lfunc.c \
-        src/lua51/ldump.c \
-        src/lua51/ldo.c \
-        src/lua51/ldebug.c \
-        src/lua51/ldblib.c \
-        src/lua51/lcode.c \
-        src/lua51/lbaselib.c \
-        src/lua51/lauxlib.c \
-        src/lua51/lapi.c
-    HEADERS += \
-        src/lua51/lzio.h \
-        src/lua51/lvm.h \
-        src/lua51/lundump.h \
-        src/lua51/lualib.h \
-        src/lua51/luaconf.h \
-        src/lua51/lua.hpp \
-        src/lua51/lua.h \
-        src/lua51/ltm.h \
-        src/lua51/ltable.h \
-        src/lua51/lstring.h \
-        src/lua51/lstate.h \
-        src/lua51/lparser.h \
-        src/lua51/lopcodes.h \
-        src/lua51/lobject.h \
-        src/lua51/lmem.h \
-        src/lua51/llimits.h \
-        src/lua51/llex.h \
-        src/lua51/lgc.h \
-        src/lua51/lfunc.h \
-        src/lua51/ldo.h \
-        src/lua51/ldebug.h \
-        src/lua51/lcode.h \
-        src/lua51/lauxlib.h \
-        src/lua51/lapi.h
-    INCLUDEPATH += src/lua51
-}
+#CONFIG(luajit){
+#    HEADERS += \
+#        src/luajit/lauxlib.h \
+#        src/luajit/luaconf.h \
+#        src/luajit/lua.h \
+#        src/luajit/lua.hpp \
+#        src/luajit/luajit.h \
+#        src/luajit/lualib.h \
+#        src/luajit/luatools.h
+#    INCLUDEPATH += src/luajit
+#    unix: LIBS += -L/usr/local/lib -lluajit-5.1
+#}
 
-CONFIG(luajit){
-    HEADERS += \
-        src/luajit/lauxlib.h \
-        src/luajit/luaconf.h \
-        src/luajit/lua.h \
-        src/luajit/lua.hpp \
-        src/luajit/luajit.h \
-        src/luajit/lualib.h \
-        src/luajit/luatools.h
-    INCLUDEPATH += src/luajit
-    unix: LIBS += -L/usr/local/lib -lluajit-5.1
-}
-
-TRANSLATIONS += sanguosha.ts
+TRANSLATIONS += builds/vs2012/sanguosha.ts
 
 OTHER_FILES += \
     sanguosha.qss \

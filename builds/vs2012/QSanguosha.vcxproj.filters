@@ -1,11 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Form Files">
-      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
-      <Extensions>ui</Extensions>
-      <ParseFiles>false</ParseFiles>
-    </Filter>
     <Filter Include="Generated Files">
       <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
@@ -840,29 +835,8 @@
     <CustomBuild Include="..\..\src\ui\uiUtils.h">
       <Filter>ui</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\swig\ai.i">
-      <Filter>Swig Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\card.i">
-      <Filter>Swig Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\list.i">
-      <Filter>Swig Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\luaskills.i">
-      <Filter>Swig Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\native.i">
-      <Filter>Swig Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\naturalvar.i">
-      <Filter>Swig Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\qvariant.i">
-      <Filter>Swig Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\sanguosha.i">
-      <Filter>Swig Files</Filter>
+    <CustomBuild Include="..\..\src\core\util.h">
+      <Filter>core</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -1348,5 +1322,31 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\resource\icon.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\swig\ai.i">
+      <Filter>Swig Files</Filter>
+    </Text>
+    <Text Include="..\..\swig\card.i">
+      <Filter>Swig Files</Filter>
+    </Text>
+    <Text Include="..\..\swig\list.i">
+      <Filter>Swig Files</Filter>
+    </Text>
+    <Text Include="..\..\swig\luaskills.i">
+      <Filter>Swig Files</Filter>
+    </Text>
+    <Text Include="..\..\swig\native.i">
+      <Filter>Swig Files</Filter>
+    </Text>
+    <Text Include="..\..\swig\naturalvar.i">
+      <Filter>Swig Files</Filter>
+    </Text>
+    <Text Include="..\..\swig\qvariant.i">
+      <Filter>Swig Files</Filter>
+    </Text>
+    <Text Include="..\..\swig\sanguosha.i">
+      <Filter>Swig Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

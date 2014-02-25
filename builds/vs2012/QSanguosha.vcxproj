@@ -1196,6 +1196,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
     </CustomBuild>
+    <CustomBuild Include="..\..\src\core\util.h" />
     <CustomBuild Include="..\..\src\ui\magatamasItem.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing magatamasItem.h...</Message>
@@ -2277,7 +2278,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\swig\ai.i">
+    <Text Include="..\..\swig\ai.i">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
@@ -2292,8 +2293,9 @@
       </Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\card.i">
+      <FileType>Document</FileType>
+    </Text>
+    <Text Include="..\..\swig\card.i">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
@@ -2308,8 +2310,9 @@
       </Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\list.i">
+      <FileType>Document</FileType>
+    </Text>
+    <Text Include="..\..\swig\list.i">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
@@ -2324,8 +2327,9 @@
       </Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\luaskills.i">
+      <FileType>Document</FileType>
+    </Text>
+    <Text Include="..\..\swig\luaskills.i">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
@@ -2340,8 +2344,9 @@
       </Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\native.i">
+      <FileType>Document</FileType>
+    </Text>
+    <Text Include="..\..\swig\native.i">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
@@ -2356,8 +2361,9 @@
       </Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\naturalvar.i">
+      <FileType>Document</FileType>
+    </Text>
+    <Text Include="..\..\swig\naturalvar.i">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
@@ -2372,8 +2378,9 @@
       </Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\qvariant.i">
+      <FileType>Document</FileType>
+    </Text>
+    <Text Include="..\..\swig\qvariant.i">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
@@ -2388,8 +2395,9 @@
       </Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
-    </CustomBuild>
-    <CustomBuild Include="..\..\swig\sanguosha.i">
+      <FileType>Document</FileType>
+    </Text>
+    <Text Include="..\..\swig\sanguosha.i">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Performing Custom Build Tools</Message>
@@ -2404,7 +2412,8 @@
       </Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </AdditionalInputs>
-    </CustomBuild>
+      <FileType>Document</FileType>
+    </Text>
     <CustomBuild Include="sanguosha.ts">
       <SubType>Designer</SubType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

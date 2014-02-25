@@ -485,7 +485,7 @@ const Card *Engine::getEngineCard(int cardId) const{
     if (cardId == Card::S_UNKNOWN_CARD_ID)
         return NULL;
     else if (cardId < 0 || cardId >= cards.length()) {
-        Q_ASSERT(FALSE);
+        Q_ASSERT(false);
         return NULL;
     } else {
         Q_ASSERT(cards[cardId] != NULL);
