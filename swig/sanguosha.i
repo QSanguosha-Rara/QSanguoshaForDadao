@@ -1314,6 +1314,7 @@ public:
         qWarning("%s", msg);
     }
     void throwEvent(const TriggerEvent event) {
+        Q_UNUSED($self);
         throw event;
     }
 };
