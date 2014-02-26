@@ -11,7 +11,7 @@ public:
         events << AfterDrawNCards;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *, ServerPlayer *player, QVariant &) const{
         if (!player->isKongcheng() && player->askForSkillInvoke(objectName())){
             player->throwAllHandCards();
         }
@@ -218,7 +218,7 @@ SanD1BianzhenCard::SanD1BianzhenCard(){
 
 }
 
-bool SanD1BianzhenCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
+bool SanD1BianzhenCard::targetFilter(const QList<const Player *> &targets, const Player *, const Player *) const{
     return targets.isEmpty();
 }
 
@@ -263,7 +263,7 @@ public:
         return !player->hasUsed("SanD1BianzhenCard");
     }
 
-    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+    virtual bool viewFilter(const QList<const Card *> &selected, const Card *) const{
         return selected.length() < 2;
     }
 
@@ -284,11 +284,11 @@ public:
         view_as_skill = new SanD1BianzhenVS;
     }
 
-    virtual int getPriority(TriggerEvent triggerEvent) const{
+    virtual int getPriority(TriggerEvent) const{
         return 1;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &) const{
         if (player->hasFlag("sand1bianzhen_used") && player->getPhase() == Player::NotActive){
             ServerPlayer *target = player->tag["sand1bianzhen_target"].value<ServerPlayer *>();
             player->tag.remove("sand1bianzhen_target");
@@ -365,7 +365,7 @@ public:
         pattern = "slash";
     }
 
-    virtual int getExtraTargetNum(const Player *from, const Card *card) const{
+    virtual int getExtraTargetNum(const Player *from, const Card *) const{
         if (from->hasSkill(objectName()) && from->getPhase() == Player::Play)
             return 99;
 
@@ -436,11 +436,11 @@ public:
         events << SlashProceed;
     }
 
-    virtual int getPriority(TriggerEvent triggerEvent) const{
+    virtual int getPriority(TriggerEvent)const{
         return 1;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
         if (player->hasFlag("xianxi_using")){
             SlashEffectStruct effect = data.value<SlashEffectStruct>();
             effect.to->setFlags("xianxi_target");
@@ -456,11 +456,11 @@ public:
         events << SlashProceed;
     }
 
-    virtual int getPriority(TriggerEvent triggerEvent) const{
+    virtual int getPriority(TriggerEvent) const{
         return -2;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
         if (player->hasFlag("xianxi_using")){
             SlashEffectStruct effect = data.value<SlashEffectStruct>();
             effect.to->setFlags("xianxi_target");
@@ -636,11 +636,11 @@ public:
         events << SlashProceed;
     }
 
-    virtual int getPriority(TriggerEvent triggerEvent) const{
+    virtual int getPriority(TriggerEvent) const{
         return 1;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
         SlashEffectStruct effect = data.value<SlashEffectStruct>();
         if (player->getMark("SanD1Zhaolie_" + effect.slash->toString()) > 0){
             player->setFlags("SanD1Zhaolie_Jink");
@@ -659,11 +659,11 @@ public:
         events << SlashProceed;
     }
 
-    virtual int getPriority(TriggerEvent triggerEvent) const{
+    virtual int getPriority(TriggerEvent) const{
         return -2;
     }
 
-    virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
         SlashEffectStruct effect = data.value<SlashEffectStruct>();
         if (player->getMark("SanD1Zhaolie_" + effect.slash->toString()) > 0){
             player->setFlags("-SanD1Zhaolie_Jink");
@@ -698,7 +698,7 @@ public:
         response_pattern = "@@sand1doudan!";
     }
 
-    virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
+    virtual bool viewFilter(const QList<const Card *> &, const Card *to_select) const{
         QVariantList l = Self->property("doudan_table").toList();
         if (l.contains(to_select->getEffectiveId()))
             return true;
