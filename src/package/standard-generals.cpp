@@ -2019,7 +2019,8 @@ public:
                 CardMoveReason(CardMoveReason::S_REASON_NATURAL_ENTER, target->objectName()));
 
             cards.removeOne(id);
-            target->obtainCard(&DummyCard(cards));
+            DummyCard card(cards);
+            target->obtainCard(&card);
 
             return true;
         }

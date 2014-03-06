@@ -1904,7 +1904,8 @@ void Room::changeHero(ServerPlayer *player, const QString &new_general, bool ful
             }
             if (skill->getFrequency() == Skill::Limited && !skill->getLimitMark().isEmpty())
                 addPlayerMark(player, skill->getLimitMark());
-            thread->trigger(EventAcquireSkill, this, player, QVariant::fromValue(skill->objectName()));
+            QVariant _data = skill->objectName();
+            thread->trigger(EventAcquireSkill, this, player, _data);
         }
     }
     if (invokeStart) {

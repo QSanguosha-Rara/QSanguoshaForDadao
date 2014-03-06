@@ -1288,8 +1288,10 @@ void ServerPlayer::gainAnExtraTurn() {
                     game_rule = qobject_cast<const GameRule *>(Sanguosha->getTriggerSkill("hulaopass_mode"));
                 else
                     game_rule = qobject_cast<const GameRule *>(Sanguosha->getTriggerSkill("game_rule"));
-                if (game_rule)
-                    game_rule->trigger(EventPhaseEnd, room, this, QVariant());
+                if (game_rule){
+                    QVariant _dummy_data;
+                    game_rule->trigger(EventPhaseEnd, room, this, _dummy_data);
+                }
                 changePhase(getPhase(), Player::NotActive);
             }
             room->setCurrent(current);

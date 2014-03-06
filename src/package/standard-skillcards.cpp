@@ -64,7 +64,8 @@ RendeCard::RendeCard(){
 }
 
 void RendeCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const{
-    if (room->askForRende(source, source->handCards(), "rende", false, true, -1, QList<ServerPlayer *>(), CardMoveReason(), "@rende", false) >= 2){
+    QList<int> handCards = source->handCards();
+    if (room->askForRende(source, handCards, "rende", false, true, -1, QList<ServerPlayer *>(), CardMoveReason(), "@rende", false) >= 2){
         RecoverStruct rec;
         rec.who = source;
         room->recover(source, rec);

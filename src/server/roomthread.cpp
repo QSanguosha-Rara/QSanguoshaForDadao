@@ -359,7 +359,8 @@ void RoomThread::_handleTurnBroken3v3(QList<ServerPlayer *> &first, QList<Server
         ServerPlayer *player = room->getCurrent();
         trigger(TurnBroken, room, player);
         if (player->getPhase() != Player::NotActive) {
-            game_rule->trigger(EventPhaseEnd, room, player, QVariant());
+            QVariant _dummy_data;
+            game_rule->trigger(EventPhaseEnd, room, player, _dummy_data);
             player->changePhase(player->getPhase(), Player::NotActive);
         }
         if (!player->hasFlag("actioned"))
@@ -461,7 +462,8 @@ void RoomThread::actionHulaoPass(ServerPlayer *shenlvbu, QList<ServerPlayer *> l
                         room->setPlayerFlag(player, "-actioned");
 
                     if (player->getPhase() != Player::NotActive) {
-                        game_rule->trigger(EventPhaseEnd, room, player);
+                        QVariant _dummy_data;
+                        game_rule->trigger(EventPhaseEnd, room, player, _dummy_data);
                         player->changePhase(player->getPhase(), Player::NotActive);
                     }
                 }
@@ -483,7 +485,8 @@ void RoomThread::_handleTurnBrokenHulaoPass(ServerPlayer *shenlvbu, QList<Server
         trigger(TurnBroken, room, player);
         ServerPlayer *next = findHulaoPassNext(shenlvbu, league, stage);
         if (player->getPhase() != Player::NotActive) {
-            game_rule->trigger(EventPhaseEnd, room, player, QVariant());
+            QVariant _dummy_data;
+            game_rule->trigger(EventPhaseEnd, room, player, _dummy_data);
             player->changePhase(player->getPhase(), Player::NotActive);
             if (player != shenlvbu && stage == 1)
                 room->setPlayerFlag(player, "actioned");
@@ -522,7 +525,8 @@ void RoomThread::_handleTurnBrokenNormal(GameRule *game_rule) {
         trigger(TurnBroken, room, player);
         ServerPlayer *next = player->getNextAlive();
         if (player->getPhase() != Player::NotActive) {
-            game_rule->trigger(EventPhaseEnd, room, player, QVariant());
+            QVariant _dummy_data;
+            game_rule->trigger(EventPhaseEnd, room, player, _dummy_data);
             player->changePhase(player->getPhase(), Player::NotActive);
         }
 
