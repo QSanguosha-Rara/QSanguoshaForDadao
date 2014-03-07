@@ -186,7 +186,7 @@ config = {
 	},
 
 	pairs_ban = {
-		"huatuo", "zhoutai", "zuoci", "bgm_pangtong", "shencaocao", "liaohua", "nos_zhoutai",
+		"huatuo", "zhoutai", "zuoci", "bgm_pangtong", "shencaocao", "liaohua", "nos_zhoutai", "wenyang" ,
 		"+luboyan",
 		"simayi+zhenji", "simayi+dengai",
 		"caoren+shenlvbu", "caoren+caozhi", "caoren+bgm_diaochan", "caoren+bgm_caoren", "caoren+neo_caoren", "caoren+nos_caoren",
