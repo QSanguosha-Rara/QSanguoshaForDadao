@@ -592,8 +592,7 @@ public:
     }
 };
 
-//技能暂时没有任何用途
-
+//for future use
 class Baoling: public TriggerSkill{
 public:
     Baoling(): TriggerSkill("baoling"){
