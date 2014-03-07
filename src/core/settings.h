@@ -56,9 +56,6 @@ public:
     ushort ServerPort;
     bool DisableLua;
 
-    QStringList ExtraHiddenGenerals;
-    QStringList RemovedHiddenGenerals;
-
     // client side
     QString HostAddress;
     QString UserName;

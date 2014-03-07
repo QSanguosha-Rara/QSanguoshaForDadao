@@ -235,6 +235,13 @@ RoomScene::RoomScene(QMainWindow *main_window)
     chat_box->setTextColor(Config.TextEditColor);
     connect(ClientInstance, SIGNAL(line_spoken(QString)), this, SLOT(appendChatBox(QString)));
 
+    QScrollBar *bar = chat_box->verticalScrollBar();
+    QFile file("qss/scroll.qss");
+    if (file.open(QIODevice::ReadOnly)) {
+        QTextStream stream(&file);
+        bar->setStyleSheet(stream.readAll());
+    }
+
     // chat edit
     chat_edit = new QLineEdit;
     chat_edit->setObjectName("chat_edit");
@@ -361,6 +368,8 @@ RoomScene::RoomScene(QMainWindow *main_window)
 
     pindian_from_card = NULL;
     pindian_to_card = NULL;
+
+    _m_bgEnabled = false;
 }
 
 void RoomScene::handleGameEvent(const Json::Value &arg) {
@@ -1308,27 +1317,12 @@ void RoomScene::keyReleaseEvent(QKeyEvent *event) {
             adjustItems();
             break;
         }
-    case Qt::Key_F6: {
-            if (!Self || !Self->isOwner() || ClientInstance->getPlayers().length() < Sanguosha->getPlayerCount(ServerInfo.GameMode)) break;
-            foreach (const ClientPlayer *p, ClientInstance->getPlayers()) {
-                if (p != Self && p->isAlive() && p->getState() != "robot")
-                    break;
-            }
-            bool paused = pausing_text->isVisible();
-            QString message = QString("pause %1").arg((paused ? "false" : "true"));
-            ClientInstance->request(message);
-            break;
-        }
     case Qt::Key_F7: {
             if (control_is_down) {
                 if (add_robot && add_robot->isVisible())
                     ClientInstance->addRobot();
             } else if (fill_robots && fill_robots->isVisible())
                 ClientInstance->fillRobots();
-            break;
-        }
-    case Qt::Key_F8: {
-            setChatBoxVisible(!chat_box_widget->isVisible());
             break;
         }
     case Qt::Key_F12: {
@@ -3415,20 +3409,23 @@ void RoomScene::speak() {
             broadcast = false;
             Config.EnableBgMusic = true;
             Config.setValue("EnableBgMusic", true);
+            _m_bgEnabled = true;
+            _m_bgMusicPath = Config.value("BackgroundMusic", "audio/system/background.ogg").toString();
 #ifdef AUDIO_SUPPORT
             Audio::stopBGM();
-            QString bgmusic_path = Config.value("BackgroundMusic", "audio/system/background.ogg").toString();
-            Audio::playBGM(bgmusic_path);
+            Audio::playBGM(_m_bgMusicPath);
             Audio::setBGMVolume(Config.BGMVolume);
 #endif
         } else if (text.startsWith(".StartBgMusic=")) {
             broadcast = false;
             Config.EnableBgMusic = true;
             Config.setValue("EnableBgMusic", true);
+            _m_bgEnabled = true;
             QString path = text.mid(14);
             if (path.startsWith("|")) {
                 path = path.mid(1);
                 Config.setValue("BackgroundMusic", path);
+                _m_bgMusicPath = path;
             }
 #ifdef AUDIO_SUPPORT
             Audio::stopBGM();
@@ -3439,6 +3436,7 @@ void RoomScene::speak() {
             broadcast = false;
             Config.EnableBgMusic = false;
             Config.setValue("EnableBgMusic", false);
+            _m_bgEnabled = false;
 #ifdef AUDIO_SUPPORT
             Audio::stopBGM();
 #endif
@@ -3563,7 +3561,7 @@ void KOFOrderBox::killPlayer(const QString &general_name) {
 
 void RoomScene::onGameStart() {
     main_window->activateWindow();
-    if (Config.GameMode.contains("_mini_")) {
+    if (ServerInfo.GameMode.contains("_mini_")) {
         QString id = Config.GameMode;
         id.replace("_mini_", "");
         _m_currentStage = id.toInt();
@@ -3585,15 +3583,18 @@ void RoomScene::onGameStart() {
 
     connect(Self, SIGNAL(skill_state_changed(QString)), this, SLOT(skillStateChange(QString)));
     trust_button->setEnabled(true);
-#ifdef AUDIO_SUPPORT
+
     if (Config.EnableBgMusic) {
         // start playing background music
-        QString bgmusic_path = Config.value("BackgroundMusic", "audio/system/background.ogg").toString();
-
-        Audio::playBGM(bgmusic_path);
+        _m_bgMusicPath = Config.value("BackgroundMusic", "audio/system/background.ogg").toString();
+#ifdef AUDIO_SUPPORT
+        Audio::playBGM(_m_bgMusicPath);
         Audio::setBGMVolume(Config.BGMVolume);
-    }
 #endif
+        _m_bgEnabled = true;
+    } else {
+        _m_bgEnabled = false;
+    }
     game_started = true;
 }
 
@@ -3639,13 +3640,7 @@ void RoomScene::moveFocus(const QStringList &players, Countdown countdown) {
 }
 
 void RoomScene::setEmotion(const QString &who, const QString &emotion) {
-    bool permanent = false;
-    if (emotion == "question" || emotion == "no-question")
-        permanent = true;
-    setEmotion(who, emotion, permanent);
-}
-
-void RoomScene::setEmotion(const QString &who, const QString &emotion, bool permanent) {
+    bool permanent = (emotion == "question" || emotion == "no-question");
     if (emotion.startsWith("weapon/") || emotion.startsWith("armor/")) {
         if (Config.value("NoEquipAnim", false).toBool()) return;
         QString name = emotion.split("/").last();
@@ -4404,3 +4399,44 @@ void RoomScene::setChatBoxVisible(bool show) {
     }
 }
 
+void RoomScene::setChatBoxVisibleSlot() {
+    setChatBoxVisible(!chat_box_widget->isVisible());
+}
+
+void RoomScene::pause() {
+    if (!Self || !Self->isOwner() || ClientInstance->getPlayers().length() < Sanguosha->getPlayerCount(ServerInfo.GameMode)) return;
+    foreach (const ClientPlayer *p, ClientInstance->getPlayers()) {
+        if (p != Self && p->isAlive() && p->getState() != "robot")
+            return;
+    }
+    bool paused = pausing_text->isVisible();
+    QString message = QString("pause %1").arg((paused ? "false" : "true"));
+    ClientInstance->request(message);
+}
+
+void RoomScene::updateVolumeConfig() {
+    if (!game_started) return;
+    if (Config.EnableBgMusic) {
+        // start playing background music
+        QString bgMusicPath = Config.value("BackgroundMusic", "audio/system/background.ogg").toString();
+        bool modified = false;
+        if (bgMusicPath != _m_bgMusicPath) {
+#ifdef AUDIO_SUPPORT
+            Audio::stopBGM();
+#endif
+            _m_bgMusicPath = bgMusicPath;
+            modified = true;
+        }
+#ifdef AUDIO_SUPPORT
+        if (modified || !_m_bgEnabled)
+            Audio::playBGM(_m_bgMusicPath);
+        Audio::setBGMVolume(Config.BGMVolume);
+#endif
+        _m_bgEnabled = true;
+    } else {
+#ifdef AUDIO_SUPPORT
+        Audio::stopBGM();
+#endif
+        _m_bgEnabled = false;
+    }
+}

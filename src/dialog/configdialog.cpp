@@ -1,6 +1,7 @@
 #include "configdialog.h"
 #include "ui_configdialog.h"
 #include "settings.h"
+#include "roomscene.h"
 
 #include <QFileDialog>
 #include <QDesktopServices>
@@ -70,10 +71,13 @@ ConfigDialog::~ConfigDialog() {
 void ConfigDialog::on_browseBgButton_clicked() {
     QString filename = QFileDialog::getOpenFileName(this,
                                                     tr("Select a background image"),
-                                                    "backdrop/",
+                                                    "image/backdrop/",
                                                     tr("Images (*.png *.bmp *.jpg)"));
 
     if (!filename.isEmpty()) {
+        QString app_path = QApplication::applicationDirPath();
+        if (filename.startsWith(app_path))
+            filename = filename.right(filename.length() - app_path.length() - 1);
         ui->bgPathLineEdit->setText(filename);
 
         Config.BackgroundImage = filename;
@@ -86,7 +90,7 @@ void ConfigDialog::on_browseBgButton_clicked() {
 void ConfigDialog::on_resetBgButton_clicked() {
     ui->bgPathLineEdit->clear();
 
-    QString filename = "backdrop/new-version.jpg";
+    QString filename = "image/backdrop/new-version.jpg";
     Config.BackgroundImage = filename;
     Config.setValue("BackgroundImage", filename);
 
@@ -96,7 +100,7 @@ void ConfigDialog::on_resetBgButton_clicked() {
 void ConfigDialog::on_browseTableBgButton_clicked() {
     QString filename = QFileDialog::getOpenFileName(this,
         tr("Select a tableBg image"),
-        "backdrop/",
+        "image/backdrop/",
         tr("Images (*.png *.bmp *.jpg)"));
 
     if (!filename.isEmpty()) {
@@ -112,7 +116,7 @@ void ConfigDialog::on_browseTableBgButton_clicked() {
 void ConfigDialog::on_resetTableBgButton_clicked() {
     ui->tableBgPathLineEdit->clear();
 
-    QString filename = "backdrop/default.jpg";
+    QString filename = "image/backdrop/default.jpg";
     Config.TableBgImage = filename;
     Config.setValue("TableBgImage", filename);
 
@@ -153,6 +157,9 @@ void ConfigDialog::saveConfig() {
 
     Config.EnableDoubleClick = ui->doubleClickCheckBox->isChecked();
     Config.setValue("EnableDoubleClick", Config.EnableDoubleClick);
+
+    if (RoomSceneInstance)
+        RoomSceneInstance->updateVolumeConfig();
 }
 
 void ConfigDialog::on_browseBgMusicButton_clicked() {
@@ -161,6 +168,9 @@ void ConfigDialog::on_browseBgMusicButton_clicked() {
                                                     "audio/system",
                                                     tr("Audio files (*.wav *.mp3 *.ogg)"));
     if (!filename.isEmpty()) {
+        QString app_path = QApplication::applicationDirPath();
+        if (filename.startsWith(app_path))
+            filename = filename.right(filename.length() - app_path.length() - 1);
         ui->bgMusicPathLineEdit->setText(filename);
         Config.setValue("BackgroundMusic", filename);
     }

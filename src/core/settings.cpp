@@ -130,8 +130,8 @@ void Settings::init() {
     BGMVolume = value("BGMVolume", 1.0f).toFloat();
     EffectVolume = value("EffectVolume", 1.0f).toFloat();
 
-    BackgroundImage = value("BackgroundImage", "backdrop/new-version.jpg").toString();
-    TableBgImage = value("TableBgImage", "backdrop/default.jpg").toString();
+    BackgroundImage = value("BackgroundImage", "image/backdrop/new-version.jpg").toString();
+    TableBgImage = value("TableBgImage", "image/backdrop/default.jpg").toString();
 
     EnableSurprisingGenerals = value("EnableSurprisingGenerals", false).toBool();
     KnownSurprisingGenerals = value("KnownSurprisingGenerals", QStringList()).toStringList();
@@ -214,6 +214,4 @@ void Settings::init() {
         setValue("ForbidPackages", forbid_packages);
     }
 
-    Config.ExtraHiddenGenerals = GetConfigFromLuaState(lua, "extra_hidden_generals").toStringList();
-    Config.RemovedHiddenGenerals = GetConfigFromLuaState(lua, "removed_hidden_generals").toStringList();
 }

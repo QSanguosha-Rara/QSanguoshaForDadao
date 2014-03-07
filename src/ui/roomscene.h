@@ -145,6 +145,7 @@ public:
     void showPromptBox();
     static void FillPlayerNames(QComboBox *ComboBox, bool add_none);
     void updateTable();
+    void updateVolumeConfig();
     inline QMainWindow *mainWindow() { return main_window; }
 
     void changeTableBg();
@@ -195,6 +196,9 @@ public slots:
     void doOkButton();
     void doCancelButton();
     void doDiscardButton();
+
+    void setChatBoxVisibleSlot();
+    void pause();
 
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
@@ -344,6 +348,9 @@ private:
 
     QRectF _m_infoPlane;
 
+    bool _m_bgEnabled;
+    QString _m_bgMusicPath;
+
 private slots:
     void fillCards(const QList<int> &card_ids, const QList<int> &disabled_ids = QList<int>());
     void updateSkillButtons();
@@ -359,7 +366,6 @@ private slots:
     void changeMaxHp(const QString &who, int delta);
     void moveFocus(const QStringList &who, QSanProtocol::Countdown);
     void setEmotion(const QString &who, const QString &emotion);
-    void setEmotion(const QString &who, const QString &emotion, bool permanent);
     void showSkillInvocation(const QString &who, const QString &skill_name);
     void doAnimation(int name, const QStringList &args);
     void showOwnerButtons(bool owner);

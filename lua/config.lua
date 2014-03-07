@@ -268,5 +268,17 @@ config = {
 		"pangde->sp_pangde",
 		"sunshangxiang->sp_sunshangxiang",
 		"fuwan->neo_mushun" ,
+	},
+
+	removed_hidden_generals = {
+	},
+
+	extra_hidden_generals = {
+	},
+
+	removed_default_lords = {
+	},
+
+	extra_default_lords = {
 	}
 }

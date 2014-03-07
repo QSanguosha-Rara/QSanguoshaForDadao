@@ -25,7 +25,7 @@ QLabel#guhuo_text {
     border-radius: 5px;
 }
 
-QTextEdit[description="true"]{
+QTextEdit[description = true]{
     border: 10px;
     border-image: none;
     background-color: rgba(255,255,255,255);
@@ -95,19 +95,19 @@ QStatusBar{
     color:white;
 }
 
-QMenu[private_pile="true"]{
+QMenu[private_pile = true]{
     background-color: rgba(43,63,53,200);
     border-radius: 1px;
     color: white;
 }
 
-QPushButton[private_pile="true"]{
+QPushButton[private_pile = true]{
     background-color: rgba(43,63,53,200);
     border-radius: 1px;
     color: white;
 }
 
-QPushButton[game_control="true"]{
+QPushButton[game_control = true]{
     border: 0px solid gray;
     font: 12px;
     border-radius: 5px;
