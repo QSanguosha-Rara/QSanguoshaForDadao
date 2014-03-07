@@ -99,7 +99,7 @@ public:
 
                 DamageStruct damage = data.value<DamageStruct>();
 
-                ServerPlayer *current = room->getCurrent(); //µ±Ç°»ØºÏ½ÇÉ«ÌÉÇ¹
+                ServerPlayer *current = room->getCurrent(); //å½“å‰å›åˆè§’è‰²èººæª
                 if (current && current->isAlive() && current->getPhase() != Player::NotActive){
                     player->tag["hengjiang_damage"] = data;
                     if (player->askForSkillInvoke(objectName(), "maxcard:" + current->objectName()))
@@ -592,7 +592,7 @@ public:
     }
 };
 
-//¼¼ÄÜÔİÊ±Ã»ÓĞÈÎºÎÓÃÍ¾
+//æŠ€èƒ½æš‚æ—¶æ²¡æœ‰ä»»ä½•ç”¨é€”
 
 class Baoling: public TriggerSkill{
 public:

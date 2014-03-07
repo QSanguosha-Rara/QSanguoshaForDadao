@@ -466,7 +466,7 @@ public:
     NeoAocai(): TriggerSkill("neoaocai"){
         events << EventPhaseChanging;
         frequency = Limited;
-        limit_mark = "@neoaocai"; //Todo£º¼ÓÈëÕâ¸öMarkµÄÍ¼Æ¬
+        limit_mark = "@neoaocai"; //Todoï¼šåŠ å…¥è¿™ä¸ªMarkçš„å›¾ç‰‡
     }
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
@@ -480,7 +480,7 @@ public:
             if (count.length() > 0)
                 if (room->askForSkillInvoke(player, objectName())){
                     room->broadcastSkillInvoke(objectName());
-                    room->doLightbox("$neoaocai", 5000); //ToAsk: ÕâÀïÃ»ÓÐAnimateµÄ·­ÒëºÍÍ¼ÏñÎÄ¼þ£¬ÕâÀïÖ»ÄÜÏÔÊ¾´óºÚ¿ò
+                    room->doLightbox("$neoaocai", 5000); //ToAsk: è¿™é‡Œæ²¡æœ‰Animateçš„ç¿»è¯‘å’Œå›¾åƒæ–‡ä»¶ï¼Œè¿™é‡Œåªèƒ½æ˜¾ç¤ºå¤§é»‘æ¡†
                     player->loseMark("@neoaocai");
                     foreach(ServerPlayer *victim, count){
                         QString choice = "give";

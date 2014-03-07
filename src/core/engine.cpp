@@ -131,8 +131,8 @@ void Engine::addTranslationEntry(const char *key, const char *value) {
 }
 
 Engine::~Engine() {
-    lua_close(lua); //´ËÌõÓï¾ä»áµ¼ÖÂÉÁÍË£¨Ö»²»¹ýÊÇÕýÔÚÍË³öµÄ¹ý³ÌÖÐÉÁÍË£¬¿´²»³öÀ´£©£¬²»ÖªÊ²Ã´Ô­Òò
-    //Êµ²â£¬ÔÚÔØÈëLUAÀ©Õ¹°üÊ±»áÉÁÍË£¬²»ÔØÈëLUA°üÃ»ÎÊÌâ
+    lua_close(lua); //æ­¤æ¡è¯­å¥ä¼šå¯¼è‡´é—ªé€€ï¼ˆåªä¸è¿‡æ˜¯æ­£åœ¨é€€å‡ºçš„è¿‡ç¨‹ä¸­é—ªé€€ï¼Œçœ‹ä¸å‡ºæ¥ï¼‰ï¼Œä¸çŸ¥ä»€ä¹ˆåŽŸå› 
+    //å®žæµ‹ï¼Œåœ¨è½½å…¥LUAæ‰©å±•åŒ…æ—¶ä¼šé—ªé€€ï¼Œä¸è½½å…¥LUAåŒ…æ²¡é—®é¢˜
 #ifdef AUDIO_SUPPORT
     Audio::quit();
 #endif
