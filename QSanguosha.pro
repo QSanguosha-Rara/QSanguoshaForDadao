@@ -9,6 +9,8 @@ CONFIG += audio
 # choose luajit if you like it, the default is to use lua.
 CONFIG += lua
 
+win32:DEFINES += Q_WS_WIN
+
 
 # If you want to enable joystick support, please uncomment the following line:
 # CONFIG += joystick
