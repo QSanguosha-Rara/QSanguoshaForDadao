@@ -99,7 +99,7 @@ public:
 
                 DamageStruct damage = data.value<DamageStruct>();
 
-                ServerPlayer *current = room->getCurrent(); //当前回合角色躺枪
+                ServerPlayer *current = room->getCurrent(); //current round player is shooted laying
                 if (current && current->isAlive() && current->getPhase() != Player::NotActive){
                     player->tag["hengjiang_damage"] = data;
                     if (player->askForSkillInvoke(objectName(), "maxcard:" + current->objectName()))

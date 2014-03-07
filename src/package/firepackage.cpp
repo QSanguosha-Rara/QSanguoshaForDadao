@@ -374,7 +374,7 @@ public:
         if (pattern != "jink")
             return false;
 
-        //此处更改是因为“八阵”是“视为”装备八卦阵，真正发动的技能是八卦阵，而不是八阵。
+        //Wolong is invoking EightDiagram, not bazhen
 
         if (wolong->askForSkillInvoke("EightDiagram")) {
             JudgeStruct judge;

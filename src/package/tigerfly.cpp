@@ -466,7 +466,7 @@ public:
     NeoAocai(): TriggerSkill("neoaocai"){
         events << EventPhaseChanging;
         frequency = Limited;
-        limit_mark = "@neoaocai"; //Todo：加入这个Mark的图片
+        limit_mark = "@neoaocai"; //Todo：add a pic to this mark
     }
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
@@ -480,7 +480,7 @@ public:
             if (count.length() > 0)
                 if (room->askForSkillInvoke(player, objectName())){
                     room->broadcastSkillInvoke(objectName());
-                    room->doLightbox("$neoaocai", 5000); //ToAsk: 这里没有Animate的翻译和图像文件，这里只能显示大黑框
+                    room->doLightbox("$neoaocai", 5000); //ToAsk: there is no animation picture here
                     player->loseMark("@neoaocai");
                     foreach(ServerPlayer *victim, count){
                         QString choice = "give";
