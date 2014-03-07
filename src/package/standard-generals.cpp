@@ -2140,7 +2140,7 @@ public:
     }
 
     virtual int getExtraTargetNum(const Player *from, const Card *) const{
-        if (from->getMark("@butterfly") == 0)
+        if (from->hasSkill(objectName()) && from->getMark("@butterfly") == 0)
             return 1;
         return 0;
     }
