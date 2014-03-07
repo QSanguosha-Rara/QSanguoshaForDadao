@@ -44,6 +44,7 @@
 #include <QCoreApplication>
 #include <QInputDialog>
 #include <qmath.h>
+#include <QScrollBar>
 #include "uiUtils.h"
 
 using namespace QSanProtocol;
