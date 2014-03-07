@@ -4004,8 +4004,6 @@ void Room::moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible, 
 
 void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible, bool enforceOrigin) {
     // First, process remove card
-    QList<CardsMoveStruct> origin = cards_moves;
-    
 
     QList<CardsMoveOneTimeStruct> moveOneTimes = _mergeMoves(cards_moves);
     foreach (ServerPlayer *player, getAllPlayers()) {
@@ -4033,6 +4031,7 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
     }
 
     cards_moves = _separateMoves(moveOneTimes);
+    QList<CardsMoveStruct> origin = cards_moves;
     notifyMoveCards(true, cards_moves, forceMoveVisible);
 
     QList<Player::Place> final_places;
