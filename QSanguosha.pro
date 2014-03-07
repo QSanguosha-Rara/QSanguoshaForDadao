@@ -55,7 +55,6 @@ SOURCES += \
     src/dialog/playercarddialog.cpp \
     src/dialog/roleassigndialog.cpp \
     src/dialog/scenario-overview.cpp \
-    src/package/3d-package.cpp \
     src/package/bgm-package.cpp \
     src/package/exppattern.cpp \
     src/package/firepackage.cpp \
@@ -172,7 +171,6 @@ HEADERS += \
     src/dialog/playercarddialog.h \
     src/dialog/roleassigndialog.h \
     src/dialog/scenario-overview.h \
-    src/package/3d-package.h \
     src/package/bgm-package.h \
     src/package/exppattern.h \
     src/package/firepackage.h \
