@@ -54,6 +54,8 @@ private:
     int item;
     QStringList ban_list;
     QPushButton *add2nd;
+    QMap<QString, QStringList> banned_items;
+    QLineEdit *card_to_ban;
 
 private slots:
     void addGeneral(const QString &name);
@@ -75,7 +77,7 @@ public:
     void ensureEnableAI();
     bool config();
 
-	static QLayout *HLay(QWidget *left, QWidget *right);
+    static QLayout *HLay(QWidget *left, QWidget *right);
 
 private:
     QWidget *createBasicTab();
