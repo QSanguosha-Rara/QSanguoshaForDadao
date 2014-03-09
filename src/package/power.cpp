@@ -648,11 +648,9 @@ public:
 
                         QString selectedskill = room->askForChoice(player, objectName() + "_loseskill", skillnames.join("+"), QVariant::fromValue(damage.to));
                         chuanxinskill << selectedskill;
-                        damage.to->tag["chuanxinskill"] = chuanxinskill;
+                        room->setPlayerProperty(damage.to, "chuanxinskill", chuanxinskill);
 
                         //log
-
-                        room->addPlayerMark(damage.to, "Qingcheng" + selectedskill);
 
                         foreach (ServerPlayer *p, room->getAllPlayers())
                             room->filterCards(p, p->getCards("he"), true);
@@ -673,11 +671,8 @@ public:
             else if (triggerEvent == EventPhaseStart){
                 if (player->getPhase() == Player::RoundStart){
                     foreach (ServerPlayer *p, room->getAlivePlayers()){
-                        QStringList chuanxinskill = p->tag["chuanxinskill"].toStringList();
-                        foreach(QString skill, chuanxinskill)
-                            room->setPlayerMark(p, "Qingcheng" + skill, 0);
                         //log
-                        p->tag.remove("chuanxinskill");
+                        room->setPlayerProperty(p, "chuanxinskill", QStringList());
                     }
 
                     foreach (ServerPlayer *p, room->getAllPlayers())
@@ -690,6 +685,17 @@ public:
             }
         }
         return false;
+    }
+};
+class ChuanxinInv: public InvaliditySkill {
+public:
+    ChuanxinInv(): InvaliditySkill("#chuanxin-inv"){
+
+    }
+
+    virtual bool isSkillValid(const Player *player, const Skill *skill) const{
+        QStringList chuanxinskill = player->property("chuanxinskill").toStringList();
+        return !chuanxinskill.contains(skill->objectName());
     }
 };
 
@@ -1217,7 +1223,9 @@ PowerPackage::PowerPackage(): Package("Power"){
 
     General *zhangren = new General(this, "zhangren", "qun", 4);
     zhangren->addSkill(new Chuanxin);
+    zhangren->addSkill(new ChuanxinInv);
     zhangren->addSkill(new Fengshi);
+    related_skills.insertMulti("chuanxin", "#chuanxin-inv");
 
     General *zhangjiao = new General(this, "heg_zhangjiao$", "qun", 3);
     zhangjiao->addSkill(new Wuxin);

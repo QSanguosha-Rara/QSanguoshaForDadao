@@ -1857,7 +1857,7 @@ void Room::resetAI(ServerPlayer *player) {
     if (smart_ai) {
         index = ais.indexOf(smart_ai);
         ais.removeOne(smart_ai);
-        smart_ai->deleteLater();
+        delete smart_ai;
     }
     AI *new_ai = cloneAI(player);
     player->setAI(new_ai);
@@ -2601,21 +2601,25 @@ void Room::run() {
         ServerPlayer *lord = m_players.first();
         setPlayerProperty(lord, "general", "shenlvbu1");
 
-        QList<const General *> generals = QList<const General *>();
-        foreach (QString pack_name, GetConfigFromLuaState(Sanguosha->getLuaState(), "hulao_packages").toStringList()) {
-             const Package *pack = Sanguosha->findChild<const Package *>(pack_name);
-             if (pack) generals << pack->findChildren<const General *>();
-        }
-
         QStringList names;
-        foreach (const General *general, generals) {
-            if (general->isTotallyHidden())
-                continue;
-            names << general->objectName();
+        foreach (QString gen_name, GetConfigFromLuaState(Sanguosha->getLuaState(), "hulao_generals").toStringList()) {
+            if (gen_name.startsWith("-")) { // means banned generals
+                names.removeOne(gen_name.mid(1));
+            } else if (gen_name.startsWith("package:")) {
+                QString pack_name = gen_name.mid(8);
+                const Package *pack = Sanguosha->findChild<const Package *>(pack_name);
+                if (pack) {
+                    foreach (const General *general, pack->findChildren<const General *>()) {
+                        if (general->isTotallyHidden())
+                            continue;
+                        if (!names.contains(general->objectName()))
+                            names << general->objectName();
+                    }
+                }
+            } else if (!names.contains(gen_name)) {
+                names << gen_name;
+            }
         }
-
-        foreach (QString name, Config.value("Banlist/HulaoPass").toStringList())
-            if (names.contains(name)) names.removeOne(name);
 
         foreach (ServerPlayer *player, m_players) {
             if (player == lord)
@@ -4837,7 +4841,7 @@ bool Room::askForDiscard(ServerPlayer *player, const QString &reason, int discar
     data = QString("%1:%2").arg("cardDiscard").arg(dummy_card->toString());
     thread->trigger(ChoiceMade, this, player, data);
 
-    dummy_card->deleteLater();
+    delete dummy_card;
 
     return true;
 }

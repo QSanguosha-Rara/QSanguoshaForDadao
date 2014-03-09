@@ -313,31 +313,9 @@ bool Player::isLord() const{
 bool Player::hasSkill(const QString &skill_name, bool include_lose) const{
     if (!include_lose) {
         if (!hasEquipSkill(skill_name)) {
-            if (getMark("Qingcheng" + skill_name) > 0) //perform Qingcheng
-                return false;
-
             const Skill *skill = Sanguosha->getSkill(skill_name);
-            if (!skill || !skill->isAttachedLordSkill()){
-                if (phase == NotActive) {
-                    const Player *current = NULL;
-                    foreach (const Player *p, getAliveSiblings()) {
-                        if (p->phase != NotActive) {
-                            current = p;
-                            break;
-                        }
-                    }
-                    if (current){
-                        if (current->hasSkill("huoshui") && hp >= (max_hp + 1) / 2) //huoshui
-                            return false;
-                        if (current->hasSkill("neo2013huoshui") && current->getEquips().length() == 0) //neo2013huoshui
-                            return false;
-                    }
-                }
-                if (hasFlag("neo2013qingcheng") && phase != NotActive) //neo2013qingcheng
-                    return false;
-                if (skill_name != "chanyuan" && hasSkill("chanyuan") && hp == 1) //chanyuan
-                    return false;
-            }
+            if (skill && !Sanguosha->correctSkillValidity(this, skill))
+                return false;
         }
     }
     return skills.contains(skill_name)
@@ -660,8 +638,8 @@ bool Player::canDiscard(const Player *to, const QString &flags) const{
     if (flags.contains(handcard_flag) && !to->isKongcheng()) return true;
     if (flags.contains(judging_flag) && !to->getJudgingArea().isEmpty()) return true;
     if (flags.contains(equip_flag)) {
-        if (to->getDefensiveHorse() || to->getOffensiveHorse() || to->getTreasure()) return true;
-        if ((to->getWeapon() || to->getArmor()) && (!to->hasSkill("qicai") || this == to)) return true;
+        if (to->getDefensiveHorse() || to->getOffensiveHorse()) return true;
+        if ((to->getWeapon() || to->getArmor() || to->getTreasure()) && (!to->hasSkill("qicai") || this == to)) return true;
     }
     return false;
 }
