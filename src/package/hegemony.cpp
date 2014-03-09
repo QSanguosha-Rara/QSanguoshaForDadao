@@ -62,6 +62,7 @@ class Duoshi: public OneCardViewAsSkill {
 public:
     Duoshi(): OneCardViewAsSkill("duoshi") {
         filter_pattern = ".|red|.|hand";
+        response_or_use = true;
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{

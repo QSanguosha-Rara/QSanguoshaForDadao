@@ -868,7 +868,8 @@ public:
 class Neo2013Duoshi: public OneCardViewAsSkill{
 public:
     Neo2013Duoshi(): OneCardViewAsSkill("neo2013duoshi"){
-        filter_pattern = ".|red|.|hand!";
+        filter_pattern = ".|red|.|hand";
+        response_or_use = true;
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
@@ -1227,7 +1228,7 @@ public:
 class Neo2013TongwuVS: public ViewAsSkill{
 public:
     Neo2013TongwuVS(): ViewAsSkill("neo2013tongwu"){
-
+        response_or_use = true;
     }
 
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
@@ -2316,6 +2317,7 @@ class Neo2013Qixi: public OneCardViewAsSkill{
 public:
     Neo2013Qixi(): OneCardViewAsSkill("neo2013qixi"){
         filter_pattern = ".|black";
+        response_or_use = true;
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
