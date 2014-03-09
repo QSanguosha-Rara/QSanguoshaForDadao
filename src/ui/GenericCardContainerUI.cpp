@@ -297,32 +297,58 @@ bool GenericCardContainer::CompareByNumber(const Card *card1, const Card *card2)
 
 void PlayerCardContainer::updatePile(const QString &pile_name) {
     ClientPlayer *player = (ClientPlayer *)sender();
-    const QList<int> &pile = player->getPile(pile_name);
-    if (pile.size() == 0) {
-        if (_m_privatePiles.contains(pile_name)) {
-            delete _m_privatePiles[pile_name];
-            _m_privatePiles[pile_name] = NULL;
-            _m_privatePiles.remove(pile_name);
+    if (!player)
+        player = m_player;
+    if (!player) return;
+    QString p_name = pile_name;
+    int treasure = 0;
+    if (p_name.endsWith("+&")) {
+        treasure = 1;
+        p_name.chop(2);
+        _m_treasureName = p_name;
+    } else if (p_name.endsWith("-&")) {
+        treasure = -1;
+        p_name.chop(2);
+        _m_treasureName = QString();
+    }
+    const QList<int> &pile = player->getPile(p_name);
+    if (pile.size() == 0 && treasure == 0 && _m_treasureName != p_name) {
+        if (_m_privatePiles.contains(p_name)) {
+            delete _m_privatePiles[p_name];
+            _m_privatePiles[p_name] = NULL;
+            _m_privatePiles.remove(p_name);
+        }
+    } else if (treasure == -1) {
+        if (_m_privatePiles.contains(p_name)) {
+            delete _m_privatePiles[p_name];
+            _m_privatePiles[p_name] = NULL;
+            _m_privatePiles.remove(p_name);
         }
     } else {
         // retrieve menu and create a new pile if necessary
         QMenu* menu;
         QPushButton *button;
-        if (!_m_privatePiles.contains(pile_name)) {
+        if (!_m_privatePiles.contains(p_name)) {
             button = new QPushButton;
-            button->setObjectName(pile_name);
-            button->setProperty("private_pile", "true");
+            button->setObjectName(p_name);
+            if (treasure == 0)
+                button->setProperty("private_pile", "true");
+            else
+                button->setProperty("treasure", "true");
             QGraphicsProxyWidget *button_widget = new QGraphicsProxyWidget(_getPileParent());
             button_widget->setWidget(button);
-            _m_privatePiles[pile_name] = button_widget;
+            _m_privatePiles[p_name] = button_widget;
         } else {
-            button = (QPushButton *)(_m_privatePiles[pile_name]->widget());
+            button = (QPushButton *)(_m_privatePiles[p_name]->widget());
             menu = button->menu();
         }
 
-        button->setText(QString("%1(%2)").arg(Sanguosha->translate(pile_name)).arg(pile.length()));
+        button->setText(QString("%1(%2)").arg(Sanguosha->translate(p_name)).arg(pile.length()));
         menu = new QMenu(button);
-        menu->setProperty("private_pile", "true");
+        if (_m_treasureName == p_name)
+            menu->setProperty("treasure", "true");
+        else
+            menu->setProperty("private_pile", "true");
 
         //Sort the cards in pile by number can let players know what is in this pile more clear.
         //If someone has "buqu", we can got which card he need or which he hate easier.
@@ -348,7 +374,14 @@ void PlayerCardContainer::updatePile(const QString &pile_name) {
     QPoint start = _m_layout->m_privatePileStartPos;
     QPoint step = _m_layout->m_privatePileStep;
     QSize size = _m_layout->m_privatePileButtonSize;
-    QList<QGraphicsProxyWidget *> widgets = _m_privatePiles.values();
+    QList<QGraphicsProxyWidget *> widgets_t, widgets_p, widgets = _m_privatePiles.values();
+    foreach (QGraphicsProxyWidget *widget, widgets) {
+        if (widget->objectName() == _m_treasureName)
+            widgets_t << widget;
+        else
+            widgets_p << widget;
+    }
+    widgets = widgets_t + widgets_p;
     for (int i = 0; i < widgets.length(); i++) {
         QGraphicsProxyWidget *widget = widgets[i];
         widget->setPos(start + i * step);
@@ -388,7 +421,7 @@ void PlayerCardContainer::updateMarks() {
 }
 
 void PlayerCardContainer::_updateEquips() {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
         CardItem *equip = _m_equipCards[i];
         if (equip == NULL) continue;
         const EquipCard *equip_card = qobject_cast<const EquipCard *>(equip->getCard()->getRealCard());
@@ -594,11 +627,16 @@ void PlayerCardContainer::setFloatingArea(QRect rect) {
     if (_getProgressBarParent() == _m_floatingArea) _updateProgressBar();
 }
 
-void PlayerCardContainer::addEquips(QList<CardItem *> &equips) {
+void PlayerCardContainer::addEquips(QList<CardItem *> &equips, bool isDashboard) {
     foreach (CardItem *equip, equips) {
         const EquipCard *equip_card = qobject_cast<const EquipCard *>(equip->getCard()->getRealCard());
         int index = (int)(equip_card->location());
         Q_ASSERT(_m_equipCards[index] == NULL);
+        if (equip_card->location() == EquipCard::TreasureLocation && !isDashboard) {
+            updatePile(equip_card->objectName() + "+&");
+            _m_photo_treasure = equip;
+            continue;
+        }
         _m_equipCards[index] = equip;
         connect(equip, SIGNAL(mark_changed()), this, SLOT(_onEquipSelectChanged()));
         equip->setHomeOpacity(0.0);
@@ -631,12 +669,22 @@ void PlayerCardContainer::addEquips(QList<CardItem *> &equips) {
     }
 }
 
-QList<CardItem *> PlayerCardContainer::removeEquips(const QList<int> &cardIds) {
+QList<CardItem *> PlayerCardContainer::removeEquips(const QList<int> &cardIds, bool isDashboard) {
     QList<CardItem *> result;
     foreach (int card_id, cardIds) {
         const EquipCard *equip_card = qobject_cast<const EquipCard *>(Sanguosha->getEngineCard(card_id));
         int index = (int)(equip_card->location());
         Q_ASSERT(_m_equipCards[index] != NULL);
+        if (equip_card->location() == EquipCard::TreasureLocation && !isDashboard) {
+            updatePile(equip_card->objectName() + "-&");
+            Q_ASSERT(_m_photo_treasure != NULL);
+            CardItem *equip = _m_photo_treasure;
+            equip->setHomeOpacity(0.0);
+            equip->setPos(_m_layout->m_equipAreas[3].center());
+            result.append(equip);
+            _m_photo_treasure = NULL;
+            continue;
+        }
         CardItem *equip = _m_equipCards[index];
         equip->setHomeOpacity(0.0);
         equip->setPos(_m_layout->m_equipAreas[index].center());
@@ -731,12 +779,13 @@ PlayerCardContainer::PlayerCardContainer() {
     m_player = NULL;
     _m_selectedFrame = NULL;
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
         _m_equipCards[i] = NULL;
         _m_equipRegions[i] = NULL;
         _m_equipAnim[i] = NULL;
         _m_equipLabel[i] = NULL;
     }
+    _m_photo_treasure = NULL;
     _m_huashenItem = NULL;
     _m_huashenAnimation = NULL;
     _m_extraSkillBg = NULL;
@@ -754,6 +803,8 @@ PlayerCardContainer::PlayerCardContainer() {
     _m_groupDeath->setFlag(ItemHasNoContents);
     _m_groupDeath->setPos(0, 0);
     _allZAdjusted = false;
+
+    _m_treasureName = QString();
 }
 
 void PlayerCardContainer::hideAvatars() {
@@ -816,7 +867,7 @@ void PlayerCardContainer::_adjustComponentZValues(bool killed) {
     _layUnder(_m_kingdomIcon);
     _layUnder(_m_kingdomColorMaskIcon);
     _layUnder(_m_screenNameItem);
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 5; i++)
         _layUnder(_m_equipRegions[i]);
     _layUnder(_m_selectedFrame);
     _layUnder(_m_extraSkillText);
@@ -877,7 +928,7 @@ void PlayerCardContainer::_createControls() {
     _m_progressBarItem->setWidget(_m_progressBar);
     _updateProgressBar();
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
         _m_equipLabel[i] = new QLabel;
         _m_equipLabel[i]->setStyleSheet("QLabel { background-color: transparent; }");
         _m_equipLabel[i]->setPixmap(QPixmap(_m_layout->m_equipAreas[i].size()));

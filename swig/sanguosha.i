@@ -177,11 +177,13 @@ public:
     WrappedCard *getArmor() const;
     WrappedCard *getDefensiveHorse() const;
     WrappedCard *getOffensiveHorse() const;
+    WrappedCard *getTreasure() const;
     QList<const Card *> getEquips() const;
     const EquipCard *getEquip(int index) const;
 
     bool hasWeapon(const char *weapon_name) const;
     bool hasArmorEffect(const char *armor_name) const;
+    bool hasTreasure(const char *treasure_name) const;
 
     bool isKongcheng() const;
     bool isNude() const;
@@ -344,10 +346,10 @@ public:
     void introduceTo(ServerPlayer *player);
     void marshal(ServerPlayer *player) const;
 
-    void addToPile(const char *pile_name, const Card *card, bool open = true);
-    void addToPile(const char *pile_name, int card_id, bool open = true);
-    void addToPile(const char *pile_name, QList<int> card_ids, bool open = true);
-    void addToPile(const char *pile_name, QList<int> card_ids, bool open, CardMoveReason reason);
+    void addToPile(const char *pile_name, const Card *card, bool open = true, QList<ServerPlayer *> open_players = QList<ServerPlayer *>());
+    void addToPile(const char *pile_name, int card_id, bool open = true, QList<ServerPlayer *> open_players = QList<ServerPlayer *>());
+    void addToPile(const char *pile_name, QList<int> card_ids, bool open = true, QList<ServerPlayer *> open_players = QList<ServerPlayer *>());
+    void addToPile(const char *pile_name, QList<int> card_ids, bool open, QList<ServerPlayer *> open_players, CardMoveReason reason);
     void exchangeFreelyFromPrivatePile(const char *skill_name, const char *pile_name, int upperlimit = 1000, bool include_equip = false);
     void gainAnExtraTurn();
 
@@ -991,7 +993,6 @@ extern Engine *Sanguosha;
 class Skill: public QObject {
 public:
     enum Frequency { Frequent, NotFrequent, Compulsory, Limited, Wake };
-    enum Location { Left, Right };
 
     explicit Skill(const char *name, Frequency frequent = NotFrequent);
     bool isLordSkill() const;
@@ -999,11 +1000,8 @@ public:
     QString getDescription(bool yellow = true) const;
     bool isVisible() const;
 
-    virtual QString getDefaultChoice(ServerPlayer *player) const;
     virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const;
     virtual QDialog *getDialog() const;
-
-    virtual Location getLocation() const;
 
     void initMediaSource();
     void playAudioEffect(int index = -1, bool superpose = true) const;

@@ -950,7 +950,7 @@ public:
                         QList<const Skill *> skillslist = player->getVisibleSkillList();
                         QStringList detachlist;
                         foreach (const Skill *skill, skillslist){
-                            if (skill->getLocation() == Skill::Right && !skill->isAttachedLordSkill())
+                            if (!skill->inherits("SPConvertSkill") && !skill->isAttachedLordSkill())
                                 detachlist.append("-" + skill->objectName());
                         }
                         room->handleAcquireDetachSkills(player, detachlist);

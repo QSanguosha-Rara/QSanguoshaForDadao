@@ -629,7 +629,7 @@ public:
                 QList<const Skill *> skills = damage.to->getVisibleSkillList();
                 QList<const Skill *> fix_skills;
                 foreach(const Skill *skill, skills){
-                    if (skill->getLocation() == Skill::Right && !skill->isAttachedLordSkill())
+                    if (!skill->inherits("SPConvertSkill") && !skill->isAttachedLordSkill())
                         fix_skills << skill;
                 }
                 if (!fix_skills.isEmpty() && player->askForSkillInvoke(objectName())){

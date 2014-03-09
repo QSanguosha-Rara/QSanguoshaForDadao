@@ -241,7 +241,6 @@ class NosXuanfeng: public TriggerSkill {
 public:
     NosXuanfeng(): TriggerSkill("nosxuanfeng") {
         events << CardsMoveOneTime;
-        default_choice = "nothing";
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *lingtong, QVariant &data) const{
@@ -1205,6 +1204,7 @@ class NosGuhuo: public OneCardViewAsSkill {
 public:
     NosGuhuo(): OneCardViewAsSkill("nosguhuo") {
         filter_pattern = ".|.|.|hand";
+        response_or_use = true;
     }
 
     virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
@@ -1696,10 +1696,6 @@ public:
 
     virtual const Card *viewAs() const{
         return new NosYexinCard;
-    }
-
-    virtual Location getLocation() const{
-        return Right;
     }
 };
 

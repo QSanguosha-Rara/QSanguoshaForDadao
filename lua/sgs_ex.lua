@@ -494,8 +494,9 @@ function sgs.CreateViewAsSkill(spec)
 	assert(type(spec.name) == "string")
 	if spec.response_pattern then assert(type(spec.response_pattern) == "string") end
 	local response_pattern = spec.response_pattern or ""
+	local response_or_use = spec.response_or_use or false
 
-	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern)
+	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern, response_or_use)
 	local n = spec.n or 0  --Fs:I want to delete this property or change the default value to 998
 	
 	if (spec.guhuo_dialog) then
@@ -523,9 +524,10 @@ function sgs.CreateOneCardViewAsSkill(spec)
 	assert(type(spec.name) == "string")
 	if spec.response_pattern then assert(type(spec.response_pattern) == "string") end
 	local response_pattern = spec.response_pattern or ""
+	local response_or_use = spec.response_or_use or false
 	if spec.filter_pattern then assert(type(spec.filter_pattern) == "string") end
 
-	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern)
+	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern, response_or_use)
 
 	if (spec.guhuo_dialog) then
 		assert(type(spec.guhuo_dialog) == "number")
@@ -561,8 +563,9 @@ function sgs.CreateZeroCardViewAsSkill(spec)
 	assert(type(spec.name) == "string")
 	if spec.response_pattern then assert(type(spec.response_pattern) == "string") end
 	local response_pattern = spec.response_pattern or ""
+	local response_or_use = spec.response_or_use or false
 
-	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern)
+	local skill = sgs.LuaViewAsSkill(spec.name, response_pattern, response_or_use)
 
 	if (spec.guhuo_dialog) then
 		assert(type(spec.guhuo_dialog) == "number")

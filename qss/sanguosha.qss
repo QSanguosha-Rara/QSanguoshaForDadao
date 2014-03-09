@@ -202,3 +202,15 @@ QPushButton#uniform{
     left: 1px;
     top: 1px;
 }
+
+QMenu[treasure = true] {
+    background-color: rgba(64, 52, 0, 200);
+    border-radius: 5px;
+    color: white;
+}
+
+QPushButton[treasure = true] {
+    background-color: rgba(64, 52, 0, 200);
+    border-radius: 5px;
+    color: white;
+}

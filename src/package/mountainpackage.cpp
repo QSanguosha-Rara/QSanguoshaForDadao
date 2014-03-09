@@ -245,7 +245,7 @@ public:
             QList<const Skill *> skills = death.damage->from->getVisibleSkillList();
             QStringList detachList;
             foreach (const Skill *skill, skills) {
-                if (skill->getLocation() == Skill::Right && !skill->isAttachedLordSkill())
+                if (!skill->inherits("SPConvertSkill") && !skill->isAttachedLordSkill())
                     detachList.append("-" + skill->objectName());
             }
             room->handleAcquireDetachSkills(death.damage->from, detachList);
@@ -477,10 +477,6 @@ public:
             return new JixiSnatchCard;
         else
             return new JixiCard;
-    }
-
-    virtual Location getLocation() const{
-        return Right;
     }
 };
 

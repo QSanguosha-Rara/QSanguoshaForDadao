@@ -69,7 +69,7 @@ void Settings::init() {
                        << "New3v3Card" /*<< "joy"*/ << "joy_equip" << "hegemony_card"
                        << "hegemony" << "ling" << "BGMDIY" << "New3v3_2013Card"
                        << "nostal_yjcm" << "nostal_yjcm2012" << "YJCM2013" << "New1v1Card" << "assassins"
-                       << "hegemony_sp" << "Special1v1" << "Special1v1OL" << "Special3v3_2013";
+                       << "hegemony_sp" << "Special1v1" << "Special3v3_2013";
     }
     setValue("BanPackages", banpackagelist);
 

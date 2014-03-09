@@ -371,6 +371,7 @@ public:
     Qingguo(): OneCardViewAsSkill("qingguo") {
         filter_pattern = ".|black|.|hand";
         response_pattern = "jink";
+        response_or_use = true;
     }
 
     virtual const Card *viewAs(const Card *originalCard) const{
@@ -533,6 +534,7 @@ public:
 class Wusheng: public OneCardViewAsSkill {
 public:
     Wusheng(): OneCardViewAsSkill("wusheng") {
+        response_or_use = true;
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
@@ -580,6 +582,7 @@ public:
 class Longdan: public OneCardViewAsSkill {
 public:
     Longdan(): OneCardViewAsSkill("longdan") {
+        response_or_use = true;
     }
 
     virtual bool viewFilter(const Card *to_select) const{
@@ -994,6 +997,7 @@ public:
 class Qixi: public OneCardViewAsSkill {
 public:
     Qixi(): OneCardViewAsSkill("qixi") {
+        response_or_use = true;
     }
 
     virtual bool viewFilter(const Card *to_select) const{
@@ -1022,6 +1026,7 @@ class Guose: public OneCardViewAsSkill {
 public:
     Guose(): OneCardViewAsSkill("guose") {
         filter_pattern = ".|diamond";
+        response_or_use = true;
     }
 
     virtual const Card *viewAs(const Card *originalCard) const{
@@ -1287,6 +1292,7 @@ class Jijiu: public OneCardViewAsSkill {
 public:
     Jijiu(): OneCardViewAsSkill("jijiu") {
         filter_pattern = ".|red";
+        response_or_use = true;
     }
 
     virtual bool isEnabledAtPlay(const Player *) const{
@@ -2111,7 +2117,7 @@ public:
                 QList<const Skill *> skills = damage.to->getVisibleSkillList();
                 QStringList can_acquires;
                 foreach(const Skill *s, skills){
-                    if (s->getLocation() == Right && !s->isAttachedLordSkill()
+                    if (!s->inherits("SPConvertSkill") && !s->isAttachedLordSkill()
                             && s->getFrequency() != Compulsory && s->getFrequency() != Wake && s->getFrequency() != Limited && !s->isLordSkill())
                         can_acquires << s->objectName();
                 }

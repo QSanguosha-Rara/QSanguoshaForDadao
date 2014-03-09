@@ -136,6 +136,7 @@ public:
 class Luanji: public ViewAsSkill {
 public:
     Luanji(): ViewAsSkill("luanji") {
+        response_or_use = true;
     }
 
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const{
@@ -181,6 +182,7 @@ public:
 class ShuangxiongViewAsSkill: public OneCardViewAsSkill {
 public:
     ShuangxiongViewAsSkill():OneCardViewAsSkill("shuangxiong") {
+        response_or_use = true;
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
@@ -286,6 +288,7 @@ class Lianhuan: public OneCardViewAsSkill {
 public:
     Lianhuan(): OneCardViewAsSkill("lianhuan") {
         filter_pattern = ".|club|.|hand";
+        response_or_use = true;
     }
 
     virtual const Card *viewAs(const Card *originalCard) const{
@@ -347,6 +350,7 @@ class Huoji: public OneCardViewAsSkill {
 public:
     Huoji(): OneCardViewAsSkill("huoji") {
         filter_pattern = ".|red|.|hand";
+        response_or_use = true;
     }
 
     virtual const Card *viewAs(const Card *originalCard) const{
@@ -404,6 +408,7 @@ public:
     Kanpo(): OneCardViewAsSkill("kanpo") {
         filter_pattern = ".|black|.|hand";
         response_pattern = "nullification";
+        response_or_use = true;
     }
 
     virtual const Card *viewAs(const Card *originalCard) const{

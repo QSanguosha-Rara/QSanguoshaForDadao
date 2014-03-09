@@ -79,6 +79,9 @@ public:
     const ViewAsSkill *currentSkill() const;
     const Card *pendingCard() const;
 
+    void expandWoodenOxCards();
+    void retractWoodenOxCards();
+
     void selectCard(CardItem *item, bool isSelected);
 
     int getButtonWidgetWidth() const;
@@ -133,7 +136,7 @@ protected:
     bool _addCardItems(QList<CardItem *> &card_items, const CardsMoveStruct &moveInfo);
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    void _addHandCard(CardItem *card_item);
+    void _addHandCard(CardItem *card_item, bool prepend = false, const QString &footnote = QString());
     void _adjustCards();
     void _adjustCards(const QList<CardItem *> &list, int y);
 
@@ -174,11 +177,12 @@ protected:
     const Card *pending_card;
     const ViewAsSkill *view_as_skill;
     const FilterSkill *filter;
+    bool _m_woodenOx_expanded;
 
     // for equip skill/selections
-    PixmapAnimation *_m_equipBorders[4];
-    QSanSkillButton *_m_equipSkillBtns[4];
-    bool _m_isEquipsAnimOn[4];
+    PixmapAnimation *_m_equipBorders[5];
+    QSanSkillButton *_m_equipSkillBtns[5];
+    bool _m_isEquipsAnimOn[5];
     QList<QSanSkillButton *> _m_button_recycle;
 
     void _createEquipBorderAnimations();

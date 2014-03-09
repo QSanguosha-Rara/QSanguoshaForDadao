@@ -77,12 +77,12 @@ void EquipCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &tar
 
     QList<CardsMoveStruct> exchangeMove;
     CardsMoveStruct move1(getEffectiveId(), target, Player::PlaceEquip,
-                          CardMoveReason(CardMoveReason::S_REASON_USE, target->objectName()));
+        CardMoveReason(CardMoveReason::S_REASON_USE, target->objectName()));
     exchangeMove.push_back(move1);
     if (equipped_id != Card::S_UNKNOWN_CARD_ID) {
-         CardsMoveStruct move2(equipped_id, NULL, Player::DiscardPile,
-                               CardMoveReason(CardMoveReason::S_REASON_CHANGE_EQUIP, target->objectName()));
-         exchangeMove.push_back(move2);
+        CardsMoveStruct move2(equipped_id, NULL, Player::DiscardPile,
+            CardMoveReason(CardMoveReason::S_REASON_CHANGE_EQUIP, target->objectName()));
+        exchangeMove.push_back(move2);
     }
     LogMessage log;
     log.from = target;
@@ -361,20 +361,21 @@ void Weapon::onUse(Room *room, const CardUseStruct &card_use) const{
     if (room->getMode() == "04_1v3"
         && use.card->isKindOf("Weapon")
         && (player->isCardLimited(use.card, Card::MethodUse)
-            || player->askForSkillInvoke("weapon_recast", QVariant::fromValue(use)))) {
-        CardMoveReason reason(CardMoveReason::S_REASON_RECAST, player->objectName());
-        reason.m_eventName = "weapon_recast";
-        room->moveCardTo(use.card, player, NULL, Player::DiscardPile, reason);
-        player->broadcastSkillInvoke("@recast");
+        || (!player->getPile("wooden_ox").contains(getEffectiveId())
+        && player->askForSkillInvoke("weapon_recast", QVariant::fromValue(use))))) {
+            CardMoveReason reason(CardMoveReason::S_REASON_RECAST, player->objectName());
+            reason.m_eventName = "weapon_recast";
+            room->moveCardTo(use.card, player, NULL, Player::DiscardPile, reason);
+            player->broadcastSkillInvoke("@recast");
 
-        LogMessage log;
-        log.type = "#Card_Recast";
-        log.from = player;
-        log.card_str = use.card->toString();
-        room->sendLog(log);
+            LogMessage log;
+            log.type = "#Card_Recast";
+            log.from = player;
+            log.card_str = use.card->toString();
+            room->sendLog(log);
 
-        player->drawCards(1);
-        return;
+            player->drawCards(1);
+            return;
     }
     EquipCard::onUse(room, use);
 }
@@ -441,6 +442,18 @@ EquipCard::Location Horse::location() const{
         return DefensiveHorseLocation;
     else
         return OffensiveHorseLocation;
+}
+
+QString Treasure::getSubtype() const{
+    return "treasure";
+}
+
+EquipCard::Location Treasure::location() const{
+    return TreasureLocation;
+}
+
+QString Treasure::getCommonEffectName() const{
+    return "treasure";
 }
 
 StandardPackage::StandardPackage()

@@ -789,7 +789,6 @@ public:
 class Wuling: public PhaseChangeSkill{
 public:
     Wuling():PhaseChangeSkill("wuling"){
-        default_choice = "wind";
     }
 
     virtual bool onPhaseChange(ServerPlayer *xuandi) const{
@@ -920,19 +919,6 @@ public:
     Shenjun():TriggerSkill("shenjun"){
         events << GameStart << EventPhaseStart << DamageInflicted;
         frequency = Compulsory;
-    }
-
-    virtual QString getDefaultChoice(ServerPlayer *player) const{ // @todo_P: move it to the AI files!!
-        int males = 0;
-        foreach(ServerPlayer *player, player->getRoom()->getAlivePlayers()){
-            if(player->isMale())
-                males ++;
-        }
-
-        if(males > (player->aliveCount() - males))
-            return "female";
-        else
-            return "male";
     }
 
     virtual bool trigger(TriggerEvent triggerEvent, Room* room, ServerPlayer *player, QVariant &data) const{
@@ -1688,7 +1674,6 @@ class YisheAsk: public ZeroCardViewAsSkill{
 public:
     YisheAsk():ZeroCardViewAsSkill("yisheask"){
         attached_lord_skill = true;
-        default_choice = "disallow";
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
@@ -1731,7 +1716,6 @@ class Xiliang: public TriggerSkill{
 public:
     Xiliang():TriggerSkill("xiliang"){
         events << CardsMoveOneTime;
-        default_choice = "obtain";
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{

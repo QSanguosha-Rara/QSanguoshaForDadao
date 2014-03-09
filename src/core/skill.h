@@ -13,7 +13,6 @@ class QDialog;
 class Skill: public QObject {
     Q_OBJECT
     Q_ENUMS(Frequency)
-    Q_ENUMS(Location)
 
 public:
     enum Frequency {
@@ -24,11 +23,6 @@ public:
         Wake
     };
 
-    enum Location {
-        Left,
-        Right
-    };
-
     explicit Skill(const QString &name, Frequency frequent = NotFrequent);
     bool isLordSkill() const;
     bool isAttachedLordSkill() const;
@@ -36,11 +30,8 @@ public:
     QString getNotice(int index) const;
     bool isVisible() const;
 
-    virtual QString getDefaultChoice(ServerPlayer *player) const;
     virtual int getEffectIndex(const ServerPlayer *player, const Card *card) const;
     virtual QDialog *getDialog() const;
-
-    virtual Location getLocation() const;
 
     void initMediaSource();
     void playAudioEffect(int index = -1, bool superpose = true) const;
@@ -51,7 +42,6 @@ public:
 protected:
     Frequency frequency;
     QString limit_mark;
-    QString default_choice;
     bool attached_lord_skill;
 
 private:
@@ -74,8 +64,11 @@ public:
     virtual bool isEnabledAtNullification(const ServerPlayer *player) const;
     static const ViewAsSkill *parseViewAsSkill(const Skill *skill);
 
+    inline bool isResponseOrUse() const{ return response_or_use; }
+
 protected:
     QString response_pattern;
+    bool response_or_use;
 };
 
 class ZeroCardViewAsSkill: public ViewAsSkill {
@@ -322,6 +315,15 @@ class ArmorSkill: public TriggerSkill {
 
 public:
     ArmorSkill(const QString &name);
+
+    virtual bool triggerable(const ServerPlayer *target) const;
+};
+
+class TreasureSkill: public TriggerSkill {
+    Q_OBJECT
+
+public:
+    TreasureSkill(const QString &name);
 
     virtual bool triggerable(const ServerPlayer *target) const;
 };

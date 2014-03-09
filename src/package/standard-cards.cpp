@@ -529,6 +529,7 @@ Blade::Blade(Suit suit, int number)
 class SpearSkill: public ViewAsSkill {
 public:
     SpearSkill(): ViewAsSkill("Spear") {
+        response_or_use = true;
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
@@ -1280,6 +1281,94 @@ public:
     }
 };
 
+
+WoodenOxCard::WoodenOxCard() {
+    target_fixed = true;
+    will_throw = false;
+    handling_method = Card::MethodNone;
+    m_skillName = "wooden_ox";
+}
+
+void WoodenOxCard::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &) const{
+    source->addToPile("wooden_ox", subcards, false);
+
+    QList<ServerPlayer *> targets;
+    foreach (ServerPlayer *p, room->getOtherPlayers(source)) {
+        if (!p->getTreasure())
+            targets << p;
+    }
+    if (targets.isEmpty())
+        return;
+    ServerPlayer *target = room->askForPlayerChosen(source, targets, "wooden_ox", "@wooden_ox-move", true);
+    if (target) {
+        const Card *treasure = source->getTreasure();
+        if (treasure)
+            room->moveCardTo(treasure, source, target, Player::PlaceEquip,
+            CardMoveReason(CardMoveReason::S_REASON_TRANSFER,
+            source->objectName(), "wooden_ox", QString()));
+    }
+}
+
+class WoodenOxSkill: public OneCardViewAsSkill {
+public:
+    WoodenOxSkill(): OneCardViewAsSkill("wooden_ox") {
+        filter_pattern = ".|.|.|hand";
+    }
+
+    virtual bool isEnabledAtPlay(const Player *player) const{
+        return !player->hasUsed("WoodenOxCard");
+    }
+
+    virtual const Card *viewAs(const Card *originalCard) const{
+        WoodenOxCard *card = new WoodenOxCard;
+        card->addSubcard(originalCard);
+        card->setSkillName("wooden_ox");
+        return card;
+    }
+};
+
+class WoodenOxTriggerSkill: public TreasureSkill {
+public:
+    WoodenOxTriggerSkill(): TreasureSkill("wooden_ox_trigger") {
+        events << CardsMoveOneTime;
+        global = true;
+    }
+
+    virtual bool triggerable(const ServerPlayer *target) const{
+        return target != NULL && target->isAlive();
+    }
+
+    virtual bool trigger(TriggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
+        CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
+        if (move.from != player || !move.from_places.contains(Player::PlaceEquip) || player->getPile("wooden_ox").isEmpty())
+            return false;
+        for (int i = 0; i < move.card_ids.size(); i++) {
+            if (move.from_places[i] != Player::PlaceEquip) continue;
+            const Card *card = Sanguosha->getEngineCard(move.card_ids[i]);
+            if (card->objectName() == "wooden_ox") {
+                ServerPlayer *to = (ServerPlayer *)move.to;
+                if (to && to->getTreasure() && to->getTreasure()->objectName() == "wooden_ox"
+                    && move.to_place == Player::PlaceEquip) {
+                        QList<ServerPlayer *> p_list;
+                        p_list << to;
+                        to->addToPile("wooden_ox", player->getPile("wooden_ox"), false, p_list);
+                } else {
+                    player->clearOnePrivatePile("wooden_ox");
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+};
+
+WoodenOx::WoodenOx(Suit suit, int number)
+    : Treasure(suit, number)
+{
+    setObjectName("wooden_ox");
+}
+
+
 StandardCardPackage::StandardCardPackage()
     : Package("standard_cards", Package::CardPack)
 {
@@ -1362,7 +1451,7 @@ StandardCardPackage::StandardCardPackage()
     skills << new DoubleSwordSkill << new QinggangSwordSkill
            << new BladeSkill << new SpearSkill << new AxeSkill
            << new KylinBowSkill << new EightDiagramSkill
-           << new HalberdSkill;
+           << new HalberdSkill << new WoodenOxSkill << new WoodenOxTriggerSkill;
 
     QList<Card *> horses;
     horses << new DefensiveHorse(Card::Spade, 5)
@@ -1382,6 +1471,8 @@ StandardCardPackage::StandardCardPackage()
     cards << horses;
 
     skills << new HorseSkill;
+
+    cards << new WoodenOx(Card::Diamond, 5);
 
     cards << new AmazingGrace(Card::Heart, 3)
           << new AmazingGrace(Card::Heart, 4)
@@ -1420,6 +1511,8 @@ StandardCardPackage::StandardCardPackage()
 
     foreach (Card *card, cards)
         card->setParent(this);
+
+    addMetaObject<WoodenOxCard>();
 }
 
 StandardExCardPackage::StandardExCardPackage()

@@ -1041,6 +1041,7 @@ class Guhuo: public OneCardViewAsSkill {
 public:
     Guhuo(): OneCardViewAsSkill("guhuo") {
         filter_pattern = ".|.|.|hand";
+        response_or_use = true;
     }
 
     virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
@@ -1174,10 +1175,6 @@ public:
         args[0] = QSanProtocol::S_GAME_EVENT_UPDATE_SKILL;
         room->doBroadcastNotify(QSanProtocol::S_COMMAND_LOG_EVENT, args);
         return false;
-    }
-
-    virtual Location getLocation() const{
-        return Right;
     }
 };
 

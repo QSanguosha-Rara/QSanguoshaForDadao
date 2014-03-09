@@ -10,18 +10,23 @@
 #include <QFile>
 
 Skill::Skill(const QString &name, Frequency frequency)
-    : frequency(frequency), limit_mark(QString()), default_choice("no"), attached_lord_skill(false)
+    : frequency(frequency), limit_mark(QString()), lord_skill(false), attached_lord_skill(false)
 {
     static QChar lord_symbol('$');
+    static QChar attached_lord_symbol('&');
 
     if (name.endsWith(lord_symbol)) {
         QString copy = name;
         copy.remove(lord_symbol);
         setObjectName(copy);
-        lord_skill = true;
+        lord_skill = true;    
+    } else if (name.endsWith(attached_lord_symbol)) {
+        QString copy = name;
+        copy.remove(attached_lord_symbol);
+        setObjectName(copy);
+        attached_lord_skill = true;
     } else {
         setObjectName(name);
-        lord_skill = false;
     }
 }
 
@@ -55,10 +60,6 @@ bool Skill::isVisible() const{
     return !objectName().startsWith("#") && !inherits("SPConvertSkill");
 }
 
-QString Skill::getDefaultChoice(ServerPlayer *) const{
-    return default_choice;
-}
-
 int Skill::getEffectIndex(const ServerPlayer *, const Card *) const{
     return -1;
 }
@@ -78,10 +79,6 @@ void Skill::initMediaSource() {
         if (QFile::exists(effect_file))
             sources << effect_file;
     }
-}
-
-Skill::Location Skill::getLocation() const{
-    return parent() ? Right : Left;
 }
 
 void Skill::playAudioEffect(int index, bool superpose) const{
@@ -125,23 +122,23 @@ QDialog *Skill::getDialog() const{
 }
 
 ViewAsSkill::ViewAsSkill(const QString &name)
-    : Skill(name), response_pattern(QString())
+    : Skill(name), response_pattern(QString()), response_or_use(false)
 {
 }
 
 bool ViewAsSkill::isAvailable(const Player *invoker,
                               CardUseStruct::CardUseReason reason,
                               const QString &pattern) const{
-    if (!invoker->hasSkill(objectName()) && !invoker->hasLordSkill(objectName()) 
-            && !invoker->hasFlag(objectName())) // For Shuangxiong
-        return false;
-    switch (reason) {
-    case CardUseStruct::CARD_USE_REASON_PLAY: return isEnabledAtPlay(invoker);
-    case CardUseStruct::CARD_USE_REASON_RESPONSE:
-    case CardUseStruct::CARD_USE_REASON_RESPONSE_USE: return isEnabledAtResponse(invoker, pattern);
-    default:
-            return false;
-    }
+                                  if (!invoker->hasSkill(objectName()) && !invoker->hasLordSkill(objectName()) 
+                                      && !invoker->hasFlag(objectName())) // For Shuangxiong
+                                      return false;
+                                  switch (reason) {
+                                  case CardUseStruct::CARD_USE_REASON_PLAY: return isEnabledAtPlay(invoker);
+                                  case CardUseStruct::CARD_USE_REASON_RESPONSE:
+                                  case CardUseStruct::CARD_USE_REASON_RESPONSE_USE: return isEnabledAtResponse(invoker, pattern);
+                                  default:
+                                      return false;
+                                  }
 }
 
 bool ViewAsSkill::isEnabledAtPlay(const Player *) const{
@@ -324,12 +321,12 @@ bool SPConvertSkill::triggerable(const ServerPlayer *target) const{
         const General *gen = Sanguosha->getGeneral(to_gen);
         if (gen && !Config.value("Banlist/Roles", "").toStringList().contains(to_gen)
             && !Sanguosha->getBanPackages().contains(gen->getPackage())) {
-            available = true;
-            break;
+                available = true;
+                break;
         }
     }
     return GameStartSkill::triggerable(target)
-           && (target->getGeneralName() == from || target->getGeneral2Name() == from) && available;
+        && (target->getGeneralName() == from || target->getGeneral2Name() == from) && available;
 }
 
 void SPConvertSkill::onGameStart(ServerPlayer *player) const{
@@ -503,6 +500,17 @@ bool ArmorSkill::triggerable(const ServerPlayer *target) const{
     if (target == NULL || target->getArmor() == NULL)
         return false;
     return target->hasArmorEffect(objectName());
+}
+
+TreasureSkill::TreasureSkill(const QString &name)
+    : TriggerSkill(name)
+{
+}
+
+bool TreasureSkill::triggerable(const ServerPlayer *target) const{
+    if (target == NULL || target->getTreasure() == NULL)
+        return false;
+    return target->hasTreasure(objectName());
 }
 
 MarkAssignSkill::MarkAssignSkill(const QString &mark, int n)

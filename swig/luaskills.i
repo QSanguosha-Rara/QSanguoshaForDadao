@@ -23,13 +23,15 @@ public:
 
     virtual bool isEnabledAtPlay(const Player *player) const;
     virtual bool isEnabledAtResponse(const Player *player, const char *pattern) const;
+	
+	bool isResponseOrUse() const;
 };
 
 class LuaViewAsSkill: public ViewAsSkill {
 public:
     enum GuhuoDialogType{ NoDialog = 0, LeftOnlyDialog = 1, RightOnlyDialog = 2, LeftRightDialog = 3 };
 
-    LuaViewAsSkill(const char *name, const char *response_pattern = "");
+    LuaViewAsSkill(const char *name, const char *response_pattern = "", bool response_or_use = false);
 
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *to_select) const;
     virtual const Card *viewAs(const QList<const Card *> &cards) const;

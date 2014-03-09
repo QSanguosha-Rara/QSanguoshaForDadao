@@ -228,7 +228,6 @@ void GongxinCard::onEffect(const CardEffectStruct &effect) const{
 class Gongxin: public ZeroCardViewAsSkill {
 public:
     Gongxin(): ZeroCardViewAsSkill("gongxin") {
-        default_choice = "discard";
     }
 
     virtual const Card *viewAs() const{
@@ -379,7 +378,6 @@ class Qinyin: public TriggerSkill {
 public:
     Qinyin(): TriggerSkill("qinyin") {
         events << CardsMoveOneTime << EventPhaseChanging;
-        default_choice = "down";
     }
 
     virtual bool triggerable(const ServerPlayer *target) const{
@@ -1072,10 +1070,6 @@ public:
 
         return false;
     }
-
-    virtual Location getLocation() const{
-        return Right;
-    }
 };
 
 class JilveClear: public TriggerSkill {
@@ -1232,6 +1226,7 @@ public:
 };
 
 Longhun::Longhun(): ViewAsSkill("longhun") {
+    response_or_use = true;
 }
 
 bool Longhun::isEnabledAtResponse(const Player *player, const QString &pattern) const{

@@ -899,7 +899,7 @@ public:
         if (Config.GameMode == "02_1v1"){
             if (triggerEvent == DrawInitialCards) {
                 int n = player->tag["1v1Arrange"].toStringList().length();
-                if (Config.value("1v1/Rule", "2013").toString() != "OL")
+                if (Config.value("1v1/Rule", "2013").toString() != "2013")
                     n += 3;
 
                 LogMessage log;
@@ -1170,16 +1170,6 @@ Special1v1Package::Special1v1Package()
     hejin->addSkill(new Mouzhu);
     hejin->addSkill(new Yanhuo);
 
-    addMetaObject<XiechanCard>();
-    addMetaObject<CangjiCard>();
-    addMetaObject<MouzhuCard>();
-}
-
-ADD_PACKAGE(Special1v1)
-
-Special1v1OLPackage::Special1v1OLPackage()
-    : Package("Special1v1OL")
-{
     General *kof_liubei = new General(this, "kof_liubei$", "shu");
     kof_liubei->addSkill(new Renwang);
     kof_liubei->addSkill(new RenwangRemoveMark);
@@ -1208,9 +1198,12 @@ Special1v1OLPackage::Special1v1OLPackage()
     kof_pangde->addSkill("mashu");
 
     addMetaObject<PujiCard>();
+    addMetaObject<XiechanCard>();
+    addMetaObject<CangjiCard>();
+    addMetaObject<MouzhuCard>();
 }
 
-ADD_PACKAGE(Special1v1OL)
+ADD_PACKAGE(Special1v1)
 
 Special1v1ExtPackage::Special1v1ExtPackage() :Package("Special1v1Ext"){
 
