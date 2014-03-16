@@ -68,7 +68,7 @@ SOURCES += \
     src/package/mountainpackage.cpp \
     src/package/nostalgia.cpp \
     src/package/package.cpp \
-    src/package/power.cpp \
+    src/package/momentum.cpp \
     src/package/special1v1-package.cpp \
     src/package/special3v3-package.cpp \
     src/package/sp-package.cpp \
@@ -184,7 +184,7 @@ HEADERS += \
     src/package/mountainpackage.h \
     src/package/nostalgia.h \
     src/package/package.h \
-    src/package/power.h \
+    src/package/momentum.h \
     src/package/special1v1-package.h \
     src/package/special3v3-package.h \
     src/package/sp-package.h \
