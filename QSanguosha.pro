@@ -11,6 +11,7 @@ CONFIG += lua
 
 #win32:DEFINES += Q_WS_WIN
 
+android:DEFINES += "\"getlocaledecpoint()='.'\""
 
 # If you want to enable joystick support, please uncomment the following line:
 # CONFIG += joystick

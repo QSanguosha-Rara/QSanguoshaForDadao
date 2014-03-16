@@ -11,6 +11,7 @@
 class Shemi: public ViewAsSkill {
 public:
     Shemi():ViewAsSkill("shemi") {
+        response_or_use = true;
     }
 
     virtual bool viewFilter(const QList<const Card *> &selected, const Card *) const{
@@ -1306,6 +1307,7 @@ public:
 class Duanhun: public ViewAsSkill{
 public:
     Duanhun(): ViewAsSkill("duanhun"){
+        response_or_use = true;
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
@@ -1522,6 +1524,7 @@ const Card *GudanCard::validateInResponse(ServerPlayer *wenyang) const{
 class Gudan: public ViewAsSkill {
 public:
     Gudan(): ViewAsSkill("gudan") {
+        response_or_use = true;
     }
 
     virtual bool isEnabledAtResponse(const Player *player, const QString &pattern) const{
