@@ -591,7 +591,7 @@ void Player::setFaceUp(bool face_up) {
 
 int Player::getMaxCards(const QString &except) const{
     int origin = Sanguosha->correctMaxCards(this, true, except);
-    if (origin == 0)
+    if (origin < 0)
         origin = qMax(hp, 0);
     int rule = 0, total = 0, extra = 0;
     if (Config.MaxHpScheme == 3 && general2) {
@@ -785,8 +785,11 @@ int Player::getSlashCount() const{
            + history.value("FireSlash", 0);
 }
 
-void Player::clearHistory() {
-    history.clear();
+void Player::clearHistory(const QString &name) {
+    if (name.isEmpty())
+        history.clear();
+    else
+        history.remove(name);
 }
 
 bool Player::hasUsed(const QString &card_class) const{

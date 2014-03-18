@@ -214,7 +214,7 @@ public:
     void setPileOpen(const char *pile_name, const char *player);
 
     void addHistory(const char *name, int times = 1);
-    void clearHistory();
+    void clearHistory(const char *name = "");
     bool hasUsed(const char *card_class) const;
     int usedTimes(const char *card_class) const;
     int getSlashCount() const;
@@ -466,6 +466,8 @@ struct DamageStruct {
     bool transfer;
     bool by_user;
     QString reason;
+    QString transfer_reason;
+    bool prevented;
 
     QString getReason() const;
 };
@@ -550,6 +552,7 @@ struct CardsMoveOneTimeStruct {
     QString origin_to_pile_name; //for case of the movement transitted
 
     QList<bool> open; // helper to prevent sending card_id to unrelevant clients
+    bool transit; // helper to judge whether the move is intermediate
     bool is_last_handcard;
 };
 
@@ -713,6 +716,7 @@ enum TriggerEvent {
     PostCardEffected,
     CardFinished,
     TrickCardCanceling,
+    TrickEffect,
 
     PreMarkChange ,
     MarkChanged ,
@@ -1127,7 +1131,7 @@ public:
     bool changeMaxHpForAwakenSkill(ServerPlayer *player, int magnitude = -1);
     void applyDamage(ServerPlayer *victim, const DamageStruct &damage);
     void recover(ServerPlayer *player, const RecoverStruct &recover, bool set_emotion = false);
-    bool cardEffect(const Card *card, ServerPlayer *from, ServerPlayer *to);
+    bool cardEffect(const Card *card, ServerPlayer *from, ServerPlayer *to, bool multiple = false);
     bool cardEffect(const CardEffectStruct &effect);
     bool isJinkEffected(ServerPlayer *user, const Card *jink);
     void judge(JudgeStruct &judge_struct);
@@ -1136,6 +1140,7 @@ public:
     ServerPlayer *getLord() const;
     void askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, GuanxingType guanxing_type = GuanxingBothSides);
     int doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target, QList<int> enabled_ids = QList<int>(), const char *skill_name = "gongxin");
+    void returnToTopDrawPile(const QList<int> &cards);
     int drawCard(bool bottom = false);
     void fillAG(const QList<int> &card_ids, ServerPlayer *who = NULL, const QList<int> &disabled_ids = QList<int>());
     void takeAG(ServerPlayer *player, int card_id, bool move_cards = true, QList<ServerPlayer *> to_notify = QList<ServerPlayer *>());

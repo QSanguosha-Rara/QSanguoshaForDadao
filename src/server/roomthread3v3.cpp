@@ -21,25 +21,20 @@ RoomThread3v3::RoomThread3v3(Room *room)
 QStringList RoomThread3v3::getGeneralsWithoutExtension() const{
     QList<const General *> generals;
 
-    const Package *stdpack = Sanguosha->findChild<const Package *>("standard");
-    const Package *windpack = Sanguosha->findChild<const Package *>("wind");
-
-    generals << stdpack->findChildren<const General *>()
-             << windpack->findChildren<const General *>();
-
-    generals.removeOne(Sanguosha->getGeneral("yuji"));
-    QStringList list_nostal, list_neo;
-    list_nostal << "nos_liubei" << "nos_diaochan" << "nos_huangyueying" << "nos_zhangjiao" << "nos_caoren" << "nos_zhoutai";
-    list_neo << "liubei" << "diaochan" << "huangyueying" << "st_yuanshu" << "st_huaxiong" << "zhangjiao" << "caoren" << "zhoutai";
-    foreach (QString general_name, list_neo)
-        generals.removeOne(Sanguosha->getGeneral(general_name));
-    foreach (QString general_name, list_nostal)
+    QStringList list_name;
+    list_name << "nos_caocao" << "simayi" << "nos_xiahoudun" << "nos_zhangliao" << "nos_xuchu" << "guojia" << "zhenji"
+        << "nos_liubei" << "guanyu" << "nos_zhangfei" << "zhaoyun" << "zhugeliang" << "machao" << "nos_huangyueying"
+        << "sunquan" << "ganning" << "nos_lvmeng" << "huanggai" << "nos_zhouyu" << "daqiao" << "nos_luxun" << "sunshangxiang"
+        << "huatuo" << "lvbu" << "nos_diaochan"
+        << "nos_caoren" << "xiahouyuan" << "weiyan" << "huangzhong"
+        << "xiaoqiao" << "nos_zhoutai" << "nos_zhangjiao";
+    foreach (QString general_name, list_name)
         generals << Sanguosha->getGeneral(general_name);
 
     QString rule = Config.value("3v3/OfficialRule", "2013").toString();
     if (rule == "2012") {
         QStringList list_remove, list_add;
-        list_remove << "nos_zhangjiao" << "nos_caoren" << "lvmeng" << "xiahoudun" << "weiyan";
+        list_remove << "nos_zhangjiao" << "nos_caoren" << "nos_lvmeng" << "nos_xiahoudun" << "weiyan";
         list_add << "sunjian" << "menghuo" << "xuhuang" << "pangde" << "zhugejin";
         foreach (QString general_name, list_remove)
             generals.removeOne(Sanguosha->getGeneral(general_name));
@@ -47,8 +42,8 @@ QStringList RoomThread3v3::getGeneralsWithoutExtension() const{
             generals << Sanguosha->getGeneral(general_name);
     } else if (rule == "2013") {
         QStringList list_remove, list_add;
-        list_remove << "nos_zhangjiao" << "nos_caoren" << "lvmeng" << "xiahoudun" << "weiyan"
-                    << "luxun" << "huangzhong" << "xuchu" << "nos_zhoutai" << "zhaoyun"
+        list_remove << "nos_zhangjiao" << "nos_caoren" << "nos_lvmeng" << "nos_xiahoudun" << "weiyan"
+                    << "nos_luxun" << "huangzhong" << "nos_xuchu" << "nos_zhoutai" << "zhaoyun"
                     << "guanyu" << "lvbu";
         list_add << "sunjian" << "xuhuang" << "pangde" << "jiaxu" << "sunce"
                  << "jiangwei" << "zhugejin" << "vs_xiahoudun" << "vs_guanyu" << "vs_zhaoyun"

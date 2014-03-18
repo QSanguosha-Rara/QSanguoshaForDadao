@@ -1119,23 +1119,26 @@ int Engine::correctDistance(const Player *from, const Player *to) const{
 }
 
 int Engine::correctMaxCards(const Player *target, bool fixed, const QString &except) const{
-    int extra = 0;
-
     QStringList exceptlist = except.split("|");
-
-    foreach (const MaxCardsSkill *skill, maxcards_skills) {
-        if (exceptlist.contains(skill->objectName()))
-            continue;
-
-        if (fixed) {
+    if (fixed) {
+        int max = -1;
+        foreach (const MaxCardsSkill *skill, maxcards_skills) {
+            if (exceptlist.contains(skill->objectName()))
+                continue;
             int f = skill->getFixed(target);
-            if (f >= 0) return f;
-        } else {
+            if (f > max) max = f;
+        }
+        return max;
+    } else {
+        int extra = 0;
+        foreach (const MaxCardsSkill *skill, maxcards_skills){
+            if (exceptlist.contains(skill->objectName()))
+                continue;
             extra += skill->getExtra(target);
         }
+        return extra;
     }
-
-    return extra;
+    return 0;
 }
 
 int Engine::correctCardTarget(const TargetModSkill::ModType type, const Player *from, const Card *card) const{

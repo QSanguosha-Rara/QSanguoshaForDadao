@@ -380,6 +380,8 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
         }
     case DamageComplete: {
             DamageStruct damage = data.value<DamageStruct>();
+            if (damage.prevented)
+                break;
             if (damage.nature != DamageStruct::Normal && player->isChained())
                 room->setPlayerProperty(player, "chained", false);
             if (room->getTag("is_chained").toInt() > 0) {
@@ -424,9 +426,13 @@ bool GameRule::trigger(TriggerEvent triggerEvent, Room *room, ServerPlayer *play
     case CardEffected: {
             if (data.canConvert<CardEffectStruct>()) {
                 CardEffectStruct effect = data.value<CardEffectStruct>();
-                if (effect.card->getTypeId() == Card::TypeTrick && room->isCanceled(effect)) {
-                    effect.to->setFlags("Global_NonSkillNullify");
-                    return true;
+                if (effect.card->getTypeId() == Card::TypeTrick) {
+                    if (room->isCanceled(effect)) {
+                        effect.to->setFlags("Global_NonSkillNullify");
+                        return true;
+                    } else {
+                        room->getThread()->trigger(TrickEffect, room, effect.to, data);
+                    }
                 }
                 if (effect.to->isAlive() || effect.card->isKindOf("Slash"))
                     effect.card->onEffect(effect);

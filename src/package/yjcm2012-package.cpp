@@ -84,7 +84,7 @@ public:
 
             if (!target->isKongcheng()) {
                 QList<int> handCards = target->handCards();
-                room->askForRende(target, handCards, objectName(), false, false, qMin(num, target->getHandcardNum()));
+                room->askForRende(target, handCards, objectName(), false, false, qMin(num, target->getHandcardNum())); //different:askforrende
             }
         }
         return false;

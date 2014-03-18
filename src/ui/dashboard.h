@@ -18,6 +18,7 @@
 #include <QLineEdit>
 #include <QMutex>
 #include <QPropertyAnimation>
+#include "util.h"
 
 
 class Dashboard: public PlayerCardContainer {
@@ -180,9 +181,9 @@ protected:
     QStringList _m_pile_expanded;
 
     // for equip skill/selections
-    PixmapAnimation *_m_equipBorders[5];
-    QSanSkillButton *_m_equipSkillBtns[5];
-    bool _m_isEquipsAnimOn[5];
+    PixmapAnimation *_m_equipBorders[S_EQUIP_AREA_LENGTH];
+    QSanSkillButton *_m_equipSkillBtns[S_EQUIP_AREA_LENGTH];
+    bool _m_isEquipsAnimOn[S_EQUIP_AREA_LENGTH];
     QList<QSanSkillButton *> _m_button_recycle;
 
     void _createEquipBorderAnimations();

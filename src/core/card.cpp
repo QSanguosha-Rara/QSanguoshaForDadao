@@ -77,7 +77,7 @@ int Card::getNumber() const{
             foreach (int id, subcards) {
                 num += Sanguosha->getCard(id)->getNumber();
             }
-            return num;
+            return qMin(num, 13);
         }
     } else
         return m_number;
@@ -644,6 +644,7 @@ void Card::use(Room *room, ServerPlayer *source, QList<ServerPlayer *> &targets)
             effect.card = this;
             effect.from = source;
             effect.to = target;
+            effect.multiple = false;
 
             room->cardEffect(effect);
         }

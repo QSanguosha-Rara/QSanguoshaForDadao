@@ -33,13 +33,13 @@ void RoomThread1v1::run() {
             foreach (const General *general, windpack->findChildren<const General *>())
                 candidates << general->objectName();
         } else {
-            candidates << "caocao" << "simayi" << "xiahoudun" << "kof_zhangliao"
+            candidates << "nos_caocao" << "simayi" << "nos_xiahoudun" << "kof_zhangliao"
                        << "kof_xuchu" << "guojia" << "kof_zhenji" << "kof_xiahouyuan"
-                       << "nos_caoren" << "dianwei" << "kof_guanyu" << "zhangfei"
+                       << "nos_caoren" << "dianwei" << "kof_guanyu" << "nos_zhangfei"
                        << "zhugeliang" << "zhaoyun" << "kof_machao" << "kof_nos_huangyueying"
                        << "kof_huangzhong" << "kof_jiangwei" << "kof_menghuo" << "kof_zhurong"
-                       << "sunquan" << "ganning" << "huanggai" << "zhouyu"
-                       << "luxun" << "kof_sunshangxiang" << "sunjian" << "xiaoqiao"
+                       << "sunquan" << "ganning" << "huanggai" << "_nos_zhouyu"
+                       << "nos_luxun" << "kof_sunshangxiang" << "sunjian" << "xiaoqiao"
                        << "lvbu" << "kof_nos_diaochan" << "yanliangwenchou" << "hejin"
                        << "niujin" << "hansui";
             if (rule == "2013") {

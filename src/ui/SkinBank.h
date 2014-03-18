@@ -15,6 +15,7 @@
 #include <QPainter>
 #include <QGraphicsPixmapItem>
 #include <QAbstractAnimation>
+#include "util.h"
 
 class QSanPixmapCache {
 public:
@@ -137,7 +138,7 @@ public:
         QRect m_handCardArea;
 
         // equips
-        QRect m_equipAreas[5];
+        QRect m_equipAreas[S_EQUIP_AREA_LENGTH];
         QRect m_equipImageArea;
         QRect m_equipTextArea;
         QRect m_equipSuitArea;

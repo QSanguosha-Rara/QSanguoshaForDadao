@@ -422,49 +422,6 @@ public:
     }
 };
 
-class Kuangfu: public TriggerSkill {
-public:
-    Kuangfu(): TriggerSkill("kuangfu") {
-        events << Damage;
-    }
-
-    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *panfeng, QVariant &data) const{
-        DamageStruct damage = data.value<DamageStruct>();
-        ServerPlayer *target = damage.to;
-        if (damage.card && damage.card->isKindOf("Slash") && target->isAlive() && !target->hasFlag("Global_DebutFlag") && target->hasEquip() && !damage.chain && !damage.transfer) {
-            QStringList equiplist;
-            for (int i = 0; i <= 3; i++) {
-                if (!target->getEquip(i)) continue;
-                if (panfeng->canDiscard(target, target->getEquip(i)->getEffectiveId()) || panfeng->getEquip(i) == NULL)
-                    equiplist << QString::number(i);
-            }
-            if (equiplist.isEmpty() || !panfeng->askForSkillInvoke(objectName(), data))
-                return false;
-            int equip_index = room->askForChoice(panfeng, "kuangfu_equip", equiplist.join("+"), QVariant::fromValue((PlayerStar)target)).toInt();
-            const Card *card = target->getEquip(equip_index);
-            int card_id = card->getEffectiveId();
-
-            QStringList choicelist;
-            if (panfeng->canDiscard(target, card_id))
-                choicelist << "throw";
-            if (equip_index > -1 && panfeng->getEquip(equip_index) == NULL)
-                choicelist << "move";
-
-            QString choice = room->askForChoice(panfeng, "kuangfu", choicelist.join("+"));
-
-            if (choice == "move") {
-                room->broadcastSkillInvoke(objectName(), 1);
-                room->moveCardTo(card, panfeng, Player::PlaceEquip);
-            } else {
-                room->broadcastSkillInvoke(objectName(), 2);
-                room->throwCard(card, target, panfeng);
-            }
-        }
-
-        return false;
-    }
-};
-
 class Huoshui: public TriggerSkill {
 public:
     Huoshui(): TriggerSkill("huoshui") {
@@ -677,7 +634,7 @@ HegemonyPackage::HegemonyPackage()
     ganfuren->addSkill(new Shenzhi);
 
     General *heg_luxun = new General(this, "heg_luxun", "wu", 3); // WU 007 G
-    heg_luxun->addSkill("qianxun");
+    heg_luxun->addSkill("nosqianxun");
     heg_luxun->addSkill("lianying");
     heg_luxun->addSkill(new Duoshi);
 
@@ -701,9 +658,6 @@ HegemonyPackage::HegemonyPackage()
     General *tianfeng = new General(this, "tianfeng", "qun", 3); // QUN 016
     tianfeng->addSkill(new Sijian);
     tianfeng->addSkill(new Suishi);
-
-    General *panfeng = new General(this, "panfeng", "qun"); // QUN 017
-    panfeng->addSkill(new Kuangfu);
 
     General *zoushi = new General(this, "zoushi", "qun", 3, false); // QUN 018
     zoushi->addSkill(new Huoshui);

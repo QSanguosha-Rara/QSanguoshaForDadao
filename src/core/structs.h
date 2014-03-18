@@ -33,6 +33,8 @@ struct DamageStruct {
     bool transfer;
     bool by_user;
     QString reason;
+    QString transfer_reason;
+    bool prevented;
 
     QString getReason() const;
 };
@@ -44,6 +46,9 @@ struct CardEffectStruct {
 
     ServerPlayer *from;
     ServerPlayer *to;
+
+    bool multiple; // helper to judge whether the card has multiple targets
+                   // does not make sense if the card inherits SkillCard
 };
 
 struct SlashEffectStruct {
@@ -193,6 +198,7 @@ struct CardsMoveOneTimeStruct {
     QString origin_to_pile_name; //for case of the movement transitted
 
     QList<bool> open; // helper to prevent sending card_id to unrelevant clients
+    bool transit; // helper to judge whether the move is intermediate
     bool is_last_handcard;
 };
 
@@ -515,6 +521,7 @@ enum TriggerEvent {
     PostCardEffected,
     CardFinished,
     TrickCardCanceling,
+    TrickEffect,
 
     PreMarkChange ,
     MarkChanged ,

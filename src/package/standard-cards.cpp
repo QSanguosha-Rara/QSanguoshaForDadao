@@ -23,6 +23,7 @@ void Slash::setNature(DamageStruct::Nature nature) {
 
 bool Slash::IsAvailable(const Player *player, const Card *slash, bool considerSpecificAssignee) {
     Slash *newslash = new Slash(Card::NoSuit, 0);
+    newslash->setFlags("Global_SlashAvailabilityChecker");
     newslash->deleteLater();
 #define THIS_SLASH (slash == NULL ? newslash : slash)
     if (player->isCardLimited(THIS_SLASH, Card::MethodUse))
@@ -1338,12 +1339,27 @@ public:
         return target != NULL && target->isAlive();
     }
 
-    virtual bool trigger(TriggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
+    virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *player, QVariant &data) const{
         CardsMoveOneTimeStruct move = data.value<CardsMoveOneTimeStruct>();
-        if (move.from != player || !move.from_places.contains(Player::PlaceEquip) || player->getPile("wooden_ox").isEmpty())
+        if (!move.from || move.from != player)
             return false;
+        if (player->hasTreasure("wooden_ox")) {
+            int count = 0;
+            for (int i = 0; i < move.card_ids.size(); i++) {
+                if (move.from_pile_names[i] == "wooden_ox") count++;
+            }
+            if (count > 0) {
+                LogMessage log;
+                log.type = "$WoodenOx";
+                log.from = player;
+                log.arg = QString::number(count);
+                log.arg2 = "wooden_ox";
+                room->sendLog(log);
+            }
+        }
+        if (player->getPile("wooden_ox").isEmpty())
         for (int i = 0; i < move.card_ids.size(); i++) {
-            if (move.from_places[i] != Player::PlaceEquip) continue;
+            if (move.from_places[i] != Player::PlaceEquip && move.from_places[i] != Player::PlaceTable) continue;
             const Card *card = Sanguosha->getEngineCard(move.card_ids[i]);
             if (card->objectName() == "wooden_ox") {
                 ServerPlayer *to = (ServerPlayer *)move.to;
@@ -1352,7 +1368,7 @@ public:
                         QList<ServerPlayer *> p_list;
                         p_list << to;
                         to->addToPile("wooden_ox", player->getPile("wooden_ox"), false, p_list);
-                } else {
+                } else if (!move.transit) {
                     player->clearOnePrivatePile("wooden_ox");
                 }
                 return false;
@@ -1368,6 +1384,9 @@ WoodenOx::WoodenOx(Suit suit, int number)
     setObjectName("wooden_ox");
 }
 
+void WoodenOx::onUninstall(ServerPlayer *player) const{
+    player->getRoom()->addPlayerHistory(player, "WoodenOxCard", 0);
+}
 
 StandardCardPackage::StandardCardPackage()
     : Package("standard_cards", Package::CardPack)

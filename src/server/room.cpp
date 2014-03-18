@@ -3207,14 +3207,16 @@ void Room::recover(ServerPlayer *player, const RecoverStruct &recover, bool set_
     thread->trigger(HpRecover, this, player, data);
 }
 
-bool Room::cardEffect(const Card *card, ServerPlayer *from, ServerPlayer *to) {
+bool Room::cardEffect(const Card *card, ServerPlayer *from, ServerPlayer *to, bool multiple) {
     CardEffectStruct effect;
     effect.card = card;
     effect.from = from;
     effect.to = to;
+    effect.multiple = multiple;
 
     return cardEffect(effect);
 }
+
 
 bool Room::cardEffect(const CardEffectStruct &effect) {
     QVariant data = QVariant::fromValue(effect);
@@ -3256,30 +3258,40 @@ void Room::damage(const DamageStruct &data) {
         damage_data = qdata.value<DamageStruct>();
     }
 
+#define REMOVE_QINGGANG_TAG if (damage_data.card && damage_data.card->isKindOf("Slash")) damage_data.to->removeQinggangTag(damage_data.card);
+
     // Predamage
     if (thread->trigger(Predamage, this, damage_data.from, qdata)) {
-        if (damage_data.card && damage_data.card->isKindOf("Slash"))
-            damage_data.to->removeQinggangTag(damage_data.card);
+        REMOVE_QINGGANG_TAG
         return;
     }
 
     try {
         bool enter_stack = false;
         do {
-            bool prevent = thread->trigger(DamageForseen, this, damage_data.to, qdata);
-            if (prevent)
+            if (thread->trigger(DamageForseen, this, damage_data.to, qdata)) {
+                REMOVE_QINGGANG_TAG
                 break;
+            }
 
             if (damage_data.from) {
-                if (thread->trigger(DamageCaused, this, damage_data.from, qdata))
+                if (thread->trigger(DamageCaused, this, damage_data.from, qdata)){
+                    REMOVE_QINGGANG_TAG
                     break;
+                }
             }
 
             damage_data = qdata.value<DamageStruct>();
 
-            bool broken = thread->trigger(DamageInflicted, this, damage_data.to, qdata);
-            if (broken)
+            damage_data.to->tag.remove("TransferDamage");
+            if (thread->trigger(DamageInflicted, this, damage_data.to, qdata)) {
+                REMOVE_QINGGANG_TAG
+                // Make sure that the trigger in which 'TransferDamage' tag is set returns TRUE
+                DamageStruct transfer_damage_data = damage_data.to->tag["TransferDamage"].value<DamageStruct>();
+                if (transfer_damage_data.to)
+                    damage(transfer_damage_data);
                 break;
+            }
 
             enter_stack = true;
             m_damageStack.push_back(damage_data);
@@ -3287,8 +3299,8 @@ void Room::damage(const DamageStruct &data) {
 
             thread->trigger(PreDamageDone, this, damage_data.to, qdata);
 
-            if (damage_data.card && damage_data.card->isKindOf("Slash"))
-                damage_data.to->removeQinggangTag(damage_data.card);
+            REMOVE_QINGGANG_TAG
+
             thread->trigger(DamageDone, this, damage_data.to, qdata);
 
             if (damage_data.from && !damage_data.from->hasFlag("Global_DebutFlag"))
@@ -3298,9 +3310,13 @@ void Room::damage(const DamageStruct &data) {
                 thread->trigger(Damaged, this, damage_data.to, qdata);
         } while (false);
 
-        if (!enter_stack)
-            setTag("SkipGameRule", true);
+#undef REMOVE_QINGGANG_TAG
+
         damage_data = qdata.value<DamageStruct>();
+        if (!enter_stack) {
+            damage_data.prevented = true;
+            qdata = QVariant::fromValue(damage_data);
+        }
         thread->trigger(DamageComplete, this, damage_data.to, qdata);
 
         if (enter_stack) {
@@ -3710,6 +3726,7 @@ QList<CardsMoveOneTimeStruct> Room::_mergeMoves(QList<CardsMoveStruct> cards_mov
         moveOneTime.origin_to = cls.m_origin_to;
         moveOneTime.origin_to_place = cls.m_origin_to_place;
         moveOneTime.origin_to_pile_name = cls.m_origin_to_pile_name;
+        moveOneTime.transit = false;
         foreach (CardsMoveStruct move, moveMap[cls]) {
             moveOneTime.card_ids.append(move.card_ids);
             for (int i = 0; i < move.card_ids.size(); i++) {
@@ -4077,6 +4094,7 @@ void Room::_moveCards(QList<CardsMoveStruct> cards_moves, bool forceMoveVisible,
     foreach (ServerPlayer *player, getAllPlayers()) {
         foreach (CardsMoveOneTimeStruct moveOneTime, moveOneTimes) {
             if (moveOneTime.card_ids.size() == 0) continue;
+            moveOneTime.transit = true;
             QVariant data = QVariant::fromValue(moveOneTime);
             thread->trigger(CardsMoveOneTime, this, player, data);
         }
@@ -4830,11 +4848,11 @@ bool Room::askForDiscard(ServerPlayer *player, const QString &reason, int discar
 
     DummyCard *dummy_card = new DummyCard(to_discard);
     if (reason == "gamerule") {
-        CardMoveReason move_reason(CardMoveReason::S_REASON_RULEDISCARD, player->objectName(), QString(), dummy_card->getSkillName(), reason);
-        throwCard(dummy_card, move_reason, player);
+        CardMoveReason mreason(CardMoveReason::S_REASON_RULEDISCARD, player->objectName(), QString(), dummy_card->getSkillName(), reason);
+        throwCard(dummy_card, mreason, player);
     } else {
-        CardMoveReason move_reason(CardMoveReason::S_REASON_THROW, player->objectName(), QString(), dummy_card->getSkillName(), reason);
-        throwCard(dummy_card, move_reason, player);
+        CardMoveReason mreason(CardMoveReason::S_REASON_THROW, player->objectName(), QString(), dummy_card->getSkillName(), reason);
+        throwCard(dummy_card, mreason, player);
     }
 
     QVariant data;
@@ -4998,6 +5016,14 @@ void Room::askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, Guanxing
     while (i.hasNext())
         m_drawPile->append(i.next());
 
+    doBroadcastNotify(S_COMMAND_UPDATE_PILE, Json::Value(m_drawPile->length()));
+}
+
+void Room::returnToTopDrawPile(const QList<int> &cards) {
+    QListIterator<int> i(cards);
+    i.toBack();
+    while (i.hasPrevious())
+        m_drawPile->prepend(i.previous());
     doBroadcastNotify(S_COMMAND_UPDATE_PILE, Json::Value(m_drawPile->length()));
 }
 
@@ -5527,7 +5553,7 @@ void Room::showAllCards(ServerPlayer *player, ServerPlayer *to) {
         log.card_str = IntList2StringList(player->handCards()).join("+");
         sendLog(log);
 
-        doBroadcastNotify(S_COMMAND_SHOW_ALL_CARDS, gongxinArgs);
+        doBroadcastNotify(getOtherPlayers(player), S_COMMAND_SHOW_ALL_CARDS, gongxinArgs);
     }
 }
 
