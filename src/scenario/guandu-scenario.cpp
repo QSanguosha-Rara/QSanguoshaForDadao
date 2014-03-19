@@ -100,25 +100,23 @@ bool SmallTuxiCard::targetFilter(const QList<const Player *> &targets, const Pla
 }
 
 void SmallTuxiCard::onEffect(const CardEffectStruct &effect) const{
-    TuxiCard::onEffect(effect);
-    effect.from->getRoom()->broadcastSkillInvoke("tuxi");
+    Room *room = effect.from->getRoom();
+    room->broadcastSkillInvoke("tuxi");
+    if (effect.from->isAlive() && !effect.to->isKongcheng()) {
+        int card_id = room->askForCardChosen(effect.from, effect.to, "h", "tuxi");
+        CardMoveReason reason(CardMoveReason::S_REASON_EXTRACTION, effect.from->objectName());
+        room->obtainCard(effect.from, Sanguosha->getCard(card_id), reason, false);
+    }
 }
 
 class SmallTuxiViewAsSkill: public ZeroCardViewAsSkill {
 public:
     SmallTuxiViewAsSkill(): ZeroCardViewAsSkill("smalltuxi") {
+        response_pattern == "@@smalltuxi";
     }
 
     virtual const Card *viewAs() const{
         return new SmallTuxiCard;
-    }
-
-    virtual bool isEnabledAtPlay(const Player *) const{
-        return false;
-    }
-
-    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
-        return  pattern == "@@smalltuxi";
     }
 };
 

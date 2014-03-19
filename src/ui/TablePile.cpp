@@ -121,8 +121,8 @@ bool TablePile::_addCardItems(QList<CardItem *> &card_items, const CardsMoveStru
              && moveInfo.reason.m_reason == CardMoveReason::S_REASON_NATURAL_ENTER) {
        foreach (CardItem *item, card_items) {
           item->deleteLater();
-          card_items.clear();
        }
+       card_items.clear();
        return false;
     }
 

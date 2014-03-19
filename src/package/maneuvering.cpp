@@ -322,7 +322,7 @@ bool IronChain::targetFilter(const QList<const Player *> &targets, const Player 
 }
 
 bool IronChain::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
-    bool rec = true;
+    bool rec = (Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY);
     QList<int> sub;
     if (isVirtualCard())
         sub = subcards;

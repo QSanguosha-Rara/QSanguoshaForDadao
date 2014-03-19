@@ -51,7 +51,7 @@ config = {
 		"BGMDIY",
 		"Hegemony",
 		"Formation",
-		"Power" ,
+		"Momentum" ,
 		"Ling2013" ,
 		"TigerFly" ,
 		"NostalStandard",
@@ -74,17 +74,19 @@ config = {
 		"jiaoshenmeanimei" ,
 	},
 
-	hulao_packages = {
-		"standard",
-		"wind"
+	hulao_generals = { -- Temp settings
+		"package:standard",
+		"package:wind"
 	},
 
-	xmode_packages = {
-		"standard",
-		"wind",
-		"fire",
-		"nostal_standard",
-		"nostal_wind",
+	xmode_generals = {
+		"package:standard",
+		"package:wind",
+		"package:fire",
+		"package:nostal_standard",
+		"package:nostal_wind",
+		"-huatuo",
+		"-zhangjiao"
 	},
 
 	easy_text = {
@@ -135,6 +137,7 @@ config = {
 		"kof_xuchu",
 		"kof_zhenji",
 		"kof_xiahouyuan",
+		"kof_liubei" ,
 		"kof_guanyu",
 		"kof_machao",
 		"kof_nos_huangyueying",
@@ -143,32 +146,16 @@ config = {
 		"kof_jiangwei",
 		"kof_menghuo",
 		"kof_zhurong",
+		"kof_lvmeng" ,
+		"kof_daqiao" ,
 		"kof_sunshangxiang",
+		"kof_huatuo" ,
 		"kof_nos_diaochan",
 	},
 
 	kof_ban = {
 		"sunquan",
 		"huatuo"
-	},
-
-	hulao_ban = {
-		"yuji"
-	},
-
-	xmode_ban = {
-		"huatuo",
-		"zhangjiao",
-		"caoren",
-		"zhoutai",
-		"yuji",
-		"liubei",
-		"diaochan",
-		"huangyueying",
-		"st_yuanshu",
-		"st_huaxiong",
-		"nos_zhangjiao",
-		"nos_yuji",
 	},
 
 	basara_ban = {

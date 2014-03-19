@@ -89,7 +89,7 @@ public:
     bool changeMaxHpForAwakenSkill(ServerPlayer *player, int magnitude = -1);
     void applyDamage(ServerPlayer *victim, const DamageStruct &damage);
     void recover(ServerPlayer *player, const RecoverStruct &recover, bool set_emotion = false);
-    bool cardEffect(const Card *card, ServerPlayer *from, ServerPlayer *to);
+    bool cardEffect(const Card *card, ServerPlayer *from, ServerPlayer *to, bool mulitple = false);
     bool cardEffect(const CardEffectStruct &effect);
     bool isJinkEffected(ServerPlayer *user, const Card *jink);
     void judge(JudgeStruct &judge_struct);
@@ -98,6 +98,7 @@ public:
     ServerPlayer *getLord() const;
     void askForGuanxing(ServerPlayer *zhuge, const QList<int> &cards, GuanxingType guanxing_type = GuanxingBothSides);
     int doGongxin(ServerPlayer *shenlvmeng, ServerPlayer *target, QList<int> enabled_ids = QList<int>(), QString skill_name = "gongxin");
+    void returnToTopDrawPile(const QList<int> &cards);
     int drawCard(bool bottom = false);
     void fillAG(const QList<int> &card_ids, ServerPlayer *who = NULL, const QList<int> &disabled_ids = QList<int>());
     void takeAG(ServerPlayer *player, int card_id, bool move_cards = true, QList<ServerPlayer *> to_notify = QList<ServerPlayer *>());

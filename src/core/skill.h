@@ -260,6 +260,15 @@ public:
     virtual int getFixed(const Player *target, bool include_weapon) const;
 };
 
+class InvaliditySkill: public Skill {
+    Q_OBJECT
+
+public:
+    InvaliditySkill(const QString &skill_name);
+
+    virtual bool isSkillValid(const Player *player, const Skill *skill) const = 0;
+};
+
 class SlashNoDistanceLimitSkill: public TargetModSkill {
     Q_OBJECT
 

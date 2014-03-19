@@ -67,6 +67,11 @@ LuaAttackRangeSkill::LuaAttackRangeSkill(const char *name)
 {
 }
 
+LuaInvaliditySkill::LuaInvaliditySkill(const char *name)
+    : InvaliditySkill(name)
+{
+}
+
 static QHash<QString, const LuaSkillCard *> LuaSkillCards;
 static QHash<QString, QString> LuaSkillCardsSkillName;
 

@@ -567,24 +567,9 @@ TianxiangCard::TianxiangCard() {
 }
 
 void TianxiangCard::onEffect(const CardEffectStruct &effect) const{
-    Room *room = effect.to->getRoom();
-
-    effect.to->addMark("TianxiangTarget");
     DamageStruct damage = effect.from->tag.value("TianxiangDamage").value<DamageStruct>();
-
-    if (damage.card && damage.card->isKindOf("Slash"))
-        effect.from->removeQinggangTag(damage.card);
-
-    damage.to = effect.to;
-    damage.transfer = true;
-    try {
-        room->damage(damage);
-    }
-    catch (TriggerEvent triggerEvent) {
-        if (triggerEvent == TurnBroken || triggerEvent == StageChange)
-            effect.to->removeMark("TianxiangTarget");
-        throw triggerEvent;
-    }
+    damage.transfer_reason = "tianxiang";
+    effect.from->tag["TransferDamage"] = QVariant::fromValue(damage);
 }
 
 class TianxiangViewAsSkill: public OneCardViewAsSkill {
@@ -610,7 +595,6 @@ public:
 
     virtual bool trigger(TriggerEvent, Room *room, ServerPlayer *xiaoqiao, QVariant &data) const{
         if (xiaoqiao->canDiscard(xiaoqiao, "h")) {
-            //DamageStruct damage = data.value<DamageStruct>();
             xiaoqiao->tag["TianxiangDamage"] = data;
             return room->askForUseCard(xiaoqiao, "@@tianxiang", "@tianxiang-card", -1, Card::MethodDiscard);
         }
@@ -637,10 +621,8 @@ public:
 
     virtual bool trigger(TriggerEvent, Room *, ServerPlayer *player, QVariant &data) const{
         DamageStruct damage = data.value<DamageStruct>();
-        if (player->isAlive() && player->getMark("TianxiangTarget") > 0 && damage.transfer) {
+        if (player->isAlive() && damage.transfer && damage.transfer_reason == "tianxiang")
             player->drawCards(player->getLostHp());
-            player->removeMark("TianxiangTarget");
-        }
 
         return false;
     }
@@ -1177,6 +1159,16 @@ public:
         return false;
     }
 };
+class ChanyuanInvalidity: public InvaliditySkill {
+public:
+    ChanyuanInvalidity(): InvaliditySkill("#chanyuan-inv") {
+    }
+
+    virtual bool isSkillValid(const Player *player, const Skill *skill) const{
+        return skill->objectName() == "chanyuan" || !player->hasSkill("chanyuan")
+            || player->getHp() != 1 || skill->isAttachedLordSkill();
+    }
+};
 
 WindPackage::WindPackage()
     :Package("wind")
@@ -1224,7 +1216,8 @@ WindPackage::WindPackage()
     addMetaObject<HuangtianCard>();
     addMetaObject<GuhuoCard>();
 
-    skills << new HuangtianViewAsSkill << new Chanyuan;
+    skills << new HuangtianViewAsSkill << new Chanyuan << new ChanyuanInvalidity;
+    related_skills.insertMulti("chanyuan", "#chanyuan-inv");
 }
 
 ADD_PACKAGE(Wind)

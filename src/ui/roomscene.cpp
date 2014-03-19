@@ -198,7 +198,7 @@ RoomScene::RoomScene(QMainWindow *main_window)
 
     card_container->moveBy(-120, 0);
 
-    connect(ClientInstance, SIGNAL(skill_attached(QString, bool)), this, SLOT(attachSkill(QString, bool)));
+    connect(ClientInstance, SIGNAL(skill_attached(QString)), this, SLOT(attachSkill(QString)));
     connect(ClientInstance, SIGNAL(skill_detached(QString)), this, SLOT(detachSkill(QString)));
 
     enemy_box = NULL;
@@ -473,7 +473,7 @@ void RoomScene::handleGameEvent(const Json::Value &arg) {
                 photo->updateAvatarTooltip();
             dashboard->updateAvatarTooltip();
             if (eventType == S_GAME_EVENT_PREPARE_SKILL)
-                updateSkillButtons();
+                updateSkillButtons(true);
             break;
         }
     case S_GAME_EVENT_CHANGE_GENDER: {
@@ -522,7 +522,7 @@ void RoomScene::handleGameEvent(const Json::Value &arg) {
 
             if (newHero) {
                 foreach (const Skill *skill, newHero->getVisibleSkills())
-                    attachSkill(skill->objectName(), false);
+                    attachSkill(skill->objectName());
                 if (!newHero->isVisible()) {
                     Config.KnownSurprisingGenerals.append(newHeroName);
                     Config.setValue("KnownSurprisingGenerals", Config.KnownSurprisingGenerals);
@@ -1664,7 +1664,7 @@ void RoomScene::chooseOrder(QSanProtocol::Game3v3ChooseOrderCommand reason) {
 
 void RoomScene::chooseRole(const QString &scheme, const QStringList &roles) {
     QDialog *dialog = new QDialog;
-    dialog->setWindowTitle(tr("Select role in 3v3 mode"));
+    dialog->setWindowTitle(tr("Select role"));
 
     QLabel *prompt = new QLabel(tr("Please select a role"));
     QVBoxLayout *layout = new QVBoxLayout;
@@ -2049,7 +2049,7 @@ void RoomScene::keepGetCardLog(const CardsMoveStruct &move) {
         log_box->appendLog("$TurnOver", move.reason.m_playerId, QStringList(), IntList2StringList(move.card_ids).join("+"));
 }
 
-void RoomScene::addSkillButton(const Skill *skill, bool) {
+void RoomScene::addSkillButton(const Skill *skill) {
     if (skill->inherits("SPConvertSkill")) return;
     // check duplication
     QSanSkillButton *btn = dashboard->addSkillButton(skill->objectName());
@@ -2087,15 +2087,24 @@ void RoomScene::acquireSkill(const ClientPlayer *player, const QString &skill_na
     if (player == Self) addSkillButton(Sanguosha->getSkill(skill_name));
 }
 
-void RoomScene::updateSkillButtons() {
-    foreach (const Skill *skill, Self->getVisibleSkillList()) {
+void RoomScene::updateSkillButtons(bool isPrepare) {
+    QList<const Skill *> skill_list;
+    if (isPrepare) {
+        if (Self->getGeneral())
+            skill_list << Self->getGeneral()->getVisibleSkillList();
+        if (Self->getGeneral2())
+            skill_list << Self->getGeneral2()->getVisibleSkillList();
+    } else {
+        skill_list = Self->getVisibleSkillList();
+    }
+    foreach (const Skill *skill, skill_list) {
         if (skill->isLordSkill()
             && (Self->getRole() != "lord"
                 || ServerInfo.GameMode == "06_3v3"
                 || ServerInfo.GameMode == "06_XMode"
                 || ServerInfo.GameMode == "02_1v1"
                 || Config.value("WithoutLordskill", false).toBool()))
-                continue;
+            continue;
 
         addSkillButton(skill);
     }
@@ -2195,7 +2204,7 @@ void RoomScene::useSelectedCard() {
     if (skill)
         dashboard->stopPending();
     else
-        dashboard->retractWoodenOxCards();
+        dashboard->retractPileCards("wooden_ox");
 }
 
 void RoomScene::onEnabledChange() {
@@ -3385,10 +3394,10 @@ void RoomScene::chooseSkillButton() {
     dialog->exec();
 }
 
-void RoomScene::attachSkill(const QString &skill_name, bool from_left) {
+void RoomScene::attachSkill(const QString &skill_name) {
     const Skill *skill = Sanguosha->getSkill(skill_name);
     if (skill)
-        addSkillButton(skill, from_left);
+        addSkillButton(skill);
 }
 
 void RoomScene::detachSkill(const QString &skill_name) {
@@ -4262,16 +4271,14 @@ void RoomScene::finishArrange() {
     if (arrange_items.length() != 3) return;
 
     arrange_button->deleteLater();
-    arrange_button = NULL;
 
     QStringList names;
     foreach (CardItem *item, arrange_items)
         names << item->objectName();
 
-    if (selector_box) {
+    if (selector_box)
         selector_box->deleteLater();
-        selector_box = NULL;
-    }
+
     arrange_rects.clear();
 
     ClientInstance->replyToServer(S_COMMAND_ARRANGE_GENERAL, Utils::toJsonArray(names));

@@ -949,7 +949,27 @@ public:
     }
 };
 
+class Neo2013HuoshuiInvalidity: public InvaliditySkill {
+public:
+    Neo2013HuoshuiInvalidity(): InvaliditySkill("#neo2013huoshui-inv") {
+    }
 
+    virtual bool isSkillValid(const Player *player, const Skill *skill) const{
+        if (player->getPhase() == Player::NotActive) {
+            const Player *current = NULL;
+            foreach (const Player *p, player->getAliveSiblings()) {
+                if (p->getPhase() != Player::NotActive) {
+                    current = p;
+                    break;
+                }
+            }
+            if (current && current->hasSkill("neo2013huoshui")
+                && current->getEquips().length() == 0 && !skill->isAttachedLordSkill())
+                return false;
+        }
+        return true;
+    }
+};
 class Neo2013Huoshui: public TriggerSkill{
 public:
     Neo2013Huoshui(): TriggerSkill("neo2013huoshui") {
@@ -998,6 +1018,18 @@ public:
     }
 };
 
+class Neo2013QingchengInvalidity: public InvaliditySkill {
+public:
+    Neo2013QingchengInvalidity(): InvaliditySkill("#neo2013qingcheng-inv") {
+    }
+
+    virtual bool isSkillValid(const Player *player, const Skill *) const{
+        if (player->getPhase() != Player::NotActive) {
+            return !player->hasFlag("neo2013qingcheng");
+        }
+        return true;
+    }
+};
 class Neo2013Qingcheng: public TriggerSkill{
 public:
     Neo2013Qingcheng(): TriggerSkill("neo2013qingcheng"){
@@ -1530,12 +1562,6 @@ public:
     Neo2013ZhoufuViewAsSkill(): OneCardViewAsSkill("neo2013zhoufu") {
         filter_pattern = ".|.|.|hand";
     }
-
-/*
-    virtual bool isEnabledAtPlay(const Player *player) const{
-        return !player->hasUsed("Neo2013ZhoufuCard");
-    }
-*/
 
     virtual const Card *viewAs(const Card *originalcard) const{
         Card *card = new Neo2013ZhoufuCard;
@@ -2682,7 +2708,11 @@ Ling2013Package::Ling2013Package(): Package("Ling2013"){
 
     General *neo2013_zoushi = new General(this, "neo2013_zoushi", "qun", 3, false);
     neo2013_zoushi->addSkill(new Neo2013Huoshui);
+    neo2013_zoushi->addSkill(new Neo2013HuoshuiInvalidity);
     neo2013_zoushi->addSkill(new Neo2013Qingcheng);
+    neo2013_zoushi->addSkill(new Neo2013QingchengInvalidity);
+    related_skills.insertMulti("neo2013huoshui", "#neo2013huoshui-inv");
+    related_skills.insertMulti("neo2013qingcheng", "#neo2013qingcheng-inv");
 
     General *neo2013_caochong = new General(this, "neo2013_caochong", "wei", 3);
     neo2013_caochong->addSkill(new Neo2013Chengxiang);
@@ -2870,7 +2900,7 @@ bool KnownBoth::targetFilter(const QList<const Player *> &targets, const Player 
 }
 
 bool KnownBoth::targetsFeasible(const QList<const Player *> &targets, const Player *Self) const{
-    bool rec = true;
+    bool rec = (Sanguosha->currentRoomState()->getCurrentCardUseReason() == CardUseStruct::CARD_USE_REASON_PLAY);
     QList<int> sub;
     if (isVirtualCard())
         sub = subcards;

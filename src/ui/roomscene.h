@@ -353,7 +353,7 @@ private:
 
 private slots:
     void fillCards(const QList<int> &card_ids, const QList<int> &disabled_ids = QList<int>());
-    void updateSkillButtons();
+    void updateSkillButtons(bool isPrepare = false);
     void acquireSkill(const ClientPlayer *player, const QString &skill_name);
     void updateSelectedTargets();
     void updateTrustButton();
@@ -372,7 +372,7 @@ private slots:
     void showPlayerCards();
     void updateRolesBox();
     void updateRoles(const QString &roles);
-    void addSkillButton(const Skill *skill, bool from_left = false);
+    void addSkillButton(const Skill *skill);
 
     void resetPiles();
     void removeLightBox();
@@ -394,7 +394,7 @@ private slots:
 
     void takeAmazingGrace(ClientPlayer *taker, int card_id, bool move_cards);
 
-    void attachSkill(const QString &skill_name, bool from_left);
+    void attachSkill(const QString &skill_name);
     void detachSkill(const QString &skill_name);
 
     void doGongxin(const QList<int> &card_ids, bool enable_heart, QList<int> enabled_ids);

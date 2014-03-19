@@ -422,6 +422,11 @@ int AttackRangeSkill::getFixed(const Player *, bool) const{
     return -1;
 }
 
+InvaliditySkill::InvaliditySkill(const QString &name)
+    : Skill(name)
+{
+}
+
 SlashNoDistanceLimitSkill::SlashNoDistanceLimitSkill(const QString &skill_name)
     : TargetModSkill(QString("#%1-slash-ndl").arg(skill_name)), name(skill_name)
 {

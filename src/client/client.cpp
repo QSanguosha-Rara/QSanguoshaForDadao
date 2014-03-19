@@ -573,7 +573,7 @@ void Client::arrangeSeats(const QString &seats_str) {
 }
 
 void Client::notifyRoleChange(const QString &new_role) {
-    if (!new_role.isEmpty()) {
+    if (isNormalGameMode(ServerInfo.GameMode) && !new_role.isEmpty()) {
         QString prompt_str = tr("Your role is %1").arg(Sanguosha->translate(new_role));
         if (new_role != "lord")
             prompt_str += tr("\n wait for the lord player choosing general, please");
@@ -974,7 +974,10 @@ void Client::addHistory(const Json::Value &history) {
         return;
     }
 
-    Self->addHistory(add_str, times);
+    if (times == 0)
+        Self->clearHistory(add_str);
+    else
+        Self->addHistory(add_str, times);
 }
 
 int Client::alivePlayerCount() const{
@@ -1460,7 +1463,7 @@ void Client::attachSkill(const Json::Value &skill) {
 
     QString skill_name = toQString(skill);
     Self->acquireSkill(skill_name);
-    emit skill_attached(skill_name, true);
+    emit skill_attached(skill_name);
 }
 
 void Client::askForAssign(const Json::Value &) {

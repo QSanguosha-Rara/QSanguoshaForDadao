@@ -179,6 +179,8 @@ void Engine::addSkills(const QList<const Skill *> &all_skills) {
             targetmod_skills << qobject_cast<const TargetModSkill *>(skill);
         else if (skill->inherits("AttackRangeSkill"))
             attackrange_skills << qobject_cast<const AttackRangeSkill *>(skill);
+        else if (skill->inherits("InvaliditySkill"))
+            invalidity_skills << qobject_cast<const InvaliditySkill *>(skill);
         else if (skill->inherits("TriggerSkill")) {
             const TriggerSkill *trigger_skill = qobject_cast<const TriggerSkill *>(skill);
             if (trigger_skill && trigger_skill->isGlobal())
@@ -201,6 +203,10 @@ QList<const TargetModSkill *> Engine::getTargetModSkills() const{
 
 QList<const AttackRangeSkill *> Engine::getAttackRangeSkills() const{
     return attackrange_skills;
+}
+
+QList<const InvaliditySkill *> Engine::getInvaliditySkills() const{
+    return invalidity_skills;
 }
 
 QList<const TriggerSkill *> Engine::getGlobalTriggerSkills() const{
@@ -376,12 +382,6 @@ int Engine::getGeneralCount(bool include_banned) const{
                   || ServerInfo.GameMode.contains("_mini_")
                   || ServerInfo.GameMode == "custom_scenario")
                  && Config.value("Banlist/Roles").toStringList().contains(general->objectName()))
-            total--;
-        else if (ServerInfo.GameMode == "04_1v3"
-                 && Config.value("Banlist/HulaoPass").toStringList().contains(general->objectName()))
-            total--;
-        else if (ServerInfo.GameMode == "06_XMode"
-                 && Config.value("Banlist/XMode").toStringList().contains(general->objectName()))
             total--;
         else if (ServerInfo.Enable2ndGeneral && BanPair::isBanned(general->objectName()))
             total--;
@@ -963,10 +963,6 @@ QStringList Engine::getRandomGenerals(int count, const QSet<QString> &ban_set) c
         || ServerInfo.GameMode.contains("_mini_")
         || ServerInfo.GameMode == "custom_scenario")
         general_set.subtract(Config.value("Banlist/Roles", "").toStringList().toSet());
-    else if (ServerInfo.GameMode == "04_1v3")
-        general_set.subtract(Config.value("Banlist/HulaoPass", "").toStringList().toSet());
-    else if (ServerInfo.GameMode == "06_XMode")
-        general_set.subtract(Config.value("Banlist/XMode", "").toStringList().toSet());
 
     all_generals = general_set.subtract(ban_set).toList();
 
@@ -1123,23 +1119,26 @@ int Engine::correctDistance(const Player *from, const Player *to) const{
 }
 
 int Engine::correctMaxCards(const Player *target, bool fixed, const QString &except) const{
-    int extra = 0;
-
     QStringList exceptlist = except.split("|");
-
-    foreach (const MaxCardsSkill *skill, maxcards_skills) {
-        if (exceptlist.contains(skill->objectName()))
-            continue;
-
-        if (fixed) {
+    if (fixed) {
+        int max = -1;
+        foreach (const MaxCardsSkill *skill, maxcards_skills) {
+            if (exceptlist.contains(skill->objectName()))
+                continue;
             int f = skill->getFixed(target);
-            if (f >= 0) return f;
-        } else {
+            if (f > max) max = f;
+        }
+        return max;
+    } else {
+        int extra = 0;
+        foreach (const MaxCardsSkill *skill, maxcards_skills){
+            if (exceptlist.contains(skill->objectName()))
+                continue;
             extra += skill->getExtra(target);
         }
+        return extra;
     }
-
-    return extra;
+    return 0;
 }
 
 int Engine::correctCardTarget(const TargetModSkill::ModType type, const Player *from, const Card *card) const{
@@ -1188,4 +1187,12 @@ int Engine::correctAttackRange(const Player *target, bool include_weapon /* = tr
     }
 
     return extra;
+}
+
+bool Engine::correctSkillValidity(const Player *player, const Skill *skill) const{
+    foreach (const InvaliditySkill *is, invalidity_skills) {
+        if (!is->isSkillValid(player, skill))
+            return false;
+    }
+    return true;
 }

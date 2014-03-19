@@ -340,143 +340,24 @@ public:
     }
 };
 
-JixiCard::JixiCard() {
-    target_fixed = true;
-}
-
-void JixiCard::onUse(Room *room, const CardUseStruct &card_use) const{
-    ServerPlayer *dengai = card_use.from;
-
-    QList<int> fields;
-    QList<int> total = dengai->getPile("field");
-    foreach (int id, total) {
-        Snatch *snatch = new Snatch(Card::SuitToBeDecided, -1);
-        snatch->addSubcard(id);
-        if (!snatch->isAvailable(dengai))
-            continue;
-        foreach (ServerPlayer *p, room->getAlivePlayers()) {
-            if (!snatch->targetFilter(QList<const Player *>(), p, dengai))
-                continue;
-            if (dengai->isProhibited(p, snatch))
-                continue;
-            fields << id;
-            break;
-        }
-        delete snatch;
-        snatch = NULL;
-    }
-
-    if (fields.isEmpty())
-        return;
-
-    QList<int> disabled;
-    foreach (int id, total) {
-        if (!fields.contains(id))
-            disabled << id;
-    }
-
-    int card_id;
-    if (fields.length() == 1)
-        card_id = fields.first();
-    else {
-        room->fillAG(total, dengai, disabled);
-        card_id = room->askForAG(dengai, fields, false, "jixi");
-        room->clearAG(dengai);
-
-        if (card_id == -1)
-            return;
-    }
-
-    Snatch *snatch = new Snatch(Card::SuitToBeDecided, -1);
-    snatch->setSkillName("jixi");
-    snatch->addSubcard(card_id);
-
-    QList<ServerPlayer *> targets;
-    foreach (ServerPlayer *p, room->getAlivePlayers()) {
-        if (!snatch->targetFilter(QList<const Player *>(), p, dengai))
-            continue;
-        if (dengai->isProhibited(p, snatch))
-            continue;
-
-        targets << p;
-    }
-    if (targets.isEmpty())
-        return;
-
-    room->setPlayerProperty(dengai, "jixi_snatch", snatch->toString());
-
-    CardUseStruct use;
-    use.card = snatch;
-    use.from = dengai;
-
-    if (room->askForUseCard(dengai, "@@jixi!", "@jixi-target")) {
-        foreach (ServerPlayer *p, room->getAlivePlayers()) {
-            if (p->hasFlag("JixiSnatchTarget")) {
-                room->setPlayerFlag(p, "-JixiSnatchTarget");
-                use.to << p;
-            }
-        }
-    } else {
-        use.to << targets.at(qrand() % targets.length());
-    }
-    room->setPlayerProperty(dengai, "jixi_snatch", QString());
-    room->useCard(use);
-}
-
-JixiSnatchCard::JixiSnatchCard() {
-}
-
-bool JixiSnatchCard::targetFilter(const QList<const Player *> &targets, const Player *to_select, const Player *Self) const{
-    const Card *card = Card::Parse(Self->property("jixi_snatch").toString());
-    if (card == NULL)
-        return false;
-    else {
-        const Snatch *snatch = qobject_cast<const Snatch *>(card);
-        return !Self->isProhibited(to_select, snatch, targets) && snatch->targetFilter(targets, to_select, Self);
-    }
-}
-
-void JixiSnatchCard::onUse(Room *room, const CardUseStruct &card_use) const{
-    foreach (ServerPlayer *to, card_use.to)
-        room->setPlayerFlag(to, "JixiSnatchTarget");
-}
-
-class Jixi: public ZeroCardViewAsSkill {
+class Jixi: public OneCardViewAsSkill {
 public:
-    Jixi(): ZeroCardViewAsSkill("jixi") {
+    Jixi(): OneCardViewAsSkill("jixi") {
     }
 
     virtual bool isEnabledAtPlay(const Player *player) const{
-        if (player->getPile("field").isEmpty())
-            return false;
-        foreach (int id, player->getPile("field")) {
-            Snatch *snatch = new Snatch(Card::SuitToBeDecided, -1);
-            snatch->setSkillName("jixi");
-            snatch->addSubcard(id);
-            snatch->deleteLater();
-            if (!snatch->isAvailable(player))
-                continue;
-            foreach (const Player *p, player->getAliveSiblings()) {
-                if (!snatch->targetFilter(QList<const Player *>(), p, player))
-                    continue;
-                if (player->isProhibited(p, snatch))
-                    continue;
-                return true;
-            }
-        }
-        return false;
+        return !player->getPile("field").isEmpty();
     }
 
-    virtual bool isEnabledAtResponse(const Player *, const QString &pattern) const{
-        return pattern == "@@jixi!";
+    virtual bool viewFilter(const Card *to_select) const{
+        return Self->getPile("field").contains(to_select->getEffectiveId());
     }
 
-    virtual const Card *viewAs() const{
-        QString pattern = Sanguosha->currentRoomState()->getCurrentCardUsePattern();
-        if (pattern == "@@jixi!")
-            return new JixiSnatchCard;
-        else
-            return new JixiCard;
+    virtual const Card *viewAs(const Card *originalCard) const{
+        Snatch *snatch = new Snatch(originalCard->getSuit(), originalCard->getNumber());
+        snatch->addSubcard(originalCard);
+        snatch->setSkillName(objectName());
+        return snatch;
     }
 };
 
@@ -1161,10 +1042,7 @@ public:
             || room->getMode().contains("_mini_")
             || room->getMode() == "custom_scenario")
             all.subtract(Config.value("Banlist/Roles", "").toStringList().toSet());
-        else if (room->getMode() == "04_1v3")
-            all.subtract(Config.value("Banlist/HulaoPass", "").toStringList().toSet());
         else if (room->getMode() == "06_XMode") {
-            all.subtract(Config.value("Banlist/XMode", "").toStringList().toSet());
             foreach (ServerPlayer *p, room->getAlivePlayers())
                 all.subtract(p->tag["XModeBackup"].toStringList().toSet());
         } else if (room->getMode() == "02_1v1") {
@@ -1422,8 +1300,6 @@ MountainPackage::MountainPackage()
     addMetaObject<TiaoxinCard>();
     addMetaObject<ZhijianCard>();
     addMetaObject<ZhibaCard>();
-    addMetaObject<JixiCard>();
-    addMetaObject<JixiSnatchCard>();
     addMetaObject<FangquanCard>();
 
     skills << new ZhibaPindian << new Jixi;
