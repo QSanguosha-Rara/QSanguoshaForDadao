@@ -5615,7 +5615,7 @@ void Room::retrial(const Card *card, ServerPlayer *player, JudgeStar judge, cons
 }
 
 int Room::askForRende(ServerPlayer *liubei, QList<int> &cards, const QString &skill_name,
-                      bool , bool optional, int max_num,
+                      bool visible, bool optional, int max_num,
                       QList<ServerPlayer *> players, CardMoveReason reason, const QString &prompt,
                       bool notify_skill) {
     if (max_num == -1)
@@ -5747,7 +5747,7 @@ int Room::askForRende(ServerPlayer *liubei, QList<int> &cards, const QString &sk
     }
 
     liubei->setFlags("Global_GongxinOperator");
-    moveCards(movelist, false);
+    moveCards(movelist, visible);
     liubei->setFlags("-Global_GongxinOperator");
 
     return give_map.keys().length();
