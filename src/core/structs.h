@@ -87,6 +87,7 @@ struct CardUseStruct {
     QList<ServerPlayer *> to;
     bool m_isOwnerUse;
     bool m_addHistory;
+    bool m_isHandcard;
 };
 
 class CardMoveReason {
@@ -401,6 +402,7 @@ struct CardResponseStruct {
     const Card *m_card;
     ServerPlayer *m_who;
     bool m_isUse;
+    bool m_isHandcard;
 };
 
 struct JsonValueForLUA{
