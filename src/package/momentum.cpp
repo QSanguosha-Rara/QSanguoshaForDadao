@@ -839,8 +839,6 @@ public:
             }
 
             if (target->getPile("skysoldier").length() == 0){
-                Room *room = target->getRoom();
-
                 int qunplayers = 0;
                 foreach(ServerPlayer *p, room->getAlivePlayers())
                     if (p->getKingdom() == "qun")
@@ -857,7 +855,6 @@ public:
                 room->getThread()->delay();
 
                 target->addToPile("skysoldier", skill2cards, true);
-
             }
 
         }
