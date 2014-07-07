@@ -2141,9 +2141,9 @@ public:
         return true;
     }
 
-    virtual const Card *viewAs(const Card *) const{
+    virtual const Card *viewAs(const Card *originalCard) const{
         Neo2013JinanCard *card = new Neo2013JinanCard;
-        card->addSubcard(card);
+        card->addSubcard(originalCard);
         return card;
     }
 };
