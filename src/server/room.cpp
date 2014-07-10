@@ -5771,7 +5771,7 @@ int Room::askForRende(ServerPlayer *liubei, QList<int> &cards, const QString &sk
     }
 
     liubei->setFlags("Global_GongxinOperator");
-    moveCards(movelist, visible);
+    moveCardsAtomic(movelist, visible);
     liubei->setFlags("-Global_GongxinOperator");
 
     return give_map.keys().length();
